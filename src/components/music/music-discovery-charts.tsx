@@ -46,7 +46,9 @@ export function MusicDiscoveryChartRow({
   const items: MusicCatalogItem[] = tracks.map((track) => ({ ...track, kind: "track" }));
   const itemMenu = useMusicItemMenu({
     onOpen: (item) => onOpen(item, items),
-    onPlay: (item) => { void playback.play(item, items); },
+    onPlay: (item) => {
+      void playback.play(item, items);
+    },
   });
   const heading = title ?? t("music.row.charts");
   const sourceLabel = (
@@ -90,8 +92,13 @@ export function MusicDiscoveryChartRow({
                   item={item}
                   badge={null}
                   onOpen={() => onOpen(item, items)}
-                  onPlay={() => { void playback.play(item, items); }}
-                  playing={playback.pending?.id === item.id && playback.pending?.connectorId === item.connectorId}
+                  onPlay={() => {
+                    void playback.play(item, items);
+                  }}
+                  playing={
+                    playback.pending?.id === item.id &&
+                    playback.pending?.connectorId === item.connectorId
+                  }
                   onMenu={itemMenu.openFor(item, index)}
                 />
                 {positions[index] !== null && positions[index] !== undefined && (
@@ -103,7 +110,11 @@ export function MusicDiscoveryChartRow({
             ))}
       </Row>
       {itemMenu.menu}
-      {playback.error && <p role="alert" className="text-[13px] text-ink-muted">{playback.error}</p>}
+      {playback.error && (
+        <p role="alert" className="text-[13px] text-ink-muted">
+          {playback.error}
+        </p>
+      )}
     </>
   );
 }

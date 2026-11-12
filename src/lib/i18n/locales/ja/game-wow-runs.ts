@@ -3,7 +3,8 @@ export default {
   "games.wow.runs.title": "ダンジョン記録",
   "games.wow.runs.all": "すべてのアフィックス",
   "games.wow.runs.current": "現在のアフィックス",
-  "games.wow.runs.currentNote": "過去の週も含め、現在のアフィックスの組み合わせに一致する記録です。",
+  "games.wow.runs.currentNote":
+    "過去の週も含め、現在のアフィックスの組み合わせに一致する記録です。",
   "games.wow.runs.allNote": "今シーズンの全アフィックスにおける上位記録です。",
   "games.wow.runs.page": "{page}ページ",
   "games.wow.runs.refresh": "記録を更新",
@@ -19,11 +20,12 @@ export default {
   "games.wow.runs.copy": "タレントをコピー",
   "games.wow.runs.copyFailed": "コピーできませんでした。再試行してください。",
   "games.wow.runs.party": "パーティー構成",
-  "games.wow.runs.snapshots": "公開されているタレントと装備は提供元のスナップショットです。この攻略時に使用したものと異なる場合があります。",
+  "games.wow.runs.snapshots":
+    "公開されているタレントと装備は提供元のスナップショットです。この攻略時に使用したものと異なる場合があります。",
   "games.wow.runs.gear": "装備",
   "games.wow.runs.tank": "タンク",
   "games.wow.runs.healer": "ヒーラー",
   "games.wow.runs.dps": "ダメージ",
   "games.wow.runs.snapshotAt": "装備の記録日時: {date}",
-  "games.wow.runs.closeGear": "装備を閉じる"
+  "games.wow.runs.closeGear": "装備を閉じる",
 };

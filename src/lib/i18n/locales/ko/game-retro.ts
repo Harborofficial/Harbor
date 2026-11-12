@@ -18,7 +18,8 @@ export default {
   "games.retro.controls": "조작 설정",
   "games.retro.saveExit": "저장 후 종료",
   "games.retro.popout": "별도 창",
-  "games.retro.dock": "Harbor로 돌아가기",  "games.retro.mute": "음소거",
+  "games.retro.dock": "Harbor로 돌아가기",
+  "games.retro.mute": "음소거",
   "games.retro.unmute": "음소거 해제",
   "games.retro.volume": "음량",
   "games.retro.picture": "화면",
@@ -27,7 +28,8 @@ export default {
   "games.retro.fullscreen": "전체 화면",
   "games.retro.exitFullscreen": "전체 화면 종료",
   "games.retro.playInside": "Harbor에서 플레이",
-  "games.retro.setup": "{system} 플레이어를 한 번 설치하고 여기서 플레이하세요. 게임은 이 기기에 보관됩니다.",
+  "games.retro.setup":
+    "{system} 플레이어를 한 번 설치하고 여기서 플레이하세요. 게임은 이 기기에 보관됩니다.",
   "games.retro.install": "설치 후 플레이 · {size} MB",
   "games.retro.runtime": "EmulatorJS {version} · 한 번 다운로드하면 오프라인 사용 가능",
   "games.retro.aboutRuntime": "소스 코드 및 라이선스",
@@ -40,5 +42,6 @@ export default {
   "games.retro.saving": "진행 상황 저장 중…",
   "games.retro.exitWithoutSave": "저장하지 않고 종료",
   "games.retro.moving": "게임 이동 중…",
-  "games.retro.moveFailed": "플레이어를 옮기지 못했습니다. 진행 상황은 저장되어 있습니다. 재개를 선택하세요.",
+  "games.retro.moveFailed":
+    "플레이어를 옮기지 못했습니다. 진행 상황은 저장되어 있습니다. 재개를 선택하세요.",
 } satisfies Record<string, string>;

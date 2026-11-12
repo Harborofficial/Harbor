@@ -23,7 +23,10 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
   const wasOpen = useRef(false);
   const viewedProfile = useRef(nc.profile);
 
-  useEffect(() => { setOpen(false); setDetail(null); }, [nc.profile]);
+  useEffect(() => {
+    setOpen(false);
+    setDetail(null);
+  }, [nc.profile]);
 
   useEffect(() => subscribeNotificationOpen(() => setOpen(true)), []);
 
@@ -32,7 +35,10 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
   }, [open]);
 
   useEffect(() => {
-    if (open && !wasOpen.current) { viewedProfile.current = nc.profile; void nc.refresh(); }
+    if (open && !wasOpen.current) {
+      viewedProfile.current = nc.profile;
+      void nc.refresh();
+    }
     if (!open && wasOpen.current && viewedProfile.current === nc.profile) void nc.markRead();
     wasOpen.current = open;
   }, [open, nc]);
@@ -58,11 +64,16 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
   const openNotif = (notif: CenterNotif) => {
     if (notif.kind === "game-source-available" && notif.data?.profile === nc.profile) {
       const game = sourceAlertGame(notif.data.game);
-      if (game && games) { setOpen(false); games.navigate({ game }); return; }
+      if (game && games) {
+        setOpen(false);
+        games.navigate({ game });
+        return;
+      }
     }
     if (notif.kind === "diagnostics-request") {
       setOpen(false);
-      const requestId = typeof notif.data?.requestId === "string" ? notif.data.requestId : undefined;
+      const requestId =
+        typeof notif.data?.requestId === "string" ? notif.data.requestId : undefined;
       if (requestId) openDiagnosticsConsent(requestId);
       return;
     }
@@ -122,10 +133,14 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
                     <ArrowLeft size={16} strokeWidth={2.2} /> {t("Back")}
                   </button>
                 ) : (
-                  <span className="text-[14px] font-semibold tracking-tight text-ink">{t("Notifications")}</span>
+                  <span className="text-[14px] font-semibold tracking-tight text-ink">
+                    {t("Notifications")}
+                  </span>
                 )}
                 <div className="flex items-center gap-1">
-                  {nc.loading && !detail && <Loader2 size={14} className="animate-spin text-ink-subtle" />}
+                  {nc.loading && !detail && (
+                    <Loader2 size={14} className="animate-spin text-ink-subtle" />
+                  )}
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
@@ -146,73 +161,84 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
                 />
               ) : (
                 <>
-              {nc.items.length > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2">
-                  <button
-                    type="button"
-                    onClick={() => void nc.markRead()}
-                    disabled={nc.unread === 0}
-                    className="rounded-md px-1.5 py-0.5 text-[12px] font-medium text-ink-muted transition-colors hover:text-ink disabled:cursor-default disabled:opacity-40"
-                  >
-                    {t("Mark all read")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void nc.clearAll()}
-                    className="ms-auto rounded-md px-1.5 py-0.5 text-[12px] font-medium text-ink-subtle transition-colors hover:text-danger"
-                  >
-                    {t("Clear all")}
-                  </button>
-                </div>
-              )}
-
-              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
-                {nc.pending.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    <span className="px-1 text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
-                      {t("Friend requests")}
-                    </span>
-                    {nc.pending.map((r) => (
-                      <RequestRow
-                        key={r.edgeId}
-                        request={r}
-                        busy={false}
-                        onAccept={() => nc.accept(r.edgeId)}
-                        onDecline={() => nc.decline(r.edgeId)}
-                        onOpen={toProfile}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {nc.items.length > 0 ? (
-                  <div className="flex flex-col gap-1.5">
-                    {nc.pending.length > 0 && (
-                      <span className="px-1 pb-0.5 text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
-                        {t("Earlier")}
-                      </span>
-                    )}
-                    {nc.items.map((n, i) => (
-                      <FeedRow key={n.id} notif={n} index={i} onDismiss={nc.dismiss} onOpen={openNotif} />
-                    ))}
-                  </div>
-                ) : (
-                  nc.pending.length === 0 && (
-                    <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-                      <div className="harbor-pop relative inline-flex">
-                        <UiIcon name="notification" className="h-16 w-16 text-ink-subtle opacity-90" />
-                        <span
-                          className="animate-badge-pop absolute -right-1 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-ink-muted px-1 text-[11px] font-semibold tabular-nums text-canvas"
-                          style={{ animationDelay: "130ms" }}
-                        >
-                          0
-                        </span>
-                      </div>
-                      <span className="text-[13px] text-ink-muted">{t("You are all caught up.")}</span>
+                  {nc.items.length > 0 && (
+                    <div className="flex items-center gap-2 px-4 py-2">
+                      <button
+                        type="button"
+                        onClick={() => void nc.markRead()}
+                        disabled={nc.unread === 0}
+                        className="rounded-md px-1.5 py-0.5 text-[12px] font-medium text-ink-muted transition-colors hover:text-ink disabled:cursor-default disabled:opacity-40"
+                      >
+                        {t("Mark all read")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void nc.clearAll()}
+                        className="ms-auto rounded-md px-1.5 py-0.5 text-[12px] font-medium text-ink-subtle transition-colors hover:text-danger"
+                      >
+                        {t("Clear all")}
+                      </button>
                     </div>
-                  )
-                )}
-              </div>
+                  )}
+
+                  <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
+                    {nc.pending.length > 0 && (
+                      <div className="flex flex-col gap-2">
+                        <span className="px-1 text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
+                          {t("Friend requests")}
+                        </span>
+                        {nc.pending.map((r) => (
+                          <RequestRow
+                            key={r.edgeId}
+                            request={r}
+                            busy={false}
+                            onAccept={() => nc.accept(r.edgeId)}
+                            onDecline={() => nc.decline(r.edgeId)}
+                            onOpen={toProfile}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {nc.items.length > 0 ? (
+                      <div className="flex flex-col gap-1.5">
+                        {nc.pending.length > 0 && (
+                          <span className="px-1 pb-0.5 text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
+                            {t("Earlier")}
+                          </span>
+                        )}
+                        {nc.items.map((n, i) => (
+                          <FeedRow
+                            key={n.id}
+                            notif={n}
+                            index={i}
+                            onDismiss={nc.dismiss}
+                            onOpen={openNotif}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      nc.pending.length === 0 && (
+                        <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+                          <div className="harbor-pop relative inline-flex">
+                            <UiIcon
+                              name="notification"
+                              className="h-16 w-16 text-ink-subtle opacity-90"
+                            />
+                            <span
+                              className="animate-badge-pop absolute -right-1 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-ink-muted px-1 text-[11px] font-semibold tabular-nums text-canvas"
+                              style={{ animationDelay: "130ms" }}
+                            >
+                              0
+                            </span>
+                          </div>
+                          <span className="text-[13px] text-ink-muted">
+                            {t("You are all caught up.")}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
                 </>
               )}
             </div>

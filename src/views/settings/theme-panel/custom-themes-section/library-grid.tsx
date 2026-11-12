@@ -59,7 +59,9 @@ function CreateTile({ onCreate }: { onCreate: () => void }) {
         style={{ background: "var(--color-accent)" }}
       />
       <div className="relative flex flex-col gap-1.5">
-        <span className="inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] bg-accent text-canvas">{t("New")}</span>
+        <span className="inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] bg-accent text-canvas">
+          {t("New")}
+        </span>
         <span className="text-[18px] font-semibold tracking-tight text-ink">
           {t("Build a theme")}
         </span>
@@ -117,7 +119,9 @@ function ImportTile({ onUpload }: { onUpload: (file: File) => void }) {
       aria-label={t("Import a theme file")}
     >
       <div className="relative flex flex-col gap-1.5">
-        <span className="inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] bg-elevated text-ink-subtle">{t("Have a file?")}</span>
+        <span className="inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] bg-elevated text-ink-subtle">
+          {t("Have a file?")}
+        </span>
         <span className="text-[18px] font-semibold tracking-tight text-ink">
           {t("Import a theme")}
         </span>

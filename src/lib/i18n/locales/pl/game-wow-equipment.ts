@@ -3,7 +3,8 @@ export default {
   "games.wow.equipment.none": "Brak zapisanych",
   "games.wow.equipment.detailsUnavailable": "Szczegóły niedostępne",
   "games.wow.equipment.unavailable": "Ekwipunek tej postaci jest niedostępny.",
-  "games.wow.equipment.note": "Ekwipunek z ostatniej aktualizacji Raider.IO. Bieżący zestaw sprawdź w grze.",
+  "games.wow.equipment.note":
+    "Ekwipunek z ostatniej aktualizacji Raider.IO. Bieżący zestaw sprawdź w grze.",
   "games.wow.equipment.partial": "Nie udało się odczytać niektórych założonych przedmiotów.",
   "games.wow.equipment.level": "Poziom przedmiotu {level}",
   "games.wow.equipment.gems": "Klejnoty",
@@ -25,5 +26,5 @@ export default {
   "games.wow.equipment.mainhand": "Główna ręka",
   "games.wow.equipment.offhand": "Druga ręka",
   "games.wow.equipment.shirt": "Koszula",
-  "games.wow.equipment.tabard": "Tabard"
+  "games.wow.equipment.tabard": "Tabard",
 };

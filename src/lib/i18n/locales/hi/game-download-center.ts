@@ -1,18 +1,21 @@
 export default {
   "games.download.relink.title": "डाउनलोड लिंक अपडेट करें",
-  "games.download.relink.intro": "स्रोत से वही फ़ाइल चुनें या नया सीधा फ़ाइल लिंक पेस्ट करें। गंतव्य फ़ोल्डर वही रहेगा।",
+  "games.download.relink.intro":
+    "स्रोत से वही फ़ाइल चुनें या नया सीधा फ़ाइल लिंक पेस्ट करें। गंतव्य फ़ोल्डर वही रहेगा।",
   "games.download.relink.source": "स्रोत से चुनें",
   "games.download.relink.manual": "सीधा फ़ाइल लिंक इस्तेमाल करें",
   "games.download.relink.url": "फ़ाइल का नया URL",
   "games.download.relink.review": "फ़ाइल की समीक्षा करें",
   "games.download.relink.saved": "सहेजा गया: {size}",
-  "games.download.relink.note": "नया डेटा जोड़ने से पहले Harbor सहेजे गए हिस्से को दोबारा डाउनलोड करके उसकी तुलना करेगा।",
+  "games.download.relink.note":
+    "नया डेटा जोड़ने से पहले Harbor सहेजे गए हिस्से को दोबारा डाउनलोड करके उसकी तुलना करेगा।",
   "games.download.relink.apply": "लिंक अपडेट करके फिर शुरू करें",
   "games.download.relink.working": "लिंक अपडेट हो रहा है…",
   "games.download.relink.checking": "सहेजे गए डेटा की जाँच हो रही है",
   "games.download.relink.single": "इस डाउनलोड लिंक को बदलने के लिए एक फ़ाइल चुनें।",
   "games.download.relink.native": "यह लिंक अपडेट करने के लिए Harbor के नवीनतम संस्करण को फिर शुरू करें।",
-  "games.download.transfer_relink_mismatch": "यह डाउनलोड जारी रखने के लिए समान नाम और आकार वाली वही फ़ाइल चुनें।",
+  "games.download.transfer_relink_mismatch":
+    "यह डाउनलोड जारी रखने के लिए समान नाम और आकार वाली वही फ़ाइल चुनें।",
   "games.download.center.content.patch": "गेम अपडेट",
   "games.download.center.content.mod": "मॉड सामग्री",
   "games.download.center.content.extra": "अतिरिक्त सामग्री",
@@ -20,7 +23,8 @@ export default {
   "games.download.center.clearCompleted": "पूरे हुए डाउनलोड हटाएँ",
   "games.download.center.keepFiles": "इस सूची से छिपाएँ। फ़ाइलें और लाइब्रेरी के गेम सुरक्षित रहेंगे।",
   "games.download.center.dismiss": "{name} छिपाएँ",
-  "games.download.center.retention": "पूरे हुए डाउनलोड 24 घंटे बाद या हटाने पर इतिहास में चले जाते हैं। फ़ाइलें रखी जाती हैं।",
+  "games.download.center.retention":
+    "पूरे हुए डाउनलोड 24 घंटे बाद या हटाने पर इतिहास में चले जाते हैं। फ़ाइलें रखी जाती हैं।",
   "games.download.center.showHistory": "पूरे हुए डाउनलोड का इतिहास दिखाएँ ({count})",
   "games.download.center.hideHistory": "पूरे हुए डाउनलोड का इतिहास छिपाएँ",
   "games.download.center.contentInfo": "सामग्री की जानकारी",
@@ -47,6 +51,8 @@ export default {
   "games.download.center.canceled": "रद्द किया गया",
   "games.download.center.readyToExtract": "निकालने के लिए तैयार",
   "games.download.center.downloadComplete": "डाउनलोड पूरा हुआ",
-  "games.download.center.installNote": "फ़ाइलें तैयार हैं। इंस्टॉल करने के लिए आर्काइव निकालें या उसका फ़ोल्डर खोलें।",
-  "games.download.center.diskNote": "इस डाउनलोड से हुई लिखाई, सिस्टम कैश सहित। इंस्टॉलेशन और दूसरे ऐप शामिल नहीं हैं।"
+  "games.download.center.installNote":
+    "फ़ाइलें तैयार हैं। इंस्टॉल करने के लिए आर्काइव निकालें या उसका फ़ोल्डर खोलें।",
+  "games.download.center.diskNote":
+    "इस डाउनलोड से हुई लिखाई, सिस्टम कैश सहित। इंस्टॉलेशन और दूसरे ऐप शामिल नहीं हैं।",
 };

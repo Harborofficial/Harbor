@@ -799,7 +799,8 @@ const catalogDF: Record<string, string> = {
   "Fast Hands": "तेज़ हाथ",
   "Fast Mouth": "तेज़ ज़ुबान",
   "Fast · recommended for chapters": "तेज़ · अध्यायों के लिए सुझाया गया",
-  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.": "अगर आप पहले से Usenet के लिए भुगतान करते हैं, तो यह P2P के मुकाबले तेज़ और कम झंझट वाला है। ऐडऑन पेज पर इसे कॉन्फ़िगर करें और उससे मिला मैनिफ़ेस्ट URL पेस्ट करें।",
+  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.":
+    "अगर आप पहले से Usenet के लिए भुगतान करते हैं, तो यह P2P के मुकाबले तेज़ और कम झंझट वाला है। ऐडऑन पेज पर इसे कॉन्फ़िगर करें और उससे मिला मैनिफ़ेस्ट URL पेस्ट करें।",
   "Favicon must be an https URL.": "फ़ेविकॉन एक https URL होना चाहिए।",
   Favorite: "पसंदीदा बनाएँ",
   "Favorite Anime": "पसंदीदा एनीमे",
@@ -838,7 +839,8 @@ const catalogDF: Record<string, string> = {
   Feishin: "Feishin",
   "Fetches DuckDuckGo results and feeds top hits into the model prompt.":
     "DuckDuckGo के नतीजे लाता है और सबसे अच्छे नतीजों को मॉडल प्रॉम्प्ट में भेजता है।",
-  "Fetches a small public test file over P2P, then reports UDP and HTTPS egress, DHT bootstrap and tracker reachability step by step.": "P2P के ज़रिए एक छोटी सार्वजनिक टेस्ट फ़ाइल डाउनलोड करता है, फिर UDP और HTTPS इग्रेस, DHT बूटस्ट्रैप और ट्रैकर तक पहुँच की चरण-दर-चरण रिपोर्ट देता है।",
+  "Fetches a small public test file over P2P, then reports UDP and HTTPS egress, DHT bootstrap and tracker reachability step by step.":
+    "P2P के ज़रिए एक छोटी सार्वजनिक टेस्ट फ़ाइल डाउनलोड करता है, फिर UDP और HTTPS इग्रेस, DHT बूटस्ट्रैप और ट्रैकर तक पहुँच की चरण-दर-चरण रिपोर्ट देता है।",
   "Fetching library index…": "लाइब्रेरी इंडेक्स लोड हो रहा है…",
   "Fetching {n} items…": "{n} आइटम लाए जा रहे हैं…",
   "Fetching {n} items…#few": "{n} आइटम लाए जा रहे हैं…#few",
@@ -1199,9 +1201,12 @@ const catalogDF: Record<string, string> = {
   "found by": "इसके द्वारा खोजा गया",
   "from the Harbor repo into a new directory as": "Harbor रेपो से एक नई डायरेक्टरी में इस रूप में",
   "from {source}": "{source} से",
-  "Cached source resolution and direct download links.": "कैश किए गए स्रोतों का समाधान और सीधे डाउनलोड लिंक।",
-  "Cached source resolution and cloud library access.": "कैश किए गए स्रोतों का समाधान और क्लाउड लाइब्रेरी तक पहुँच।",
-  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.": "दोनों में सीधे, डीब्रिड और पीयर-टू-पीयर नतीजे एक साथ दिखते हैं। सीधा/डीब्रिड में P2P नतीजे तभी दिखते हैं जब और कुछ उपलब्ध न हो। P2P में वे सबसे पहले आते हैं।",
+  "Cached source resolution and direct download links.":
+    "कैश किए गए स्रोतों का समाधान और सीधे डाउनलोड लिंक।",
+  "Cached source resolution and cloud library access.":
+    "कैश किए गए स्रोतों का समाधान और क्लाउड लाइब्रेरी तक पहुँच।",
+  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.":
+    "दोनों में सीधे, डीब्रिड और पीयर-टू-पीयर नतीजे एक साथ दिखते हैं। सीधा/डीब्रिड में P2P नतीजे तभी दिखते हैं जब और कुछ उपलब्ध न हो। P2P में वे सबसे पहले आते हैं।",
 };
 
 export default catalogDF;

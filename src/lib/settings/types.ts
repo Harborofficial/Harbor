@@ -194,7 +194,6 @@ export type Settings = {
   showSimklBadge: boolean;
   showSimklDetail: boolean;
   showDubBadge: boolean;
-  simklShowCommunityRatings: boolean;
   simklEnableUserRatings: boolean;
   simklGranularFilters: SimklGranularFilters;
   cardBadgeLimit: number;
@@ -217,7 +216,6 @@ export type Settings = {
   posterDockTransitionMs: number;
   top10Ribbon: boolean;
   top10RibbonSide: "left" | "right";
-  awardTabs: boolean; // Deprecated: Retained strictly for sanitizeCardAwardDisplay parsing
   cardAwardDisplay: CardAwardDisplay;
   awardTabPosition: "above" | "below" | "top";
   rowTitleScale: number;
@@ -449,6 +447,8 @@ export type Settings = {
   autoSyncApplyStructural: boolean;
   autoSyncDrift: boolean;
   subtitleAutoSyncAsr: boolean;
+  subtitleAutoSyncEngine: "automatic" | "moonshine";
+  subtitleMoonshineLanguage: string;
   subtitleAutoSyncPivot: boolean;
   subtitleAutoSyncCrowd: boolean;
   communitySyncUrl: string;
@@ -617,6 +617,8 @@ export type Settings = {
     local: boolean;
     publicmetadb: boolean;
   };
+  /** Dismissing a CW card also deletes its saved playback progress on connected providers. */
+  cwClearProviderProgress: boolean;
   showPlaylistsTab: boolean;
   skipProfileScreen: boolean;
   profilePromptInterval: "launch" | "15m" | "30m" | "never";
@@ -640,7 +642,6 @@ export type Settings = {
   customLogoMark: string;
   customLogoWordmark: string;
   customAppIcon: string;
-  customAppIconPreset: string;
   musicArtworkAppIcon: boolean;
   musicSeekThumb: boolean;
   musicSeekThumbHover: boolean;
@@ -691,7 +692,6 @@ export type Settings = {
   fullscreenClockSizePx: number;
   hybridTitleBar: boolean;
   topbarScrollBlur: boolean;
-  transparentTopBar: boolean;
   topbarAppearance: "transparent" | "glass" | "filled";
   dragAnywhere: boolean;
   resumeDetailScroll: boolean;
@@ -736,11 +736,6 @@ export type Settings = {
     hidden: string[];
     renamed: Record<string, string>;
   };
-  navCustomizationOwn: {
-    order: string[];
-    hidden: string[];
-    renamed: Record<string, string>;
-  } | null;
   animeRows: {
     order: string[];
     hidden: string[];
@@ -755,7 +750,8 @@ export type Settings = {
   animeMalRowsHidden: string[];
   addonTimeoutSec: number;
   profileAudio: ProfileAudioMode;
-  syncIndicator: boolean;
+  anilistSyncIndicator: boolean;
+  malSyncIndicator: boolean;
   syncIndicatorPosition: SyncIndicatorPosition;
   pickerLayout: "condensed" | "stremio";
   streamSort: "harbor" | "addon";

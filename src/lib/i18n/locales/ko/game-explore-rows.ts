@@ -59,7 +59,8 @@ export default {
   "games.recent.open": "{source}에서 {name} 열기",
   "games.recent.files": "소스 파일",
   "games.recent.empty": "게임 소스를 연결하면 최근 추가된 항목이 여기에 표시됩니다.",
-  "games.recent.undated": "소스에 업로드 날짜가 있는 게임이 아직 없습니다. 소스 관리에서 찾아보세요.",
+  "games.recent.undated":
+    "소스에 업로드 날짜가 있는 게임이 아직 없습니다. 소스 관리에서 찾아보세요.",
   "games.recent.adult": "성인 콘텐츠 · 흐림 처리된 이미지",
   "games.recent.artHidden": "이미지 숨김",
   "games.recent.artUnrated": "콘텐츠 등급 정보 없음",
@@ -75,7 +76,8 @@ export default {
   "games.favorites.any": "제한 없음",
   "games.favorites.clearReviews": "평가 필터 초기화",
   "games.favorites.noReviewMatches": "이 평가 필터에 맞는 게임이 없습니다.",
-  "games.favorites.moreToCheck": "아직 일치하는 게임이 없습니다. 더 많은 게임을 확인할 수 있습니다.",
+  "games.favorites.moreToCheck":
+    "아직 일치하는 게임이 없습니다. 더 많은 게임을 확인할 수 있습니다.",
   "games.favorites.findMore": "게임 더 찾기",
   "games.discovery.pauseWorlds": "세계 자동 전환 일시 정지",
   "games.discovery.resumeWorlds": "세계 자동 전환 재개",
@@ -143,7 +145,8 @@ export default {
   "games.tournaments.schedule": "공식 행사 정보",
   "games.tournaments.watch": "시청 방법",
   "games.tournaments.channelsNote": "공식 채널입니다. 방송은 대회 일정에 따라 진행됩니다.",
-  "games.tournaments.broadcastPending": "아직 방송 정보를 확인하지 못했습니다. 주최 측 페이지를 확인하세요.",
+  "games.tournaments.broadcastPending":
+    "아직 방송 정보를 확인하지 못했습니다. 주최 측 페이지를 확인하세요.",
   "games.tournaments.noDates": "이 캘린더에 확인된 예정 메이저 대회가 없습니다.",
   "games.launchers.topGames": "Steam에서 가장 많이 플레이한 게임",
   "games.launchers.chartRank": "플레이어 수 순위 {rank}위",

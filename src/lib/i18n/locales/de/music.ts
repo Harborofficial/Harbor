@@ -34,7 +34,8 @@ const music: Record<string, string> = {
   "dj.minimize": "Minimieren",
   "dj.maximize": "Maximieren",
   "dj.close": "Schließen",
-  "dj.blurb": "Tempo, Tonhöhe, EQ-Kills und Cue-Pads in einem eigenen Fenster, über dem laufenden Titel.",
+  "dj.blurb":
+    "Tempo, Tonhöhe, EQ-Kills und Cue-Pads in einem eigenen Fenster, über dem laufenden Titel.",
   "dj.open": "Pult öffnen",
   "dj.idle": "Nichts läuft",
   "dj.tempo": "Tempo",
@@ -94,7 +95,8 @@ const music: Record<string, string> = {
   "dj.pads.jump": "Beatjump",
   "dj.pads.sampler": "Sampler",
   "dj.pads.triplet": "Triole",
-  "dj.pads.rollHint": "Pad halten für den Roll, beim Loslassen läuft der Titel dort weiter, wo er ohne Roll wäre",
+  "dj.pads.rollHint":
+    "Pad halten für den Roll, beim Loslassen läuft der Titel dort weiter, wo er ohne Roll wäre",
   "dj.pads.jumpHint": "Vor oder zurück springen, ohne den Beat zu verlieren",
   "dj.pads.noBpm": "Noch kein BPM, Längen in Sekunden, bis du das Tempo eintippst",
   "dj.reset": "Zurücksetzen",
@@ -104,26 +106,34 @@ const music: Record<string, string> = {
   "music.broadcast.drift": "({ms} ms Versatz)",
   "music.broadcast.live": "Sendet über {product}",
   "music.broadcast.install": "{product} holen",
-  "music.broadcast.none": "Es ist kein virtuelles Audiokabel installiert. Installiere {product} und wähle es hier aus.",
+  "music.broadcast.none":
+    "Es ist kein virtuelles Audiokabel installiert. Installiere {product} und wähle es hier aus.",
   "music.broadcast.auto": "Erstes gefundenes Gerät",
   "music.broadcast.output": "Ausgang",
   "music.broadcast.stop": "Stoppen",
   "music.broadcast.start": "Starten",
-  "music.broadcast.blurb": "Sende das Gespielte an ein virtuelles Mikrofon, damit Freunde im Anruf es hören. Über deine Boxen hörst du es weiter.",
+  "music.broadcast.blurb":
+    "Sende das Gespielte an ein virtuelles Mikrofon, damit Freunde im Anruf es hören. Über deine Boxen hörst du es weiter.",
   "music.broadcast.title": "In den Sprachchat senden",
-  "music.cable.mac.installNeeded": "Harbor kann sein eigenes virtuelles Mikrofon installieren. macOS fragt nach deinem Administratorkennwort, danach startet Core Audio neu.",
-  "music.cable.mac.installMissing": "Diese Harbor-Version enthält den Treiber für das virtuelle Mikrofon nicht.",
+  "music.cable.mac.installNeeded":
+    "Harbor kann sein eigenes virtuelles Mikrofon installieren. macOS fragt nach deinem Administratorkennwort, danach startet Core Audio neu.",
+  "music.cable.mac.installMissing":
+    "Diese Harbor-Version enthält den Treiber für das virtuelle Mikrofon nicht.",
   "music.cable.mac.installCancelled": "Installation abgebrochen.",
   "music.cable.mac.installFailed": "Das virtuelle Mikrofon konnte nicht installiert werden.",
-  "music.cable.mac.restartNeeded": "Das virtuelle Mikrofon ist installiert, aber Core Audio hat es noch nicht erkannt. Starte den Mac neu, um abzuschließen.",
-  "music.cable.mac.updateAvailable": "Mit dieser Harbor-Version kommt ein neueres virtuelles Mikrofon. Installiere es, damit das Kabel weiter funktioniert.",
+  "music.cable.mac.restartNeeded":
+    "Das virtuelle Mikrofon ist installiert, aber Core Audio hat es noch nicht erkannt. Starte den Mac neu, um abzuschließen.",
+  "music.cable.mac.updateAvailable":
+    "Mit dieser Harbor-Version kommt ein neueres virtuelles Mikrofon. Installiere es, damit das Kabel weiter funktioniert.",
   "music.cable.title": "Virtuelles Harbor-Mikrofon",
-  "music.cable.blurb": "Harbor richtet das virtuelle Mikrofon selbst ein. Nichts herunterladen, nichts installieren.",
+  "music.cable.blurb":
+    "Harbor richtet das virtuelle Mikrofon selbst ein. Nichts herunterladen, nichts installieren.",
   "music.cable.create": "Virtuelles Mikrofon erstellen",
   "music.cable.remove": "Virtuelles Mikrofon entfernen",
   "music.cable.spec": "{rate}, {depth}",
   "music.cable.perfect": "Kein Resampling",
-  "music.cable.resampledGraph": "PipeWire fährt seinen Graph mit {graph}, deshalb wird hier resampelt",
+  "music.cable.resampledGraph":
+    "PipeWire fährt seinen Graph mit {graph}, deshalb wird hier resampelt",
   "music.cable.resampledServer": "Der Audioserver hat sich auf {rate} statt {requested} festgelegt",
   "music.cable.resampledFormat": "Der Audioserver führt kein 32-Bit-Float",
   "music.cable.resampledOther": "Irgendwo im Audioweg wird resampelt",
@@ -139,13 +149,17 @@ const music: Record<string, string> = {
   "music.cable.depth.int16": "16 Bit",
   "music.cable.unknownSpec": "Harbor kann das ausgehandelte Format nicht auslesen",
   "music.cable.noServer": "Es läuft kein Audioserver",
-  "music.cable.driverNeeded": "Harbor kann auf diesem System noch kein virtuelles Mikrofon einrichten",
+  "music.cable.driverNeeded":
+    "Harbor kann auf diesem System noch kein virtuelles Mikrofon einrichten",
   "music.cable.pipewireFailed": "PipeWire hat den Loopback nicht gestartet",
   "music.cable.createFailed": "Das virtuelle Mikrofon konnte nicht erstellt werden",
-  "music.cable.installNeeded": "Harbor braucht deine Erlaubnis, um das virtuelle Mikrofon zu installieren",
+  "music.cable.installNeeded":
+    "Harbor braucht deine Erlaubnis, um das virtuelle Mikrofon zu installieren",
   "music.cable.installMissing": "Dieser Harbor-Build bringt kein virtuelles Mikrofon mit",
-  "music.cable.restartNeeded": "Das Audiosystem muss neu starten, damit das virtuelle Mikrofon erscheint",
-  "music.cable.updateAvailable": "Dieses Harbor bringt ein neueres virtuelles Mikrofon mit. Neu erstellen zum Aktualisieren.",
+  "music.cable.restartNeeded":
+    "Das Audiosystem muss neu starten, damit das virtuelle Mikrofon erscheint",
+  "music.cable.updateAvailable":
+    "Dieses Harbor bringt ein neueres virtuelles Mikrofon mit. Neu erstellen zum Aktualisieren.",
   "dj.crossfade": "Crossfader",
   "dj.b.broadcasting": "Überträgt den Broadcast",
   "dj.b.eject": "Auswerfen",
@@ -192,7 +206,8 @@ const music: Record<string, string> = {
   "music.speed.pitch": "Tonhöhe",
   "music.speed.reverb": "Hall",
   "music.speed.keepPitch": "Originaltonart behalten",
-  "music.speed.keepPitchHelp": "An ändert das Tempo, nicht die Tonart. Aus ergibt den Nightcore- und Slowed-Klang.",
+  "music.speed.keepPitchHelp":
+    "An ändert das Tempo, nicht die Tonart. Aus ergibt den Nightcore- und Slowed-Klang.",
   "music.speed.reset": "Zurücksetzen",
   "music.speed.normal": "Normal",
   "music.speed.nightcore": "Nightcore",
@@ -359,7 +374,8 @@ const music: Record<string, string> = {
   "music.explore.scene": "Aus der Szene",
   "music.artist.inPlaylists": "Playlists mit {name}",
   "music.audio.preferredSource": "Bevorzugte Quelle",
-  "music.audio.preferredSourceHint": "Harbor spielt zuerst von hier und weicht sonst auf jede funktionierende Quelle aus.",
+  "music.audio.preferredSourceHint":
+    "Harbor spielt zuerst von hier und weicht sonst auf jede funktionierende Quelle aus.",
   "music.spotify.connect": "Spotify Premium",
   "music.spotify.connectDetail": "Einmal verbinden für native, werbefreie Wiedergabe.",
   "music.spotify.connectAction": "Verbinden",
@@ -492,10 +508,12 @@ const music: Record<string, string> = {
   "music.playlist.new": "Neue Playlist",
   "music.row.charts": "Charts",
   "music.connect.shelfTitle": "{name} verbinden, um dieses Regal zu füllen",
-  "music.connect.shelfBody": "Harbor rät nicht bei einer Reihe, die es nicht mit echten Daten belegen kann.",
+  "music.connect.shelfBody":
+    "Harbor rät nicht bei einer Reihe, die es nicht mit echten Daten belegen kann.",
   "music.connect.title": "{name} verbinden",
   "music.connect.connected": "Verbunden als {account}",
-  "music.connect.browserHandoff": "Bestätige Harbor im Browser und schließe die Verbindung hier ab.",
+  "music.connect.browserHandoff":
+    "Bestätige Harbor im Browser und schließe die Verbindung hier ab.",
   "music.connect.scanningFolder": "Ordner wird gelesen. Bei einer großen Bibliothek dauert das.",
   "music.connect.scanned": "{count} Dateien gescannt",
   "music.connect.connecting": "Verbinden",
@@ -524,9 +542,11 @@ const music: Record<string, string> = {
   "music.ytm.loading": "YouTube Music wird geladen",
   "music.row.scrobble": "Weil du {tag} scrobbelst",
   "music.row.scrobbleWaiting": "Last.fm ist verbunden, hat aber noch kein Tag-Regal geliefert.",
-  "music.connect.scrobbleBody": "Verbinde Last.fm, dann entsteht dieses Regal aus den Tags, die du wirklich scrobbelst.",
+  "music.connect.scrobbleBody":
+    "Verbinde Last.fm, dann entsteht dieses Regal aus den Tags, die du wirklich scrobbelst.",
   "music.connect.serverName": "einen Medienserver oder Ordner",
-  "music.connect.serverBody": "Richte Harbor auf einen Ordner, Plex, Jellyfin, Navidrome oder Subsonic, und dieses Regal füllt sich mit Alben, die dir schon gehören.",
+  "music.connect.serverBody":
+    "Richte Harbor auf einen Ordner, Plex, Jellyfin, Navidrome oder Subsonic, und dieses Regal füllt sich mit Alben, die dir schon gehören.",
   "music.row.recents": "Mach dort weiter, wo du aufgehört hast",
   "music.row.fresh": "Neu von Künstlern, die du hörst",
   "music.row.freshSubtitle": "Aktuelle Veröffentlichungen von Künstlern aus deinem Hörverlauf",
@@ -575,7 +595,8 @@ const music: Record<string, string> = {
   "music.surprise.back": "Zurück",
   "music.surprise.title": "Überrasch mich",
   "music.surprise.stop": "Überrasch mich beenden",
-  "music.surprise.body": "Neue Songs für dich, passend zu deinem Hörverhalten und deinen Playlists.",
+  "music.surprise.body":
+    "Neue Songs für dich, passend zu deinem Hörverhalten und deinen Playlists.",
   "music.surprise.loading": "Deine nächsten Songs werden gesucht…",
   "music.surprise.waiting": "Weitere Musik für dich wird gesucht…",
   "music.surprise.empty": "Wähle deinen Musikgeschmack oder speichere ein paar Songs.",
@@ -591,7 +612,8 @@ const music: Record<string, string> = {
   "music.quickListen.loop": "Vorschauen wiederholen",
   "music.quickListen.mute": "Vorschau stummschalten",
   "music.quickListen.unmute": "Ton einschalten",
-  "music.quickListen.empty": "Keine ungehörten Songs gefunden. Entdecke mehr Musik und versuche es erneut.",
+  "music.quickListen.empty":
+    "Keine ungehörten Songs gefunden. Entdecke mehr Musik und versuche es erneut.",
   "music.quickListen.finding": "Songs suchen, die du noch nicht gehört hast…",
   "music.quickListen.more": "Weitere Optionen",
   "music.playlist.search": "Playlists suchen",

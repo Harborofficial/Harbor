@@ -18,8 +18,11 @@ export async function searchUsers(query: string, signal?: AbortSignal): Promise<
   if (!q) return [];
   if (endpointLive) {
     try {
-      const d = await socialGet<SearchResponse>(`/social/users/search?q=${encodeURIComponent(q)}`, signal);
-      const hits = Array.isArray(d) ? d : d.users ?? [];
+      const d = await socialGet<SearchResponse>(
+        `/social/users/search?q=${encodeURIComponent(q)}`,
+        signal,
+      );
+      const hits = Array.isArray(d) ? d : (d.users ?? []);
       return hits.map(normalize);
     } catch (err) {
       if (signal?.aborted) throw err;
@@ -35,7 +38,15 @@ async function resolveByHandle(q: string, signal?: AbortSignal): Promise<UserHit
   if (!handle) return [];
   try {
     const s = await fetchSummary(handle, signal);
-    return [{ handle: s.handle, alias: s.alias, avatarUrl: s.avatarUrl, verified: s.verified, online: s.online }];
+    return [
+      {
+        handle: s.handle,
+        alias: s.alias,
+        avatarUrl: s.avatarUrl,
+        verified: s.verified,
+        online: s.online,
+      },
+    ];
   } catch (err) {
     if (err instanceof ProfileNotFound) return [];
     throw err;

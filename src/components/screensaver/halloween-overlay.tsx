@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { AnimationItem } from "lottie-web";
-import {
-  ScreensaverBrand,
-  ScreensaverClockFace,
-  useScreensaverClock,
-} from "./screensaver-clock";
+import { ScreensaverBrand, ScreensaverClockFace, useScreensaverClock } from "./screensaver-clock";
 
 const CANVAS = "#0f1113";
 

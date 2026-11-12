@@ -133,7 +133,10 @@ export function BpStepTmdb({ setSatisfied, setPrimaryGuard }: BpOnboardStepProps
           />
         )}
       </BpDecisionRow>
-      <BpDecisionNote text={note(t, check, draft)} alert={check === "rejected" || check === "unreachable"} />
+      <BpDecisionNote
+        text={note(t, check, draft)}
+        alert={check === "rejected" || check === "unreachable"}
+      />
       <BpOnboardKeyboard
         onChar={(c) => {
           setCheck("idle");
@@ -153,7 +156,9 @@ function note(
   draft: string,
 ): string {
   if (check === "rejected") {
-    return t("TMDB did not accept that key. Check you copied the v3 key, not the read access token.");
+    return t(
+      "TMDB did not accept that key. Check you copied the v3 key, not the read access token.",
+    );
   }
   if (check === "unreachable") {
     return t("Could not reach TMDB from this TV. You can save the key without checking it.");

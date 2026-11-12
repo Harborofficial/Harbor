@@ -49,8 +49,7 @@ export type LeagueMetadata = {
 type Raw = Record<string, unknown>;
 const obj = (value: unknown): Raw =>
   value && typeof value === "object" && !Array.isArray(value) ? (value as Raw) : {};
-const list = (value: unknown): Raw[] =>
-  Array.isArray(value) ? value.slice(0, 2000).map(obj) : [];
+const list = (value: unknown): Raw[] => (Array.isArray(value) ? value.slice(0, 2000).map(obj) : []);
 const text = (value: unknown, max = 500): string =>
   typeof value === "string"
     ? value.trim().slice(0, max)
@@ -176,10 +175,7 @@ export function parseEspnLeagueMetadata(
   const catalogRoot = catalog ?? {};
   const details = new Map([...espnTeamDetails(rawTable), ...espnTeamDetails(catalogRoot)]);
   const teams = new Map<string, SportsTeam>();
-  for (const team of [
-    ...parseCatalogTeams(rawTable, def),
-    ...parseCatalogTeams(catalogRoot, def),
-  ])
+  for (const team of [...parseCatalogTeams(rawTable, def), ...parseCatalogTeams(catalogRoot, def)])
     teams.set(team.id, team);
   result.teams = [...teams.values()]
     .map((team) => {
@@ -493,9 +489,7 @@ export function createLeagueMetadataClient(options: {
       // lookup_all_teams currently returns an unrelated demo league even for valid numeric IDs.
       const [teams, table] = await Promise.all([
         verified && text(verified.strLeague)
-          ? request(
-              `${DB}/search_all_teams.php?l=${encodeURIComponent(text(verified.strLeague))}`,
-            )
+          ? request(`${DB}/search_all_teams.php?l=${encodeURIComponent(text(verified.strLeague))}`)
           : Promise.resolve({}),
         seed.season && /^\d{4}(?:[-/]\d{2,4})?$/.test(seed.season)
           ? request(`${DB}/lookuptable.php?l=${def.path}&s=${encodeURIComponent(seed.season)}`)

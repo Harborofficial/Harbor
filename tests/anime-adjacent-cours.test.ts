@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import { memoryMediaCache } from "./helpers/media-cache.mjs";
-import { nextAnimeEntry } from "../src/lib/providers/anime-entry.ts";
+import { nextAnimeEntry, previousAnimeEntry } from "../src/lib/providers/anime-entry.ts";
 import type { AnimeKitsuMeta, AnimeKitsuVideo } from "../src/lib/providers/anime-kitsu-addon.ts";
 
 function video(
@@ -61,10 +61,50 @@ const SEASON_2: AnimeKitsuMeta = {
   videos: Array.from({ length: 12 }, (_, i) => video(46873, i + 1, i + 1, 2)),
 };
 
+const SPECIALS: AnimeKitsuMeta = {
+  id: "kitsu:90001",
+  type: "series",
+  name: "Specials fixture",
+  videos: [
+    {
+      id: "kitsu:90001:1",
+      title: "Special 1",
+      season: 0,
+      episode: 1,
+      imdbSeason: 0,
+      imdbEpisode: 1,
+      released: "2022-10-01T14:00:00.000Z",
+    },
+    video(90001, 1, 1),
+  ],
+};
+
+const ANIZIP_SPECIAL_META: AnimeKitsuMeta = {
+  id: "kitsu:90002",
+  type: "series",
+  name: "AniZip special fixture",
+  videos: [video(90002, 1, 1)],
+};
+
+const ANIZIP_SPECIAL = {
+  mappings: { imdb_id: "tt1234567" },
+  episodes: {
+    "1": { seasonNumber: 1, episodeNumber: 1 },
+    "13": {
+      seasonNumber: 0,
+      episodeNumber: 1,
+      airDate: "2022-10-01",
+      title: { en: "Special" },
+    },
+  },
+};
+
 const METAS: Record<string, AnimeKitsuMeta> = {
   "kitsu:45398": PART_1,
   "kitsu:45619": PART_2,
   "kitsu:46873": SEASON_2,
+  "kitsu:90001": SPECIALS,
+  "kitsu:90002": ANIZIP_SPECIAL_META,
 };
 
 function seriesModule() {
@@ -106,7 +146,7 @@ function seriesModule() {
     },
     "./providers/anime-mapping": {
       kitsuToAnilist: async () => null,
-      animeMappingByKitsu: async () => null,
+      animeMappingByKitsu: async (id: number) => (id === 90002 ? ANIZIP_SPECIAL : null),
     },
     "./providers/anime-entry": {
       resolveAnimeEntry: async (id: string) => {
@@ -124,6 +164,7 @@ function seriesModule() {
       },
     },
     "./providers/kitsu": {
+      kitsuEpisodes: async () => [],
       parseKitsuId: (id: string) => {
         const match = /^kitsu:(\d+)/.exec(id);
         return match ? Number(match[1]) : null;
@@ -140,12 +181,16 @@ function seriesModule() {
     },
     "./providers/anime-franchise-root": { franchiseRoot: async (id: string) => id },
     "./streams/anime-identity": { foreignAnimeProviderSeasons: async () => null },
+    "./providers/tvdb-order": { fetchTvdbOrder: async () => null },
+    "./providers/tvdb": { tvdbLangFromIso1: () => "en" },
   };
   const exports: Record<string, any> = {};
   new Function("require", "exports", compiled)((id: string) => {
     if (id === "@/lib/metadata-policy" || id === "./metadata-policy")
       return { addonOnlyMetadata: () => false };
     if (id === "./metadata-addons") return { readMetadataAddonOrder: () => [] };
+    if (id === "./metadata-sources")
+      return { addonKeyFromSource: () => null, normalizeMetadataSourceChain: () => [] };
     assert.ok(Object.hasOwn(mocks, id), `Unexpected dependency: ${id}`);
     return mocks[id];
   }, exports);
@@ -171,6 +216,15 @@ function seriesModule() {
       } | null;
       nextMeta?: { id: string; name: string };
     }>;
+    fetchSeasonList: (
+      meta: { id: string; type: string; name: string },
+      opts: Record<string, unknown>,
+    ) => Promise<number[]>;
+    fetchSeasonEpisodes: (
+      meta: { id: string; type: string; name: string },
+      season: number,
+      opts: Record<string, unknown>,
+    ) => Promise<Array<{ season: number; episode: number; imdbEpisode?: number }>>;
   };
 }
 
@@ -308,6 +362,65 @@ test("hidden episodes are checked against the sequel entry during a cour handoff
     { ...query, skip: (s, e, id = "kitsu:45398") => id === "kitsu:45619" && s === 1 && e === 1 },
   );
   assert.equal(hiddenSequel.next?.kitsuStreamId, "kitsu:45619:2");
+});
+
+test("a Prequel franchise link resolves the previous series entry", async () => {
+  const byId: Record<string, AnimeKitsuMeta> = {
+    "kitsu:45619": {
+      ...PART_2,
+      links: [
+        {
+          name: "Prequel: SPY x FAMILY",
+          category: "Franchise",
+          url: "stremio:///detail/series/kitsu:45398",
+        },
+      ],
+    },
+    "kitsu:45398": PART_1,
+  };
+  const previous = await previousAnimeEntry("kitsu:45619", async (id) => byId[id] ?? null);
+  assert.equal(previous?.id, "kitsu:45398");
+  assert.equal(previous?.meta?.name, "SPY x FAMILY");
+});
+
+test("anime specials stay in season 0 for the player season browser", async () => {
+  const { fetchSeasonEpisodes, fetchSeasonList } = seriesModule();
+  const meta = { id: "kitsu:90001", type: "series", name: "Specials fixture" };
+  assert.deepEqual(await fetchSeasonList(meta, {}), [0, 1]);
+  const episodes = await fetchSeasonEpisodes(meta, 0, {});
+  assert.equal(episodes.length, 1);
+  assert.equal(episodes[0].season, 0);
+  assert.equal(episodes[0].episode, 1);
+});
+
+test("an anime special in AniZip is added even when the Kitsu addon omits it", async () => {
+  const { fetchSeasonEpisodes, fetchSeasonList } = seriesModule();
+  const meta = { id: "kitsu:90002", type: "series", name: "AniZip special fixture" };
+  assert.deepEqual(await fetchSeasonList(meta, {}), [0, 1]);
+  const episodes = await fetchSeasonEpisodes(meta, 0, {});
+  assert.equal(episodes.length, 1);
+  assert.equal(episodes[0].season, 0);
+  assert.equal(episodes[0].episode, 13);
+  assert.equal(episodes[0].imdbEpisode, 1);
+});
+
+test("the player panel browses anime entries and plays with the entry meta", () => {
+  const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+  const panel = read("src/components/player/episode-panel/index.tsx");
+  assert.match(panel, /useAnimeEntryBrowser\(meta, currentEpisode, open\)/);
+  assert.match(panel, /entryBrowser\.browsing \? entryBrowser\.activeMeta : null/);
+  assert.match(panel, /const playbackMeta = entryBrowser\.activeMeta \?\? meta/);
+  assert.match(panel, /openPicker\(playbackMeta, ep/);
+  assert.match(panel, /savePlayback\(\s*playbackMeta\.id/);
+  assert.match(panel, /entryBrowser\.entries\.length > 1/);
+  assert.match(panel, /isNextAired\(false, ep\.airDate\)/);
+  assert.match(panel, /seasons\.includes\(0\)/);
+  const watched = read("src/views/player/hooks/use-player-watched.ts");
+  assert.match(watched, /entryId: string = meta\.id/);
+  assert.match(watched, /allowAlias && !sameEntry/);
+  const browser = read("src/components/player/episode-panel/use-anime-entries.ts");
+  assert.match(browser, /previousAnimeEntry\(cursor\)/);
+  assert.match(browser, /nextAnimeEntry\(cursor\)/);
 });
 
 test("player navigation switches to the next entry's meta", () => {

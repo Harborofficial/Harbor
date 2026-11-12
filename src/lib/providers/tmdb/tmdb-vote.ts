@@ -41,7 +41,7 @@ export function useTmdbVote(
   tmdbKey: string,
 ): string | null | undefined {
   const [v, setV] = useState<string | null | undefined>(() =>
-    metaId && cache.has(metaId) ? cache.get(metaId) ?? null : undefined,
+    metaId && cache.has(metaId) ? (cache.get(metaId) ?? null) : undefined,
   );
   useEffect(() => {
     if (!metaId || !tmdbKey) {

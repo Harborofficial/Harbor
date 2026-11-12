@@ -1,4 +1,4 @@
-const gameHub: Record<string,string> = {
+const gameHub: Record<string, string> = {
   "games.hub.filesTitle": "Файлы проекта",
   "games.hub.videoUnavailable": "Не удалось загрузить видео игрового процесса.",
   "games.hub.noVideos": "Для этих ROM-хаков пока нет видео.",
@@ -7,10 +7,14 @@ const gameHub: Record<string,string> = {
   "games.hub.allOriginals": "Все оригинальные игры",
   "games.hub.searchOriginal": "Найти оригинальную игру…",
   "games.hub.getFiles": "Получить файлы",
-  "games.hub.packNote": "Этот проект использует набор модов. Следуйте инструкции автора для вашей системы.",
-  "games.hub.noDownload": "Прямая ссылка на патч не найдена. Откройте сайт проекта или вставьте ссылку на файл.",
-  "games.hub.downloadFailed": "Не удалось получить файлы. Повторите попытку или откройте сайт проекта.",
-  "games.hub.downloadNote": "Скачайте патч автора, затем выберите оригинальную игру для его применения.",
+  "games.hub.packNote":
+    "Этот проект использует набор модов. Следуйте инструкции автора для вашей системы.",
+  "games.hub.noDownload":
+    "Прямая ссылка на патч не найдена. Откройте сайт проекта или вставьте ссылку на файл.",
+  "games.hub.downloadFailed":
+    "Не удалось получить файлы. Повторите попытку или откройте сайт проекта.",
+  "games.hub.downloadNote":
+    "Скачайте патч автора, затем выберите оригинальную игру для его применения.",
   "games.hub.downloadLink": "Вставить ссылку на скачивание",
   "games.hub.gettingFiles": "Проверка файлов…",
   "games.hub.creatorNotes": "Инструкции автора",
@@ -20,18 +24,22 @@ const gameHub: Record<string,string> = {
   "games.hub.toolkitNote": "Скачайте патч для своей оригинальной игры.",
   "games.hub.communityMade": "Создано сообществом",
   "games.hub.title": "ROM-хаки",
-  "games.hub.note": "Новые приключения и переосмысленная классика. Найдите хак, сохраните его и играйте в свою пропатченную копию в Harbor.",
+  "games.hub.note":
+    "Новые приключения и переосмысленная классика. Найдите хак, сохраните его и играйте в свою пропатченную копию в Harbor.",
   "games.hub.hacksFor": "Хаки для {name}",
   "games.hub.baseNote": "Посмотрите, что сообщество создало на основе этой игры.",
   "games.hub.how": "Как играть в ROM-хак",
   "games.hub.stepFind": "Откройте хак, чтобы найти сайт проекта и нужную оригинальную игру.",
-  "games.hub.stepPatch": "Выберите оригинальный ROM и патч BPS или IPS. Harbor проверит файлы и сохранит отдельную копию.",
-  "games.hub.stepPlay": "Добавьте копию в библиотеку. Играйте в поддерживаемые системы в Harbor или используйте настроенный эмулятор.",
+  "games.hub.stepPatch":
+    "Выберите оригинальный ROM и патч BPS или IPS. Harbor проверит файлы и сохранит отдельную копию.",
+  "games.hub.stepPlay":
+    "Добавьте копию в библиотеку. Играйте в поддерживаемые системы в Harbor или используйте настроенный эмулятор.",
   "games.hub.byOriginal": "Хаки по оригинальной игре",
   "games.hub.allHacks": "Все хаки",
   "games.hub.baseUnlisted": "Оригинальная игра не указана",
   "games.hub.makePlayable": "Подготовить к игре",
-  "games.hub.installNote": "Скачайте патч с сайта проекта и примените его к своей копии. Сначала проверьте нужную версию.",
+  "games.hub.installNote":
+    "Скачайте патч с сайта проекта и примените его к своей копии. Сначала проверьте нужную версию.",
   "games.hub.moreFor": "Больше хаков для {name}",
   "games.hub.project": "Сайт проекта",
   "games.hub.relatedError": "Не удалось загрузить связанные хаки.",
@@ -41,9 +49,11 @@ const gameHub: Record<string,string> = {
   "games.hub.added": "Добавлено в библиотеку",
   "games.hub.addLibrary": "Добавить в библиотеку",
   "games.collectionsLive.greats": "Лучшие за всё время",
-  "games.collectionsLive.greatsNote": "Самые высокие оценки IGDB: не менее 100 оценок игроков и критиков.",
+  "games.collectionsLive.greatsNote":
+    "Самые высокие оценки IGDB: не менее 100 оценок игроков и критиков.",
   "games.collectionsLive.coop": "Вместе лучше",
-  "games.collectionsLive.coopNote": "Высоко оценённые кооперативные игры с минимум 100 оценками IGDB. Режимы зависят от платформы.",
+  "games.collectionsLive.coopNote":
+    "Высоко оценённые кооперативные игры с минимум 100 оценками IGDB. Режимы зависят от платформы.",
   "games.collectionsLive.records": "Игры в книгах рекордов",
   "games.collectionsLive.recordsNote": "Знаменательные достижения с историей и источниками.",
   "games.collectionsLive.minecraft": "Minecraft",
@@ -56,6 +66,6 @@ const gameHub: Record<string,string> = {
   "games.collectionsLive.gtaRecord": "Продаж всего за три дня",
   "games.collectionsLive.gtaDate": "Сентябрь 2013",
   "games.atlas.kind.greats": "Лучшие за всё время",
-  "games.atlas.kind.coop": "Кооперативные игры"
+  "games.atlas.kind.coop": "Кооперативные игры",
 };
 export default gameHub;

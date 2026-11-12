@@ -2,9 +2,7 @@ const KEY = "harbor.library.local.removed.v1";
 
 /** Windows scan paths are case-insensitive; keep Unix paths case-sensitive. */
 export function localPathKey(path: string): string {
-  return /^(?:[a-z]:[\\/]|\\\\)/i.test(path)
-    ? path.replace(/\\/g, "/").toLowerCase()
-    : path;
+  return /^(?:[a-z]:[\\/]|\\\\)/i.test(path) ? path.replace(/\\/g, "/").toLowerCase() : path;
 }
 
 export function removedLocalPaths(): Set<string> {

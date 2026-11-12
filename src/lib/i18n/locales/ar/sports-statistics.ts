@@ -1,8 +1,8 @@
 export default {
   "Match stats": "إحصائيات المباراة",
-  "Timeline": "أحداث المباراة",
+  Timeline: "أحداث المباراة",
   "Head to head": "المواجهات المباشرة",
-  "Standings": "الترتيب",
+  Standings: "الترتيب",
   "Loading team results…": "جارٍ تحميل نتائج الفريق…",
   "No completed matches were returned for this team.":
     "لم يُرجع المصدر أي مباريات مكتملة لهذا الفريق.",

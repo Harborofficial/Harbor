@@ -55,15 +55,67 @@ export type ProbeFn = (
 ) => Promise<RustTrackSelection | null>;
 
 const LANG_ALIAS: Record<string, string> = {
-  jpn: "ja", eng: "en", spa: "es", por: "pt", rus: "ru", ita: "it", kor: "ko",
-  ara: "ar", hin: "hi", tur: "tr", pol: "pl", swe: "sv", dan: "da", fin: "fi",
-  nor: "no", nob: "no", heb: "he", tha: "th", vie: "vi", ind: "id", ukr: "uk",
-  nld: "nl", dut: "nl", deu: "de", ger: "de", fra: "fr", fre: "fr", ces: "cs",
-  cze: "cs", ell: "el", gre: "el", isl: "is", ice: "is", ron: "ro", rum: "ro",
-  slk: "sk", slo: "sk", zho: "zh", chi: "zh", fas: "fa", per: "fa", sqi: "sq",
-  alb: "sq", hye: "hy", arm: "hy", eus: "eu", baq: "eu", mya: "my", bur: "my",
-  kat: "ka", geo: "ka", mkd: "mk", mac: "mk", mri: "mi", mao: "mi", msa: "ms",
-  may: "ms", bod: "bo", tib: "bo", cym: "cy", wel: "cy",
+  jpn: "ja",
+  eng: "en",
+  spa: "es",
+  por: "pt",
+  rus: "ru",
+  ita: "it",
+  kor: "ko",
+  ara: "ar",
+  hin: "hi",
+  tur: "tr",
+  pol: "pl",
+  swe: "sv",
+  dan: "da",
+  fin: "fi",
+  nor: "no",
+  nob: "no",
+  heb: "he",
+  tha: "th",
+  vie: "vi",
+  ind: "id",
+  ukr: "uk",
+  nld: "nl",
+  dut: "nl",
+  deu: "de",
+  ger: "de",
+  fra: "fr",
+  fre: "fr",
+  ces: "cs",
+  cze: "cs",
+  ell: "el",
+  gre: "el",
+  isl: "is",
+  ice: "is",
+  ron: "ro",
+  rum: "ro",
+  slk: "sk",
+  slo: "sk",
+  zho: "zh",
+  chi: "zh",
+  fas: "fa",
+  per: "fa",
+  sqi: "sq",
+  alb: "sq",
+  hye: "hy",
+  arm: "hy",
+  eus: "eu",
+  baq: "eu",
+  mya: "my",
+  bur: "my",
+  kat: "ka",
+  geo: "ka",
+  mkd: "mk",
+  mac: "mk",
+  mri: "mi",
+  mao: "mi",
+  msa: "ms",
+  may: "ms",
+  bod: "bo",
+  tib: "bo",
+  cym: "cy",
+  wel: "cy",
 };
 
 const UNKNOWN_CODES = new Set(["und", "mul", "zxx", "mis", ""]);
@@ -119,7 +171,8 @@ export function selectFromSnapshot(
   const eligible = audio
     .map((t, i) => ({ t, i, lang: normalizeLang(t.lang) }))
     .filter(({ t }) => !commentaryTitle(t.title) && !descriptiveTitle(t.title));
-  const pool = eligible.length > 0 ? eligible : audio.map((t, i) => ({ t, i, lang: normalizeLang(t.lang) }));
+  const pool =
+    eligible.length > 0 ? eligible : audio.map((t, i) => ({ t, i, lang: normalizeLang(t.lang) }));
 
   if (subN) {
     const matches = pool.filter((e) => e.lang === subN);
@@ -238,9 +291,11 @@ export function shouldRunAsrForSelection(sel: AudioTrackSelection): boolean {
   return sel.asrStrategy !== "suppressed";
 }
 
-export function resolveAsrLanguage(
-  sel: AudioTrackSelection,
-): { run: boolean; lang?: string; translate: boolean } {
+export function resolveAsrLanguage(sel: AudioTrackSelection): {
+  run: boolean;
+  lang?: string;
+  translate: boolean;
+} {
   switch (sel.asrStrategy) {
     case "direct":
       return { run: true, lang: sel.subLang, translate: false };

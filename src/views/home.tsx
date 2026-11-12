@@ -614,7 +614,9 @@ export function Home({
           for (const i of libItems) {
             const rawMt = i._mtime as unknown;
             const mt = typeof rawMt === "number" ? rawMt : Date.parse(String(rawMt ?? ""));
-            if (i.state?.timeOffset && i.state.timeOffset > 0) {
+            // A dismissed card must not get its resume re-created from a library
+            // timestamp; genuine progress is already visible to isCwDismissed.
+            if (i.state?.timeOffset && i.state.timeOffset > 0 && !isCwDismissed(i)) {
               const vid = i.state.video_id ?? "";
               const kitsuThreeSeg =
                 /^(kitsu|mal|anilist|anidb):/.test(i._id) && vid.split(":").length === 3;
@@ -905,6 +907,10 @@ export function Home({
     };
   }, [anilistConnected, continueWatching]);
 
+  const cwProgressPool = useMemo(
+    () => [...items, ...localCwItems, ...externalCw],
+    [items, localCwItems, externalCw],
+  );
   const cwItems = useCwAdvance(
     continueWatching,
     settings.tmdbKey,
@@ -919,6 +925,7 @@ export function Home({
     animeDetectVer,
     settings.episodeHiding,
     settings.animeCwEnd,
+    cwProgressPool,
   );
 
   useEffect(() => {

@@ -1,5 +1,8 @@
 .detail-layout-action {
-  transition: background-color 160ms ease, color 160ms ease, opacity 160ms ease;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease;
 }
 
 .detail-layout-action:focus-visible {
@@ -16,7 +19,9 @@
 .detail-layout-glyph > *,
 .detail-layout-label > * {
   grid-area: 1 / 1;
-  transition: opacity 140ms ease, transform 180ms cubic-bezier(0.2, 0, 0, 1);
+  transition:
+    opacity 140ms ease,
+    transform 180ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 .detail-layout-label > * {
@@ -48,15 +53,21 @@
 }
 
 @keyframes detail-layout-confirm {
-  from { stroke-dashoffset: 24; }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .detail-layout-reset {
   display: grid;
   grid-template-columns: 0fr;
   opacity: 0;
-  transition: grid-template-columns 180ms cubic-bezier(0.2, 0, 0, 1), opacity 140ms ease;
+  transition:
+    grid-template-columns 180ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 140ms ease;
 }
 
 .detail-layout-reset > div {
@@ -78,7 +89,9 @@
   display: grid;
   grid-template-rows: 0fr;
   opacity: 0;
-  transition: grid-template-rows 200ms cubic-bezier(0.2, 0, 0, 1), opacity 160ms ease;
+  transition:
+    grid-template-rows 200ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 160ms ease;
 }
 
 .detail-layout-controls > div {

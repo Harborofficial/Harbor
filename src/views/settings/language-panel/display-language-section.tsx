@@ -43,9 +43,7 @@ export function DisplayLanguageSection() {
               >
                 {lang.greeting}
               </span>
-              {selected && (
-                <Check size={18} strokeWidth={2.6} className="shrink-0 text-accent" />
-              )}
+              {selected && <Check size={18} strokeWidth={2.6} className="shrink-0 text-accent" />}
             </button>
           );
         })}

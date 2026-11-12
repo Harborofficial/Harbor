@@ -55,8 +55,13 @@ function normalizeItem(raw: unknown): Record<string, unknown> | null {
   const r = raw as Record<string, unknown>;
   const id = asString(r._id);
   if (!id) return null;
-  const srcState = (r.state && typeof r.state === "object" ? r.state : {}) as Record<string, unknown>;
-  const srcHints = (r.behaviorHints && typeof r.behaviorHints === "object" ? r.behaviorHints : {}) as Record<string, unknown>;
+  const srcState = (r.state && typeof r.state === "object" ? r.state : {}) as Record<
+    string,
+    unknown
+  >;
+  const srcHints = (
+    r.behaviorHints && typeof r.behaviorHints === "object" ? r.behaviorHints : {}
+  ) as Record<string, unknown>;
   return {
     _id: id,
     name: asString(r.name) ?? "",
@@ -97,7 +102,9 @@ export async function repairStremioLibrary(
   onProgress?: (p: RepairProgress) => void,
 ): Promise<RepairResult> {
   onProgress?.({ phase: "fetching" });
-  const ids = (await call("datastoreMeta", { authKey, collection: "libraryItem" })) as Array<[string, string]>;
+  const ids = (await call("datastoreMeta", { authKey, collection: "libraryItem" })) as Array<
+    [string, string]
+  >;
   if (!Array.isArray(ids) || ids.length === 0) {
     onProgress?.({ phase: "done", total: 0, needsRepair: 0, pushed: 0 });
     return { total: 0, alreadyClean: 0, repaired: 0, unrepairable: 0 };
@@ -120,7 +127,8 @@ export async function repairStremioLibrary(
       continue;
     }
     const nid = String((normalized as { _id?: unknown })._id ?? "");
-    if (ANIME_CLOUD_ID.test(nid) && (normalized as { removed?: unknown }).removed !== true) continue;
+    if (ANIME_CLOUD_ID.test(nid) && (normalized as { removed?: unknown }).removed !== true)
+      continue;
     if (differs(raw, normalized)) toPush.push(normalized);
   }
   onProgress?.({ phase: "normalizing", total: items.length, needsRepair: toPush.length });

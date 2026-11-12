@@ -10,12 +10,15 @@ export default {
   "games.calendar.search": "Szukaj w zapisanych grach",
   "games.calendar.platform": "Platforma premiery",
   "games.calendar.allPlatforms": "Wszystkie platformy",
-  "games.calendar.dates": "Daty podane przez wydawców mogą się zmienić. Daty Steam pochodzą z amerykańskiego sklepu, a wpisy IGDB wskazują platformę i region.",
-  "games.calendar.noDays": "Żadna ze sprawdzonych gier nie ma dokładnego dnia premiery w miesiącu: {month}.",
+  "games.calendar.dates":
+    "Daty podane przez wydawców mogą się zmienić. Daty Steam pochodzą z amerykańskiego sklepu, a wpisy IGDB wskazują platformę i region.",
+  "games.calendar.noDays":
+    "Żadna ze sprawdzonych gier nie ma dokładnego dnia premiery w miesiącu: {month}.",
   "games.calendar.windows": "Okresy premier",
   "games.calendar.windowsNote": "Te plany obejmują ten miesiąc, ale nie wskazują dokładnego dnia.",
   "games.calendar.undated": "Brak potwierdzonej daty",
-  "games.calendar.undatedNote": "Daty nieogłoszone, niedostępne i jeszcze niesprawdzone nie trafiają do kalendarza.",
+  "games.calendar.undatedNote":
+    "Daty nieogłoszone, niedostępne i jeszcze niesprawdzone nie trafiają do kalendarza.",
   "games.calendar.cancelled": "Pominięte wpisy anulowanych wydań: {count}.",
   "games.calendar.unchecked": "Data jeszcze niesprawdzona",
   "games.watchlist.note": "Śledź premiery ulubionych gier.",
@@ -34,7 +37,8 @@ export default {
   "games.watchlist.coverage": "Sprawdzono {count} z {total} gier",
   "games.watchlist.refresh": "Odśwież daty premier",
   "games.watchlist.unavailable": "Data premiery niedostępna",
-  "games.watchlist.partial": "Nie udało się sprawdzić niektórych dat premier. Zapisane informacje są wyświetlane, jeśli są dostępne.",
+  "games.watchlist.partial":
+    "Nie udało się sprawdzić niektórych dat premier. Zapisane informacje są wyświetlane, jeśli są dostępne.",
   "games.watchlist.noMatch": "Brak ulubionych pasujących do filtrów.",
   "games.watchlist.dateNote": "Daty pochodzą ze Steam i IGDB. Plany premier mogą się zmienić.",
   "games.watchlist.remove": "Usuń {name} z ulubionych",
@@ -54,9 +58,12 @@ export default {
   "games.owned.pickHint": "Otwórz losową grę z tych wyników.",
   "games.owned.clear": "Wyczyść filtry biblioteki",
   "games.owned.scanning": "Sprawdzanie lokalnych instalacji…",
-  "games.owned.scanUnavailable": "Stan lokalnych instalacji jest niedostępny. Odśwież, aby sprawdzić to urządzenie.",
-  "games.owned.partial": "Nie udało się sprawdzić niektórych folderów Steam. Część instalacji mogła nie zostać rozpoznana.",
+  "games.owned.scanUnavailable":
+    "Stan lokalnych instalacji jest niedostępny. Odśwież, aby sprawdzić to urządzenie.",
+  "games.owned.partial":
+    "Nie udało się sprawdzić niektórych folderów Steam. Część instalacji mogła nie zostać rozpoznana.",
   "games.owned.results": "{count} z {total} gier",
-  "games.owned.playtimeNote": "Historia rozgrywki pochodzi z ostatniej synchronizacji ze Steam. Brak zarejestrowanego czasu gry nie wskazuje, czy gra została ukończona.",
-  "games.owned.resetAvailability": "Pokaż gry niezależnie od stanu instalacji"
+  "games.owned.playtimeNote":
+    "Historia rozgrywki pochodzi z ostatniej synchronizacji ze Steam. Brak zarejestrowanego czasu gry nie wskazuje, czy gra została ukończona.",
+  "games.owned.resetAvailability": "Pokaż gry niezależnie od stanu instalacji",
 };

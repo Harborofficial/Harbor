@@ -102,6 +102,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.recordings": "录音",
   "music.artist.limited": "此来源提供部分作品，可能不包含完整目录。",
   "music.rockHall.title": "摇滚名人堂",
-  "music.rockHall.subtitle": "1986 年以来的每一届，直接取自维基百科"
+  "music.rockHall.subtitle": "1986 年以来的每一届，直接取自维基百科",
 };
 export default musicTaste;

@@ -315,7 +315,8 @@ const catalog07: Record<string, string> = {
   "Live preview": "Podgląd na żywo",
   "Live preview is on. Done and Save both keep what you've picked as your Custom theme. Reset reverts the editor to the saved palette.":
     "Podgląd na żywo jest włączony. Zarówno Gotowe, jak i Zapisz zachowują wybrane ustawienia jako motyw niestandardowy. Resetuj przywraca w edytorze zapisaną paletę.",
-  "Live state of Harbor's own P2P engine on this machine.": "Bieżący stan własnego silnika P2P Harbor na tym urządzeniu.",
+  "Live state of Harbor's own P2P engine on this machine.":
+    "Bieżący stan własnego silnika P2P Harbor na tym urządzeniu.",
   "Live streams that actually work.": "Transmisje na żywo, które naprawdę działają.",
   "Live sync": "Synchronizacja na żywo",
   "Live web": "Internet na żywo",

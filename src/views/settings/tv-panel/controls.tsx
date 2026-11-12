@@ -97,7 +97,12 @@ export function StepRow({
       desc={sub ? t(sub) : undefined}
     >
       <div className="flex h-11 w-full max-w-[520px] items-center gap-4">
-        <StepButton glyph="minus" label={t("Decrease {name}", { name: t(label) })} disabled={value <= min} onClick={() => onChange(clamp(value - step))} />
+        <StepButton
+          glyph="minus"
+          label={t("Decrease {name}", { name: t(label) })}
+          disabled={value <= min}
+          onClick={() => onChange(clamp(value - step))}
+        />
         <input
           type="range"
           min={min}
@@ -110,7 +115,12 @@ export function StepRow({
           className="harbor-slider min-w-0 flex-1"
           style={fillStyle(value, min, max, step)}
         />
-        <StepButton glyph="plus" label={t("Increase {name}", { name: t(label) })} disabled={value >= max} onClick={() => onChange(clamp(value + step))} />
+        <StepButton
+          glyph="plus"
+          label={t("Increase {name}", { name: t(label) })}
+          disabled={value >= max}
+          onClick={() => onChange(clamp(value + step))}
+        />
         <span className="w-14 shrink-0 text-end text-[15.5px] font-semibold tabular-nums leading-[22px] text-ink">
           {value}
           {unit ?? ""}
@@ -181,11 +191,19 @@ export function ChipMulti({
   };
   if (ordered) {
     return (
-      <SettingRow wide label={<RowLabel label={label} tvOnly={tvOnly} newId={newId} />} desc={sub ? t(sub) : undefined}>
+      <SettingRow
+        wide
+        label={<RowLabel label={label} tvOnly={tvOnly} newId={newId} />}
+        desc={sub ? t(sub) : undefined}
+      >
         <LanguagesPicker
           value={value.map((v) => options.find((option) => option.value === v)?.label ?? v)}
           options={options.map((option) => option.label)}
-          onChange={(labels) => onChange(labels.map((name) => options.find((option) => option.label === name)?.value ?? name))}
+          onChange={(labels) =>
+            onChange(
+              labels.map((name) => options.find((option) => option.label === name)?.value ?? name),
+            )
+          }
         />
       </SettingRow>
     );

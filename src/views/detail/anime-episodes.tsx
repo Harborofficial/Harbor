@@ -47,12 +47,10 @@ import { useAnimeTvdbPanel } from "./anime-episodes/use-anime-tvdb-panel";
 import { animeUpToEpisodeSlice } from "./anime-episodes/up-to-episodes";
 
 import { useFranchiseEpisodes } from "./anime-episodes/use-franchise-episodes";
+import { isSoloSplitEntry } from "./anime-episodes/solo-entry";
 import { isFranchiseExtra } from "@/lib/providers/anime-detail";
 import { franchiseRoot, franchiseRootSync } from "@/lib/providers/anime-franchise-root";
-import {
-  isScopedSplitFranchiseRoot,
-  splitFranchiseDisplaySeason,
-} from "@/lib/streams/anime-identity-core";
+import { splitFranchiseDisplaySeason } from "@/lib/streams/anime-identity-core";
 import { useAnimeWatchedRouting } from "./anime-episodes/use-anime-watched-routing";
 import { useAnimeFranchiseNav } from "./anime-episodes/use-anime-franchise-nav";
 import { useTvdbProxyImages } from "./anime-episodes/use-tvdb-proxy-images";
@@ -69,7 +67,7 @@ import {
   withEpisodeImdbRatings,
   type EpisodeArtwork,
 } from "@/lib/providers/anime-episode-enrich";
-import { useHarborEpisodeRatings } from "./use-episode-imdb-ratings";
+import { useEntryEpisodeRatings } from "./use-episode-imdb-ratings";
 import { TvdbOrderPanel } from "./series-episodes/tvdb-order-panel";
 import { SeasonExplorer } from "./season-explorer";
 import { useSeasonExplorerView } from "./use-season-explorer";
@@ -224,14 +222,10 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
       cancelled = true;
     };
   }, [meta.id]);
-  const openedKitsu = parseKitsuId(meta.id);
-  const isFranchiseRoot =
-    rootEntryId == null ||
-    (openedKitsu != null ? parseKitsuId(rootEntryId) === openedKitsu : rootEntryId === meta.id);
-  const scopedSplitFranchise =
-    rootEntryId != null && isScopedSplitFranchiseRoot(parseKitsuId(rootEntryId));
-  const soloEntry =
-    /^(kitsu|mal|anilist|anidb):/.test(meta.id) && !isFranchiseRoot && scopedSplitFranchise;
+  // A TYBW cour is known synchronously from its Kitsu id. Do not wait for the
+  // async franchise root: that first render pools the whole Bleach franchise and
+  // briefly shows the 2004 seasons before switching back.
+  const soloEntry = isSoloSplitEntry(meta.id, rootEntryId);
   const franchiseEpisodes = useFranchiseEpisodes(
     franchise,
     currentId,
@@ -390,7 +384,17 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
     episodes.length,
     "aired",
   );
-  const ratings = useHarborEpisodeRatings(imdbId ?? null);
+  const entrySeason =
+    episodes.find((ep) => ep.imdbId === imdbId && ep.imdbSeason != null)?.imdbSeason ??
+    episodes.find((ep) => ep.imdbSeason != null)?.imdbSeason ??
+    null;
+  const yearMatch = /(\d{4})/.exec(meta.releaseInfo ?? "");
+  const { ratings, season: ratingSeason } = useEntryEpisodeRatings(
+    imdbId ?? null,
+    entrySeason,
+    meta.name ?? null,
+    yearMatch ? Number(yearMatch[1]) : null,
+  );
   const unratedDisplay = tvdbPanel.panel
     ? tvdbPanel.panel.visibleEpisodes
     : !activeIsAnchor
@@ -403,8 +407,9 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
       withEpisodeImdbRatings(unratedDisplay, ratings, {
         seriesMetaId: meta.id,
         seriesImdbId: imdbId ?? null,
+        ratingSeason,
       }),
-    [unratedDisplay, ratings, meta.id, imdbId],
+    [unratedDisplay, ratings, meta.id, imdbId, ratingSeason],
   );
   const artworkSeasons = useMemo(
     () => [
@@ -458,7 +463,7 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
       // anywhere yet, so any artwork-map hit would be another season's data
       // borrowed through a differently-numbered provider season.
       if (unairedIds.has(ep.id)) return ep;
-      const img = pickTvdbImage(proxyImages, ep);
+      const img = pickTvdbImage(proxyImages, ep, { preferAbsolute: soloEntry });
       if (img) {
         changed = true;
         return {
@@ -489,7 +494,7 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
       return next;
     });
     return changed ? out : filled;
-  }, [baseDisplay, proxyImages, franchiseEpisodes, artwork, unairedIds]);
+  }, [baseDisplay, proxyImages, franchiseEpisodes, artwork, unairedIds, soloEntry]);
   const displaySourceId = useMemo(() => {
     const ids = new Set<string>();
     for (const e of displayEpisodes) if (e.sourceMetaId != null) ids.add(e.sourceMetaId);

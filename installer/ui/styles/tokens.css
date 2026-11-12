@@ -24,7 +24,13 @@
   --shadow-float: 0 18px 44px -12px oklch(0 0 0 / 0.6);
 
   --scrim-art: linear-gradient(to bottom, transparent 0%, oklch(0.18 0.004 260 / 0.86) 100%);
-  --fade-mask: linear-gradient(to bottom, transparent 0, black 24px, black calc(100% - 24px), transparent 100%);
+  --fade-mask: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 24px,
+    black calc(100% - 24px),
+    transparent 100%
+  );
 
   --r-sm: 6px;
   --r-md: 10px;

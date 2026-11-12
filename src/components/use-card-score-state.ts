@@ -105,7 +105,8 @@ export function useCardScoreState<T extends HTMLElement>({
       !wantAnimeImdb &&
       !wantTmdbPoster &&
       !wantImdbForPoster
-    ) return;
+    )
+      return;
     const element = cardRef.current;
     if (!element) return;
     let off: (() => void) | null = null;
@@ -116,9 +117,10 @@ export function useCardScoreState<T extends HTMLElement>({
       if (wantTmdbPoster)
         void tmdbIdFromImdb(settings.tmdbKey, meta.id, meta.type === "series" ? "series" : "movie");
       const needsScoreId = wantsOmdb || wantsMdblist || wantCinemetaRating || wantAnimeImdb;
-      const id = needsScoreId || wantImdbForPoster
-        ? imdbId ?? (await tmdbImdbId(settings.tmdbKey, meta.id))
-        : undefined;
+      const id =
+        needsScoreId || wantImdbForPoster
+          ? (imdbId ?? (await tmdbImdbId(settings.tmdbKey, meta.id)))
+          : undefined;
       if (id) {
         if (wantsOmdb) void omdbPrefetch(settings.omdbKey, id);
         if (wantsMdblist) mdblistCardPrefetch(id, mediaKind);
@@ -160,12 +162,10 @@ export function useCardScoreState<T extends HTMLElement>({
       cinemetaRating ??
       (meta.id.startsWith("tt") ? meta.imdbRating : undefined));
   const resolvedAnimeRating = wantAnimeImdb
-    ? harborRating ?? animeOmdb?.imdbRating ?? animeCinemeta ?? meta.imdbRating
+    ? (harborRating ?? animeOmdb?.imdbRating ?? animeCinemeta ?? meta.imdbRating)
     : animeRating;
   const resolvedAnimeSource: "imdb" | "mal" =
-    wantAnimeImdb && (harborRating || animeOmdb?.imdbRating || animeCinemeta)
-      ? "imdb"
-      : "mal";
+    wantAnimeImdb && (harborRating || animeOmdb?.imdbRating || animeCinemeta) ? "imdb" : "mal";
   const cardRating = isAnime
     ? settings.showMalBadge
       ? resolvedAnimeRating

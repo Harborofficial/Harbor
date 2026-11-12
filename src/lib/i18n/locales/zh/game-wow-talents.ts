@@ -14,6 +14,6 @@ const gameWowTalents: Record<string, string> = {
   "games.wow.talents.import": "将此代码粘贴到魔兽世界的天赋导入功能中。",
   "games.wow.talents.descriptionUnavailable": "法术详情暂不可用。",
   "games.wow.talents.otherChoice": "另一选项 · 未选择",
-  "games.wow.talents.reference": "Wowhead 当前法术资料。数值可能因天赋等级、角色和补丁而异。"
+  "games.wow.talents.reference": "Wowhead 当前法术资料。数值可能因天赋等级、角色和补丁而异。",
 };
 export default gameWowTalents;

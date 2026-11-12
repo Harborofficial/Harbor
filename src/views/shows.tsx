@@ -220,6 +220,7 @@ export function Shows({ active = true }: { active?: boolean }) {
     0,
     settings.episodeHiding,
     settings.animeCwEnd,
+    items,
   );
 
   useEffect(() => {
@@ -342,6 +343,7 @@ export function Shows({ active = true }: { active?: boolean }) {
               min={260}
               shape="landscape"
               scrollKey="shows:cw"
+              scrollAnchorKey={cwItems[0]?._id ?? ""}
             >
               {cwItems.map((it) => (
                 <ContinueCard

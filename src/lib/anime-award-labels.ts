@@ -63,5 +63,8 @@ export const CR_CATEGORY_SHORT: Record<string, string> = {
 export function shortCategory(win: AwardWin): string {
   const fromMap = CR_CATEGORY_SHORT[win.categoryKey];
   if (fromMap) return fromMap;
-  return win.categoryName.replace(/^Best\s+/i, "").replace(/Award$/i, "").trim();
+  return win.categoryName
+    .replace(/^Best\s+/i, "")
+    .replace(/Award$/i, "")
+    .trim();
 }

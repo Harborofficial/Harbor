@@ -50,7 +50,12 @@ function detailMapper(language: string, translateTitles = true) {
     "@/lib/settings/load": { loadStoredSettings: () => ({ translateTitles }) },
     "./tmdb-images": { pickLogo: () => undefined, fetchMovieAssets: async () => null },
     "./tmdb-image-lang": { imageLangParam: () => "ja,en", imageLangRank: () => 0 },
-    "./tmdb-trailers": { pickTrailers: () => [] },
+    "./tmdb-trailers": {
+      pickTrailers: () => [],
+      pickTrailerVideos: () => [],
+      sortTrailerVideos: (videos: unknown[]) => videos,
+      mergeTrailerVideoGroups: () => [],
+    },
     "./tmdb-meta-mappers": { isAnimeItem: metaMappers(language).isAnimeItem },
     "./tmdb-title-fallback": {
       pickTmdbTitle,

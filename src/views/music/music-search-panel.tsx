@@ -9,7 +9,15 @@ import {
   uniqueSearchArtists,
   resolveSearchCollaborations,
 } from "@/lib/music/search-artists";
-import { ChevronLeft, Disc3, ListMusic, Music2, Search, UserRound, X } from "@/components/icons/music-icons";
+import {
+  ChevronLeft,
+  Disc3,
+  ListMusic,
+  Music2,
+  Search,
+  UserRound,
+  X,
+} from "@/components/icons/music-icons";
 import { useEffect, useRef, useState } from "react";
 import { MusicCatalogRow } from "@/components/music/music-catalog-row";
 import {

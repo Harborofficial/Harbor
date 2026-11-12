@@ -12,7 +12,8 @@ export default {
   "games.hub.viewOriginal": "View original game",
   "games.hub.toolkitNote": "Download a patch and use it with your original game.",
   "games.hub.baseVersion": "Use the exact game version and region listed by the project.",
-  "games.hub.catalogNote": "Explore ROM hacks and console mods. Filter by system, or find a project by name.",
+  "games.hub.catalogNote":
+    "Explore ROM hacks and console mods. Filter by system, or find a project by name.",
   "games.hub.findVideos": "Find gameplay",
   "games.hub.resources": "ROM hacking communities",
   "games.patch.open": "Apply a patch",
@@ -23,10 +24,12 @@ export default {
   "games.atlas.sort.rated": "Highest rated",
   "games.atlas.sort.newest": "Newest",
   "games.atlas.sort.oldest": "Oldest",
-  "games.hub.stepPatch": "Choose your original game and a BPS, IPS or UPS patch. Harbor saves a separate copy.",
-  "games.patch.description": "Choose your original game and a BPS, IPS or UPS patch. Harbor saves a separate copy.",
+  "games.hub.stepPatch":
+    "Choose your original game and a BPS, IPS or UPS patch. Harbor saves a separate copy.",
+  "games.patch.description":
+    "Choose your original game and a BPS, IPS or UPS patch. Harbor saves a separate copy.",
   "games.patch.choosePatch": "Choose a patch (BPS, IPS, UPS)",
   "games.patch.patch_unsupported": "This file is not a supported BPS, IPS or UPS patch.",
   "games.discovery.viewGame": "View game",
-  "games.atlas.basedOn": "Built on this game"
+  "games.atlas.basedOn": "Built on this game",
 };

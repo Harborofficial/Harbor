@@ -71,7 +71,8 @@ test("every Big Picture animation has a reduced-motion path", () => {
       if (!hit) continue;
       // A template literal can interpolate the guard from a sibling constant,
       // so fall back to the whole statement for those.
-      const scope = m[2] === undefined ? body : src.slice(Math.max(0, m.index - 400), m.index + m[0].length);
+      const scope =
+        m[2] === undefined ? body : src.slice(Math.max(0, m.index - 400), m.index + m[0].length);
       if (GUARDED.test(scope)) continue;
       const line = src.slice(0, m.index).split("\n").length;
       bare.push(`${name}:${line} ${hit[0]}`);

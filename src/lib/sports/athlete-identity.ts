@@ -33,9 +33,7 @@ export function espnPublishedAthleteId(raw: unknown): string {
 export function athleteImageUrl(value: unknown): string {
   try {
     const url = new URL(text(value));
-    return url.protocol === "https:" && !url.username && !url.password && !url.port
-      ? url.href
-      : "";
+    return url.protocol === "https:" && !url.username && !url.password && !url.port ? url.href : "";
   } catch {
     return "";
   }
@@ -46,9 +44,7 @@ export function espnAthleteRecordUrl(raw: unknown, id: string): string {
   return (
     list(raw)
       .map(object)
-      .sort(
-        (a, b) => Number(list(b.rel).includes("stats")) - Number(list(a.rel).includes("stats")),
-      )
+      .sort((a, b) => Number(list(b.rel).includes("stats")) - Number(list(a.rel).includes("stats")))
       .map((link) => text(link.href))
       .find((value) => {
         try {

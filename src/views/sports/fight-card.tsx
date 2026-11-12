@@ -91,7 +91,12 @@ export function FightCard({
                     name={game.home.name}
                     league={game.league}
                     group="combat"
-                    athlete={{ id: game.home.id, name: game.home.name, image: game.home.logo, source: "espn" }}
+                    athlete={{
+                      id: game.home.id,
+                      name: game.home.name,
+                      image: game.home.logo,
+                      source: "espn",
+                    }}
                   />
                   <span>
                     <strong>
@@ -103,7 +108,12 @@ export function FightCard({
                     name={game.away.name}
                     league={game.league}
                     group="combat"
-                    athlete={{ id: game.away.id, name: game.away.name, image: game.away.logo, source: "espn" }}
+                    athlete={{
+                      id: game.away.id,
+                      name: game.away.name,
+                      image: game.away.logo,
+                      source: "espn",
+                    }}
                   />
                   <ArrowRight size={16} />
                 </button>

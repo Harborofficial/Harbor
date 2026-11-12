@@ -28,5 +28,5 @@ export default {
   "games.notes.export": "Xuất bản sao lưu",
   "games.notes.unsaved": "Thay đổi chưa lưu",
   "games.notes.local": "Lưu trong hồ sơ Harbor này",
-  "games.notes.importGuide": "Chép vào ghi chú của tôi"
+  "games.notes.importGuide": "Chép vào ghi chú của tôi",
 };

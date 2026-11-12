@@ -86,41 +86,49 @@ function AnimeCorner({ name, year }: { name: string; year?: number }) {
   const subline = !top
     ? ""
     : top.isAOTY
-    ? `${top.year} Anime of the Year`
-    : `${top.year} ${top.categoryName.replace(/^Best\s+/i, "Best ")}`;
+      ? `${top.year} Anime of the Year`
+      : `${top.year} ${top.categoryName.replace(/^Best\s+/i, "Best ")}`;
   const otherWins = wins.length - 1;
   return (
     <div
       ref={ref}
       className="harbor-awards-corner pointer-events-none absolute bottom-10 end-10 z-10 flex max-w-[38%] items-center justify-end gap-3 text-end"
-      title={show ? wins.map((w) => `${awardSourceMeta(w.source).shortName} ${w.year} ${w.categoryName}`).join("\n") : undefined}
+      title={
+        show
+          ? wins
+              .map((w) => `${awardSourceMeta(w.source).shortName} ${w.year} ${w.categoryName}`)
+              .join("\n")
+          : undefined
+      }
     >
       {show && top && src && (
-      <>
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span
-          className={`truncate font-bold uppercase tracking-[0.18em] text-ink/55 ${compact ? "text-[9.5px]" : "text-[10.5px]"}`}
-        >
-          {compact ? "Award Winner" : `${src.name} Winner`}
-        </span>
-        {!compact && <span className="truncate text-[13px] font-semibold text-ink/85">{subline}</span>}
-        {!compact && otherWins > 0 && (
-          <span className="truncate text-[11px] text-ink-subtle">
-            +{otherWins} more award{otherWins === 1 ? "" : "s"}
+        <>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span
+              className={`truncate font-bold uppercase tracking-[0.18em] text-ink/55 ${compact ? "text-[9.5px]" : "text-[10.5px]"}`}
+            >
+              {compact ? "Award Winner" : `${src.name} Winner`}
+            </span>
+            {!compact && (
+              <span className="truncate text-[13px] font-semibold text-ink/85">{subline}</span>
+            )}
+            {!compact && otherWins > 0 && (
+              <span className="truncate text-[11px] text-ink-subtle">
+                +{otherWins} more award{otherWins === 1 ? "" : "s"}
+              </span>
+            )}
+          </div>
+          <span className="shrink-0 text-accent">
+            <Laurel size={compact ? 48 : 68}>
+              <img
+                src={custom ?? src.iconSmall}
+                alt=""
+                className={`object-contain ${compact ? "h-5 w-5" : "h-7 w-7"} ${!custom && top.source === "animation_kobe" ? "brightness-0 invert" : ""}`}
+                draggable={false}
+              />
+            </Laurel>
           </span>
-        )}
-      </div>
-      <span className="shrink-0 text-accent">
-        <Laurel size={compact ? 48 : 68}>
-          <img
-            src={custom ?? src.iconSmall}
-            alt=""
-            className={`object-contain ${compact ? "h-5 w-5" : "h-7 w-7"} ${!custom && top.source === "animation_kobe" ? "brightness-0 invert" : ""}`}
-            draggable={false}
-          />
-        </Laurel>
-      </span>
-      </>
+        </>
       )}
     </div>
   );
@@ -140,10 +148,7 @@ function ClassicCorner({
   const { ref, tier } = useHostTier();
   const live = useAwards(imdbId ?? undefined, isSeries);
   const awardsV = useBundledAwardsVersion();
-  const awards = useMemo(
-    () => mergeBundledAwards(live, name, year),
-    [awardsV, live, name, year],
-  );
+  const awards = useMemo(() => mergeBundledAwards(live, name, year), [awardsV, live, name, year]);
   const summary = useMemo(() => pickHeroAwards(awardSummary(awards)), [awards]);
   const top = summary[0];
   const show = !!top && tier !== "hidden";
@@ -172,37 +177,37 @@ function ClassicCorner({
       title={show ? lines.join(" · ") : undefined}
     >
       {show && top && (
-      <>
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span
-          className={`truncate font-bold uppercase tracking-[0.18em] text-ink/55 ${compact ? "text-[9.5px]" : "text-[10.5px]"}`}
-        >
-          {headline}
-        </span>
-        {!compact &&
-          lines.slice(0, 2).map((l, i) => (
-            <span key={i} className="truncate text-[13px] font-medium text-ink/85">
-              {l}
+        <>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span
+              className={`truncate font-bold uppercase tracking-[0.18em] text-ink/55 ${compact ? "text-[9.5px]" : "text-[10.5px]"}`}
+            >
+              {headline}
             </span>
-          ))}
-      </div>
-      <span
-        className="shrink-0 text-accent"
-        style={laurelTint ? { color: laurelTint } : undefined}
-      >
-        {won ? (
-          <Laurel size={compact ? 48 : 68}>
-            <AwardLogo type={top.type as AwardType} size={compact ? 18 : 24} />
-          </Laurel>
-        ) : (
+            {!compact &&
+              lines.slice(0, 2).map((l, i) => (
+                <span key={i} className="truncate text-[13px] font-medium text-ink/85">
+                  {l}
+                </span>
+              ))}
+          </div>
           <span
-            className={`flex items-center justify-center opacity-85 ${compact ? "h-11 w-11" : "h-16 w-16"}`}
+            className="shrink-0 text-accent"
+            style={laurelTint ? { color: laurelTint } : undefined}
           >
-            <AwardLogo type={top.type as AwardType} size={compact ? 26 : 36} />
+            {won ? (
+              <Laurel size={compact ? 48 : 68}>
+                <AwardLogo type={top.type as AwardType} size={compact ? 18 : 24} />
+              </Laurel>
+            ) : (
+              <span
+                className={`flex items-center justify-center opacity-85 ${compact ? "h-11 w-11" : "h-16 w-16"}`}
+              >
+                <AwardLogo type={top.type as AwardType} size={compact ? 26 : 36} />
+              </span>
+            )}
           </span>
-        )}
-      </span>
-      </>
+        </>
       )}
     </div>
   );
@@ -214,4 +219,3 @@ function pluralizeNoun(type: string, n: number): string {
   if (base.endsWith("s")) return base;
   return `${base}s`;
 }
-

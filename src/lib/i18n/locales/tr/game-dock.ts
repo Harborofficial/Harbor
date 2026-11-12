@@ -8,7 +8,8 @@ export default {
   "games.sidebar.customOrder": "Benim sıralamam",
   "games.sidebar.arrange": "Kenar çubuğunu düzenle",
   "games.sidebar.resetFilters": "Filtreleri sıfırla",
-  "games.sidebar.arrangeNote": "Sıralamak için sürükleyin veya okları kullanın. Oyunları sabitleyin ya da bu çubuktan gizleyin.",
+  "games.sidebar.arrangeNote":
+    "Sıralamak için sürükleyin veya okları kullanın. Oyunları sabitleyin ya da bu çubuktan gizleyin.",
   "games.sidebar.saveFailed": "Tercihler kaydedilemedi. Değişiklikler bu oturum için geçerli.",
   "games.sidebar.move": "{name} oyununu taşı",
   "games.sidebar.up": "{name} oyununu yukarı taşı",
@@ -19,11 +20,13 @@ export default {
   "games.sidebar.hide": "{name} oyununu çubukta gizle",
   "games.sidebar.pinned": "Sabitlenenler",
   "games.dock.welcomeTitle": "Oyun sekmesi gösterilsin mi?",
-  "games.dock.welcomeNote": "İmleci kenara götürerek oyunlarına eriş. Ayarlar → Tema ve görünüm → Arayüz bölümünden istediğin zaman kapatabilirsin.",
+  "games.dock.welcomeNote":
+    "İmleci kenara götürerek oyunlarına eriş. Ayarlar → Tema ve görünüm → Arayüz bölümünden istediğin zaman kapatabilirsin.",
   "games.dock.welcomeEnable": "Oyun sekmesini göster",
   "games.dock.welcomeDismiss": "Şimdi değil",
   "games.dock.settingTitle": "Hızlı kitaplık",
-  "games.dock.settingNote": "Kitaplığınıza hızla erişmek için kenarda sade bir sekme gösterir. Varsayılan olarak kapalıdır.",
+  "games.dock.settingNote":
+    "Kitaplığınıza hızla erişmek için kenarda sade bir sekme gösterir. Varsayılan olarak kapalıdır.",
   "games.dock.launchError": "Oyun açılamadı. Kurulumu ve başlatıcıyı kontrol edip tekrar deneyin.",
   "games.dock.launcher": "Başlatıcılar",
   "games.dock.client": "{launcher} içinde aç",
@@ -75,5 +78,6 @@ export default {
   "games.badge.unavailable": "Dosyalar kullanılamıyor",
   "games.badge.notInstalled": "Yüklü değil",
   "games.home.libraryFirstTitle": "Oyunlar'ı kütüphanenizde açın",
-  "games.home.libraryFirstNote": "Oyunlar'ı her açtığınızda Keşfet yerine kütüphanenizden başlayın."
+  "games.home.libraryFirstNote":
+    "Oyunlar'ı her açtığınızda Keşfet yerine kütüphanenizden başlayın.",
 };

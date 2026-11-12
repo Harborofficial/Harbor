@@ -177,11 +177,7 @@ function MusicRecentsRow({ ctx, title }: { ctx: MusicBandContext; title: string 
               aria-label={t("music.card.openItem", { title: item.title })}
               onClick={() => ctx.openItem(trackItem(item), items)}
             >
-              {item.artwork ? (
-                <img src={item.artwork} alt="" />
-              ) : (
-                <Music2 size={24} aria-hidden />
-              )}
+              {item.artwork ? <img src={item.artwork} alt="" /> : <Music2 size={24} aria-hidden />}
             </button>
             <div className="music-quick-copy">
               <button type="button" onClick={() => ctx.openItem(trackItem(item), items)}>
@@ -245,9 +241,7 @@ function freshBand(ctx: MusicBandContext): MusicBand | null {
     key: "fresh",
     title: t("music.row.fresh"),
     catalog: false,
-    render: (title) => (
-      <MusicFreshRow title={title} data={ctx.data} onOpen={ctx.openItem} />
-    ),
+    render: (title) => <MusicFreshRow title={title} data={ctx.data} onOpen={ctx.openItem} />,
   };
 }
 

@@ -7,6 +7,7 @@ export default {
   "games.community.previousPage": "Anterior",
   "games.community.nextPage": "Siguiente",
   "games.community.pageNumber": "Página {count}",
-  "games.community.reviewSource": "Reseñas públicas de Steam. Se muestran por separado el tiempo total jugado y el registrado al escribir la reseña. Se aplica el filtro de reseñas ajenas al tema de Steam.",
+  "games.community.reviewSource":
+    "Reseñas públicas de Steam. Se muestran por separado el tiempo total jugado y el registrado al escribir la reseña. Se aplica el filtro de reseñas ajenas al tema de Steam.",
   "games.community.authorOneReview": "1 reseña",
 } satisfies Record<string, string>;

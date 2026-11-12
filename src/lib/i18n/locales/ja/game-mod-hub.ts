@@ -26,7 +26,8 @@ export default {
   "games.modHub.entryNote": "Modを探して、インストール済みのコンテンツを管理。",
   "games.modHub.switchGame": "ゲームを変更",
   "games.modHub.creatorDownload": "作者のサイトからダウンロード",
-  "games.modHub.legacyNote": "The Sims 2 と The Sims 3 のコンテンツは作者のサイトからダウンロードできます。ローカルの Mod 管理は現在 The Sims 4 に対応しています。",
+  "games.modHub.legacyNote":
+    "The Sims 2 と The Sims 3 のコンテンツは作者のサイトからダウンロードできます。ローカルの Mod 管理は現在 The Sims 4 に対応しています。",
   "games.modHub.bodyShop": "ボディショップ",
   "games.modHub.patterns": "パターン",
   "games.modHub.sets": "テーマ別セット",
@@ -42,5 +43,5 @@ export default {
   "games.modHub.creator": "制作者",
   "games.modHub.viewOnSource": "制作者のページ",
   "games.modHub.filesPending": "プロジェクトのファイルを読み込み中…",
-  "games.modHub.picked": "MTSのおすすめ"
+  "games.modHub.picked": "MTSのおすすめ",
 };

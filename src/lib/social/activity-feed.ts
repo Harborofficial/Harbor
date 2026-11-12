@@ -53,7 +53,8 @@ export function buildActivityFeed(input: {
   for (const c of input.cw) {
     if (!(c.progress > 0)) continue;
     const finished = c.progress >= 0.9;
-    const sub = c.type === "series" && c.season && c.episode ? `S${c.season} E${c.episode}` : undefined;
+    const sub =
+      c.type === "series" && c.season && c.episode ? `S${c.season} E${c.episode}` : undefined;
     items.push({
       kind: finished ? "finished" : "watched",
       metaId: c.id,
@@ -122,7 +123,8 @@ export function buildActivityFeed(input: {
 export function sameFeed(a: ActivityFeedItem[], b: ActivityFeedItem[]): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
-    if (a[i].kind !== b[i].kind || a[i].metaId !== b[i].metaId || a[i].rating !== b[i].rating) return false;
+    if (a[i].kind !== b[i].kind || a[i].metaId !== b[i].metaId || a[i].rating !== b[i].rating)
+      return false;
   }
   return true;
 }

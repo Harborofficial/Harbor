@@ -10,7 +10,12 @@ const GAP = 8;
 const FALLBACK_H = 300;
 
 function clipBox(el: HTMLElement | null) {
-  let box = { top: GAP, bottom: window.innerHeight - GAP, left: GAP, right: window.innerWidth - GAP };
+  let box = {
+    top: GAP,
+    bottom: window.innerHeight - GAP,
+    left: GAP,
+    right: window.innerWidth - GAP,
+  };
   let node = el?.parentElement ?? null;
   while (node) {
     const s = getComputedStyle(node);
@@ -143,8 +148,10 @@ export function ColorPopover({
             <div
               className="fixed inset-0 z-[310]"
               onMouseDown={(e) => {
-                e.stopPropagation();
-                setOpen(false);
+                if (e.target === e.currentTarget) {
+                  e.stopPropagation();
+                  setOpen(false);
+                }
               }}
             />
             <div

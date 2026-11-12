@@ -91,7 +91,11 @@ async function resolveManga(title: string): Promise<string | null> {
   return list?.[0]?.cover ?? null;
 }
 
-async function resolveSlow(itemKey: string, mediaType: string, title: string): Promise<string | null> {
+async function resolveSlow(
+  itemKey: string,
+  mediaType: string,
+  title: string,
+): Promise<string | null> {
   if (mediaType === "manga") return resolveManga(title);
   return resolveAnime(itemKey);
 }

@@ -19,7 +19,8 @@ export default {
   "games.tft.save": "Takımı kaydet",
   "games.tft.savedTeams": "Kayıtlı takımlar",
   "games.tft.delete": "Kayıtlı takımı sil",
-  "games.tft.note": "Her şampiyon bir kez sayılır. Eşyalar ve özel etkiler özellikleri veya takım alanını değiştirebilir.",
+  "games.tft.note":
+    "Her şampiyon bir kez sayılır. Eşyalar ve özel etkiler özellikleri veya takım alanını değiştirebilir.",
   "games.tft.saveFailed": "Bu cihaza kaydedilemedi. Mevcut takımın hâlâ burada.",
   "games.tft.missing": "Bazı kayıtlı şampiyonlar artık bu sette yok.",
   "games.tft.imported": "Takım içe aktarıldı.",
@@ -54,5 +55,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "Can yenilenmesi",
   "games.tft.stat.set14AmpIcon": "Hasar artışı",
   "games.tft.stat.TFTManaRegen": "Mana yenilenmesi",
-  "games.tft.stat.scaleSV": "Mutlak sömürü"
+  "games.tft.stat.scaleSV": "Mutlak sömürü",
 };

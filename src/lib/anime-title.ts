@@ -3,11 +3,13 @@ import {
   aniZipByAnilist,
   aniZipByKitsu,
   aniZipByMal,
+  aniZipByTmdbTv,
   type AniZipMapping,
 } from "@/lib/providers/anizip";
-import { getAnimeCanonicalId, getAnimeCwId } from "@/lib/anime-cw-ids";
+import { getAnimeCanonicalId, getAnimeCwId, notifyAnimeCwIds } from "@/lib/anime-cw-ids";
+import { rememberAnimeTitle, type AnimeTitleCheckpoint } from "@/lib/anime-title-key";
 import { cwAnimeIdentityKey, getCachedCatalogImdb } from "@/lib/cw-anime-identity";
-import { externalToKitsu } from "@/lib/providers/anime-mapping";
+import { externalToKitsu, tmdbTvToKitsu } from "@/lib/providers/anime-mapping";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 
 export type AnimeTitleLang = "english" | "romaji" | "native";
@@ -78,6 +80,10 @@ async function kitsuIdFor(id: string, entryId?: string | null): Promise<number |
     const n = Number(lookupId.slice(prefix.length));
     return Number.isFinite(n) ? externalToKitsu(source, n).catch(() => null) : null;
   }
+  if (lookupId.startsWith("tmdb:tv:")) {
+    const n = Number(lookupId.slice("tmdb:tv:".length));
+    return Number.isFinite(n) ? tmdbTvToKitsu(n).catch(() => null) : null;
+  }
   if (/^tt\d+$/.test(lookupId)) {
     // IMDb is a shared series identifier: reverse lookup may return a special.
     // Without a recorded entry, use the card's existing title instead.
@@ -108,6 +114,10 @@ async function aniZipFor(id: string, entryId?: string | null): Promise<AniZipMap
     const n = Number(lookupId.slice(6));
     return Number.isFinite(n) ? aniZipByAnidb(n) : null;
   }
+  if (lookupId.startsWith("tmdb:tv:")) {
+    const n = Number(lookupId.slice("tmdb:tv:".length));
+    return Number.isFinite(n) ? aniZipByTmdbTv(n) : null;
+  }
   if (/^tt\d+$/.test(lookupId)) {
     const entry = entryId ?? cwAnimeIdentityKey(lookupId);
     const kitsuId = entry ? parseKitsuId(entry) : null;
@@ -116,15 +126,10 @@ async function aniZipFor(id: string, entryId?: string | null): Promise<AniZipMap
   return null;
 }
 
-export async function resolvePreferredAnimeTitle(
+async function resolvePreferredAnimeTitleUncached(
   id: string,
   lang: AnimeTitleLang,
-  checkpoint?: {
-    videoId?: string | null;
-    season?: number;
-    episode?: number;
-    imdbId?: string | null;
-  },
+  checkpoint?: AnimeTitleCheckpoint,
 ): Promise<string | null> {
   // Resolve the catalog entry once. This keeps AniZip and Kitsu title variants
   // aligned to the episode represented by a Continue Watching card. Only pass
@@ -165,4 +170,16 @@ export async function resolvePreferredAnimeTitle(
     if (titles) return getTitleFromKitsu(titles, lang);
   }
   return null;
+}
+
+export async function resolvePreferredAnimeTitle(
+  id: string,
+  lang: AnimeTitleLang,
+  checkpoint?: AnimeTitleCheckpoint,
+): Promise<string | null> {
+  const title = await resolvePreferredAnimeTitleUncached(id, lang, checkpoint);
+  // The card shows this title, so two sources that display the same show should
+  // also dedupe by it even when their stored names are in different languages.
+  if (title && rememberAnimeTitle(id, title, checkpoint)) notifyAnimeCwIds();
+  return title;
 }

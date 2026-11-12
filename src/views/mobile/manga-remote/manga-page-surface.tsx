@@ -66,7 +66,9 @@ export function MangaPageSurface({
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
         <div
           className="relative flex aspect-[2/3] w-[min(78%,320px)] flex-col items-center justify-center gap-2.5 rounded-[22px] border border-edge-soft/70 bg-elevated shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)]"
-          style={{ transform: `translate3d(${visual.tx}px, ${visual.ty}px, 0) scale(${visual.scale})` }}
+          style={{
+            transform: `translate3d(${visual.tx}px, ${visual.ty}px, 0) scale(${visual.scale})`,
+          }}
         >
           <span className="absolute inset-x-4 top-4 h-px bg-edge-soft/50" />
           <span className="max-w-[80%] truncate text-[12.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">

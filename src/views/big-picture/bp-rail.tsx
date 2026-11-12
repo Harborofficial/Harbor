@@ -17,7 +17,6 @@ const BP_RAIL_LEAD = 6;
 const BP_RAIL_FILL = 4;
 const BP_RAIL_FILL_MS = 220;
 
-
 export function BpRail({
   railRef,
   entries,

@@ -12,7 +12,12 @@ function norm(s: string): string {
 export function setTop10Metas(metas: Array<{ id: string; name: string }>): void {
   const nextIds = new Set(metas.map((m) => m.id));
   let changed = nextIds.size !== idSet.size;
-  if (!changed) for (const id of nextIds) if (!idSet.has(id)) { changed = true; break; }
+  if (!changed)
+    for (const id of nextIds)
+      if (!idSet.has(id)) {
+        changed = true;
+        break;
+      }
   if (!changed) return;
   idSet.clear();
   nameSet.clear();

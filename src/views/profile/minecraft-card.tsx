@@ -54,7 +54,11 @@ export function MinecraftCard({
         className="relative mt-3 grid min-h-[260px] place-items-center overflow-hidden"
         style={
           bg
-            ? { backgroundImage: `url(${bg})`, backgroundSize: "cover", backgroundPosition: "center" }
+            ? {
+                backgroundImage: `url(${bg})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }
             : {
                 background:
                   "linear-gradient(180deg, color-mix(in oklab, var(--color-accent), transparent 82%), transparent 70%)",
@@ -81,7 +85,9 @@ export function MinecraftCard({
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5 px-3 py-3">
-        <span className="me-auto min-w-0 truncate ps-1 font-mono text-[13px] text-ink">{clean}</span>
+        <span className="me-auto min-w-0 truncate ps-1 font-mono text-[13px] text-ink">
+          {clean}
+        </span>
         {POSES.map((p) => (
           <button
             key={p.id}

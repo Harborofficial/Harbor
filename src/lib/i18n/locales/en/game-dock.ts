@@ -8,7 +8,8 @@ export default {
   "games.sidebar.customOrder": "My order",
   "games.sidebar.arrange": "Arrange sidebar",
   "games.sidebar.resetFilters": "Reset filters",
-  "games.sidebar.arrangeNote": "Drag or use the arrows to reorder. Pin top games, or hide entries from this sidebar.",
+  "games.sidebar.arrangeNote":
+    "Drag or use the arrows to reorder. Pin top games, or hide entries from this sidebar.",
   "games.sidebar.saveFailed": "Couldn't save sidebar preferences. Changes apply for this session.",
   "games.sidebar.move": "Move {name}",
   "games.sidebar.up": "Move {name} up",
@@ -19,12 +20,15 @@ export default {
   "games.sidebar.hide": "Hide {name} from sidebar",
   "games.sidebar.pinned": "Pinned",
   "games.dock.welcomeTitle": "Show the game tab?",
-  "games.dock.welcomeNote": "Keep your games one hover away. Turn it off anytime in Settings → Theme & appearance → Interface.",
+  "games.dock.welcomeNote":
+    "Keep your games one hover away. Turn it off anytime in Settings → Theme & appearance → Interface.",
   "games.dock.welcomeEnable": "Show game tab",
   "games.dock.welcomeDismiss": "Not now",
   "games.dock.settingTitle": "Quick library",
-  "games.dock.settingNote": "Show a subtle edge tab for quick access to your library. Off by default.",
-  "games.dock.launchError": "Could not open this game. Check its installation and launcher, then try again.",
+  "games.dock.settingNote":
+    "Show a subtle edge tab for quick access to your library. Off by default.",
+  "games.dock.launchError":
+    "Could not open this game. Check its installation and launcher, then try again.",
   "games.dock.launcher": "Launchers",
   "games.dock.client": "Open in {launcher}",
   "games.dock.openClient": "Open {name} in {launcher}",
@@ -75,5 +79,6 @@ export default {
   "games.badge.unavailable": "Files unavailable",
   "games.badge.notInstalled": "Not installed",
   "games.home.libraryFirstTitle": "Open Games in your library",
-  "games.home.libraryFirstNote": "Start on your library instead of Explore each time you open Games."
+  "games.home.libraryFirstNote":
+    "Start on your library instead of Explore each time you open Games.",
 };

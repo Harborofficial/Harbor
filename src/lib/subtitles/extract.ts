@@ -13,7 +13,8 @@ export function subtitleDownloadError(reason: string): string {
   if (reason.includes("timed out")) return "The subtitle export timed out while reading the video.";
   if (reason.includes("denied access") || /\b(401|403)\b/.test(reason))
     return "The stream provider denied access while reading the embedded subtitles.";
-  if (reason.includes("ffmpeg not found")) return "Harbor could not find FFmpeg to export this track.";
+  if (reason.includes("ffmpeg not found"))
+    return "Harbor could not find FFmpeg to export this track.";
   if (reason.includes("track missing") || reason.includes("matches no streams"))
     return "The selected subtitle track is missing from the video opened for export.";
   if (reason.includes("image subtitle") || reason.includes("bitmap to bitmap"))

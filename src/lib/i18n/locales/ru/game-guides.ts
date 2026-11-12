@@ -3,7 +3,8 @@ export default {
   "games.guides.saveTxt": "Сохранить как TXT",
   "games.guides.savePdf": "Сохранить как PDF",
   "games.guides.preparingPdf": "Подготовка PDF…",
-  "games.guides.exportError": "Не удалось сохранить руководство. Проверьте соединение и попробуйте снова.",
+  "games.guides.exportError":
+    "Не удалось сохранить руководство. Проверьте соединение и попробуйте снова.",
   "games.guides.filters": "Фильтры",
   "games.guides.clearFilters": "Сбросить фильтры",
   "games.guides.popular": "Самые популярные",
@@ -52,16 +53,22 @@ export default {
   "games.guides.date.all": "За всё время",
   "games.guides.viewers": "Смотрят: {count}",
   "games.guides.views": "Просмотры: {count}",
-  "games.guides.import.callofdutywarzone": "Скопируйте значения в соответствующие настройки Warzone. DPI настраивается в программе мыши.",
-  "games.guides.import.css": "Скопируйте настройки в Counter-Strike: Source. Они взяты из датированных архивов сообщества.",
-  "games.guides.import.cod": "Используйте эти значения в соответствующей версии игры. DPI настраивается в программе мыши.",
-  "games.guides.noCrosshair": "Источник не содержит достаточно данных о прицеле для достоверного предпросмотра.",
-  "games.guides.previewNote": "Статический предпросмотр опубликованных значений. Разрешение, движение и отдача могут изменить вид в игре.",
+  "games.guides.import.callofdutywarzone":
+    "Скопируйте значения в соответствующие настройки Warzone. DPI настраивается в программе мыши.",
+  "games.guides.import.css":
+    "Скопируйте настройки в Counter-Strike: Source. Они взяты из датированных архивов сообщества.",
+  "games.guides.import.cod":
+    "Используйте эти значения в соответствующей версии игры. DPI настраивается в программе мыши.",
+  "games.guides.noCrosshair":
+    "Источник не содержит достаточно данных о прицеле для достоверного предпросмотра.",
+  "games.guides.previewNote":
+    "Статический предпросмотр опубликованных значений. Разрешение, движение и отдача могут изменить вид в игре.",
   "games.guides.previewBackground": "Переключить светлый фон предпросмотра",
   "games.guides.crosshairPreview": "Предпросмотр прицела",
   "games.guides.noPlayers": "Игроки не найдены. Попробуйте другое имя.",
   "games.guides.playerCount": "Игроков: {count}",
-  "games.guides.archived": "Историческая конфигурация. Перед использованием проверьте версию игры и дату.",
+  "games.guides.archived":
+    "Историческая конфигурация. Перед использованием проверьте версию игры и дату.",
   "games.guides.rateLimit": "Этот источник ограничивает запросы. Повторите через {seconds} с.",
   "games.guides.configs": "Настройки профессионалов",
   "games.guides.searchPlayers": "Поиск игроков",
@@ -73,22 +80,28 @@ export default {
   "games.guides.sourceErrorTitle": "Попробуем ещё раз",
   "games.guides.more": "Загрузить ещё",
   "games.guides.moreKick": "Больше на Kick",
-  "games.guides.configNote": "Настройки, опубликованные игроками и авторами. Выберите профиль, чтобы увидеть источник, дату и параметры.",
+  "games.guides.configNote":
+    "Настройки, опубликованные игроками и авторами. Выберите профиль, чтобы увидеть источник, дату и параметры.",
   "games.guides.players": "Все игроки",
   "games.guides.useConfig": "Использовать настройки",
-  "games.guides.import.cs2": "Вставьте команды в консоль разработчика CS2. Коды прицела можно импортировать в Настройки → Игра → Прицел. Проверьте значения перед применением.",
-  "games.guides.import.valorant": "Скопируйте код прицела и откройте Настройки → Прицел → Импорт кода профиля в VALORANT. Остальные значения введите в соответствующих настройках.",
-  "games.guides.import.rainbowsixsiege": "Скопируйте настройки и введите значения в параметрах мыши и изображения Siege. DPI задаётся в программе для мыши.",
+  "games.guides.import.cs2":
+    "Вставьте команды в консоль разработчика CS2. Коды прицела можно импортировать в Настройки → Игра → Прицел. Проверьте значения перед применением.",
+  "games.guides.import.valorant":
+    "Скопируйте код прицела и откройте Настройки → Прицел → Импорт кода профиля в VALORANT. Остальные значения введите в соответствующих настройках.",
+  "games.guides.import.rainbowsixsiege":
+    "Скопируйте настройки и введите значения в параметрах мыши и изображения Siege. DPI задаётся в программе для мыши.",
   "games.guides.copyCrosshair": "Копировать прицел",
   "games.guides.copyCommands": "Копировать команды",
   "games.guides.copySettings": "Копировать настройки",
   "games.guides.copied": "Скопировано",
   "games.guides.copyError": "Не удалось скопировать. Повторите попытку.",
-  "games.guides.embedNote": "Воспроизведение обеспечивает платформа автора. Если встраивание ограничено, откройте оригинал.",
+  "games.guides.embedNote":
+    "Воспроизведение обеспечивает платформа автора. Если встраивание ограничено, откройте оригинал.",
   "games.guides.readerErrorTitle": "Не удалось загрузить руководство",
   "games.guides.short": "Руководства",
   "games.guides.title": "Руководства и прохождения",
-  "games.guides.note": "Найдите следующий шаг. Читайте руководства сообщества, смотрите прохождения или игровые трансляции.",
+  "games.guides.note":
+    "Найдите следующий шаг. Читайте руководства сообщества, смотрите прохождения или игровые трансляции.",
   "games.guides.written": "Статьи",
   "games.guides.videos": "Видео",
   "games.guides.live": "В эфире",
@@ -102,18 +115,20 @@ export default {
   "games.guides.videoTitle": "Смотрите и учитесь",
   "games.guides.twitch": "Искать на Twitch",
   "games.guides.youtube": "Ещё на YouTube",
-  "games.guides.liveNote": "Прямые эфиры YouTube. Их доступность может измениться во время просмотра.",
+  "games.guides.liveNote":
+    "Прямые эфиры YouTube. Их доступность может измениться во время просмотра.",
   "games.guides.error": "Не удалось загрузить источник. Повторите попытку.",
   "games.guides.empty": "Руководства не найдены. Попробуйте другой запрос или источник.",
   "games.guides.noLive": "Сейчас нет подходящих прямых эфиров.",
   "games.guides.previous": "Назад",
   "games.guides.next": "Далее",
   "games.guides.original": "Открыть оригинал",
-  "games.guides.playerNote": "Воспроизведение через YouTube. Если автор запретил встраивание, откройте исходное видео.",
-  "games.guides.readerError": "Не удалось прочитать руководство здесь. Повторите попытку или откройте оригинал.",
+  "games.guides.playerNote":
+    "Воспроизведение через YouTube. Если автор запретил встраивание, откройте исходное видео.",
+  "games.guides.readerError":
+    "Не удалось прочитать руководство здесь. Повторите попытку или откройте оригинал.",
   "games.guides.contents": "В этом руководстве",
-  "games.guides.credits": "Авторы и лицензия"
-,
+  "games.guides.credits": "Авторы и лицензия",
   "games.guides.copy": "Копировать",
   "games.guides.previewMap": "Показать скриншот карты за прицелом",
   "games.guides.skins": "Скины",
@@ -123,5 +138,5 @@ export default {
   "games.guides.teammates": "Партнёры по команде",
   "games.guides.specs": "Характеристики",
   "games.guides.exportAll": "Экспортировать всё",
-  "games.guides.copyValue": "Копировать «{label}»"
+  "games.guides.copyValue": "Копировать «{label}»",
 } satisfies Record<string, string>;

@@ -71,9 +71,7 @@ export function CustomChromeBuilder({
           <Field
             label={t("Position")}
             action={
-              <FieldReset
-                onClick={() => onChange({ ...config, position: resetConfig.position })}
-              />
+              <FieldReset onClick={() => onChange({ ...config, position: resetConfig.position })} />
             }
           >
             <div className="grid grid-cols-2 gap-2">

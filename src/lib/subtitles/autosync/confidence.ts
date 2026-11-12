@@ -49,7 +49,13 @@ const MAX_FUSED_LOGIT = 9.2;
 const AGREE_P = 0.5;
 
 export function isTimingGroup(group: string): boolean {
-  return group === "hash" || group === "crowd" || group === "vad" || group === "asr" || group === "consensus";
+  return (
+    group === "hash" ||
+    group === "crowd" ||
+    group === "vad" ||
+    group === "asr" ||
+    group === "consensus"
+  );
 }
 
 export function isAgreeingSignal(s: SignalEvidence): boolean {
@@ -122,7 +128,9 @@ type GroupMass = {
 function bestByGroup(evidence: SignalEvidence[], priorLogit: number): Map<string, SignalEvidence> {
   const best = new Map<string, SignalEvidence>();
   const swing = (s: SignalEvidence) =>
-    Math.abs((toLogOdds(calibrate(s.calibrator, s.rawScore)) - priorLogit) * clamp01(s.reliability));
+    Math.abs(
+      (toLogOdds(calibrate(s.calibrator, s.rawScore)) - priorLogit) * clamp01(s.reliability),
+    );
   for (const s of evidence) {
     const cur = best.get(s.independenceGroup);
     if (!cur || swing(s) > swing(cur)) best.set(s.independenceGroup, s);
@@ -177,7 +185,11 @@ export function fuseConfidence(
 
   const summed = perTier
     .filter((c) => c.isRepresentative)
-    .reduce((acc, c) => acc + (isTimingGroup(c.group) ? c.weightedLogOdds : Math.min(0, c.weightedLogOdds)), priorLogit);
+    .reduce(
+      (acc, c) =>
+        acc + (isTimingGroup(c.group) ? c.weightedLogOdds : Math.min(0, c.weightedLogOdds)),
+      priorLogit,
+    );
   const logOdds = Math.max(-MAX_FUSED_LOGIT, Math.min(MAX_FUSED_LOGIT, summed));
   const pCorrect = fromLogOdds(logOdds);
 

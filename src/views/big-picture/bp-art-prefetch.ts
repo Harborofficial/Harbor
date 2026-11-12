@@ -117,7 +117,10 @@ export function prefetchBpRowNeighbours(
     const m = metas[index - step];
     if (m) near.push(m);
   }
-  prefetchBpHeroArt(near.map((m) => m.background), fullQuality);
+  prefetchBpHeroArt(
+    near.map((m) => m.background),
+    fullQuality,
+  );
   const next = metas[index + 1];
   if (!tmdbKey) {
     if (next) decodeBpHeroArt(next.background, fullQuality);

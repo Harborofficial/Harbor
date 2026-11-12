@@ -11,5 +11,5 @@ export default {
   "games.studioCatalog.minimumRating.value": "{count}点以上 / 100",
   "games.studioCatalog.minimumVotes.all": "すべての評価数",
   "games.studioCatalog.minimumVotes.value": "{count}件以上の評価",
-  "games.studioCatalog.ratingFloor": "スコアには5件以上の評価が必要です。"
+  "games.studioCatalog.ratingFloor": "スコアには5件以上の評価が必要です。",
 };

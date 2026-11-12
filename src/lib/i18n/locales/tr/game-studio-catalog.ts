@@ -11,5 +11,5 @@ export default {
   "games.studioCatalog.minimumRating.value": "{count}+ / 100",
   "games.studioCatalog.minimumVotes.all": "Herhangi bir değerlendirme sayısı",
   "games.studioCatalog.minimumVotes.value": "{count}+ değerlendirme",
-  "games.studioCatalog.ratingFloor": "Puanlar en az 5 değerlendirme gerektirir."
+  "games.studioCatalog.ratingFloor": "Puanlar en az 5 değerlendirme gerektirir.",
 };

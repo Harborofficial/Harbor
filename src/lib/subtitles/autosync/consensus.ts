@@ -254,7 +254,11 @@ export async function prepareConsensusCandidate(
         filename: r.rawFilename ?? undefined,
         durationSec: ctx.durationSec,
         allowLocalNetwork: r.localTrusted === true,
-        requestHeaders: subtitleTrackDownloadHeaders(r.downloadAuth, r.url, r.localTrusted !== true),
+        requestHeaders: subtitleTrackDownloadHeaders(
+          r.downloadAuth,
+          r.url,
+          r.localTrusted !== true,
+        ),
       });
       try {
         if (prepared.cues.length < MIN_LINES) return null;

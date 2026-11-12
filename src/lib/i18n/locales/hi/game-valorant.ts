@@ -34,20 +34,24 @@ export default {
   "games.valorant.sampleNote": "200 से कम बार खेले गए एजेंट सूची के अंत में हैं।",
   "games.valorant.empty": "इन फ़िल्टर से कोई नतीजा नहीं मिला।",
   "games.valorant.checked": "जाँच: {date}",
-  "games.valorant.metaScope": "चुने गए पैच के लिए OP.GG का प्रतिस्पर्धी डेटा। चयन दर एजेंट के इस्तेमाल का अनुपात है। नतीजे स्रोत के नमूने को दर्शाते हैं, सभी खिलाड़ियों को नहीं।",
-  "games.valorant.referenceScope": "गेम चित्र और जानकारी Valorant-API से। अपडेट गेम के बाद आ सकते हैं। Harbor को Riot Games का समर्थन प्राप्त नहीं है।",
+  "games.valorant.metaScope":
+    "चुने गए पैच के लिए OP.GG का प्रतिस्पर्धी डेटा। चयन दर एजेंट के इस्तेमाल का अनुपात है। नतीजे स्रोत के नमूने को दर्शाते हैं, सभी खिलाड़ियों को नहीं।",
+  "games.valorant.referenceScope":
+    "गेम चित्र और जानकारी Valorant-API से। अपडेट गेम के बाद आ सकते हैं। Harbor को Riot Games का समर्थन प्राप्त नहीं है।",
   "games.valorant.samples": "{count} बार इस्तेमाल",
   "games.valorant.smallSample": "छोटा नमूना",
   "games.valorant.abilities": "क्षमताएँ",
   "games.valorant.watchAbility": "क्षमता देखें",
   "games.valorant.videoError": "यह प्रदर्शन चलाया नहीं जा सका।",
   "games.valorant.mapMeta": "इस मैप पर एजेंट मेटा",
-  "games.valorant.mapScope": "वर्तमान रैंक्ड रोटेशन से बाहर के मैप भी शामिल हैं। मैप और स्थानों के नाम अंग्रेज़ी में हैं।",
+  "games.valorant.mapScope":
+    "वर्तमान रैंक्ड रोटेशन से बाहर के मैप भी शामिल हैं। मैप और स्थानों के नाम अंग्रेज़ी में हैं।",
   "games.valorant.callouts": "स्थान के नाम",
   "games.valorant.compareWeapon": "तुलना करें",
   "games.valorant.weapon": "हथियार",
   "games.valorant.distance": "दूरी",
-  "games.valorant.damageScope": "कवच, भेदन या क्षमताओं से पहले प्राथमिक फ़ायर के मूल मान। शॉटगन का नुकसान प्रति छर्रा दिखाया गया है।",
+  "games.valorant.damageScope":
+    "कवच, भेदन या क्षमताओं से पहले प्राथमिक फ़ायर के मूल मान। शॉटगन का नुकसान प्रति छर्रा दिखाया गया है।",
   "games.valorant.weaponStats": "हथियार के आँकड़े",
   "games.valorant.cost": "क्रेडिट",
   "games.valorant.magazine": "मैगज़ीन",
@@ -55,5 +59,5 @@ export default {
   "games.valorant.reload": "रीलोड · सेकंड",
   "games.valorant.head": "सिर पर नुकसान",
   "games.valorant.body": "शरीर पर नुकसान",
-  "games.valorant.legs": "पैर पर नुकसान"
+  "games.valorant.legs": "पैर पर नुकसान",
 };

@@ -104,21 +104,27 @@ const music: Record<string, string> = {
   "music.broadcast.drift": "({ms}밀리초 차이)",
   "music.broadcast.live": "{product}(으)로 송출 중",
   "music.broadcast.install": "{product} 받기",
-  "music.broadcast.none": "가상 오디오 케이블이 설치되어 있지 않습니다. {product}을 설치한 뒤 여기서 선택하세요.",
+  "music.broadcast.none":
+    "가상 오디오 케이블이 설치되어 있지 않습니다. {product}을 설치한 뒤 여기서 선택하세요.",
   "music.broadcast.auto": "처음 찾은 장치",
   "music.broadcast.output": "출력",
   "music.broadcast.stop": "중지",
   "music.broadcast.start": "시작",
-  "music.broadcast.blurb": "재생 중인 소리를 가상 마이크로 보내 통화 중인 친구도 듣게 합니다. 본인 스피커로도 계속 들립니다.",
+  "music.broadcast.blurb":
+    "재생 중인 소리를 가상 마이크로 보내 통화 중인 친구도 듣게 합니다. 본인 스피커로도 계속 들립니다.",
   "music.broadcast.title": "음성 채팅으로 송출",
-  "music.cable.mac.installNeeded": "Harbor가 자체 가상 마이크를 설치할 수 있습니다. macOS가 관리자 암호를 요청한 뒤 Core Audio가 다시 시작됩니다.",
+  "music.cable.mac.installNeeded":
+    "Harbor가 자체 가상 마이크를 설치할 수 있습니다. macOS가 관리자 암호를 요청한 뒤 Core Audio가 다시 시작됩니다.",
   "music.cable.mac.installMissing": "이 Harbor 빌드에는 가상 마이크 드라이버가 없습니다.",
   "music.cable.mac.installCancelled": "설치를 취소했습니다.",
   "music.cable.mac.installFailed": "가상 마이크를 설치하지 못했습니다.",
-  "music.cable.mac.restartNeeded": "가상 마이크는 설치되었지만 Core Audio가 아직 인식하지 못했습니다. Mac을 재시동해 마무리하세요.",
-  "music.cable.mac.updateAvailable": "이 버전의 Harbor에는 더 새로운 가상 마이크가 들어 있습니다. 케이블을 계속 쓰려면 설치하세요.",
+  "music.cable.mac.restartNeeded":
+    "가상 마이크는 설치되었지만 Core Audio가 아직 인식하지 못했습니다. Mac을 재시동해 마무리하세요.",
+  "music.cable.mac.updateAvailable":
+    "이 버전의 Harbor에는 더 새로운 가상 마이크가 들어 있습니다. 케이블을 계속 쓰려면 설치하세요.",
   "music.cable.title": "Harbor 가상 마이크",
-  "music.cable.blurb": "Harbor가 가상 마이크를 직접 만들어 줍니다. 내려받을 것도, 설치할 것도 없습니다.",
+  "music.cable.blurb":
+    "Harbor가 가상 마이크를 직접 만들어 줍니다. 내려받을 것도, 설치할 것도 없습니다.",
   "music.cable.create": "가상 마이크 만들기",
   "music.cable.remove": "가상 마이크 제거",
   "music.cable.spec": "{rate}, {depth}",
@@ -145,7 +151,8 @@ const music: Record<string, string> = {
   "music.cable.installNeeded": "가상 마이크를 설치하려면 사용자의 허가가 필요합니다",
   "music.cable.installMissing": "이 Harbor 빌드에는 가상 마이크가 들어 있지 않습니다",
   "music.cable.restartNeeded": "가상 마이크가 나타나려면 오디오 시스템을 다시 시작해야 합니다",
-  "music.cable.updateAvailable": "이 Harbor에는 더 새로운 가상 마이크가 들어 있습니다. 다시 만들면 업데이트됩니다.",
+  "music.cable.updateAvailable":
+    "이 Harbor에는 더 새로운 가상 마이크가 들어 있습니다. 다시 만들면 업데이트됩니다.",
   "dj.crossfade": "크로스페이더",
   "dj.b.broadcasting": "방송을 내보내는 중",
   "dj.b.eject": "빼기",
@@ -192,7 +199,8 @@ const music: Record<string, string> = {
   "music.speed.pitch": "음정",
   "music.speed.reverb": "리버브",
   "music.speed.keepPitch": "원래 키 유지",
-  "music.speed.keepPitchHelp": "켜면 템포만 바뀝니다. 끄면 나이트코어와 슬로우 특유의 소리가 납니다.",
+  "music.speed.keepPitchHelp":
+    "켜면 템포만 바뀝니다. 끄면 나이트코어와 슬로우 특유의 소리가 납니다.",
   "music.speed.reset": "초기화",
   "music.speed.normal": "기본",
   "music.speed.nightcore": "나이트코어",
@@ -358,7 +366,8 @@ const music: Record<string, string> = {
   "music.explore.scene": "씬에서",
   "music.artist.inPlaylists": "{name} 이(가) 담긴 플레이리스트",
   "music.audio.preferredSource": "선호 소스",
-  "music.audio.preferredSourceHint": "Harbor가 이곳에서 먼저 재생하고, 안 되면 다른 소스로 전환합니다.",
+  "music.audio.preferredSourceHint":
+    "Harbor가 이곳에서 먼저 재생하고, 안 되면 다른 소스로 전환합니다.",
   "music.spotify.connect": "Spotify Premium",
   "music.spotify.connectDetail": "한 번 연결하면 광고 없이 네이티브로 재생됩니다.",
   "music.spotify.connectAction": "연결",
@@ -516,9 +525,11 @@ const music: Record<string, string> = {
   "music.ytm.loading": "YouTube Music 불러오는 중",
   "music.row.scrobble": "{tag}을(를) 스크로블하기 때문에",
   "music.row.scrobbleWaiting": "Last.fm이 연결되었지만 아직 태그 선반을 보내지 않았습니다.",
-  "music.connect.scrobbleBody": "Last.fm을 연결하면 실제로 스크로블한 태그로 이 선반이 만들어집니다.",
+  "music.connect.scrobbleBody":
+    "Last.fm을 연결하면 실제로 스크로블한 태그로 이 선반이 만들어집니다.",
   "music.connect.serverName": "미디어 서버 또는 폴더",
-  "music.connect.serverBody": "Harbor를 폴더나 Plex, Jellyfin, Navidrome, Subsonic에 연결하면 이미 가진 앨범으로 이 선반이 채워집니다.",
+  "music.connect.serverBody":
+    "Harbor를 폴더나 Plex, Jellyfin, Navidrome, Subsonic에 연결하면 이미 가진 앨범으로 이 선반이 채워집니다.",
   "music.row.recents": "멈춘 곳부터 이어서",
   "music.row.fresh": "자주 듣는 아티스트의 새 음악",
   "music.row.freshSubtitle": "청취 기록에 있는 아티스트의 최근 발매곡",
@@ -583,7 +594,8 @@ const music: Record<string, string> = {
   "music.quickListen.loop": "미리듣기 반복",
   "music.quickListen.mute": "미리듣기 음소거",
   "music.quickListen.unmute": "음소거 해제",
-  "music.quickListen.empty": "아직 듣지 않은 곡을 찾지 못했어요. 더 많은 음악을 탐색한 뒤 다시 시도하세요.",
+  "music.quickListen.empty":
+    "아직 듣지 않은 곡을 찾지 못했어요. 더 많은 음악을 탐색한 뒤 다시 시도하세요.",
   "music.quickListen.finding": "아직 듣지 않은 곡을 찾고 있어요…",
   "music.quickListen.more": "더 보기",
   "music.playlist.search": "플레이리스트 검색",

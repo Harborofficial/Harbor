@@ -27,19 +27,25 @@ export function SubtitlesLanguageTab() {
       >
         <ToggleRow
           label={t("Prefer embedded subtitles")}
-          sub={t("Keep the subtitle track included in the video file instead of switching to a downloaded one.")}
+          sub={t(
+            "Keep the subtitle track included in the video file instead of switching to a downloaded one.",
+          )}
           value={settings.preferEmbeddedSubs}
           onChange={(v) => update({ preferEmbeddedSubs: v })}
         />
         <ToggleRow
           label={t("Forced subs with native audio")}
-          sub={t("When the audio already matches your subtitle language, pick a forced track (foreign dialogue and signs only) instead of full subtitles. If the file has no forced track, subtitles stay off.")}
+          sub={t(
+            "When the audio already matches your subtitle language, pick a forced track (foreign dialogue and signs only) instead of full subtitles. If the file has no forced track, subtitles stay off.",
+          )}
           value={settings.forcedSubsWhenNativeAudio}
           onChange={(v) => update({ forcedSubsWhenNativeAudio: v })}
         />
         <ToggleRow
           label={t("Upgrade subtitles when better ones load")}
-          sub={t("Switch to a better language match if it arrives after playback starts. Leave off to keep the current track.")}
+          sub={t(
+            "Switch to a better language match if it arrives after playback starts. Leave off to keep the current track.",
+          )}
           value={settings.subtitleAutoUpgrade}
           onChange={(v) => update({ subtitleAutoUpgrade: v })}
         />
@@ -51,13 +57,17 @@ export function SubtitlesLanguageTab() {
       >
         <ToggleRow
           label={t("Start with subtitles off")}
-          sub={t("Find subtitles without showing them automatically. You can turn them on in the player.")}
+          sub={t(
+            "Find subtitles without showing them automatically. You can turn them on in the player.",
+          )}
           value={settings.subtitlesOffByDefault}
           onChange={(v) => update({ subtitlesOffByDefault: v })}
         />
         <ToggleRow
           label={t("Choose subtitles before playback")}
-          sub={t("Choose the exact track and language after picking a source, before the video starts.")}
+          sub={t(
+            "Choose the exact track and language after picking a source, before the video starts.",
+          )}
           value={settings.subtitlePreselect}
           onChange={(v) => update({ subtitlePreselect: v })}
         />

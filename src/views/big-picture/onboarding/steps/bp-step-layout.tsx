@@ -3,10 +3,7 @@ import { useSettings } from "@/lib/settings";
 import { useBpT } from "../../bp-i18n";
 import { BpLayoutPreview } from "../bp-layout-preview";
 import { advanceBpOnboardRing } from "../bp-onboard-ring";
-import {
-  BP_ROW_FLUSH,
-  BpDecisionScroll,
-} from "../bp-step-parts";
+import { BP_ROW_FLUSH, BpDecisionScroll } from "../bp-step-parts";
 
 type Mode = "harbor" | "classic";
 
@@ -99,8 +96,7 @@ function Sketch({ mode }: { mode: Mode }) {
           <span
             className="h-[44%] w-full rounded-[4px]"
             style={{
-              background:
-                "var(--bp-on)",
+              background: "var(--bp-on)",
             }}
           />
           <Cells count={7} className="h-[26%]" bar={bar} />

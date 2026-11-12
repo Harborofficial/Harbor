@@ -20,5 +20,7 @@ export function initialDelayForSelectedTrack(
   }
   return typeof savedManualDelay === "number" &&
     Number.isFinite(savedManualDelay) &&
-    Math.abs(savedManualDelay) <= 120 ? savedManualDelay : 0;
+    Math.abs(savedManualDelay) <= 120
+    ? savedManualDelay
+    : 0;
 }

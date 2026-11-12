@@ -370,7 +370,6 @@ function TopbarAppearanceRow() {
           onChange={(topbarAppearance) =>
             update({
               topbarAppearance,
-              transparentTopBar: topbarAppearance === "transparent",
             })
           }
         />

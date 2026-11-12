@@ -17,9 +17,7 @@ type ArtistIdentity = Pick<MusicArtistRef, "musicBrainzId" | "id" | "connectorId
 const listeners = new Set<() => void>();
 
 export function musicArtistKey(artist: ArtistIdentity): string {
-  return artist.musicBrainzId
-    ? `mb:${artist.musicBrainzId}`
-    : `${artist.connectorId}:${artist.id}`;
+  return artist.musicBrainzId ? `mb:${artist.musicBrainzId}` : `${artist.connectorId}:${artist.id}`;
 }
 
 const STORE = "liked-artists";

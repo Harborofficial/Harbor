@@ -8,9 +8,12 @@ import type { PlayerSrc } from "@/lib/view";
 
 export type Anime4kChoice = "auto" | "off" | Anime4kMode;
 
-function autoActive(settings: Settings, src: PlayerSrc): boolean {
-  return settings.playerAnime4k &&
-    (!settings.playerAnime4kAnimeOnly || !!src.isAnime || metaIsAnime(src.meta));
+/** Anime4K may run for this title: enabled, and either unrestricted or actually anime. */
+export function anime4kWantedFor(settings: Settings, src: PlayerSrc): boolean {
+  return (
+    settings.playerAnime4k &&
+    (!settings.playerAnime4kAnimeOnly || !!src.isAnime || metaIsAnime(src.meta))
+  );
 }
 
 type Anime4kDims = { srcWidth: number; displayWidth: number };
@@ -61,10 +64,9 @@ export function anime4kShadersFor(
   c: Anime4kChoice,
   dims?: Anime4kDims,
 ): string[] {
-  if (!settings.playerAnime4k || c === "off") return [];
+  if (c === "off" || !anime4kWantedFor(settings, src)) return [];
   const tier = gatedTier(settings);
   if (c === "auto") {
-    if (!autoActive(settings, src)) return [];
     return anime4kChain(
       settings.playerAnime4kFolder,
       gatedMode(settings.playerAnime4kMode as Anime4kMode, dims),
@@ -102,7 +104,8 @@ export function useAnime4k(
 ) {
   const { settings, update } = useSettings();
   const choice = (settings.playerAnime4kOverride as Anime4kChoice) || "auto";
-  const available = !!settings.playerAnime4kFolder;
+  const wanted = anime4kWantedFor(settings, src);
+  const available = !!settings.playerAnime4kFolder && wanted;
   const dims: Anime4kDims = {
     srcWidth: videoSourceWidth,
     displayWidth: displayWidthPx(videoWidth),
@@ -126,12 +129,17 @@ export function useAnime4k(
     bridgeRef.current?.setShaderProps?.(props);
   }, [bridgeRef, bridgeReady, srcKey, shaderConfig]);
 
+  // A menu choice applies to the title being watched; the next title starts from
+  // the configured default instead of inheriting the last selection.
+  useEffect(() => () => update({ playerAnime4kOverride: "auto" }), [update]);
+
   const setMode = (c: string) => {
     update({ playerAnime4kOverride: c });
   };
 
-  const displayMode: Anime4kChoice =
-    choice === "auto" && autoActive(settings, src)
+  const displayMode: Anime4kChoice = !wanted
+    ? "off"
+    : choice === "auto"
       ? (settings.playerAnime4kMode as Anime4kMode)
       : choice;
 

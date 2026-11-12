@@ -1,7 +1,8 @@
 const gameWowTalents: Record<string, string> = {
   "games.wow.talents.title": "Talenti",
   "games.wow.talents.selected": "Talenti selezionati",
-  "games.wow.talents.note": "La configurazione registrata, disposta come nel gioco. Seleziona un talento per i dettagli.",
+  "games.wow.talents.note":
+    "La configurazione registrata, disposta come nel gioco. Seleziona un talento per i dettagli.",
   "games.wow.talents.unavailable": "I dati dei talenti non sono disponibili.",
   "games.wow.talents.partial": "Alcuni talenti selezionati non sono disponibili.",
   "games.wow.talents.class": "Classe",
@@ -14,6 +15,7 @@ const gameWowTalents: Record<string, string> = {
   "games.wow.talents.import": "Incolla questo codice nell’importazione dei talenti di WoW.",
   "games.wow.talents.descriptionUnavailable": "I dettagli dell’incantesimo non sono disponibili.",
   "games.wow.talents.otherChoice": "Altra scelta · non selezionata",
-  "games.wow.talents.reference": "Riferimento attuale di Wowhead. I valori possono variare in base al grado del talento, al personaggio e alla patch."
+  "games.wow.talents.reference":
+    "Riferimento attuale di Wowhead. I valori possono variare in base al grado del talento, al personaggio e alla patch.",
 };
 export default gameWowTalents;

@@ -16,6 +16,7 @@ import { resolveChromeTheme } from "@/lib/theme";
 import { SeekBar } from "./transport/seek-bar";
 import { LiveBadge, GoToLive, LiveSeekBar } from "./transport/live-controls";
 import { PipChrome } from "./transport/pip-chrome";
+import { playerTitleLines } from "./transport/title-lines";
 import { fmtTime } from "./transport/transport-utils";
 import {
   controlsInSlot,
@@ -191,6 +192,14 @@ export function Transport({
   const titleLogos = useHeroLogos(titleLogoSlides, settings);
   const titleLogo =
     meta && titleLogoSlides.length > 0 ? (titleLogos[meta.id] ?? meta.logo) : undefined;
+  const titleLines = playerTitleLines({
+    title,
+    subtitle,
+    showName: meta?.name,
+    isSeries: meta?.type === "series" || episode != null,
+    hasLogo: !!titleLogo,
+    seriesFirst: settings.playerTitleSeriesFirst,
+  });
   const { openMeta, exitPlayer } = usePlayerNavigation();
   const castModalPlay = useCastModalPlay();
   const controlsRef = useRef<HTMLDivElement>(null);
@@ -390,12 +399,12 @@ export function Transport({
     volumeStyle: chromeConfig.options.volumeStyle,
     seekBackStepSec: settings.seekBackStepSec,
     seekForwardStepSec: settings.seekForwardStepSec,
-    title,
-    subtitle,
+    title: titleLines.title,
+    subtitle: titleLines.subtitle,
     titleClickable,
     titleLogo,
     titleScale: settings.playerTitleScale,
-    titleSeriesFirst: settings.playerTitleSeriesFirst,
+    titleSeriesFirst: titleLines.seriesFirst,
     onBack,
     onTitleClick: () => setCastModalOpen(true),
     meta,

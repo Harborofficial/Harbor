@@ -105,13 +105,29 @@ function jump(minutes: number) {
 const kingVon = () => harness(() => DEEZER_KING_VON_SEARCH);
 
 test("a later search ref joins the dock's canonical artist only with shared recordings", async () => {
-  const tracks = [{ title: "2 Phones", artist: "Kevin Gates", durationSeconds: 240 }, { title: "Really Really", artist: "Kevin Gates", durationSeconds: 233 }];
-  const { authority } = harness(() => ({ data: [{ id: 123, name: "Kevin Gates", nb_fan: 697654 }] }),
-    async (ref) => ref.id === "other-person" ? [{ title: "Unrelated", artist: "Kevin Gates", durationSeconds: 100 }] : tracks);
+  const tracks = [
+    { title: "2 Phones", artist: "Kevin Gates", durationSeconds: 240 },
+    { title: "Really Really", artist: "Kevin Gates", durationSeconds: 233 },
+  ];
+  const { authority } = harness(
+    () => ({ data: [{ id: 123, name: "Kevin Gates", nb_fan: 697654 }] }),
+    async (ref) =>
+      ref.id === "other-person"
+        ? [{ title: "Unrelated", artist: "Kevin Gates", durationSeconds: 100 }]
+        : tracks,
+  );
   const dock = await authority.resolveArtist("Kevin Gates");
-  const search = await authority.identityForRef({ id: "youtube-kevin", connectorId: "youtube", name: "Kevin Gates" });
+  const search = await authority.identityForRef({
+    id: "youtube-kevin",
+    connectorId: "youtube",
+    name: "Kevin Gates",
+  });
   assert.equal(search.id, dock.canonical?.id);
-  const namesake = await authority.identityForRef({ id: "other-person", connectorId: "youtube", name: "Kevin Gates" });
+  const namesake = await authority.identityForRef({
+    id: "other-person",
+    connectorId: "youtube",
+    name: "Kevin Gates",
+  });
   assert.equal(namesake.id, "other-person");
 });
 

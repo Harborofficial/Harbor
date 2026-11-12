@@ -20,25 +20,39 @@ const js = ts.transpileModule(helper.getText(source), {
 }).outputText;
 
 function heroImage(height: number, pixelRatio: number) {
-  return new Function("window", `${js}; return upsizeTmdb;`)(
-    { screen: { height }, devicePixelRatio: pixelRatio },
-  ) as (url?: string, full?: boolean) => string | undefined;
+  return new Function("window", `${js}; return upsizeTmdb;`)({
+    screen: { height },
+    devicePixelRatio: pixelRatio,
+  }) as (url?: string, full?: boolean) => string | undefined;
 }
 
 test("explicit full hero quality requests original art on ordinary and high-density displays", () => {
-  for (const [height, ratio] of [[768, 1], [1080, 1], [1080, 1.25], [1080, 2], [2160, 1]]) {
+  for (const [height, ratio] of [
+    [768, 1],
+    [1080, 1],
+    [1080, 1.25],
+    [1080, 2],
+    [2160, 1],
+  ]) {
     const image = heroImage(height, ratio);
-    assert.equal(image("https://image.tmdb.org/t/p/w780/hero.jpg", true),
-      "https://image.tmdb.org/t/p/original/hero.jpg", `${height}px at ${ratio}x`);
+    assert.equal(
+      image("https://image.tmdb.org/t/p/w780/hero.jpg", true),
+      "https://image.tmdb.org/t/p/original/hero.jpg",
+      `${height}px at ${ratio}x`,
+    );
   }
 });
 
 test("turning full quality off restores the optimized hero image", () => {
   const image = heroImage(2160, 2);
-  assert.equal(image("https://image.tmdb.org/t/p/original/hero.jpg", false),
-    "https://image.tmdb.org/t/p/w1280/hero.jpg");
-  assert.equal(image("https://image.tmdb.org/t/p/w780/hero.jpg"),
-    "https://image.tmdb.org/t/p/w1280/hero.jpg");
+  assert.equal(
+    image("https://image.tmdb.org/t/p/original/hero.jpg", false),
+    "https://image.tmdb.org/t/p/w1280/hero.jpg",
+  );
+  assert.equal(
+    image("https://image.tmdb.org/t/p/w780/hero.jpg"),
+    "https://image.tmdb.org/t/p/w1280/hero.jpg",
+  );
 });
 
 test("missing artwork and other providers are preserved", () => {

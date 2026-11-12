@@ -47,9 +47,7 @@ test("a surface that does not want plugin rows does not ask for them", () => {
 
 test("the Plugins page is the only surface that always asks for plugin rows", () => {
   const definition = join("src", "lib", "catalog-browse.ts");
-  const callers = FILES.filter(
-    (p) => p !== definition && read(p).includes("listBrowseCatalogs("),
-  );
+  const callers = FILES.filter((p) => p !== definition && read(p).includes("listBrowseCatalogs("));
   assert.ok(callers.length > 0, "the catalog list has callers");
 
   const pluginsPage = join("src", "views", "plugins.tsx");

@@ -1,8 +1,18 @@
-import { useMusicPlaybackOrigin, recordMusicLibraryPlayback, recordMusicPlaylistPlayback, recordMusicSimilarPlayback } from "@/lib/music/playback-origin";
+import {
+  useMusicPlaybackOrigin,
+  recordMusicLibraryPlayback,
+  recordMusicPlaylistPlayback,
+  recordMusicSimilarPlayback,
+} from "@/lib/music/playback-origin";
 import { useMusicNowPlaying } from "@/lib/music/use-now-playing";
 import { MusicNowPlayingMark } from "@/components/music/music-now-playing-mark";
 import { jumpBackInPlayingKey } from "@/lib/music/jump-back-in-playing";
-import { legacySingleArtist, musicDestinationIdentity, musicRecentContextIdentity, uniqueMusicRecents } from "@/lib/music/recent-identity";
+import {
+  legacySingleArtist,
+  musicDestinationIdentity,
+  musicRecentContextIdentity,
+  uniqueMusicRecents,
+} from "@/lib/music/recent-identity";
 import { useRef, useState, type MouseEvent } from "react";
 import { MusicPinnedCover } from "@/components/music/music-pinned-cover";
 import { MusicCardBadgeChip } from "@/components/music/music-cover-card";
@@ -19,8 +29,16 @@ import { MusicSectionHead } from "@/components/music/music-track-grid";
 import { Poster } from "@/components/poster";
 import { listMusicPlaylists } from "@/lib/music/library";
 import { enqueueMusic, toggleMusicLiked } from "@/lib/music/player";
-import { pinMusicPlaylist, unpinMusicPlaylist, useMusicPlaylistPinned } from "@/lib/music/pinned-playlists";
-import { reopenMusicMix, useMusicRecentContexts, type MusicRecentContext } from "@/lib/music/recent-context";
+import {
+  pinMusicPlaylist,
+  unpinMusicPlaylist,
+  useMusicPlaylistPinned,
+} from "@/lib/music/pinned-playlists";
+import {
+  reopenMusicMix,
+  useMusicRecentContexts,
+  type MusicRecentContext,
+} from "@/lib/music/recent-context";
 import type { MusicExploreRequest } from "@/lib/music/navigation";
 import {
   useMusicDestinations,
@@ -44,14 +62,18 @@ type Tile = {
   surprise?: boolean;
   explicit?: boolean;
   open: () => void;
-  source: { kind: "destination"; entry: MusicDestination } | { kind: "context"; context: MusicRecentContext };
+  source:
+    | { kind: "destination"; entry: MusicDestination }
+    | { kind: "context"; context: MusicRecentContext };
 };
 
 type Translate = MusicBandContext["t"];
 
 /** "catalog" is Harbor's own aggregate, so its chip would read CA and say nothing about origin. */
 function named(connectorId: string | undefined): string | undefined {
-  return !connectorId || connectorId === "catalog" || connectorId === "local" ? undefined : connectorId;
+  return !connectorId || connectorId === "catalog" || connectorId === "local"
+    ? undefined
+    : connectorId;
 }
 
 function noteFor(kind: string, t: Translate, artist?: string): string {
@@ -63,9 +85,18 @@ function JumpBackIn({ ctx, title }: { ctx: MusicBandContext; title: string }) {
   const origin = useMusicPlaybackOrigin();
   const now = useMusicNowPlaying();
   const playingKey = jumpBackInPlayingKey(origin);
-  const playingIdentity = origin?.kind === "catalog" && (origin.item.kind === "artist" || origin.item.kind === "album")
-    ? musicDestinationIdentity({ kind: origin.item.kind, id: origin.item.id, connectorId: origin.item.connectorId, name: origin.name, artist: "artist" in origin.item ? origin.item.artist : undefined })
-    : origin?.kind === "similar" || origin?.kind === "playlist" ? musicRecentContextIdentity(origin) : playingKey;
+  const playingIdentity =
+    origin?.kind === "catalog" && (origin.item.kind === "artist" || origin.item.kind === "album")
+      ? musicDestinationIdentity({
+          kind: origin.item.kind,
+          id: origin.item.id,
+          connectorId: origin.item.connectorId,
+          name: origin.name,
+          artist: "artist" in origin.item ? origin.item.artist : undefined,
+        })
+      : origin?.kind === "similar" || origin?.kind === "playlist"
+        ? musicRecentContextIdentity(origin)
+        : playingKey;
   const animating = now.phase === "playing" || now.phase === "resolving";
   const contexts = useMusicRecentContexts();
   const destinations = useMusicDestinations();
@@ -89,7 +120,8 @@ function JumpBackIn({ ctx, title }: { ctx: MusicBandContext; title: string }) {
 
   /** The tile's own item: destinations recorded before the item shape existed rebuild one. */
   const itemOfDestination = (entry: MusicDestination): MusicCatalogItem =>
-    entry.item ?? ({
+    entry.item ??
+    ({
       kind: entry.kind,
       id: entry.id,
       connectorId: entry.connectorId ?? "catalog",
@@ -133,11 +165,13 @@ function JumpBackIn({ ctx, title }: { ctx: MusicBandContext; title: string }) {
   // The tile the pointer sits on decides the menu; the row itself stays inert.
   const target = menu?.tile ?? null;
   const targetEntry = target?.source.kind === "destination" ? target.source.entry : null;
-  const targetItem = targetEntry && targetEntry.kind !== "liked" ? itemOfDestination(targetEntry) : null;
+  const targetItem =
+    targetEntry && targetEntry.kind !== "liked" ? itemOfDestination(targetEntry) : null;
   const targetTrack = targetItem?.kind === "track" ? (targetItem as MusicTrack) : null;
-  const targetPlaylistId = target?.source.kind === "context" && target.source.context.kind === "playlist"
-    ? target.source.context.id
-    : "";
+  const targetPlaylistId =
+    target?.source.kind === "context" && target.source.context.kind === "playlist"
+      ? target.source.context.id
+      : "";
   const pinned = useMusicPlaylistPinned(targetPlaylistId);
   const trackItems = useMusicTrackMenuItems(targetTrack, {
     onPlay: targetTrack ? () => ctx.playTrack(targetTrack, [targetTrack]) : undefined,
@@ -208,32 +242,36 @@ function JumpBackIn({ ctx, title }: { ctx: MusicBandContext; title: string }) {
 
   // Everything the listener actually opened, newest first, so the row reads as where they just
   // were rather than a fixed menu.
-  const recent: Tile[] = uniqueMusicRecents([
-    ...destinations.map((entry) => ({
-      key: `${entry.kind}:${entry.id}`,
-      identity: musicDestinationIdentity(entry),
-      at: entry.at,
-      name: entry.name,
-      arts: [entry.artwork],
-      note: noteFor(entry.kind, t, entry.artist),
-      connectorId: named(entry.kind === "liked" ? undefined : entry.connectorId),
-      saved: entry.kind === "liked",
-      open: () => openDestination(entry),
-      source: { kind: "destination", entry } as const,
-    })),
-    ...contexts.map((context) => ({
-      key: `${context.kind}:${context.id}`,
-      identity: musicRecentContextIdentity(context),
-      at: context.at,
-      name: legacySingleArtist(context) ? t("music.madeForYou.namedMix", { name: legacySingleArtist(context)! }) : context.name,
-      arts: context.artwork.filter(Boolean),
-      surprise: context.kind === "similar" && context.id.startsWith("mix:surprise:"),
-      note: noteFor(context.kind === "similar" ? "mix" : "playlist", t),
-      open: () => openContext(context, `${context.kind}:${context.id}`),
-      source: { kind: "context", context } as const,
-    })),
-  ], tile => tile.identity)
-    .map(({ at: _at, ...tile }) => tile);
+  const recent: Tile[] = uniqueMusicRecents(
+    [
+      ...destinations.map((entry) => ({
+        key: `${entry.kind}:${entry.id}`,
+        identity: musicDestinationIdentity(entry),
+        at: entry.at,
+        name: entry.name,
+        arts: [entry.artwork],
+        note: noteFor(entry.kind, t, entry.artist),
+        connectorId: named(entry.kind === "liked" ? undefined : entry.connectorId),
+        saved: entry.kind === "liked",
+        open: () => openDestination(entry),
+        source: { kind: "destination", entry } as const,
+      })),
+      ...contexts.map((context) => ({
+        key: `${context.kind}:${context.id}`,
+        identity: musicRecentContextIdentity(context),
+        at: context.at,
+        name: legacySingleArtist(context)
+          ? t("music.madeForYou.namedMix", { name: legacySingleArtist(context)! })
+          : context.name,
+        arts: context.artwork.filter(Boolean),
+        surprise: context.kind === "similar" && context.id.startsWith("mix:surprise:"),
+        note: noteFor(context.kind === "similar" ? "mix" : "playlist", t),
+        open: () => openContext(context, `${context.kind}:${context.id}`),
+        source: { kind: "context", context } as const,
+      })),
+    ],
+    (tile) => tile.identity,
+  ).map(({ at: _at, ...tile }) => tile);
 
   const tiles = recent.slice(0, TILES);
   if (!ready && tiles.length === 0) {
@@ -277,29 +315,42 @@ function JumpBackIn({ ctx, title }: { ctx: MusicBandContext; title: string }) {
               {tile.saved || tile.surprise ? (
                 <MusicPinnedCover
                   kind={tile.surprise ? "surprise" : "liked"}
-                  artwork={tile.surprise ? tile.arts : ctx.player.likedTracks.map((track) => track.artwork).filter((art): art is string => Boolean(art)).slice(0, 4)}
+                  artwork={
+                    tile.surprise
+                      ? tile.arts
+                      : ctx.player.likedTracks
+                          .map((track) => track.artwork)
+                          .filter((art): art is string => Boolean(art))
+                          .slice(0, 4)
+                  }
                   glyphSize={tile.surprise ? 28 : 24}
                 />
               ) : (
-                (tile.arts.length > 1 ? tile.arts.slice(0, 4) : [tile.arts[0] ?? ""]).map((art, at) => (
-                  <Poster
-                    key={`${tile.key}:${at}`}
-                    src={art}
-                    seed={`${tile.key}:${at}`}
-                    ratio="square"
-                    lazy
-                    className="h-full w-full [--poster-radius:0px]"
-                  />
-                ))
+                (tile.arts.length > 1 ? tile.arts.slice(0, 4) : [tile.arts[0] ?? ""]).map(
+                  (art, at) => (
+                    <Poster
+                      key={`${tile.key}:${at}`}
+                      src={art}
+                      seed={`${tile.key}:${at}`}
+                      ratio="square"
+                      lazy
+                      className="h-full w-full [--poster-radius:0px]"
+                    />
+                  ),
+                )
               )}
-              {animating && tile.identity === playingIdentity && <MusicNowPlayingMark loading={now.phase === "resolving"} />}
+              {animating && tile.identity === playingIdentity && (
+                <MusicNowPlayingMark loading={now.phase === "resolving"} />
+              )}
             </span>
             <span className="music-jump-copy">
               <span className="music-jump-name">{tile.name}</span>
               <span className="music-jump-note">
                 <span className="music-jump-note-text">{tile.note}</span>
                 {tile.connectorId && (
-                  <MusicCardBadgeChip badge={{ kind: "connector", connectorId: tile.connectorId }} />
+                  <MusicCardBadgeChip
+                    badge={{ kind: "connector", connectorId: tile.connectorId }}
+                  />
                 )}
                 {tile.explicit && (
                   <span

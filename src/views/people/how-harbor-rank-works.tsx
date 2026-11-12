@@ -11,13 +11,7 @@ const PILLARS = [
   { key: "roles", label: "Roles", tone: "bg-ink/15" },
 ] as const;
 
-export function HowHarborRankWorks({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function HowHarborRankWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useT();
 
   useEffect(() => {

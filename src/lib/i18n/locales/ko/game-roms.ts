@@ -18,12 +18,15 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "크리에이터 플레이",
   "games.roms.watchVideo": "영상 보기",
   "games.roms.noVideos": "이 게임에는 아직 등록된 영상이 없습니다.",
-  "games.roms.libraryNote": "내 게임을 한곳에 모으세요. 파일을 가져오고 에뮬레이터를 선택해 컬렉션을 관리하세요.",
+  "games.roms.libraryNote":
+    "내 게임을 한곳에 모으세요. 파일을 가져오고 에뮬레이터를 선택해 컬렉션을 관리하세요.",
   "games.roms.openLibrary": "라이브러리 열기",
   "games.roms.downloadCharts": "가장 많이 다운로드된 ROM 핵",
-  "games.roms.downloadChartsNote": "Romhack Plaza의 누적 패치 다운로드 수. 제작자, 버전, 요구 사항은 프로젝트에서 확인하세요.",
+  "games.roms.downloadChartsNote":
+    "Romhack Plaza의 누적 패치 다운로드 수. 제작자, 버전, 요구 사항은 프로젝트에서 확인하세요.",
   "games.roms.downloadCount": "다운로드 {count}회",
-  "games.roms.chartUnavailable": "다운로드 순위를 불러올 수 없습니다. Romhack Plaza에서 직접 확인할 수 있습니다.",
+  "games.roms.chartUnavailable":
+    "다운로드 순위를 불러올 수 없습니다. Romhack Plaza에서 직접 확인할 수 있습니다.",
   "games.roms.allPlatforms": "모든 플랫폼",
   "games.roms.moreReleases": "출시 정보 더 보기",
   "games.roms.fewerReleases": "출시 정보 간략히",
@@ -59,14 +62,16 @@ const gameRoms: Record<string, string> = {
   "games.roms.noCollection": "선택한 게임기에는 이 컬렉션에 해당하는 게임이 아직 없습니다.",
   "games.roms.community": "커뮤니티가 만든 작품",
   "games.roms.hacksTitle": "익숙한 게임. 새로운 모험.",
-  "games.roms.hacksNote": "ROM 핵을 찾아보고 기반이 된 원작을 확인한 뒤, 패치한 사본을 플레이할 수 있도록 준비하세요.",
+  "games.roms.hacksNote":
+    "ROM 핵을 찾아보고 기반이 된 원작을 확인한 뒤, 패치한 사본을 플레이할 수 있도록 준비하세요.",
   "games.roms.catalogNote": "게임기, 장르, 출시 시기, 시리즈별로 카탈로그를 둘러보세요.",
   "games.roms.genre": "장르",
   "games.roms.allGenres": "모든 장르",
   "games.roms.era": "출시 시기",
   "games.roms.reset": "필터 초기화",
   "games.roms.empty": "다른 제목을 검색하거나 이 게임기의 필터 조건을 넓혀 보세요.",
-  "games.roms.source": "게임 정보와 연관 정보는 IGDB에서 제공합니다. 로컬 파일을 가져와 Harbor에서 지원하는 게임을 플레이하세요.",
+  "games.roms.source":
+    "게임 정보와 연관 정보는 IGDB에서 제공합니다. 로컬 파일을 가져와 Harbor에서 지원하는 게임을 플레이하세요.",
   "games.roms.playerScore": "IGDB 플레이어 평점 · 평가 {count}개",
   "games.roms.combinedScore": "IGDB 종합 평점 · 평가 {count}개",
   "games.roms.sort.discussed": "평가 수 많은 순",

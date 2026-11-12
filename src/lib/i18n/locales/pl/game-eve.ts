@@ -22,7 +22,8 @@ export default {
   "games.eve.avoiding": "Omijane",
   "games.eve.allow": "Zezwól na {name}",
   "games.eve.clear": "Wyczyść wszystko",
-  "games.eve.stargates": "Tylko trasy przez bramy gwiezdne. Tunele czasoprzestrzenne i mosty skokowe nie są uwzględniane.",
+  "games.eve.stargates":
+    "Tylko trasy przez bramy gwiezdne. Tunele czasoprzestrzenne i mosty skokowe nie są uwzględniane.",
   "games.eve.saveFailed": "Nie udało się zapamiętać tej trasy na urządzeniu.",
   "games.eve.routeFailed": "Nie udało się wczytać trasy. Spróbuj ponownie.",
   "games.eve.ready": "Wybierz cel i wyznacz trasę.",
@@ -46,7 +47,8 @@ export default {
   "games.eve.avoid": "Omijaj {name}",
   "games.eve.less": "Pokaż mniej przystanków",
   "games.eve.allStops": "Pokaż wszystkie przystanki",
-  "games.eve.activityNote": "Raportowana aktywność jest historyczna i nie obejmuje przestrzeni tuneli. Preferencja bezpieczeństwa nie gwarantuje bezpiecznej trasy.",
+  "games.eve.activityNote":
+    "Raportowana aktywność jest historyczna i nie obejmuje przestrzeni tuneli. Preferencja bezpieczeństwa nie gwarantuje bezpiecznej trasy.",
   "games.eve.noRoute": "Nie znaleziono trasy przez bramy gwiezdne.",
   "games.eve.incursions": "Inwazje",
   "games.eve.refreshIncursions": "Odśwież inwazje",
@@ -60,5 +62,5 @@ export default {
   "games.eve.influence": "Wpływy",
   "games.eve.systems": "Systemy · {count}",
   "games.eve.boss": "Boss obecny",
-  "games.eve.routeThere": "Trasa tutaj"
+  "games.eve.routeThere": "Trasa tutaj",
 };

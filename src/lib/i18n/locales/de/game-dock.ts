@@ -8,8 +8,10 @@ export default {
   "games.sidebar.customOrder": "Meine Reihenfolge",
   "games.sidebar.arrange": "Seitenleiste anpassen",
   "games.sidebar.resetFilters": "Filter zurücksetzen",
-  "games.sidebar.arrangeNote": "Zum Sortieren ziehen oder die Pfeile nutzen. Spiele anheften oder in dieser Seitenleiste ausblenden.",
-  "games.sidebar.saveFailed": "Seitenleisteneinstellungen konnten nicht gespeichert werden. Änderungen gelten für diese Sitzung.",
+  "games.sidebar.arrangeNote":
+    "Zum Sortieren ziehen oder die Pfeile nutzen. Spiele anheften oder in dieser Seitenleiste ausblenden.",
+  "games.sidebar.saveFailed":
+    "Seitenleisteneinstellungen konnten nicht gespeichert werden. Änderungen gelten für diese Sitzung.",
   "games.sidebar.move": "{name} verschieben",
   "games.sidebar.up": "{name} nach oben",
   "games.sidebar.down": "{name} nach unten",
@@ -19,12 +21,15 @@ export default {
   "games.sidebar.hide": "{name} in Seitenleiste ausblenden",
   "games.sidebar.pinned": "Angeheftet",
   "games.dock.welcomeTitle": "Spiele-Tab anzeigen?",
-  "games.dock.welcomeNote": "Erreiche deine Spiele, indem du den Mauszeiger an den Rand bewegst. Jederzeit abschaltbar unter Einstellungen → Design & Darstellung → Oberfläche.",
+  "games.dock.welcomeNote":
+    "Erreiche deine Spiele, indem du den Mauszeiger an den Rand bewegst. Jederzeit abschaltbar unter Einstellungen → Design & Darstellung → Oberfläche.",
   "games.dock.welcomeEnable": "Spiele-Tab anzeigen",
   "games.dock.welcomeDismiss": "Jetzt nicht",
   "games.dock.settingTitle": "Schnellbibliothek",
-  "games.dock.settingNote": "Zeigt einen dezenten Reiter am Rand für schnellen Zugriff auf deine Bibliothek. Standardmäßig ausgeschaltet.",
-  "games.dock.launchError": "Das Spiel konnte nicht geöffnet werden. Prüfe Installation und Launcher und versuche es erneut.",
+  "games.dock.settingNote":
+    "Zeigt einen dezenten Reiter am Rand für schnellen Zugriff auf deine Bibliothek. Standardmäßig ausgeschaltet.",
+  "games.dock.launchError":
+    "Das Spiel konnte nicht geöffnet werden. Prüfe Installation und Launcher und versuche es erneut.",
   "games.dock.launcher": "Launcher",
   "games.dock.client": "In {launcher} öffnen",
   "games.dock.openClient": "{name} in {launcher} öffnen",
@@ -75,5 +80,6 @@ export default {
   "games.badge.unavailable": "Dateien nicht verfügbar",
   "games.badge.notInstalled": "Nicht installiert",
   "games.home.libraryFirstTitle": "Spiele in der Bibliothek öffnen",
-  "games.home.libraryFirstNote": "Beginne jedes Mal in deiner Bibliothek statt in Entdecken, wenn du Spiele öffnest."
+  "games.home.libraryFirstNote":
+    "Beginne jedes Mal in deiner Bibliothek statt in Entdecken, wenn du Spiele öffnest.",
 };

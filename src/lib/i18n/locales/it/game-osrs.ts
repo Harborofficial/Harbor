@@ -21,7 +21,8 @@ export default {
   "games.osrs.buy": "Acquisto immediato",
   "games.osrs.sell": "Vendita immediata",
   "games.osrs.unseen": "Nessuna osservazione",
-  "games.osrs.observed": "Scambi segnalati, non offerte aperte. Le osservazioni di acquisto e vendita possono avere età diverse.",
+  "games.osrs.observed":
+    "Scambi segnalati, non offerte aperte. Le osservazioni di acquisto e vendita possono avere età diverse.",
   "games.osrs.history": "Storico dei prezzi",
   "games.osrs.period": "Periodo",
   "games.osrs.range.6h": "Ultime 6 ore",
@@ -39,8 +40,9 @@ export default {
   "games.osrs.averageSell": "Vendita media",
   "games.osrs.chart": "Storico dei prezzi di acquisto e vendita",
   "games.osrs.observation": "Seleziona osservazione",
-  "games.osrs.averages": "Gli scambi mancanti lasciano spazi vuoti. La tassa del Grand Exchange non viene calcolata qui.",
+  "games.osrs.averages":
+    "Gli scambi mancanti lasciano spazi vuoti. La tassa del Grand Exchange non viene calcolata qui.",
   "games.osrs.table": "Ultimi 24 intervalli",
   "games.osrs.time": "Ora",
-  "games.osrs.volume": "Oggetti scambiati"
+  "games.osrs.volume": "Oggetti scambiati",
 };

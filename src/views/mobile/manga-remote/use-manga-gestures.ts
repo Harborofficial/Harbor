@@ -85,7 +85,11 @@ export function useMangaGestures(input: MangaGestureInput) {
   };
 
   const progressiveOn = () =>
-    !!input.progressive && !!input.onDrag && !!input.onDragEnd && !input.reduce && input.zoom <= 1.01;
+    !!input.progressive &&
+    !!input.onDrag &&
+    !!input.onDragEnd &&
+    !input.reduce &&
+    input.zoom <= 1.01;
 
   const cancelStream = () => {
     if (st.current.streamRaf) cancelAnimationFrame(st.current.streamRaf);
@@ -232,7 +236,9 @@ export function useMangaGestures(input: MangaGestureInput) {
     st.current.vel = 0;
     st.current.tx = 0;
     st.current.ty = 0;
-    setVisual((v) => (v.tx === 0 && v.ty === 0 && v.hintDir === null ? v : { ...v, tx: 0, ty: 0, hintDir: null }));
+    setVisual((v) =>
+      v.tx === 0 && v.ty === 0 && v.hintDir === null ? v : { ...v, tx: 0, ty: 0, hintDir: null },
+    );
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -249,7 +255,11 @@ export function useMangaGestures(input: MangaGestureInput) {
       const ratio = Math.hypot(a.x - b.x, a.y - b.y) / st.current.pinchD0;
       const z = clampZoom(st.current.pinchZoom0 * ratio);
       const scale = Math.max(PINCH_MIN, Math.min(PINCH_MAX, ratio));
-      setVisual((v) => (v.scale === scale && v.tx === 0 && v.ty === 0 ? v : { ...v, scale, tx: 0, ty: 0, hintDir: null }));
+      setVisual((v) =>
+        v.scale === scale && v.tx === 0 && v.ty === 0
+          ? v
+          : { ...v, scale, tx: 0, ty: 0, hintDir: null },
+      );
       if (z !== st.current.lastSentZoom) {
         st.current.lastSentZoom = z;
         input.onZoom(z);
@@ -301,7 +311,11 @@ export function useMangaGestures(input: MangaGestureInput) {
       st.current.ty = 0;
     }
     const hintDir = allowed && Math.abs(t) >= TURN_FRAC * size ? dir : null;
-    setVisual((v) => (v.tx === st.current.tx && v.ty === st.current.ty && v.hintDir === hintDir ? v : { ...v, tx: st.current.tx, ty: st.current.ty, hintDir }));
+    setVisual((v) =>
+      v.tx === st.current.tx && v.ty === st.current.ty && v.hintDir === hintDir
+        ? v
+        : { ...v, tx: st.current.tx, ty: st.current.ty, hintDir },
+    );
     if (progressiveOn()) scheduleStream(allowed ? t / size : 0);
   };
 
@@ -332,7 +346,10 @@ export function useMangaGestures(input: MangaGestureInput) {
     }
     if (st.current.mode === "pending") {
       const held = performance.now() - st.current.startT;
-      const moved = Math.hypot(st.current.lastX - st.current.startX, st.current.lastY - st.current.startY);
+      const moved = Math.hypot(
+        st.current.lastX - st.current.startX,
+        st.current.lastY - st.current.startY,
+      );
       if (held <= TAP_MS && moved <= TAP_SLOP) {
         const rect = surfaceRef.current?.getBoundingClientRect();
         const fracX = rect && rect.width > 0 ? (st.current.lastX - rect.left) / rect.width : 0.5;

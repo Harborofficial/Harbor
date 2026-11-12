@@ -39,8 +39,10 @@ export default {
   "games.league.patch": "Patch {patch}",
   "games.league.more": "Altri campioni",
   "games.league.empty": "Nessun campione corrisponde alla ricerca.",
-  "games.league.poolEmpty": "Conserva qui i preferiti. Apri un campione e aggiungilo alla tua selezione.",
-  "games.league.unavailable": "Impossibile aggiornare i dati. I risultati precedenti restano disponibili.",
+  "games.league.poolEmpty":
+    "Conserva qui i preferiti. Apri un campione e aggiungilo alla tua selezione.",
+  "games.league.unavailable":
+    "Impossibile aggiornare i dati. I risultati precedenti restano disponibili.",
   "games.league.back": "Torna ai campioni",
   "games.league.addPool": "Aggiungi ai miei campioni",
   "games.league.inPool": "Nei miei campioni",
@@ -65,7 +67,8 @@ export default {
   "games.league.combosIntro": "Brevi dimostrazioni selezionate da OP.GG. Avviale quando vuoi.",
   "games.league.watchCombo": "Guarda la dimostrazione",
   "games.league.updated": "Fonte aggiornata: {date}",
-  "games.league.buildEmpty": "Nessuna build per questo ruolo. Prova un altro ruolo o le guide qui sotto.",
+  "games.league.buildEmpty":
+    "Nessuna build per questo ruolo. Prova un altro ruolo o le guide qui sotto.",
   "games.league.iconsUnavailable": "Alcuni dettagli di oggetti o rune non sono disponibili.",
   "games.league.passive": "Passiva",
   "games.league.cooldown": "Ricarica: {seconds}s",
@@ -74,17 +77,22 @@ export default {
   "games.league.story": "Storia del campione",
   "games.league.exploreMore": "Scopri di più",
   "games.league.guides": "Videoguide",
-  "games.league.metaScope": "OP.GG fornisce la classifica con il campione predefinito, senza indicare patch, regione o fascia di rango. Le vittorie sono calcolate da partite e vittorie riportate; i tassi di scelta sono arrotondati dalla fonte. Classifiche e build usano campioni distinti.",
-  "games.league.buildNote": "Ogni build ha un campione separato. Le build complete favoriscono partite abbastanza lunghe da acquistare gli oggetti; le loro vittorie non rappresentano il totale del campione. I matchup possono avere pochi dati. Adattati a squadra e avversario. I video possono risalire a patch precedenti.",
-  "games.league.patchDifference": "Statistiche della build: {patch}; dati di oggetti e abilità: {assets}.",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.metaScope":
+    "OP.GG fornisce la classifica con il campione predefinito, senza indicare patch, regione o fascia di rango. Le vittorie sono calcolate da partite e vittorie riportate; i tassi di scelta sono arrotondati dalla fonte. Classifiche e build usano campioni distinti.",
+  "games.league.buildNote":
+    "Ogni build ha un campione separato. Le build complete favoriscono partite abbastanza lunghe da acquistare gli oggetti; le loro vittorie non rappresentano il totale del campione. I matchup possono avere pochi dati. Adattati a squadra e avversario. I video possono risalire a patch precedenti.",
+  "games.league.patchDifference":
+    "Statistiche della build: {patch}; dati di oggetti e abilità: {assets}.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "Classifica",
   "games.league.tierScope": "Classificata solo/duo · Smeraldo+ · Globale",
   "games.league.patchFilter": "Scegli patch",
   "games.league.allRoles": "Tutti i ruoli",
   "games.league.banRate": "Tasso di ban",
   "games.league.matches": "Partite",
-  "games.league.tierNote": "Le posizioni sono relative a ciascun ruolo. Le build mostrano gli ultimi dati disponibili.",
+  "games.league.tierNote":
+    "Le posizioni sono relative a ciascun ruolo. Le build mostrano gli ultimi dati disponibili.",
   "games.official.publisherSource": "Download ufficiale dell’editore",
   "games.official.get": "Scarica {launcher}",
 };

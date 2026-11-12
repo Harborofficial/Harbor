@@ -27,10 +27,10 @@ function loadCalendarMapper(entries: unknown[]) {
   }).outputText;
   const exports = {} as Record<string, any>;
   const mockRequire = (id: string) => {
-  if (id === "./providers/anime-dub-sub") {
-    return { fetchDubSchedule: async () => entries };
-  }
-  throw new Error(`Unexpected import: ${id}`);
+    if (id === "./providers/anime-dub-sub") {
+      return { fetchDubSchedule: async () => entries };
+    }
+    throw new Error(`Unexpected import: ${id}`);
   };
   new Function(
     "require",
@@ -38,14 +38,10 @@ function loadCalendarMapper(entries: unknown[]) {
     "toLocalDateISO",
     "toLocalTimeLabel",
     `${compiled}\nexports.mapDubFeedToCalendar = mapDubFeedToCalendar;`,
-  )(
-    mockRequire,
-    exports,
-    toLocalDateISO,
-    toLocalTimeLabel,
-  );
+  )(mockRequire, exports, toLocalDateISO, toLocalTimeLabel);
   return exports.mapDubFeedToCalendar as (
-    year: number, month: number,
+    year: number,
+    month: number,
   ) => Promise<Array<Record<string, any>>>;
 }
 
@@ -92,7 +88,10 @@ test("AniSchedule v2 schedule nodes map to local calendar episodes with stable I
   ];
 
   const items = await loadCalendarMapper(entries)(2026, 10);
-  assert.deepEqual(items.map((item) => item.id), ["mal:900:1:5", "anilist:701:1:2", "mal:900:1:6"]);
+  assert.deepEqual(
+    items.map((item) => item.id),
+    ["mal:900:1:5", "anilist:701:1:2", "mal:900:1:6"],
+  );
   assert.equal(items[0].name, "Example Anime EN E05");
   assert.equal(items[0].poster, "poster-large");
   assert.equal(items[0].background, "banner");
@@ -102,7 +101,10 @@ test("AniSchedule v2 schedule nodes map to local calendar episodes with stable I
 });
 
 function loadDubProvider(results = { mal: [900, 900], anilist: [700, 700] }) {
-  const source = readFileSync(new URL("../src/lib/providers/anime-dub-sub.ts", import.meta.url), "utf8");
+  const source = readFileSync(
+    new URL("../src/lib/providers/anime-dub-sub.ts", import.meta.url),
+    "utf8",
+  );
   const compiled = ts.transpileModule(source, {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
   }).outputText;
@@ -112,18 +114,28 @@ function loadDubProvider(results = { mal: [900, 900], anilist: [700, 700] }) {
   const next = (values: Array<number | null>) => values.shift() ?? null;
   const feed = [{ id: 700, idMal: 900 }];
   const require = (id: string) => {
-    if (id === "@/lib/safe-fetch") return { safeFetch: async () => ({ ok: true, json: async () => feed }) };
-    if (id === "@/lib/providers/anime-mapping") return {
-      kitsuToMal: async () => { mappingCalls++; return next(results.mal); },
-      kitsuToAnilist: async () => { mappingCalls++; return next(results.anilist); },
-    };
+    if (id === "@/lib/safe-fetch")
+      return { safeFetch: async () => ({ ok: true, json: async () => feed }) };
+    if (id === "@/lib/providers/anime-mapping")
+      return {
+        kitsuToMal: async () => {
+          mappingCalls++;
+          return next(results.mal);
+        },
+        kitsuToAnilist: async () => {
+          mappingCalls++;
+          return next(results.anilist);
+        },
+      };
     throw new Error(`Unexpected import: ${id}`);
   };
   new Function("require", "exports", "Date", compiled)(require, exports, { now: () => now });
   return {
     api: exports,
     mappingCalls: () => mappingCalls,
-    advance: (ms: number) => { now += ms; },
+    advance: (ms: number) => {
+      now += ms;
+    },
   };
 }
 
@@ -143,7 +155,10 @@ test("Kitsu IDs resolve through shared mappings and match both feed ID systems",
 });
 
 test("a Kitsu mapping miss retries after its short cache expires", async () => {
-  const { api, mappingCalls, advance } = loadDubProvider({ mal: [null, 900], anilist: [null, 700] });
+  const { api, mappingCalls, advance } = loadDubProvider({
+    mal: [null, 900],
+    anilist: [null, 700],
+  });
   api.ensureDubForAnimeId("kitsu:77");
   for (let i = 0; i < 20 && api.dubSetSnapshot().version < 2; i++) {
     await new Promise((resolve) => setTimeout(resolve, 0));

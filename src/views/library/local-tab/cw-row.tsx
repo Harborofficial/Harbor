@@ -54,7 +54,13 @@ export function LocalCwRow() {
   if (cards.length === 0) return null;
 
   return (
-    <Row title={t("Continue Watching")} min={260} shape="landscape" scrollKey="library:local:cw">
+    <Row
+      title={t("Continue Watching")}
+      min={260}
+      shape="landscape"
+      scrollKey="library:local:cw"
+      scrollAnchorKey={cards[0]?.item._id ?? ""}
+    >
       {cards.map(({ item, entry }) => (
         <ContinueCard
           key={item._id}

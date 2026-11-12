@@ -48,8 +48,18 @@ export function cycleMusicRepeat(): void {
 }
 
 /** What will actually play next, shuffle included, so a list never shows the stored order by mistake. */
-export function musicUpcoming(queue: MusicTrack[], index: number, count: number, includeRepeats = true): MusicTrack[] {
-  return queueOrder.upcoming(queue, index, includeRepeats ? transport : { ...transport, repeat: "off" }, count);
+export function musicUpcoming(
+  queue: MusicTrack[],
+  index: number,
+  count: number,
+  includeRepeats = true,
+): MusicTrack[] {
+  return queueOrder.upcoming(
+    queue,
+    index,
+    includeRepeats ? transport : { ...transport, repeat: "off" },
+    count,
+  );
 }
 
 export const getMusicTransport = (): MusicTransport => transport;
@@ -72,11 +82,7 @@ export function setMusicPriorityNext(track: MusicTrack | null): void {
  * Owned here rather than injected into the player, so listening order cannot be lost when one
  * module is replaced without the other.
  */
-export function musicAdvance(
-  queue: MusicTrack[],
-  index: number,
-  auto: boolean,
-): MusicTrack | null {
+export function musicAdvance(queue: MusicTrack[], index: number, auto: boolean): MusicTrack | null {
   const next = queueOrder.next(queue, index, transport, auto, priorityNext);
   if (!(auto && transport.repeat === "one")) priorityNext = null;
   return next;
@@ -90,11 +96,7 @@ export function musicPrevious(queue: MusicTrack[], index: number): MusicTrack | 
  * The tracks worth resolving early. Preloading the stored neighbours warmed the wrong songs
  * whenever shuffle or Play next changed the order, so every advance paid for a cold lookup.
  */
-export function musicWarmTargets(
-  queue: MusicTrack[],
-  index: number,
-  count: number,
-): MusicTrack[] {
+export function musicWarmTargets(queue: MusicTrack[], index: number, count: number): MusicTrack[] {
   const ahead = musicUpcoming(queue, index, count);
   const out = priorityNext ? [priorityNext, ...ahead] : ahead;
   const behind = queueOrder.peekPrevious(queue, index, transport.shuffle);

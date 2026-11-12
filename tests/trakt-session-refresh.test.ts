@@ -150,7 +150,12 @@ test("the token proxy is called without Trakt API headers its preflight refuses"
   // never be renewed.
   const h = harness([
     json({}, 401),
-    json({ access_token: "access-9", refresh_token: "refresh-9", created_at: 9, expires_in: 604800 }),
+    json({
+      access_token: "access-9",
+      refresh_token: "refresh-9",
+      created_at: 9,
+      expires_in: 604800,
+    }),
     json({ ok: true }),
   ]);
   try {

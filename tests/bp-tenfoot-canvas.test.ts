@@ -33,7 +33,10 @@ function tsxFiles(dir: string): string[] {
 const tokens = readFileSync(`${BP}/bp-tokens.ts`, "utf8");
 
 test("the top bar's height is defined once, and the page offset derives from it", () => {
-  assert.match(tokens, /--bp-bar-h:\s*calc\(clamp\(72px, 9vh, 112px\) \+ var\(--bp-safe-y, 0px\)\)/);
+  assert.match(
+    tokens,
+    /--bp-bar-h:\s*calc\(clamp\(72px, 9vh, 112px\) \+ var\(--bp-safe-y, 0px\)\)/,
+  );
   assert.match(tokens, /--bp-page-top:\s*calc\(var\(--bp-bar-h\)/);
 });
 

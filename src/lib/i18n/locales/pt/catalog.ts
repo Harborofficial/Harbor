@@ -31,24 +31,33 @@ const catalog: Record<string, string> = {
   "Show on home": "Mostrar na tela inicial",
   "Hide from home": "Ocultar da home",
   "Feature this catalog in the hero carousel": "Destacar este catálogo no carrossel principal",
-  "Stop feeding the hero carousel (back to automatic)": "Parar de alimentar o carrossel principal (voltar ao automático)",
-  "Needs artwork-rich titles to feed the hero": "Precisa de títulos com bastante arte para alimentar o destaque",
-  "Needs at least 10 titles for the Top 10 look": "Precisa de pelo menos 10 títulos para o visual Top 10",
+  "Stop feeding the hero carousel (back to automatic)":
+    "Parar de alimentar o carrossel principal (voltar ao automático)",
+  "Needs artwork-rich titles to feed the hero":
+    "Precisa de títulos com bastante arte para alimentar o destaque",
+  "Needs at least 10 titles for the Top 10 look":
+    "Precisa de pelo menos 10 títulos para o visual Top 10",
   "Customize home": "Personalizar início",
   "Customize anime": "Personalizar animes",
   "Home layout": "Layout da Início",
   "How the Home page assembles its rails.": "Como a página Início monta suas faixas.",
   "Card overlays": "Sobreposições de cartão",
   "Hover preview": "Pré-visualização ao passar o mouse",
-  "Rest the cursor on a poster to peek at the rating, runtime, and story without opening it.": "Pouse o cursor sobre um pôster para espiar a avaliação, duração e sinopse sem abri-lo.",
-  "Cleaner grid when your poster service already prints the title on the artwork.": "Grade mais limpa quando o seu serviço de pôsteres já imprime o título na arte.",
+  "Rest the cursor on a poster to peek at the rating, runtime, and story without opening it.":
+    "Pouse o cursor sobre um pôster para espiar a avaliação, duração e sinopse sem abri-lo.",
+  "Cleaner grid when your poster service already prints the title on the artwork.":
+    "Grade mais limpa quando o seu serviço de pôsteres já imprime o título na arte.",
   "Hide titles under posters": "Ocultar títulos sob os pôsteres",
   "No matches for these filters.": "Nenhum resultado para estes filtros.",
   "No more found for this category.": "Nenhum outro encontrado para esta categoria.",
-  "Cinemeta didn't return anything for {genre}. Try a different genre or add a TMDB key.": "O Cinemeta não retornou nada para {genre}. Tente outro gênero ou adicione uma chave do TMDB.",
-  "That's everything Cinemeta has for {genre}. Add a TMDB key for deeper rails.": "Isso é tudo que o Cinemeta tem para {genre}. Adicione uma chave do TMDB para faixas mais completas.",
-  "Year, runtime, language, and country filters need TMDB. Genre browsing falls back to Cinemeta automatically.": "Filtros de ano, duração, idioma e país precisam do TMDB. A navegação por gênero recorre ao Cinemeta automaticamente.",
-  "The best {genre} {media}, layered by mood. Browse trending, dive into a director's run, sort by decade, find quiet gems.": "Os melhores {media} de {genre}, organizados por clima. Navegue pelos populares, explore a filmografia de um diretor, ordene por década, encontre pérolas escondidas.",
+  "Cinemeta didn't return anything for {genre}. Try a different genre or add a TMDB key.":
+    "O Cinemeta não retornou nada para {genre}. Tente outro gênero ou adicione uma chave do TMDB.",
+  "That's everything Cinemeta has for {genre}. Add a TMDB key for deeper rails.":
+    "Isso é tudo que o Cinemeta tem para {genre}. Adicione uma chave do TMDB para faixas mais completas.",
+  "Year, runtime, language, and country filters need TMDB. Genre browsing falls back to Cinemeta automatically.":
+    "Filtros de ano, duração, idioma e país precisam do TMDB. A navegação por gênero recorre ao Cinemeta automaticamente.",
+  "The best {genre} {media}, layered by mood. Browse trending, dive into a director's run, sort by decade, find quiet gems.":
+    "Os melhores {media} de {genre}, organizados por clima. Navegue pelos populares, explore a filmografia de um diretor, ordene por década, encontre pérolas escondidas.",
 };
 
 export default catalog;

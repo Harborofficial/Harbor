@@ -74,14 +74,22 @@ export function ImportBanner({ name }: { name: string }) {
       </span>
       <div className="flex min-w-0 flex-col">
         <span className="truncate text-[13px] font-semibold text-ink">{name}</span>
-        <span className="text-[11px] font-medium text-accent">{tr("Imported and now playing")}</span>
+        <span className="text-[11px] font-medium text-accent">
+          {tr("Imported and now playing")}
+        </span>
       </div>
       <Sparkles size={15} className="ms-auto shrink-0 text-accent" />
     </div>
   );
 }
 
-export function EmptyState({ searchSettled, veryNewMovie }: { searchSettled: boolean; veryNewMovie: boolean }) {
+export function EmptyState({
+  searchSettled,
+  veryNewMovie,
+}: {
+  searchSettled: boolean;
+  veryNewMovie: boolean;
+}) {
   const tr = useT();
   if (!searchSettled) {
     return (
@@ -95,7 +103,11 @@ export function EmptyState({ searchSettled, veryNewMovie }: { searchSettled: boo
     return (
       <div className="flex flex-col gap-1.5 px-5 py-6 text-[13.5px] leading-snug text-ink-muted">
         <span className="text-[14px] font-semibold text-ink">{tr("Movie's too new")}</span>
-        <span>{tr("Subtitles haven't been published yet. Try search below or check back in a few days.")}</span>
+        <span>
+          {tr(
+            "Subtitles haven't been published yet. Try search below or check back in a few days.",
+          )}
+        </span>
       </div>
     );
   }

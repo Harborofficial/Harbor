@@ -68,9 +68,12 @@ export function useProviderKeys({
   const keyFieldRef = useRef<HTMLDivElement | null>(null);
   const extraTimerRef = useRef<number | null>(null);
 
-  useEffect(() => () => {
-    if (extraTimerRef.current) window.clearTimeout(extraTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (extraTimerRef.current) window.clearTimeout(extraTimerRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!keyModal) return;
@@ -316,8 +319,7 @@ export function useProviderKeys({
                 {"postersplus.elfhosted.com/poster?tmdb_id={tmdbId}&imdb_id={imdbId}&type={type}"}
               </code>
               . {t("TV cards use 16:9 art when the service supports it; add")}{" "}
-              <code>{"{shape}"}</code>{" "}
-              {t("to a template to switch between landscape and poster.")}
+              <code>{"{shape}"}</code> {t("to a template to switch between landscape and poster.")}
             </>
           }
         />

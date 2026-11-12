@@ -15,13 +15,9 @@ type Option = {
   hint: string;
 };
 
-const TraktGlyph = () => (
-  <img src={traktLogo} alt="" className="h-3.5 w-3.5 object-contain" />
-);
+const TraktGlyph = () => <img src={traktLogo} alt="" className="h-3.5 w-3.5 object-contain" />;
 
-const SimklGlyph = () => (
-  <img src={simklLogo} alt="" className="h-3.5 w-3.5 object-contain" />
-);
+const SimklGlyph = () => <img src={simklLogo} alt="" className="h-3.5 w-3.5 object-contain" />;
 
 const OPTIONS: Option[] = [
   {
@@ -30,7 +26,12 @@ const OPTIONS: Option[] = [
     icon: () => <Library size={13} strokeWidth={2.2} />,
     hint: "Upcoming episodes and movies from your saved shows",
   },
-  { id: "games", label: "games.calendar.source", icon: () => <GamesIcon size={17}/>, hint: "games.calendar.hint" },
+  {
+    id: "games",
+    label: "games.calendar.source",
+    icon: () => <GamesIcon size={17} />,
+    hint: "games.calendar.hint",
+  },
   {
     id: "all",
     label: "All upcoming",
@@ -107,9 +108,7 @@ export function SourceSwitcher({
             aria-pressed={active}
             title={t(opt.hint)}
             className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-              active
-                ? "bg-ink text-canvas"
-                : "text-ink-muted hover:bg-raised/60 hover:text-ink"
+              active ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised/60 hover:text-ink"
             }`}
           >
             {opt.icon()}

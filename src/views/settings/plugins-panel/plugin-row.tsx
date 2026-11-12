@@ -82,14 +82,14 @@ export function PluginRow({
     : health?.lastSkip
       ? t("Skipped: {reason}", { reason: health.lastSkip })
       : health?.lastCount != null && health.lastTitle
-      ? health.lastCount > 0
-        ? t("Found {count} streams for {title} in {seconds}s", {
-            count: health.lastCount,
-            title: health.lastTitle,
-            seconds: ((health.lastMs ?? 0) / 1000).toFixed(1),
-          })
-        : t("No streams for {title}", { title: health.lastTitle })
-      : t("Nothing yet. Kept on this computer only.");
+        ? health.lastCount > 0
+          ? t("Found {count} streams for {title} in {seconds}s", {
+              count: health.lastCount,
+              title: health.lastTitle,
+              seconds: ((health.lastMs ?? 0) / 1000).toFixed(1),
+            })
+          : t("No streams for {title}", { title: health.lastTitle })
+        : t("Nothing yet. Kept on this computer only.");
 
   const checkText = check
     ? check.error
@@ -124,7 +124,14 @@ export function PluginRow({
     <>
       <div className={`hset-row ${locked ? "opacity-60" : ""}`} data-settings-row>
         <RowText
-          lead={<AddonLogo addonId={plugin.id} addonName={plugin.name} manifestLogo={plugin.icon} size="lg" />}
+          lead={
+            <AddonLogo
+              addonId={plugin.id}
+              addonName={plugin.name}
+              manifestLogo={plugin.icon}
+              size="lg"
+            />
+          }
           onClick={() => setOpen((v) => !v)}
           expanded={open}
         >
@@ -137,7 +144,9 @@ export function PluginRow({
           </RowTitle>
           <RowDesc accent={!!copy.lock}>{copy.lock ?? sub}</RowDesc>
           {copy.desc && <RowDesc accent>{copy.desc}</RowDesc>}
-          {masterOff && !locked && <RowDesc>{t("Plugins are paused. Turn on Use plugins above to run them.")}</RowDesc>}
+          {masterOff && !locked && (
+            <RowDesc>{t("Plugins are paused. Turn on Use plugins above to run them.")}</RowDesc>
+          )}
           {note && <RowNote>{note}</RowNote>}
         </RowText>
         <RowControl>
@@ -169,12 +178,18 @@ export function PluginRow({
           <button
             type="button"
             className={`${BARE_ICON} ${confirmRemove ? "scale-110 text-danger" : "text-danger/75 hover:text-danger"}`}
-            aria-label={confirmRemove ? t("Remove and uninstall {count}?", { count: 1 }) : t("Remove")}
+            aria-label={
+              confirmRemove ? t("Remove and uninstall {count}?", { count: 1 }) : t("Remove")
+            }
             title={confirmRemove ? t("Remove and uninstall {count}?", { count: 1 }) : t("Remove")}
             disabled={busy === "remove"}
             onClick={remove}
           >
-            {busy === "remove" ? <Loader2 size={19} className="animate-spin" /> : <Trash2 size={19} />}
+            {busy === "remove" ? (
+              <Loader2 size={19} className="animate-spin" />
+            ) : (
+              <Trash2 size={19} />
+            )}
           </button>
           <Switch
             value={plugin.enabled}
@@ -204,7 +219,10 @@ export function PluginRow({
               </button>
             )}
             {plugin.canRevert && plugin.previousVersion && adapter.revert && (
-              <SButton disabled={!!busy} onClick={() => void run("revert", () => adapter.revert!(plugin.id))}>
+              <SButton
+                disabled={!!busy}
+                onClick={() => void run("revert", () => adapter.revert!(plugin.id))}
+              >
                 {t("Revert to v{version}", { version: plugin.previousVersion })}
               </SButton>
             )}
@@ -247,7 +265,9 @@ export function PluginRow({
                 >
                   {log.length === 0
                     ? t("Nothing yet. Kept on this computer only.")
-                    : log.map((l) => `${new Date(l.at).toLocaleTimeString()} ${l.level} ${l.text}`).join("\n")}
+                    : log
+                        .map((l) => `${new Date(l.at).toLocaleTimeString()} ${l.level} ${l.text}`)
+                        .join("\n")}
                 </pre>
               )}
             </>
@@ -255,10 +275,7 @@ export function PluginRow({
 
           {plugin.checkable && adapter.check && (
             <SettingRow label={t("Check it works")} desc={checkText}>
-              <SButton
-                disabled={busy === "check"}
-                onClick={() => void run("check", checkNow)}
-              >
+              <SButton disabled={busy === "check"} onClick={() => void run("check", checkNow)}>
                 {busy === "check" ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
@@ -274,7 +291,11 @@ export function PluginRow({
       )}
 
       {settingsOpen && (
-        <PluginSettingsModal plugin={plugin} adapter={adapter} onClose={() => setSettingsOpen(false)} />
+        <PluginSettingsModal
+          plugin={plugin}
+          adapter={adapter}
+          onClose={() => setSettingsOpen(false)}
+        />
       )}
     </>
   );

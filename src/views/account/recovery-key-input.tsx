@@ -70,11 +70,23 @@ export function RecoveryKeyInput({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <span className={inline ? "text-[16.5px] font-medium leading-6 text-ink" : "text-[12.5px] font-semibold text-ink"}>{t("Recovery key")}</span>
+        <span
+          className={
+            inline
+              ? "text-[16.5px] font-medium leading-6 text-ink"
+              : "text-[12.5px] font-semibold text-ink"
+          }
+        >
+          {t("Recovery key")}
+        </span>
         <button
           type="button"
           onClick={pasteButton}
-          className={inline ? ROW_ACTION : "inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[11.5px] font-medium text-ink-subtle transition-colors hover:text-ink"}
+          className={
+            inline
+              ? ROW_ACTION
+              : "inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[11.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
+          }
         >
           <ClipboardPaste size={12} strokeWidth={2} /> {t("Paste")}
         </button>
@@ -116,7 +128,11 @@ export function RecoveryKeyInput({
           </Fragment>
         ))}
       </div>
-      <span className={inline ? "text-[15.5px] leading-[22px] text-ink-muted" : "text-[11.5px] text-ink-subtle"}>
+      <span
+        className={
+          inline ? "text-[15.5px] leading-[22px] text-ink-muted" : "text-[11.5px] text-ink-subtle"
+        }
+      >
         {t("The 20-character key from when you created your account. Paste it or type each block.")}
       </span>
     </div>

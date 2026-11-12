@@ -3,7 +3,8 @@ export default {
   "games.tft.intro": "Monte uma equipe antes da próxima partida.",
   "games.tft.version": "Versão dos dados {version}",
   "games.tft.refresh": "Atualizar referência",
-  "games.tft.refreshFailed": "Não foi possível atualizar. A referência anterior continua disponível.",
+  "games.tft.refreshFailed":
+    "Não foi possível atualizar. A referência anterior continua disponível.",
   "games.tft.loadFailed": "Não foi possível carregar os dados dos campeões.",
   "games.tft.set": "Conjunto",
   "games.tft.current": "Atual",
@@ -19,8 +20,10 @@ export default {
   "games.tft.save": "Salvar equipe",
   "games.tft.savedTeams": "Equipes salvas",
   "games.tft.delete": "Excluir equipe salva",
-  "games.tft.note": "Cada campeão conta uma vez. Itens e efeitos especiais podem alterar características ou o espaço da equipe.",
-  "games.tft.saveFailed": "Não foi possível salvar neste dispositivo. Sua equipe atual continua aqui.",
+  "games.tft.note":
+    "Cada campeão conta uma vez. Itens e efeitos especiais podem alterar características ou o espaço da equipe.",
+  "games.tft.saveFailed":
+    "Não foi possível salvar neste dispositivo. Sua equipe atual continua aqui.",
   "games.tft.missing": "Alguns campeões salvos não estão mais neste conjunto.",
   "games.tft.imported": "Equipe importada.",
   "games.tft.full": "Um código comporta até 10 campeões diferentes.",
@@ -54,5 +57,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "Regeneração de vida",
   "games.tft.stat.set14AmpIcon": "Amplificação de dano",
   "games.tft.stat.TFTManaRegen": "Regeneração de mana",
-  "games.tft.stat.scaleSV": "Onivampirismo"
+  "games.tft.stat.scaleSV": "Onivampirismo",
 };

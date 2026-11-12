@@ -63,18 +63,15 @@ function loadWatchedTitle(): Record<string, any> {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
   const exports: Record<string, any> = {};
-  new Function("require", "exports", code)(
-    (id: string) => {
-      if (id === "@/lib/playback-history") {
-        return { watchTitleKey: (name?: string) => name?.trim().toLowerCase() ?? null };
-      }
-      if (id === "@/lib/providers/tmdb/tmdb-imdb-resolve") {
-        return { tmdbFromImdbCached: () => null, tmdbImdbCached: () => null };
-      }
-      throw new Error(`Unexpected dependency: ${id}`);
-    },
-    exports,
-  );
+  new Function("require", "exports", code)((id: string) => {
+    if (id === "@/lib/playback-history") {
+      return { watchTitleKey: (name?: string) => name?.trim().toLowerCase() ?? null };
+    }
+    if (id === "@/lib/providers/tmdb/tmdb-imdb-resolve") {
+      return { tmdbFromImdbCached: () => null, tmdbImdbCached: () => null };
+    }
+    throw new Error(`Unexpected dependency: ${id}`);
+  }, exports);
   return exports;
 }
 
@@ -106,8 +103,5 @@ test("a watched tmdb episode cannot hide a movie with the same tmdb id", () => {
 test("imdb episode folds still mark their show as watched", () => {
   const { isTitleWatched, collapseWatchedKeys } = loadWatchedTitle();
   const traktKeys = collapseWatchedKeys(new Set(["imdb:tt0944947:1:1"]));
-  assert.equal(
-    isTitleWatched({ id: "tt0944947", name: "Game of Thrones" }, { traktKeys }),
-    true,
-  );
+  assert.equal(isTitleWatched({ id: "tt0944947", name: "Game of Thrones" }, { traktKeys }), true);
 });

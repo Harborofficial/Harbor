@@ -22,18 +22,26 @@ export default {
   "games.patch.fingerprint": "फ़ाइल फ़िंगरप्रिंट · SHA-256",
   "games.patch.fingerprints": "फ़ाइल फ़िंगरप्रिंट · SHA-256",
   "games.patch.localNote": "आपके डिवाइस पर · BPS · IPS · UPS · अधिकतम 256 MB",
-  "games.patch.desktop": "Windows, macOS या Linux के Harbor डेस्कटॉप ऐप में पैच लगाएँ। फ़ाइलें आपके डिवाइस पर रहती हैं और मूल गेम सुरक्षित रहता है।",
+  "games.patch.desktop":
+    "Windows, macOS या Linux के Harbor डेस्कटॉप ऐप में पैच लगाएँ। फ़ाइलें आपके डिवाइस पर रहती हैं और मूल गेम सुरक्षित रहता है।",
   "games.patch.done": "नए रोमांच के लिए तैयार",
   "games.patch.preserved": "पैच वाली कॉपी सहेज दी गई है। मूल गेम और पैच में कोई बदलाव नहीं हुआ।",
-  "games.patch.patch_source_mismatch": "इस पैच को मूल गेम की दूसरी फ़ाइल या संस्करण चाहिए। प्रोजेक्ट की ज़रूरतें जाँचकर सही फ़ाइल चुनें।",
-  "games.patch.patch_checksum_mismatch": "पैच का चेकसम मेल नहीं खाता। फ़ाइल अधूरी हो सकती है; प्रोजेक्ट से नई कॉपी डाउनलोड करें।",
-  "games.patch.patch_target_mismatch": "तैयार कॉपी का चेकसम अपेक्षित चेकसम से मेल नहीं खाता। कुछ भी सहेजा नहीं गया।",
+  "games.patch.patch_source_mismatch":
+    "इस पैच को मूल गेम की दूसरी फ़ाइल या संस्करण चाहिए। प्रोजेक्ट की ज़रूरतें जाँचकर सही फ़ाइल चुनें।",
+  "games.patch.patch_checksum_mismatch":
+    "पैच का चेकसम मेल नहीं खाता। फ़ाइल अधूरी हो सकती है; प्रोजेक्ट से नई कॉपी डाउनलोड करें।",
+  "games.patch.patch_target_mismatch":
+    "तैयार कॉपी का चेकसम अपेक्षित चेकसम से मेल नहीं खाता। कुछ भी सहेजा नहीं गया।",
   "games.patch.patch_expired": "इस तैयारी की समय सीमा समाप्त हो गई है। पैच फिर से जाँचें।",
-  "games.patch.patch_inputs_changed": "सत्यापन के बाद चुनी गई एक फ़ाइल बदल गई। सहेजने से पहले पैच फिर से जाँचें।",
-  "games.patch.patch_output_exists": "इस जगह पर फ़ाइल पहले से मौजूद है। दूसरा नाम चुनें; Harbor मौजूदा फ़ाइलों को नहीं बदलता।",
-  "games.patch.patch_read_failed": "चुनी गई एक फ़ाइल पढ़ी नहीं जा सकी। जाँचें कि वह अभी उपलब्ध है, फिर उसे दोबारा चुनें।",
+  "games.patch.patch_inputs_changed":
+    "सत्यापन के बाद चुनी गई एक फ़ाइल बदल गई। सहेजने से पहले पैच फिर से जाँचें।",
+  "games.patch.patch_output_exists":
+    "इस जगह पर फ़ाइल पहले से मौजूद है। दूसरा नाम चुनें; Harbor मौजूदा फ़ाइलों को नहीं बदलता।",
+  "games.patch.patch_read_failed":
+    "चुनी गई एक फ़ाइल पढ़ी नहीं जा सकी। जाँचें कि वह अभी उपलब्ध है, फिर उसे दोबारा चुनें।",
   "games.patch.patch_write_failed": "कॉपी सहेजी नहीं जा सकी। फ़ोल्डर और खाली जगह जाँचें या दूसरी जगह चुनें।",
-  "games.patch.patch_too_large": "मूल गेम, पैच और तैयार कॉपी में से हर एक का आकार अधिकतम 256 MB होना चाहिए।",
+  "games.patch.patch_too_large":
+    "मूल गेम, पैच और तैयार कॉपी में से हर एक का आकार अधिकतम 256 MB होना चाहिए।",
   "games.patch.patch_busy": "एक और पैच पर काम चल रहा है। पूरा होने पर फिर कोशिश करें।",
   "games.patch.patch_game_type": "समर्थित गेम फ़ाइल चुनें, जैसे GBA, GB, NES, SFC, NDS या ROM।",
   "games.patch.patch_output_type": "कॉपी सहेजते समय मूल गेम का फ़ाइल एक्सटेंशन बनाए रखें।",
@@ -65,5 +73,5 @@ export default {
   "games.patch.choosePatch": "पैच चुनें (BPS, IPS, UPS)",
   "games.patch.patch_unsupported": "यह फ़ाइल समर्थित BPS, IPS या UPS पैच नहीं है।",
   "games.discovery.viewGame": "गेम देखें",
-  "games.atlas.basedOn": "इस गेम पर आधारित"
+  "games.atlas.basedOn": "इस गेम पर आधारित",
 };

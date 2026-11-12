@@ -1,4 +1,4 @@
-const gameHub: Record<string,string> = {
+const gameHub: Record<string, string> = {
   "games.hub.filesTitle": "项目文件",
   "games.hub.videoUnavailable": "无法加载实机演示视频。",
   "games.hub.noVideos": "这些 ROM 改版暂无视频。",
@@ -26,7 +26,8 @@ const gameHub: Record<string,string> = {
   "games.hub.how": "如何游玩 ROM 改版",
   "games.hub.stepFind": "打开改版详情，查看项目网站及所需的原作。",
   "games.hub.stepPatch": "选择原版 ROM 和 BPS 或 IPS 补丁。Harbor 会检查文件并另存一份副本。",
-  "games.hub.stepPlay": "将副本加入游戏库。支持的系统可在 Harbor 中游玩，其他系统可使用已配置的模拟器。",
+  "games.hub.stepPlay":
+    "将副本加入游戏库。支持的系统可在 Harbor 中游玩，其他系统可使用已配置的模拟器。",
   "games.hub.byOriginal": "按原版游戏查找改版",
   "games.hub.allHacks": "浏览所有改版",
   "games.hub.baseUnlisted": "未列出原作",
@@ -56,6 +57,6 @@ const gameHub: Record<string,string> = {
   "games.collectionsLive.gtaRecord": "仅三天的销售额",
   "games.collectionsLive.gtaDate": "2013 年 9 月",
   "games.atlas.kind.greats": "历代佳作",
-  "games.atlas.kind.coop": "合作游戏"
+  "games.atlas.kind.coop": "合作游戏",
 };
 export default gameHub;

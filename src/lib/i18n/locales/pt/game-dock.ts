@@ -8,8 +8,10 @@ export default {
   "games.sidebar.customOrder": "Minha ordem",
   "games.sidebar.arrange": "Organizar barra lateral",
   "games.sidebar.resetFilters": "Redefinir filtros",
-  "games.sidebar.arrangeNote": "Arraste ou use as setas para reordenar. Fixe seus jogos ou oculte itens desta barra.",
-  "games.sidebar.saveFailed": "Não foi possível salvar as preferências. As alterações valem para esta sessão.",
+  "games.sidebar.arrangeNote":
+    "Arraste ou use as setas para reordenar. Fixe seus jogos ou oculte itens desta barra.",
+  "games.sidebar.saveFailed":
+    "Não foi possível salvar as preferências. As alterações valem para esta sessão.",
   "games.sidebar.move": "Mover {name}",
   "games.sidebar.up": "Mover {name} para cima",
   "games.sidebar.down": "Mover {name} para baixo",
@@ -19,12 +21,15 @@ export default {
   "games.sidebar.hide": "Ocultar {name} da barra",
   "games.sidebar.pinned": "Fixados",
   "games.dock.welcomeTitle": "Mostrar a aba de jogos?",
-  "games.dock.welcomeNote": "Acesse seus jogos ao passar o cursor. Desative quando quiser em Configurações → Tema e aparência → Interface.",
+  "games.dock.welcomeNote":
+    "Acesse seus jogos ao passar o cursor. Desative quando quiser em Configurações → Tema e aparência → Interface.",
   "games.dock.welcomeEnable": "Mostrar aba de jogos",
   "games.dock.welcomeDismiss": "Agora não",
   "games.dock.settingTitle": "Biblioteca rápida",
-  "games.dock.settingNote": "Mostra uma aba discreta na borda para acessar sua biblioteca rapidamente. Desativada por padrão.",
-  "games.dock.launchError": "Não foi possível abrir o jogo. Verifique a instalação e o inicializador e tente novamente.",
+  "games.dock.settingNote":
+    "Mostra uma aba discreta na borda para acessar sua biblioteca rapidamente. Desativada por padrão.",
+  "games.dock.launchError":
+    "Não foi possível abrir o jogo. Verifique a instalação e o inicializador e tente novamente.",
   "games.dock.launcher": "Inicializadores",
   "games.dock.client": "Abrir no {launcher}",
   "games.dock.openClient": "Abrir {name} no {launcher}",
@@ -75,5 +80,6 @@ export default {
   "games.badge.unavailable": "Ficheiros indisponíveis",
   "games.badge.notInstalled": "Não instalado",
   "games.home.libraryFirstTitle": "Abrir Jogos na sua biblioteca",
-  "games.home.libraryFirstNote": "Comece na sua biblioteca em vez de Explorar cada vez que abrir Jogos."
+  "games.home.libraryFirstNote":
+    "Comece na sua biblioteca em vez de Explorar cada vez que abrir Jogos.",
 };

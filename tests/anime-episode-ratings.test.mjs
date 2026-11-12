@@ -65,6 +65,11 @@ function fixture() {
       react: React,
       "@/lib/providers/harbor-imdb": provider,
       "@/lib/providers/omdb": {},
+      "@/lib/search": { searchCinemeta: async () => ({ series: [] }) },
+      "@/lib/omdb-season-queue": {
+        selectOmdbSeasonsForOrder: (seasons) => ({ lazy: false, seasons: [...seasons] }),
+        createOmdbSeasonQueue: () => ({ enqueue() {}, dispose() {} }),
+      },
     },
     {
       setTimeout: (fn, ms) => {

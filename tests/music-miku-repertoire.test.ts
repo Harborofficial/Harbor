@@ -5,8 +5,19 @@ import { MIKU_DANCE as before } from "./fixtures/miku-dance-before-removal";
 
 test("successive tracks cycle only retained sway and reference layouts with their authored exits", () => {
   const retained = [0, 2];
-  for (const key of ["rows", "frameWidths", "loopFrames", "loopBeats", "breaksMs", "stopExits"] as const) {
-    assert.deepEqual(MIKU_DANCE[key], retained.map(i => before[key][i]), key);
+  for (const key of [
+    "rows",
+    "frameWidths",
+    "loopFrames",
+    "loopBeats",
+    "breaksMs",
+    "stopExits",
+  ] as const) {
+    assert.deepEqual(
+      MIKU_DANCE[key],
+      retained.map((i) => before[key][i]),
+      key,
+    );
   }
   assert.deepEqual(MIKU_DANCE.loopFrames, [64, 76]);
   assert.deepEqual(MIKU_DANCE.frameWidths, [288, 384]);
@@ -15,8 +26,12 @@ test("successive tracks cycle only retained sway and reference layouts with thei
   let now = 0;
   const tick = (active = true) => {
     now += 16;
-    const state = dance.advance(16, { beat: now / 500, period: 500, locked: true,
-      excitement: .8, highlight: true, danceFit: 1 }, active, true);
+    const state = dance.advance(
+      16,
+      { beat: now / 500, period: 500, locked: true, excitement: 0.8, highlight: true, danceFit: 1 },
+      active,
+      true,
+    );
     assert.ok(state.kind === 0 || state.kind === 1, "removed routine cannot reappear");
     assert.ok(state.opacity === 0 || state.opacity === 1);
     return state;
@@ -31,7 +46,8 @@ test("successive tracks cycle only retained sway and reference layouts with thei
     const kind = state.kind;
     seen.push(kind);
     assert.equal(memory.lastPerformed, kind);
-    const start = now, loopFrames = MIKU_DANCE.loopFrames[kind];
+    const start = now,
+      loopFrames = MIKU_DANCE.loopFrames[kind];
     const observed = new Set<number>();
     while (now - start < MIKU_DANCE.loopBeats[kind] * 500 * 2) {
       state = tick();
@@ -49,7 +65,11 @@ test("successive tracks cycle only retained sway and reference layouts with thei
       if (state.stage === "disengaging") {
         sawAuthoredExit = true;
         const stops = MIKU_DANCE.stopExits[kind]!;
-        assert.ok(stops.frameOffsets.some(offset => state.frame >= offset && state.frame < offset + stops.frames));
+        assert.ok(
+          stops.frameOffsets.some(
+            (offset) => state.frame >= offset && state.frame < offset + stops.frames,
+          ),
+        );
       }
     }
     assert.ok(sawAuthoredExit);

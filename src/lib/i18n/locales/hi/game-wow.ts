@@ -7,11 +7,14 @@ export default {
   "games.wow.addons.changes": "संस्करण के बदलाव",
   "games.wow.addons.fullNotes": "लेखक के पेज पर पूरा विवरण पढ़ें",
 
-  "games.wow.manager.errorIdentity": "इंस्टॉल किए गए फ़ोल्डर लेखक के ऐडऑन पैकेज से मेल नहीं खाते। फिर स्कैन करें और ऐडऑन का स्रोत जाँचें।",
+  "games.wow.manager.errorIdentity":
+    "इंस्टॉल किए गए फ़ोल्डर लेखक के ऐडऑन पैकेज से मेल नहीं खाते। फिर स्कैन करें और ऐडऑन का स्रोत जाँचें।",
   "games.wow.manager.importInstalled": "इंस्टॉल किए गए ऐडऑन आयात करें",
   "games.wow.manager.import": "Harbor से प्रबंधित करें",
-  "games.wow.manager.importScope": "WoWInterface पहचान वाले इंस्टॉल किए गए ऐडऑन। अन्य ऐडऑन इंस्टॉल की सूची में रहते हैं।",
-  "games.wow.manager.importNote": "अपनी इंस्टॉल की गई फ़ाइलें रखें। Harbor लेखक का पैकेज जाँचता है और भविष्य में अपडेट या हटाने से पहले पिछला संस्करण सहेजता है।",
+  "games.wow.manager.importScope":
+    "WoWInterface पहचान वाले इंस्टॉल किए गए ऐडऑन। अन्य ऐडऑन इंस्टॉल की सूची में रहते हैं।",
+  "games.wow.manager.importNote":
+    "अपनी इंस्टॉल की गई फ़ाइलें रखें। Harbor लेखक का पैकेज जाँचता है और भविष्य में अपडेट या हटाने से पहले पिछला संस्करण सहेजता है।",
   "games.wow.manager.keepVersion": "इंस्टॉल किया गया संस्करण {version} रखें",
   "games.wow.manager.keep": "रखें",
   "games.wow.manager.importSuccess": "यह ऐडऑन अब Harbor द्वारा प्रबंधित है।",
@@ -19,8 +22,10 @@ export default {
   "games.wow.manager.browse": "ऐडऑन खोजें",
   "games.wow.manager.managed": "Harbor द्वारा प्रबंधित",
   "games.wow.manager.backups": "बैकअप",
-  "games.wow.manager.catalogNote": "WoWInterface देखें। बदलाव लागू करने से पहले इंस्टॉल किए गए WoW के साथ संगतता जाँची जाती है।",
-  "games.wow.manager.managedNote": "यहाँ केवल Harbor से इंस्टॉल किए गए ऐडऑन बदले जा सकते हैं। अन्य ऐडऑन इंस्टॉल की सूची में रहते हैं।",
+  "games.wow.manager.catalogNote":
+    "WoWInterface देखें। बदलाव लागू करने से पहले इंस्टॉल किए गए WoW के साथ संगतता जाँची जाती है।",
+  "games.wow.manager.managedNote":
+    "यहाँ केवल Harbor से इंस्टॉल किए गए ऐडऑन बदले जा सकते हैं। अन्य ऐडऑन इंस्टॉल की सूची में रहते हैं।",
   "games.wow.manager.category": "श्रेणी",
   "games.wow.manager.allCategories": "सभी श्रेणियाँ",
   "games.wow.manager.popular": "मासिक डाउनलोड",
@@ -33,7 +38,8 @@ export default {
   "games.wow.manager.partial": "प्रदाता के कुछ रिकॉर्ड उपलब्ध नहीं हैं। परिणाम अधूरे हो सकते हैं।",
   "games.wow.manager.emptyManaged": "अभी कोई ऐडऑन Harbor द्वारा प्रबंधित नहीं है।",
   "games.wow.manager.emptyBackups": "अभी कोई पिछला संस्करण सहेजा नहीं गया है।",
-  "games.wow.manager.reviewNote": "पहले पैकेज और फ़ोल्डर बदलावों की समीक्षा करें। समीक्षा या बदलाव लागू करने से पहले WoW बंद करें।",
+  "games.wow.manager.reviewNote":
+    "पहले पैकेज और फ़ोल्डर बदलावों की समीक्षा करें। समीक्षा या बदलाव लागू करने से पहले WoW बंद करें।",
   "games.wow.manager.backupNote": "पिछली फ़ाइलें स्थानीय रूप से सुरक्षित: {size}।",
   "games.wow.manager.fileSummary": "{count} फ़ाइलें · {size}",
   "games.wow.manager.preparing": "बदलावों की समीक्षा तैयार हो रही है…",
@@ -48,9 +54,11 @@ export default {
   "games.wow.manager.error": "बदलाव पूरा नहीं हुआ। कनेक्शन और खाली डिस्क स्थान जाँचकर फिर प्रयास करें।",
   "games.wow.manager.errorRunning": "WoW पूरी तरह बंद करके फिर प्रयास करें।",
   "games.wow.manager.errorCompatibility": "यह पैकेज इंस्टॉल किए गए WoW के संस्करण या एडिशन से मेल नहीं खाता।",
-  "games.wow.manager.errorUnmanaged": "ये फ़ोल्डर Harbor के बाहर इंस्टॉल किए गए थे। इन्हें यहाँ ओवरराइट नहीं किया जा सकता।",
+  "games.wow.manager.errorUnmanaged":
+    "ये फ़ोल्डर Harbor के बाहर इंस्टॉल किए गए थे। इन्हें यहाँ ओवरराइट नहीं किया जा सकता।",
   "games.wow.manager.errorChanged": "फ़ाइलें बदल गई हैं या जाँच की आवश्यकता है। दोबारा स्कैन करें।",
-  "games.wow.manager.errorDependency": "ज़रूरी निर्भरताएँ गायब हैं या किसी अन्य ऐडऑन को इन फ़ाइलों की ज़रूरत है।",
+  "games.wow.manager.errorDependency":
+    "ज़रूरी निर्भरताएँ गायब हैं या किसी अन्य ऐडऑन को इन फ़ाइलों की ज़रूरत है।",
   "games.wow.manager.errorExpired": "इस समीक्षा की समय सीमा समाप्त हो गई। बदलावों की फिर समीक्षा करें।",
   "games.wow.manager.errorDesktop": "ऐडऑन प्रबंधन के लिए Windows पर Harbor का वर्तमान डेस्कटॉप ऐप चाहिए।",
 
@@ -98,7 +106,8 @@ export default {
   "games.wow.classic.news": "Classic समाचार",
   "games.wow.realm.browse": "रियल्म देखें",
   "games.wow.realm.unavailable": "रियल्म की स्थिति उपलब्ध नहीं है। आप फिर भी रियल्म दर्ज कर सकते हैं।",
-  "games.wow.realm.unsupported": "Blizzard की वैश्विक स्थिति सेवा इस क्षेत्र को कवर नहीं करती। अपना रियल्म मैन्युअल रूप से दर्ज करें।",
+  "games.wow.realm.unsupported":
+    "Blizzard की वैश्विक स्थिति सेवा इस क्षेत्र को कवर नहीं करती। अपना रियल्म मैन्युअल रूप से दर्ज करें।",
   "games.wow.realm.noMatches": "कोई मेल खाता रियल्म नहीं। आप नाम मैन्युअल रूप से दर्ज कर सकते हैं।",
   "games.wow.realm.refresh": "रियल्म की स्थिति रीफ़्रेश करें",
   "games.wow.realm.unknown": "स्थिति अज्ञात",
@@ -163,7 +172,8 @@ export default {
   "games.wow.bosses": "{count} बॉस",
   "games.wow.raidsUnavailable": "वर्तमान रेड की जानकारी उपलब्ध नहीं है।",
   "games.wow.checked": "जाँचा गया: {date}",
-  "games.wow.scope": "Raider.IO से Retail डेटा। टाइमर कीस्टोन के लिए हैं; अफ़िक्स कीस्टोन स्तर के अनुसार बदलते हैं।",
+  "games.wow.scope":
+    "Raider.IO से Retail डेटा। टाइमर कीस्टोन के लिए हैं; अफ़िक्स कीस्टोन स्तर के अनुसार बदलते हैं।",
   "games.wow.region.us": "अमेरिका / ओशिआनिया",
   "games.wow.region.eu": "यूरोप",
   "games.wow.region.kr": "कोरिया",

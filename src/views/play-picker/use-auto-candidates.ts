@@ -3,12 +3,12 @@ import { isStreamDead } from "@/lib/dead-streams";
 import { engineP2pEligible } from "@/lib/torrent/stremio-stream";
 import type { ScoredStream } from "@/lib/streams/types";
 import {
-  streamMatchesEntry,
   streamMatchesPreferredSource,
   streamMatchesPreferredSourceFallback,
   streamMatchesReleaseLineage,
   streamMatchesSource,
   findPreferredSourceMatch,
+  findRememberedSourceMatch,
   streamOfferedByAddon,
   type PlaybackEntry,
 } from "@/lib/playback-history";
@@ -40,6 +40,7 @@ export function useAutoCandidates(args: {
   hostSource?: SourceDescriptor | null;
   prefer1080?: boolean;
   preferPacks?: boolean;
+  sourceEntryFirst?: boolean;
   season?: number | null;
   episode?: number | null;
   expectedTitle?: string | null;
@@ -61,6 +62,7 @@ export function useAutoCandidates(args: {
     hostSource,
     prefer1080,
     preferPacks,
+    sourceEntryFirst,
     season,
     episode,
     expectedTitle,
@@ -116,7 +118,12 @@ export function useAutoCandidates(args: {
     });
     const matchScores = hostSource ? buildMatchScores(filteredPicker.all, hostSource) : null;
     const previousMatch = previousPlayback
-      ? (filteredPicker.allRaw.find((s) => streamMatchesEntry(s, previousPlayback)) ?? null)
+      ? findRememberedSourceMatch(
+          filteredPicker.allRaw.filter(
+            (s) => !isStreamDead(s) && !isWatchHub(s) && !episodeConflict(s),
+          ),
+          previousPlayback,
+        )
       : null;
     for (const s of filteredPicker.all) s.nameAbsent = !nameKnown(s);
     const sorted = filteredPicker.all.slice().sort((a, b) => {
@@ -211,10 +218,14 @@ export function useAutoCandidates(args: {
       : null;
     const instantPlayable = (s: ScoredStream | null) => !!s && (isCached(s) || !!s.url);
     if (!matchScores) {
+      // The exact remembered file wins for the episode it belongs to; the
+      // series lineage only fills in when no same-episode memory exists. A
+      // season lock is an explicit choice and stays first.
+      if (!sourceEntryFirst && instantPlayable(previousMatch)) push(previousMatch);
       if (instantPlayable(sourceMatch)) push(sourceMatch);
       if (instantPlayable(fallbackSourceMatch)) push(fallbackSourceMatch);
       if (instantPlayable(preferredQuality)) push(preferredQuality);
-      if (instantPlayable(previousMatch)) push(previousMatch);
+      if (sourceEntryFirst && instantPlayable(previousMatch)) push(previousMatch);
     }
     for (const s of sorted) push(s);
     if (out.length > 0) return out;
@@ -239,6 +250,7 @@ export function useAutoCandidates(args: {
     hostSource,
     prefer1080,
     preferPacks,
+    sourceEntryFirst,
     season,
     episode,
     expectedTitle,

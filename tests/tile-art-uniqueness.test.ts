@@ -48,8 +48,16 @@ test("a tile with nothing left returns fewer rather than duplicating", () => {
 test("both discover tile rows claim through the shared registry", () => {
   for (const f of ["src/components/genre-tiles.tsx", "src/components/language-tiles.tsx"]) {
     const src = readFileSync(new URL(`../${f}`, import.meta.url), "utf8");
-    assert.match(src, /claimUniqueArt\(key, pool, \(m\) => m\.id, 3\)/, `${f} must claim unique art`);
+    assert.match(
+      src,
+      /claimUniqueArt\(key, pool, \(m\) => m\.id, 3\)/,
+      `${f} must claim unique art`,
+    );
     assert.match(src, /releaseUniqueArt\(key\)/, `${f} must release on unmount`);
-    assert.doesNotMatch(src, /\.filter\(\(m\) => m\.background\)\.slice\(0, 3\)/, `${f} still takes the top 3 blindly`);
+    assert.doesNotMatch(
+      src,
+      /\.filter\(\(m\) => m\.background\)\.slice\(0, 3\)/,
+      `${f} still takes the top 3 blindly`,
+    );
   }
 });

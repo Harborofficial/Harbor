@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
-import { listNotifications, markNotificationsRead, type ThemeNotification } from "@/lib/theme-store";
+import {
+  listNotifications,
+  markNotificationsRead,
+  type ThemeNotification,
+} from "@/lib/theme-store";
 
 export function useNotifications() {
   const [items, setItems] = useState<ThemeNotification[]>([]);

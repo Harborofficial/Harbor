@@ -17,5 +17,6 @@ export default {
   "artwork.error.large": "اختر ملفًا أصغر: حتى 8 ميغابايت و4096 × 4096 بكسل.",
   "artwork.error.external": "تستخدم هذه الحركة وسائط خارجية. صدّرها مع تضمين الصور.",
   "artwork.error.storage": "تعذّر حفظ الملف على هذا الجهاز. لم يتغير اختيارك السابق.",
-  "artwork.error.invalid": "تعذّرت قراءة الملف. اختر Lottie ‏(.json أو .lottie) أو GIF أو PNG أو JPEG أو WebP."
+  "artwork.error.invalid":
+    "تعذّرت قراءة الملف. اختر Lottie ‏(.json أو .lottie) أو GIF أو PNG أو JPEG أو WebP.",
 };

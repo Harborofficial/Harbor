@@ -21,10 +21,14 @@ export function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[15px] font-medium text-ink">{label}</label>
+      <label htmlFor={id} className="text-[15px] font-medium text-ink">
+        {label}
+      </label>
       {children}
       {hint && (
-        <span className={`text-[13px] leading-5 ${tone === "danger" ? "text-danger" : "text-ink-muted"}`}>
+        <span
+          className={`text-[13px] leading-5 ${tone === "danger" ? "text-danger" : "text-ink-muted"}`}
+        >
           {hint}
         </span>
       )}

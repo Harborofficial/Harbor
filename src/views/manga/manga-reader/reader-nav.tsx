@@ -17,8 +17,18 @@ export function ReaderNav({
   if (pos === "sides") {
     return (
       <>
-        <NavArrow dir="left" onClick={onPrev} label={t("Previous page")} className={`fixed start-3 top-1/2 z-[90] -translate-y-1/2 ${SIZE}`} />
-        <NavArrow dir="right" onClick={onNext} label={t("Next page")} className={`fixed end-3 top-1/2 z-[90] -translate-y-1/2 ${SIZE}`} />
+        <NavArrow
+          dir="left"
+          onClick={onPrev}
+          label={t("Previous page")}
+          className={`fixed start-3 top-1/2 z-[90] -translate-y-1/2 ${SIZE}`}
+        />
+        <NavArrow
+          dir="right"
+          onClick={onNext}
+          label={t("Next page")}
+          className={`fixed end-3 top-1/2 z-[90] -translate-y-1/2 ${SIZE}`}
+        />
       </>
     );
   }

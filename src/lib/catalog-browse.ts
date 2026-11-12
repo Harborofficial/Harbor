@@ -1,3 +1,4 @@
+import { addonBaseUrl } from "@/lib/addon-url";
 import {
   createAddonCatalogFetcher,
   gatherCatalogAddons,
@@ -88,7 +89,7 @@ export async function listBrowseCatalogs(
   const out: BrowseCatalog[] = extensionCatalogs(opts.pluginRows);
   const addons = await gatherCatalogAddons(authKey).catch(() => []);
   for (const addon of addons) {
-    const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
+    const base = addonBaseUrl(addon.transportUrl);
     for (const cat of addon.manifest.catalogs ?? []) {
       if (!cat?.name || !cat.type || !cat.id) continue;
       if (NON_CONTENT.has(cat.type.toLowerCase())) continue;

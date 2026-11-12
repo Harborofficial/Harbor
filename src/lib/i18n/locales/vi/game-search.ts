@@ -7,11 +7,13 @@ export default {
   "games.searchUi.web": "Ngữ cảnh web",
   "games.searchUi.settings": "Cài đặt AI",
   "games.searchUi.setup": "Kết nối nhà cung cấp AI",
-  "games.searchUi.setupNote": "Dùng cùng tài khoản OpenRouter hoặc Groq và mô hình bạn đã dùng trong Harbor.",
+  "games.searchUi.setupNote":
+    "Dùng cùng tài khoản OpenRouter hoặc Groq và mô hình bạn đã dùng trong Harbor.",
   "games.searchUi.aiHint": "Nhấn Enter khi sẵn sàng. Bộ lọc đã chọn cũng áp dụng cho kết quả AI.",
   "games.searchUi.thinking": "Đang tìm trò chơi và kiểm tra trên Steam…",
   "games.searchUi.verified": "{count} kết quả Steam · Gợi ý AI",
-  "games.searchUi.noAiResults": "Không có kết quả Steam đã xác minh với các bộ lọc này. Thử mô tả khác hoặc bớt bộ lọc.",
+  "games.searchUi.noAiResults":
+    "Không có kết quả Steam đã xác minh với các bộ lọc này. Thử mô tả khác hoặc bớt bộ lọc.",
   "games.searchUi.random": "Trò chơi ngẫu nhiên",
   "games.searchUi.randomHint": "Chọn ngẫu nhiên một trò chơi khớp với tìm kiếm và bộ lọc này.",
   "games.searchUi.picking": "Đang chọn…",
@@ -21,5 +23,5 @@ export default {
   "games.searchUi.sources": "Steam + IGDB · Trò chơi PC, console và bản mod ROM.",
   "games.searchUi.steamScope": "Các bộ lọc hoặc thứ tự này sử dụng dữ liệu Steam.",
   "games.searchUi.allCatalogs": "Tìm trong tất cả danh mục",
-  "games.searchUi.partial": "Một số kết quả không khả dụng: {providers}."
+  "games.searchUi.partial": "Một số kết quả không khả dụng: {providers}.",
 };

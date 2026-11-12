@@ -57,9 +57,7 @@ export function AioStatusModal({
               </span>
             )}
             <div className="flex min-w-0 flex-col gap-1">
-              <span className="harbor-settings-label">
-                {t("Service status")}
-              </span>
+              <span className="harbor-settings-label">{t("Service status")}</span>
               <span className="truncate text-[19px] font-semibold leading-[26px] tracking-tight text-ink">
                 {snapshot.addonName}
               </span>
@@ -108,8 +106,12 @@ function ServiceRow({ service }: { service: AioService }) {
   return (
     <li className="flex items-center gap-3 rounded-md bg-canvas px-3.5 py-3">
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">{service.name}</span>
-        <span className="truncate text-[15.5px] leading-[22px] text-ink-subtle">{service.rawLine}</span>
+        <span className="truncate text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">
+          {service.name}
+        </span>
+        <span className="truncate text-[15.5px] leading-[22px] text-ink-subtle">
+          {service.rawLine}
+        </span>
       </div>
       <span className={`flex shrink-0 items-center gap-2 text-[15px] font-semibold ${pal.text}`}>
         <span className={`h-2 w-2 shrink-0 rounded-full ${pal.dot}`} />

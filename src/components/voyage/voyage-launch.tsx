@@ -14,7 +14,9 @@ const SETTLE_MS = 140;
 const CROSSFADE_MS = 240;
 
 function reduced(): boolean {
-  return typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  return (
+    typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+  );
 }
 
 type ContentBox = { minX: number; maxX: number; cx: number; cy: number; span: number };
@@ -105,7 +107,10 @@ export function VoyageLaunch({ thumbs, onDone }: { thumbs: LaunchThumb[]; onDone
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
-    if (reduced()) { finish(); return; }
+    if (reduced()) {
+      finish();
+      return;
+    }
     let cancelled = false;
     // Let the app's pointer-down cleanup finish before moving focus into the launch.
     const focusFrame = requestAnimationFrame(() => skipRef.current?.focus({ preventScroll: true }));
@@ -121,8 +126,14 @@ export function VoyageLaunch({ thumbs, onDone }: { thumbs: LaunchThumb[]; onDone
     const onReady = () => {
       if (cancelled || completed.current) return;
       const svg = stage.querySelector("svg");
-      if (!svg) { finish(); return; }
-      paintPosters(svg, three.map(c => c.src));
+      if (!svg) {
+        finish();
+        return;
+      }
+      paintPosters(
+        svg,
+        three.map((c) => c.src),
+      );
       const content = measureContent(svg, anim);
       if (content) {
         contentRef.current = { svg, content };
@@ -136,7 +147,10 @@ export function VoyageLaunch({ thumbs, onDone }: { thumbs: LaunchThumb[]; onDone
         }
         return null;
       });
-      if (found.some(r => !r)) { finish(); return; }
+      if (found.some((r) => !r)) {
+        finish();
+        return;
+      }
       setTargets(found as DOMRect[]);
     };
     anim.addEventListener("DOMLoaded", onReady);
@@ -159,11 +173,14 @@ export function VoyageLaunch({ thumbs, onDone }: { thumbs: LaunchThumb[]; onDone
     let cancelled = false;
     let settle = 0;
     const animations: Animation[] = [];
-    const width = Math.min(128, window.innerWidth * .16);
-    const height = width * RECT_H / RECT_W;
-    const gap = Math.min(18, window.innerWidth * .02);
+    const width = Math.min(128, window.innerWidth * 0.16);
+    const height = (width * RECT_H) / RECT_W;
+    const gap = Math.min(18, window.innerWidth * 0.02);
     const startX = (window.innerWidth - three.length * width - (three.length - 1) * gap) / 2;
-    const gathered = three.map((_, i) => new DOMRect(startX + i * (width + gap), (window.innerHeight - height) / 2, width, height));
+    const gathered = three.map(
+      (_, i) =>
+        new DOMRect(startX + i * (width + gap), (window.innerHeight - height) / 2, width, height),
+    );
     const transformTo = (from: DOMRect, to: DOMRect) =>
       `translate(${to.left - from.left}px, ${to.top - from.top}px) scale(${to.width / from.width}, ${to.height / from.height})`;
     const run = async () => {
@@ -172,10 +189,20 @@ export function VoyageLaunch({ thumbs, onDone }: { thumbs: LaunchThumb[]; onDone
         const el = cloneRefs.current[i];
         if (!el) return Promise.resolve();
         const to = gathered[i % gathered.length];
-        const frames: Keyframe[] = i < three.length
-          ? [{ transform: "none" }, { transform: transformTo(thumb.rect, to) }]
-          : [{ transform: "none", opacity: 1 }, { opacity: .65, offset: .45 }, { transform: transformTo(thumb.rect, to), opacity: 0 }];
-        const animation = el.animate(frames, { duration: 520, delay: i * 18, easing: "ease-in-out", fill: "forwards" });
+        const frames: Keyframe[] =
+          i < three.length
+            ? [{ transform: "none" }, { transform: transformTo(thumb.rect, to) }]
+            : [
+                { transform: "none", opacity: 1 },
+                { opacity: 0.65, offset: 0.45 },
+                { transform: transformTo(thumb.rect, to), opacity: 0 },
+              ];
+        const animation = el.animate(frames, {
+          duration: 520,
+          delay: i * 18,
+          easing: "ease-in-out",
+          fill: "forwards",
+        });
         animations.push(animation);
         return animation.finished;
       });
@@ -187,12 +214,20 @@ export function VoyageLaunch({ thumbs, onDone }: { thumbs: LaunchThumb[]; onDone
         if (!el) return Promise.resolve();
         const from = gathered[i];
         const to = targets[i];
-        const near = new DOMRect(to.left + (from.left - to.left) * .08, to.top - 10, to.width * 1.025, to.height * 1.015);
-        const animation = el.animate([
-          { transform: transformTo(thumb.rect, from) },
-          { transform: transformTo(thumb.rect, near), offset: .72 },
-          { transform: transformTo(thumb.rect, to) },
-        ], { duration: FLIGHT_MS, delay: i * 70, easing: "ease-in-out", fill: "forwards" });
+        const near = new DOMRect(
+          to.left + (from.left - to.left) * 0.08,
+          to.top - 10,
+          to.width * 1.025,
+          to.height * 1.015,
+        );
+        const animation = el.animate(
+          [
+            { transform: transformTo(thumb.rect, from) },
+            { transform: transformTo(thumb.rect, near), offset: 0.72 },
+            { transform: transformTo(thumb.rect, to) },
+          ],
+          { duration: FLIGHT_MS, delay: i * 70, easing: "ease-in-out", fill: "forwards" },
+        );
         animations.push(animation);
         return animation.finished;
       });
@@ -208,7 +243,7 @@ export function VoyageLaunch({ thumbs, onDone }: { thumbs: LaunchThumb[]; onDone
     return () => {
       cancelled = true;
       window.clearTimeout(settle);
-      animations.forEach(animation => animation.cancel());
+      animations.forEach((animation) => animation.cancel());
     };
   }, [targets, cast, three]);
 
@@ -223,22 +258,63 @@ export function VoyageLaunch({ thumbs, onDone }: { thumbs: LaunchThumb[]; onDone
   }, []);
 
   return createPortal(
-    <div className="animate-voyage-launch-in fixed inset-0 z-[1200] bg-canvas" data-voyage-launch data-phase={phase} data-tv-focus-scope>
-      <div ref={stageRef} aria-hidden data-voyage-boat className="pointer-events-none absolute inset-0 transition-opacity ease-in-out" style={{ opacity: phase === "sailing" ? 1 : 0, transitionDuration: `${CROSSFADE_MS}ms` }} />
+    <div
+      className="animate-voyage-launch-in fixed inset-0 z-[1200] bg-canvas"
+      data-voyage-launch
+      data-phase={phase}
+      data-tv-focus-scope
+    >
+      <div
+        ref={stageRef}
+        aria-hidden
+        data-voyage-boat
+        className="pointer-events-none absolute inset-0 transition-opacity ease-in-out"
+        style={{ opacity: phase === "sailing" ? 1 : 0, transitionDuration: `${CROSSFADE_MS}ms` }}
+      />
       {cast.map((thumb, i) => (
-        <div key={i} ref={el => { cloneRefs.current[i] = el; }} aria-hidden data-voyage-flying-poster
+        <div
+          key={i}
+          ref={(el) => {
+            cloneRefs.current[i] = el;
+          }}
+          aria-hidden
+          data-voyage-flying-poster
           className="pointer-events-none absolute overflow-hidden transition-opacity ease-in-out"
-          style={{ left: thumb.rect.left, top: thumb.rect.top, width: thumb.rect.width, height: thumb.rect.height,
-            transformOrigin: "top left", borderRadius: Math.max(4, thumb.rect.width * .06),
-            opacity: phase === "sailing" ? 0 : 1, transitionDuration: `${CROSSFADE_MS}ms`, zIndex: i < 3 ? 2 : 1 }}>
+          style={{
+            left: thumb.rect.left,
+            top: thumb.rect.top,
+            width: thumb.rect.width,
+            height: thumb.rect.height,
+            transformOrigin: "top left",
+            borderRadius: Math.max(4, thumb.rect.width * 0.06),
+            opacity: phase === "sailing" ? 0 : 1,
+            transitionDuration: `${CROSSFADE_MS}ms`,
+            zIndex: i < 3 ? 2 : 1,
+          }}
+        >
           <img src={thumb.src} alt="" draggable={false} className="h-full w-full object-cover" />
         </div>
       ))}
-      <button ref={skipRef} type="button" data-tv-modal-close onClick={finish} aria-label={t("Skip the launch")}
-        onKeyDown={e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finish(); } }}
-        className="absolute inset-0 z-10 cursor-pointer focus-visible:outline-none">
-        <span className="absolute inset-x-0 bottom-8 text-center text-[12px] font-medium text-ink-subtle">{t("Click anywhere to skip")}</span>
+      <button
+        ref={skipRef}
+        type="button"
+        data-tv-modal-close
+        onClick={finish}
+        aria-label={t("Skip the launch")}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            e.stopPropagation();
+            finish();
+          }
+        }}
+        className="absolute inset-0 z-10 cursor-pointer focus-visible:outline-none"
+      >
+        <span className="absolute inset-x-0 bottom-8 text-center text-[12px] font-medium text-ink-subtle">
+          {t("Click anywhere to skip")}
+        </span>
       </button>
-    </div>, document.body,
+    </div>,
+    document.body,
   );
 }

@@ -20,7 +20,11 @@ const QUIET_TRIES = 6;
 const QUIET_SECS = 6;
 
 const sh = (c) =>
-  execSync(c, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 32 * 1024 * 1024 });
+  execSync(c, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+    maxBuffer: 32 * 1024 * 1024,
+  });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const say = (s) => process.stdout.write(s + "\n");
 
@@ -29,7 +33,11 @@ function power() {
   try {
     out = sh("adb shell dumpsys power");
   } catch (e) {
-    return { reachable: false, on: false, why: String(e && e.message ? e.message : e).split("\n")[0] };
+    return {
+      reachable: false,
+      on: false,
+      why: String(e && e.message ? e.message : e).split("\n")[0],
+    };
   }
   return { reachable: true, on: /mWakefulness=Awake/.test(out), why: "" };
 }
@@ -76,7 +84,9 @@ async function requireQuiet() {
     await wait(QUIET_SECS * 1000);
     const s = read();
     if (s && s.frames === 0) return true;
-    say(`  baseline not quiet (${s ? s.frames : "?"} frames in ${QUIET_SECS}s), settling ${i}/${QUIET_TRIES}`);
+    say(
+      `  baseline not quiet (${s ? s.frames : "?"} frames in ${QUIET_SECS}s), settling ${i}/${QUIET_TRIES}`,
+    );
     await wait(6000);
   }
   return false;
@@ -99,7 +109,9 @@ if (app !== PKG) {
   process.exit(1);
 }
 
-say(`tv-press: ${PRESSES} isolated presses, ${GAP}s apart, key=${argv.key || "right"}, label="${LABEL}"`);
+say(
+  `tv-press: ${PRESSES} isolated presses, ${GAP}s apart, key=${argv.key || "right"}, label="${LABEL}"`,
+);
 say("");
 say(`waiting for a verified-quiet baseline (0 frames in ${QUIET_SECS}s)...`);
 
@@ -175,7 +187,9 @@ say(`  ms per press     ${renderMs.toFixed(0)}   (frames x p50 frame time ${fram
 if (frameMs > 20) {
   say(`  NOTE             frames average ${frameMs}ms, well over one 16.7ms vsync.`);
   say(`                   frames x 16.67 would have said ${vsyncMs.toFixed(0)}ms and understated`);
-  say(`                   this by ${(renderMs / Math.max(1, vsyncMs)).toFixed(1)}x. That bug is why this line exists.`);
+  say(
+    `                   this by ${(renderMs / Math.max(1, vsyncMs)).toFixed(1)}x. That bug is why this line exists.`,
+  );
 }
 say(`  janky            ${s.janky} (${((s.janky / Math.max(1, s.frames)) * 100).toFixed(0)}%)`);
 say(`  p50 p90 p95 p99  ${s.p50} ${s.p90} ${s.p95} ${s.p99}`);

@@ -2,12 +2,14 @@ export default {
   "games.minecraft.discovery.viewAll": "查看全部",
   "games.minecraft.discovery.searchCurseForge": "搜索 CurseForge",
   "games.minecraft.discovery.downloads": "下载量",
-  "games.minecraft.discovery.curseForgeBlocked": "CurseForge 暂时不允许 Harbor 加载此目录。请重试或打开来源网站。",
+  "games.minecraft.discovery.curseForgeBlocked":
+    "CurseForge 暂时不允许 Harbor 加载此目录。请重试或打开来源网站。",
   "games.minecraft.discovery.unavailable": "无法加载此目录，请重试。",
   "games.minecraft.discovery.openSource": "打开来源网站",
   "games.minecraft.discovery.loadMore": "加载更多",
   "games.minecraft.discovery.servers": "服务器",
-  "games.minecraft.discovery.serverNote": "独立服务器目录。Harbor 与这些网站或服务器没有隶属关系。人数由各目录提供。",
+  "games.minecraft.discovery.serverNote":
+    "独立服务器目录。Harbor 与这些网站或服务器没有隶属关系。人数由各目录提供。",
   "games.minecraft.discovery.searchServers": "搜索已加载的服务器",
   "games.minecraft.discovery.directory": "目录来源",
   "games.minecraft.discovery.mode": "游戏模式",
@@ -38,12 +40,15 @@ export default {
   "games.minecraft.lifecycle.worlds": "包含世界",
   "games.minecraft.lifecycle.settings": "包含操作设置和服务器列表",
   "games.minecraft.lifecycle.exportNote": "创建包含模组和配置的便携 .mrpack 文件。",
-  "games.minecraft.lifecycle.privateNote": "不包含 Harbor 账户数据、运行文件和日志。分享前请检查模组配置。",
+  "games.minecraft.lifecycle.privateNote":
+    "不包含 Harbor 账户数据、运行文件和日志。分享前请检查模组配置。",
   "games.minecraft.lifecycle.included": "包含的文件",
   "games.minecraft.lifecycle.referenced": "下载引用",
-  "games.minecraft.lifecycle.referenceNote": "已验证的提供方文件将在导入时重新下载。修改过的文件和本地文件会包含在压缩包中。",
+  "games.minecraft.lifecycle.referenceNote":
+    "已验证的提供方文件将在导入时重新下载。修改过的文件和本地文件会包含在压缩包中。",
   "games.minecraft.lifecycle.edit": "编辑选择",
-  "games.minecraft.lifecycle.storageNote": "更新整合包时保留的旧版本。可在整合包版本中恢复最新副本。",
+  "games.minecraft.lifecycle.storageNote":
+    "更新整合包时保留的旧版本。可在整合包版本中恢复最新副本。",
   "games.minecraft.lifecycle.latest": "当前还原点",
   "games.minecraft.lifecycle.reviewCopy": "检查 {version}",
   "games.minecraft.lifecycle.review": "检查文件",
@@ -70,7 +75,8 @@ export default {
   "games.minecraft.lifecycle.existsError": "该文件已存在。请选择新文件名。",
   "games.minecraft.lifecycle.limitError": "导出超过 256 MB 压缩包上限。请尝试不包含世界。",
 
-  "games.minecraft.update.compatibilityError": "这些模组与所选 Minecraft 和加载器版本不兼容。当前实例未更改。",
+  "games.minecraft.update.compatibilityError":
+    "这些模组与所选 Minecraft 和加载器版本不兼容。当前实例未更改。",
   "games.minecraft.update.title": "整合包版本",
   "games.minecraft.update.complete": "整合包版本已就绪",
   "games.minecraft.update.completeNote": "你的世界和个人设置已保留。游玩前请检查游戏设置。",
@@ -82,12 +88,15 @@ export default {
   "games.minecraft.update.localNote": "选择本地 .mrpack 文件以查看更新内容。",
   "games.minecraft.update.chooseFile": "选择 .mrpack 文件",
   "games.minecraft.update.restoreVersion": "恢复 {version}",
-  "games.minecraft.update.reviewNote": "应用前可查看每项文件变更。Harbor 会独立保留上一实例的副本。",
+  "games.minecraft.update.reviewNote":
+    "应用前可查看每项文件变更。Harbor 会独立保留上一实例的副本。",
   "games.minecraft.update.changeVersion": "更改版本",
   "games.minecraft.update.download": "下载",
   "games.minecraft.update.recoveryCopy": "恢复副本",
-  "games.minecraft.update.loaderConflict": "额外模组无法在不同加载器之间迁移。更换加载器前请移除它们。",
-  "games.minecraft.update.conflictNote": "部分整合包文件与已修改或单独管理的模组重叠。应用前请解决冲突。",
+  "games.minecraft.update.loaderConflict":
+    "额外模组无法在不同加载器之间迁移。更换加载器前请移除它们。",
+  "games.minecraft.update.conflictNote":
+    "部分整合包文件与已修改或单独管理的模组重叠。应用前请解决冲突。",
   "games.minecraft.update.environmentNote": "Minecraft 或加载器版本将更改。完成后请检查游戏设置。",
   "games.minecraft.update.fileGroups": "整合包文件",
   "games.minecraft.update.changes": "变更",
@@ -100,7 +109,8 @@ export default {
   "games.minecraft.update.action.conflict": "冲突",
   "games.minecraft.update.noChanges": "此视图中没有文件。",
   "games.minecraft.update.extraMods": "保留 {count} 个额外模组",
-  "games.minecraft.update.preserveNote": "现有世界、个人设置和修改过的配置将保持不变。恢复整合包版本也会保留当前世界进度。",
+  "games.minecraft.update.preserveNote":
+    "现有世界、个人设置和修改过的配置将保持不变。恢复整合包版本也会保留当前世界进度。",
   "games.minecraft.update.chooseOriginal": "选择原始 .mrpack",
   "games.minecraft.update.originalSelected": "已选择原始整合包",
   "games.minecraft.update.footer": "当前实例在变更准备完成前仍可使用。",
@@ -123,15 +133,19 @@ export default {
   "games.minecraft.creation.loading": "正在查找兼容的 {loader} 版本…",
   "games.minecraft.creation.version": "{loader} Loader 版本",
   "games.minecraft.creation.preview": "预览版",
-  "games.minecraft.creation.unavailable": "Minecraft {version} 不支持 {loader}。请选择其他版本或 Vanilla。",
+  "games.minecraft.creation.unavailable":
+    "Minecraft {version} 不支持 {loader}。请选择其他版本或 Vanilla。",
   "games.minecraft.creation.note": "创建独立的游戏文件夹。游戏文件和 Java 将在游戏设置中准备。",
   "games.minecraft.creation.creating": "正在创建实例…",
-  "games.minecraft.creation.versionError": "所选 Minecraft 版本不支持此加载器版本。请刷新选项后重试。",
+  "games.minecraft.creation.versionError":
+    "所选 Minecraft 版本不支持此加载器版本。请刷新选项后重试。",
   "games.minecraft.content.title": "管理模组",
-  "games.minecraft.content.compatible": "适用于 Minecraft {version} 的 Fabric 模组。安装前请检查更改。",
+  "games.minecraft.content.compatible":
+    "适用于 Minecraft {version} 的 Fabric 模组。安装前请检查更改。",
   "games.minecraft.content.search": "搜索模组",
   "games.minecraft.content.packFiles": "整合包及其他文件",
-  "games.minecraft.content.packFilesNote": "这些文件来自整合包或在此管理器之外添加。在此处仅可读取。",
+  "games.minecraft.content.packFilesNote":
+    "这些文件来自整合包或在此管理器之外添加。在此处仅可读取。",
   "games.minecraft.content.empty": "从浏览页面添加兼容模组。它们将安装到此实例。",
   "games.minecraft.content.ready": "模组已在 {name} 中就绪。关闭此面板并打开游戏设置即可游玩。",
   "games.minecraft.content.reviewNote": "更改仅应用于此实例。世界和配置将予以保留。",
@@ -190,7 +204,8 @@ export default {
   "games.minecraft.runtime.installing": "正在安装 Minecraft 文件…",
   "games.minecraft.runtime.progress": "{done} / {total} 个文件",
   "games.minecraft.runtime.ready": "游戏文件已就绪",
-  "games.minecraft.runtime.readyNote": "文件已验证。游玩仍需要 Java {version} 和已连接的 Minecraft 账户。",
+  "games.minecraft.runtime.readyNote":
+    "文件已验证。游玩仍需要 Java {version} 和已连接的 Minecraft 账户。",
   "games.minecraft.runtime.preserved": "你的世界和模组未被更改。",
   "games.minecraft.runtime.resumeNote": "取消时会保留已完成的下载。",
   "games.minecraft.runtime.install": "安装文件",
@@ -224,18 +239,21 @@ export default {
   "games.minecraft.instances.rename": "重命名实例",
   "games.minecraft.instances.review": "检查整合包",
   "games.minecraft.instances.name": "实例名称",
-  "games.minecraft.instances.createNote": "为此版本创建独立的原版游戏文件夹。游戏和 Java 需另行安装。",
+  "games.minecraft.instances.createNote":
+    "为此版本创建独立的原版游戏文件夹。游戏和 Java 需另行安装。",
   "games.minecraft.instances.contents": "整合包内容",
   "games.minecraft.instances.filterFiles": "筛选文件",
   "games.minecraft.instances.optional": "可选",
   "games.minecraft.instances.filterMore": "还有 {count} 个文件。请缩小筛选范围以查看。",
   "games.minecraft.instances.overrides": "包含 {count} 个配置和覆盖文件。",
   "games.minecraft.instances.skipped": "已跳过 {count} 个仅服务器使用的文件。",
-  "games.minecraft.instances.verifyNote": "下载将根据整合包的文件哈希进行验证。现有世界和实例保持独立。",
+  "games.minecraft.instances.verifyNote":
+    "下载将根据整合包的文件哈希进行验证。现有世界和实例保持独立。",
   "games.minecraft.instances.reviewAgain": "重新检查",
   "games.minecraft.instances.loadingVersions": "正在加载 Minecraft 版本…",
   "games.minecraft.instances.added": "已添加到你的实例",
-  "games.minecraft.instances.storageNote": "选择 Minecraft 实例的保存位置。每个 Harbor 个人资料在此都有独立文件夹。",
+  "games.minecraft.instances.storageNote":
+    "选择 Minecraft 实例的保存位置。每个 Harbor 个人资料在此都有独立文件夹。",
   "games.minecraft.instances.isolated": "安装到全新、独立的实例中。",
   "games.minecraft.instances.cancelling": "正在取消…",
   "games.minecraft.instances.install": "安装整合包文件",
@@ -251,7 +269,8 @@ export default {
   "games.minecraft.instances.readError": "无法读取此实例。请检查驱动器是否已连接、文件是否可访问。",
   "games.minecraft.instances.networkError": "下载失败。请检查连接并重新检查整合包。",
   "games.minecraft.instances.rateLimit": "提供方繁忙。请稍等片刻后重试。",
-  "games.minecraft.instances.integrityError": "某个文件与整合包的校验值不符。未向库中添加任何内容。",
+  "games.minecraft.instances.integrityError":
+    "某个文件与整合包的校验值不符。未向库中添加任何内容。",
   "games.minecraft.instances.changedError": "整合包已更改或检查已过期。请重新检查。",
   "games.minecraft.instances.formatError": "这不是有效且受支持的 .mrpack 归档文件。",
   "games.minecraft.instances.loaderError": "此整合包使用了无法识别或相互冲突的游戏加载器。",
@@ -326,7 +345,8 @@ export default {
   "games.minecraft.account.declined": "登录已取消或被拒绝。",
   "games.minecraft.account.notOwned": "此账户需要Minecraft: Java Edition及Minecraft个人资料。",
   "games.minecraft.account.xbox": "请在Xbox网站创建个人资料后重试。",
-  "games.minecraft.account.restricted": "Microsoft或Xbox设置阻止了登录，请检查账户的年龄、家庭或地区设置。",
+  "games.minecraft.account.restricted":
+    "Microsoft或Xbox设置阻止了登录，请检查账户的年龄、家庭或地区设置。",
   "games.minecraft.account.skinError": "无法应用此皮肤或披风，请刷新账户后重试。",
   "games.minecraft.account.storeError": "Harbor无法在此设备上安全保存账户。",
   "games.minecraft.account.error": "账户请求失败，请重试。",
@@ -408,10 +428,12 @@ export default {
   "games.minecraft.release.alpha": "预览版",
   "games.minecraft.creation.forgeNote": "适用于 Forge 模组和整合包。",
   "games.minecraft.creation.neoforgeNote": "适用于 NeoForge 模组和整合包。",
-  "games.minecraft.runtime.processorNote": "{loader} 需要使用 Java 准备游戏文件。请在安装前设置 Java。",
+  "games.minecraft.runtime.processorNote":
+    "{loader} 需要使用 Java 准备游戏文件。请在安装前设置 Java。",
   "games.minecraft.runtime.preparingLoader": "正在准备 {loader}…",
   "games.minecraft.runtime.processorProgress": "第 {done} 步，共 {total} 步",
-  "games.minecraft.runtime.processorError": "加载器未能完成文件准备。重试时将复用已验证的下载文件。",
+  "games.minecraft.runtime.processorError":
+    "加载器未能完成文件准备。重试时将复用已验证的下载文件。",
   "games.minecraft.runtime.javaRequired": "请设置兼容的 Java，然后重试安装。",
   "games.minecraft.notes.title": "更新日志",
   "games.minecraft.notes.version": "版本",
@@ -427,4 +449,3 @@ export default {
   "games.minecraft.hub.curseforge": "CurseForge 精选",
   "games.minecraft.hub.browseCurseforge": "浏览 CurseForge",
 } satisfies Record<string, string>;
-

@@ -34,7 +34,8 @@ const music: Record<string, string> = {
   "dj.minimize": "Perkecil",
   "dj.maximize": "Perbesar",
   "dj.close": "Tutup",
-  "dj.blurb": "Tempo, nada, EQ kill, dan pad cue di jendela sendiri, di atas lagu yang sedang diputar.",
+  "dj.blurb":
+    "Tempo, nada, EQ kill, dan pad cue di jendela sendiri, di atas lagu yang sedang diputar.",
   "dj.open": "Buka dek",
   "dj.idle": "Tidak ada yang diputar",
   "dj.tempo": "Tempo",
@@ -104,26 +105,33 @@ const music: Record<string, string> = {
   "music.broadcast.drift": "(selisih {ms} md)",
   "music.broadcast.live": "Menyiarkan lewat {product}",
   "music.broadcast.install": "Dapatkan {product}",
-  "music.broadcast.none": "Belum ada kabel audio virtual terpasang. Pasang {product}, lalu pilih di sini.",
+  "music.broadcast.none":
+    "Belum ada kabel audio virtual terpasang. Pasang {product}, lalu pilih di sini.",
   "music.broadcast.auto": "Yang pertama ditemukan",
   "music.broadcast.output": "Keluaran",
   "music.broadcast.stop": "Hentikan",
   "music.broadcast.start": "Mulai",
-  "music.broadcast.blurb": "Kirim yang sedang diputar ke mikrofon virtual agar teman di panggilan ikut mendengar. Anda tetap mendengarnya di speaker.",
+  "music.broadcast.blurb":
+    "Kirim yang sedang diputar ke mikrofon virtual agar teman di panggilan ikut mendengar. Anda tetap mendengarnya di speaker.",
   "music.broadcast.title": "Siarkan ke obrolan suara",
-  "music.cable.mac.installNeeded": "Harbor bisa memasang mikrofon virtualnya sendiri. macOS akan meminta kata sandi administrator, lalu Core Audio dimulai ulang.",
+  "music.cable.mac.installNeeded":
+    "Harbor bisa memasang mikrofon virtualnya sendiri. macOS akan meminta kata sandi administrator, lalu Core Audio dimulai ulang.",
   "music.cable.mac.installMissing": "Versi Harbor ini tidak menyertakan driver mikrofon virtual.",
   "music.cable.mac.installCancelled": "Pemasangan dibatalkan.",
   "music.cable.mac.installFailed": "Mikrofon virtual tidak bisa dipasang.",
-  "music.cable.mac.restartNeeded": "Mikrofon virtual sudah terpasang, tetapi Core Audio belum mengenalinya. Mulai ulang Mac untuk menyelesaikan.",
-  "music.cable.mac.updateAvailable": "Versi Harbor ini menyertakan mikrofon virtual yang lebih baru. Pasang agar kabel tetap bekerja.",
+  "music.cable.mac.restartNeeded":
+    "Mikrofon virtual sudah terpasang, tetapi Core Audio belum mengenalinya. Mulai ulang Mac untuk menyelesaikan.",
+  "music.cable.mac.updateAvailable":
+    "Versi Harbor ini menyertakan mikrofon virtual yang lebih baru. Pasang agar kabel tetap bekerja.",
   "music.cable.title": "Mikrofon virtual Harbor",
-  "music.cable.blurb": "Harbor menyiapkan mikrofon virtualnya sendiri. Tidak ada yang perlu diunduh atau dipasang.",
+  "music.cable.blurb":
+    "Harbor menyiapkan mikrofon virtualnya sendiri. Tidak ada yang perlu diunduh atau dipasang.",
   "music.cable.create": "Buat mikrofon virtual",
   "music.cable.remove": "Hapus mikrofon virtual",
   "music.cable.spec": "{rate}, {depth}",
   "music.cable.perfect": "Tanpa resampling",
-  "music.cable.resampledGraph": "PipeWire menjalankan grafnya di {graph}, jadi bagian ini diresample",
+  "music.cable.resampledGraph":
+    "PipeWire menjalankan grafnya di {graph}, jadi bagian ini diresample",
   "music.cable.resampledServer": "Server audio memilih {rate}, bukan {requested}",
   "music.cable.resampledFormat": "Server audio tidak membawa float 32-bit",
   "music.cable.resampledOther": "Ada yang meresample di jalur audio",
@@ -145,7 +153,8 @@ const music: Record<string, string> = {
   "music.cable.installNeeded": "Harbor butuh izin kamu untuk memasang mikrofon virtual",
   "music.cable.installMissing": "Versi Harbor ini tidak menyertakan mikrofon virtual",
   "music.cable.restartNeeded": "Sistem audio harus dimulai ulang agar mikrofon virtual muncul",
-  "music.cable.updateAvailable": "Harbor ini membawa mikrofon virtual yang lebih baru. Buat ulang untuk memperbarui.",
+  "music.cable.updateAvailable":
+    "Harbor ini membawa mikrofon virtual yang lebih baru. Buat ulang untuk memperbarui.",
   "dj.crossfade": "Crossfader",
   "dj.b.broadcasting": "Membawa siaran",
   "dj.b.eject": "Keluarkan",
@@ -192,7 +201,8 @@ const music: Record<string, string> = {
   "music.speed.pitch": "Nada",
   "music.speed.reverb": "Reverb",
   "music.speed.keepPitch": "Pertahankan nada asli",
-  "music.speed.keepPitchHelp": "Aktif mengubah tempo tanpa mengubah nada. Nonaktif memberi suara nightcore dan slowed.",
+  "music.speed.keepPitchHelp":
+    "Aktif mengubah tempo tanpa mengubah nada. Nonaktif memberi suara nightcore dan slowed.",
   "music.speed.reset": "Setel ulang",
   "music.speed.normal": "Normal",
   "music.speed.nightcore": "Nightcore",
@@ -358,7 +368,8 @@ const music: Record<string, string> = {
   "music.explore.scene": "Dari skena",
   "music.artist.inPlaylists": "Playlist berisi {name}",
   "music.audio.preferredSource": "Sumber pilihan",
-  "music.audio.preferredSourceHint": "Harbor memutar dari sini dulu, lalu beralih ke sumber apa pun yang berfungsi.",
+  "music.audio.preferredSourceHint":
+    "Harbor memutar dari sini dulu, lalu beralih ke sumber apa pun yang berfungsi.",
   "music.spotify.connect": "Spotify Premium",
   "music.spotify.connectDetail": "Hubungkan sekali untuk pemutaran asli tanpa iklan.",
   "music.spotify.connectAction": "Hubungkan",
@@ -520,9 +531,11 @@ const music: Record<string, string> = {
   "music.ytm.loading": "Memuat YouTube Music",
   "music.row.scrobble": "Karena kamu men-scrobble {tag}",
   "music.row.scrobbleWaiting": "Last.fm terhubung. Rak tag belum dikirim.",
-  "music.connect.scrobbleBody": "Hubungkan Last.fm dan rak ini dibangun dari tag yang benar-benar kamu scrobble.",
+  "music.connect.scrobbleBody":
+    "Hubungkan Last.fm dan rak ini dibangun dari tag yang benar-benar kamu scrobble.",
   "music.connect.serverName": "server media atau folder",
-  "music.connect.serverBody": "Arahkan Harbor ke folder, Plex, Jellyfin, Navidrome atau Subsonic dan rak ini terisi album yang sudah kamu miliki.",
+  "music.connect.serverBody":
+    "Arahkan Harbor ke folder, Plex, Jellyfin, Navidrome atau Subsonic dan rak ini terisi album yang sudah kamu miliki.",
   "music.row.recents": "Lanjutkan dari tempat kamu berhenti",
   "music.row.fresh": "Terbaru dari musisi yang kamu putar",
   "music.row.freshSubtitle": "Rilisan terbaru dari musisi dalam riwayat dengarmu",
@@ -571,7 +584,8 @@ const music: Record<string, string> = {
   "music.surprise.back": "Kembali",
   "music.surprise.title": "Kejutkan saya",
   "music.surprise.stop": "Hentikan Kejutkan saya",
-  "music.surprise.body": "Lagu yang belum kamu dengar, berdasarkan kebiasaan mendengar dan playlistmu.",
+  "music.surprise.body":
+    "Lagu yang belum kamu dengar, berdasarkan kebiasaan mendengar dan playlistmu.",
   "music.surprise.loading": "Mencari lagu berikutnya untukmu…",
   "music.surprise.waiting": "Mencari lebih banyak musik untukmu…",
   "music.surprise.empty": "Pilih selera musikmu atau simpan beberapa lagu untuk memulai.",
@@ -587,7 +601,8 @@ const music: Record<string, string> = {
   "music.quickListen.loop": "Ulangi pratinjau",
   "music.quickListen.mute": "Bisukan cuplikan",
   "music.quickListen.unmute": "Aktifkan suara",
-  "music.quickListen.empty": "Tidak ada lagu yang belum kamu dengar. Jelajahi lebih banyak musik, lalu coba lagi.",
+  "music.quickListen.empty":
+    "Tidak ada lagu yang belum kamu dengar. Jelajahi lebih banyak musik, lalu coba lagi.",
   "music.quickListen.finding": "Mencari lagu yang belum kamu dengar…",
   "music.quickListen.more": "Opsi lainnya",
   "music.playlist.search": "Cari playlist",

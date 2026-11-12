@@ -7,25 +7,48 @@ import { useSettings } from "@/lib/settings";
 import { usePosterChain } from "@/components/poster";
 import type { Voyage } from "@/lib/voyage/types";
 
-export function VoyageReady({ voyage, onStart, inline = false }: { voyage: Voyage; onStart: () => void; inline?: boolean }) {
+export function VoyageReady({
+  voyage,
+  onStart,
+  inline = false,
+}: {
+  voyage: Voyage;
+  onStart: () => void;
+  inline?: boolean;
+}) {
   const t = useT();
-  const picks = voyage.routeIds.map(id => metaById(voyage, id)).filter((m): m is Meta => !!m);
+  const picks = voyage.routeIds.map((id) => metaById(voyage, id)).filter((m): m is Meta => !!m);
   return (
-    <div className={inline ? "voyage-inline-ready" : "flex flex-col items-center gap-3.5 rounded-lg bg-canvas/40 px-6 py-9 text-center ring-1 ring-inset ring-edge-soft"}>
+    <div
+      className={
+        inline
+          ? "voyage-inline-ready"
+          : "flex flex-col items-center gap-3.5 rounded-lg bg-canvas/40 px-6 py-9 text-center ring-1 ring-inset ring-edge-soft"
+      }
+    >
       {inline ? (
-        <div className="voyage-ready-posters" style={{ gridTemplateColumns: `repeat(${picks.length}, minmax(0, 1fr))` }}>
-          {picks.map(meta => <ReadyPoster key={meta.id} meta={meta} />)}
+        <div
+          className="voyage-ready-posters"
+          style={{ gridTemplateColumns: `repeat(${picks.length}, minmax(0, 1fr))` }}
+        >
+          {picks.map((meta) => (
+            <ReadyPoster key={meta.id} meta={meta} />
+          ))}
         </div>
-      ) : <span
-        className="grid h-14 w-14 place-items-center rounded-md"
-        style={{
-          background: `color-mix(in oklch, ${voyage.accent}, transparent 88%)`,
-          color: voyage.accent,
-        }}
-      >
-        <Play size={22} strokeWidth={2} fill="currentColor" />
-      </span>}
-      {!inline && <span className="text-[16px] font-semibold text-ink">{t("Your voyage is ready")}</span>}
+      ) : (
+        <span
+          className="grid h-14 w-14 place-items-center rounded-md"
+          style={{
+            background: `color-mix(in oklch, ${voyage.accent}, transparent 88%)`,
+            color: voyage.accent,
+          }}
+        >
+          <Play size={22} strokeWidth={2} fill="currentColor" />
+        </span>
+      )}
+      {!inline && (
+        <span className="text-[16px] font-semibold text-ink">{t("Your voyage is ready")}</span>
+      )}
       <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
         <button
           type="button"
@@ -48,9 +71,25 @@ export function VoyageReady({ voyage, onStart, inline = false }: { voyage: Voyag
 
 function ReadyPoster({ meta }: { meta: Meta }) {
   const { settings } = useSettings();
-  const poster = usePosterChain(settings.rpdbKey, meta.id, meta.poster, meta.type === "series" ? "series" : "movie");
-  return <figure className="min-w-0">
-    <img data-voyage-launch-thumb src={poster.src} onError={poster.onError} alt="" draggable={false} className="aspect-[2/3] w-full rounded-md object-cover" />
-    <figcaption className="mt-2 line-clamp-2 text-[12.5px] leading-snug text-ink-muted">{meta.name}</figcaption>
-  </figure>;
+  const poster = usePosterChain(
+    settings.rpdbKey,
+    meta.id,
+    meta.poster,
+    meta.type === "series" ? "series" : "movie",
+  );
+  return (
+    <figure className="min-w-0">
+      <img
+        data-voyage-launch-thumb
+        src={poster.src}
+        onError={poster.onError}
+        alt=""
+        draggable={false}
+        className="aspect-[2/3] w-full rounded-md object-cover"
+      />
+      <figcaption className="mt-2 line-clamp-2 text-[12.5px] leading-snug text-ink-muted">
+        {meta.name}
+      </figcaption>
+    </figure>
+  );
 }

@@ -141,7 +141,9 @@ function DragGhost({
     if (!el) return;
     const box = el.getBoundingClientRect();
     setSize((prev) =>
-      prev && prev.w === box.width && prev.h === box.height ? prev : { w: box.width, h: box.height },
+      prev && prev.w === box.width && prev.h === box.height
+        ? prev
+        : { w: box.width, h: box.height },
     );
   }, [label]);
 
@@ -211,7 +213,9 @@ export function PluginArrange({
    * place. A layout effect so the start position is set before anything is painted. */
   const places = useRef(new Map<string, DOMRect>());
   const slides = useRef(new Set<string>());
-  const measured = held ? null : listed.map(([, rows]) => rows.map((r) => r.key).join("|")).join("@");
+  const measured = held
+    ? null
+    : listed.map(([, rows]) => rows.map((r) => r.key).join("|")).join("@");
 
   useLayoutEffect(() => {
     const host = scrollRef.current;
@@ -270,7 +274,7 @@ export function PluginArrange({
     if (!held) return;
     setGrab((prev) => (prev ? { ...prev, x: e.clientX, y: e.clientY } : prev));
     const under = document.elementFromPoint(e.clientX, e.clientY)?.closest("[data-arrange-row]");
-    const id = under instanceof HTMLElement ? under.dataset.arrangeRow ?? null : null;
+    const id = under instanceof HTMLElement ? (under.dataset.arrangeRow ?? null) : null;
     setOver((prev) => (prev === id ? prev : id));
   };
 
@@ -322,7 +326,9 @@ export function PluginArrange({
         open
         onClose={onClose}
         title={t("Arrange the plugin tab")}
-        sub={t("This arranges the All plugins page. A single plugin still lists its own rows as it reports them.")}
+        sub={t(
+          "This arranges the All plugins page. A single plugin still lists its own rows as it reports them.",
+        )}
         width={560}
         actions={
           <>
@@ -394,7 +400,9 @@ export function PluginArrange({
                       />
                       <span className="min-w-0 flex-1 truncate text-[13.5px] text-ink">{name}</span>
                       {hidden && (
-                        <span className="shrink-0 text-[11.5px] text-ink-subtle">{t("Hidden")}</span>
+                        <span className="shrink-0 text-[11.5px] text-ink-subtle">
+                          {t("Hidden")}
+                        </span>
                       )}
                       <Stepper
                         name={name}
@@ -422,11 +430,7 @@ export function PluginArrange({
           )}
         </div>
       </SettingsModal>
-      <DragGhost
-        grab={grab}
-        label={heldLabel}
-        hint={t("Release to place")}
-      />
+      <DragGhost grab={grab} label={heldLabel} hint={t("Release to place")} />
     </>
   );
 }

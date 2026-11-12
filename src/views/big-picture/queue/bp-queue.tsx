@@ -15,12 +15,7 @@ import { currentBpFocus, recoverBpFocus } from "../use-bp-focus";
 import { BP_QUEUE_TITLE, BpQueueCopy } from "./bp-queue-copy";
 import { setBpQueueKeyHandler } from "./bp-queue-key";
 import { BpQueueRail } from "./bp-queue-rail";
-import {
-  BP_QUEUE_HINT_CLEAR,
-  BpQueuePosition,
-  BpQueueStage,
-  BpQueueThumb,
-} from "./bp-queue-stage";
+import { BP_QUEUE_HINT_CLEAR, BpQueuePosition, BpQueueStage, BpQueueThumb } from "./bp-queue-stage";
 import { useBpQueue } from "./use-bp-queue";
 import { useBpQueueArt } from "./use-bp-queue-art";
 

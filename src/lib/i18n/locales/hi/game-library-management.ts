@@ -21,11 +21,16 @@ export default {
   "games.manage.uninstallTitle": "यह गेम अनइंस्टॉल करें?",
   "games.manage.optionsTitle": "{source} से अनइंस्टॉल करें",
   "games.manage.removedNote": "लाइब्रेरी की प्रविष्टि हटा दी गई। गेम की फ़ाइलें इस कंप्यूटर पर हैं।",
-  "games.manage.sentNote": "{source} खुल गया। वहाँ प्रक्रिया पूरी करें; वापस आने पर Harbor इंस्टॉलेशन स्थिति अपडेट करेगा।",
-  "games.manage.removeNote": "इस प्रोफ़ाइल से {name} और उसका Harbor खेल इतिहास हटाता है। यह गेम अनइंस्टॉल नहीं करता या उसकी फ़ाइलें नहीं मिटाता।",
-  "games.manage.steamNote": "Steam {name} को अनइंस्टॉल करेगा। Steam में दोबारा पुष्टि करनी पड़ सकती है। पहले रखने योग्य स्थानीय सेव और मॉड का बैकअप लें।",
-  "games.manage.launcherNote": "{source} खोलें, {name} चुनें, फिर प्रबंधित करें या अनइंस्टॉल चुनें। लॉन्चर हटाने का काम करता है; Harbor गेम फ़ोल्डर नहीं मिटाता।",
-  "games.manage.windowsNote": "Windows के इंस्टॉल किए गए ऐप्स में {name} खोजें और अनइंस्टॉल चुनें। पोर्टेबल गेम के लिए उसके निर्देश मानें। Harbor फ़ोल्डर नहीं मिटाएगा।",
+  "games.manage.sentNote":
+    "{source} खुल गया। वहाँ प्रक्रिया पूरी करें; वापस आने पर Harbor इंस्टॉलेशन स्थिति अपडेट करेगा।",
+  "games.manage.removeNote":
+    "इस प्रोफ़ाइल से {name} और उसका Harbor खेल इतिहास हटाता है। यह गेम अनइंस्टॉल नहीं करता या उसकी फ़ाइलें नहीं मिटाता।",
+  "games.manage.steamNote":
+    "Steam {name} को अनइंस्टॉल करेगा। Steam में दोबारा पुष्टि करनी पड़ सकती है। पहले रखने योग्य स्थानीय सेव और मॉड का बैकअप लें।",
+  "games.manage.launcherNote":
+    "{source} खोलें, {name} चुनें, फिर प्रबंधित करें या अनइंस्टॉल चुनें। लॉन्चर हटाने का काम करता है; Harbor गेम फ़ोल्डर नहीं मिटाता।",
+  "games.manage.windowsNote":
+    "Windows के इंस्टॉल किए गए ऐप्स में {name} खोजें और अनइंस्टॉल चुनें। पोर्टेबल गेम के लिए उसके निर्देश मानें। Harbor फ़ोल्डर नहीं मिटाएगा।",
   "games.manage.opening": "खोल रहा है…",
   "games.manage.confirmUninstall": "Steam पर जारी रखें",
   "games.manage.openSource": "{source} खोलें",

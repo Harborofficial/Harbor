@@ -137,7 +137,8 @@ const music: Record<string, string> = {
   "dj.minimize": "Minimise",
   "dj.maximize": "Maximise",
   "dj.close": "Close",
-  "dj.blurb": "Tempo, pitch, EQ kills and cue pads in a window of their own, over whatever is playing.",
+  "dj.blurb":
+    "Tempo, pitch, EQ kills and cue pads in a window of their own, over whatever is playing.",
   "dj.open": "Open the deck",
   "dj.idle": "Nothing playing",
   "dj.tempo": "Tempo",
@@ -197,7 +198,8 @@ const music: Record<string, string> = {
   "dj.pads.jump": "Beat jump",
   "dj.pads.sampler": "Sampler",
   "dj.pads.triplet": "Triplet",
-  "dj.pads.rollHint": "Hold a pad to roll, let go and the track carries on where it would have been",
+  "dj.pads.rollHint":
+    "Hold a pad to roll, let go and the track carries on where it would have been",
   "dj.pads.jumpHint": "Jump back or forward without losing the beat",
   "dj.pads.noBpm": "No BPM yet, lengths are in seconds until you tap it in",
   "dj.reset": "Reset",
@@ -207,21 +209,28 @@ const music: Record<string, string> = {
   "music.broadcast.drift": "({ms} ms off)",
   "music.broadcast.live": "Broadcasting through {product}",
   "music.broadcast.install": "Get {product}",
-  "music.broadcast.none": "No virtual audio cable is installed. Install {product}, then pick it here.",
+  "music.broadcast.none":
+    "No virtual audio cable is installed. Install {product}, then pick it here.",
   "music.broadcast.auto": "First one found",
   "music.broadcast.output": "Output",
   "music.broadcast.stop": "Stop",
   "music.broadcast.start": "Start",
-  "music.broadcast.blurb": "Send what you are playing to a virtual microphone so friends on a call hear it. You keep hearing it on your speakers.",
+  "music.broadcast.blurb":
+    "Send what you are playing to a virtual microphone so friends on a call hear it. You keep hearing it on your speakers.",
   "music.broadcast.title": "Broadcast to voice chat",
-  "music.cable.mac.installNeeded": "Harbor can install its own virtual microphone. macOS will ask for your administrator password, then Core Audio restarts.",
-  "music.cable.mac.installMissing": "This build of Harbor does not include the virtual microphone driver.",
+  "music.cable.mac.installNeeded":
+    "Harbor can install its own virtual microphone. macOS will ask for your administrator password, then Core Audio restarts.",
+  "music.cable.mac.installMissing":
+    "This build of Harbor does not include the virtual microphone driver.",
   "music.cable.mac.installCancelled": "Installation was cancelled.",
   "music.cable.mac.installFailed": "The virtual microphone could not be installed.",
-  "music.cable.mac.restartNeeded": "The virtual microphone is installed, but Core Audio has not picked it up yet. Restart your Mac to finish.",
-  "music.cable.mac.updateAvailable": "A newer virtual microphone ships with this version of Harbor. Install it to keep the cable working.",
+  "music.cable.mac.restartNeeded":
+    "The virtual microphone is installed, but Core Audio has not picked it up yet. Restart your Mac to finish.",
+  "music.cable.mac.updateAvailable":
+    "A newer virtual microphone ships with this version of Harbor. Install it to keep the cable working.",
   "music.cable.title": "Harbor virtual mic",
-  "music.cable.blurb": "Harbor sets the virtual microphone up itself. Nothing to download, nothing to install.",
+  "music.cable.blurb":
+    "Harbor sets the virtual microphone up itself. Nothing to download, nothing to install.",
   "music.cable.create": "Create virtual mic",
   "music.cable.remove": "Remove virtual mic",
   "music.cable.spec": "{rate}, {depth}",
@@ -248,7 +257,8 @@ const music: Record<string, string> = {
   "music.cable.installNeeded": "Harbor needs your permission to install the virtual mic",
   "music.cable.installMissing": "This Harbor build does not ship a virtual mic",
   "music.cable.restartNeeded": "The audio system has to restart before the virtual mic appears",
-  "music.cable.updateAvailable": "This Harbor ships a newer virtual mic. Create it again to update.",
+  "music.cable.updateAvailable":
+    "This Harbor ships a newer virtual mic. Create it again to update.",
   "dj.crossfade": "Crossfader",
   "dj.b.broadcasting": "Carrying the broadcast",
   "dj.b.eject": "Eject",
@@ -295,7 +305,8 @@ const music: Record<string, string> = {
   "music.speed.pitch": "Pitch",
   "music.speed.reverb": "Reverb",
   "music.speed.keepPitch": "Keep the original key",
-  "music.speed.keepPitchHelp": "On, the tempo changes but the key does not. Off is the nightcore and slowed sound.",
+  "music.speed.keepPitchHelp":
+    "On, the tempo changes but the key does not. Off is the nightcore and slowed sound.",
   "music.speed.reset": "Reset",
   "music.speed.normal": "Normal",
   "music.speed.nightcore": "Nightcore",
@@ -373,7 +384,8 @@ const music: Record<string, string> = {
   "music.explore.scene": "From the scene",
   "music.artist.inPlaylists": "Playlists including {name}",
   "music.audio.preferredSource": "Preferred source",
-  "music.audio.preferredSourceHint": "Harbor plays from this first, then falls back to any source that works.",
+  "music.audio.preferredSourceHint":
+    "Harbor plays from this first, then falls back to any source that works.",
   "music.spotify.connect": "Spotify Premium",
   "music.spotify.connectDetail": "Connect once for native, ad-free playback.",
   "music.spotify.connectAction": "Connect",
@@ -666,7 +678,7 @@ const music: Record<string, string> = {
   "music.newRelease.title": "New from artists you play",
   "music.newRelease.subtitle": "Just released",
   "music.newRelease.eyebrow": "New release",
-  "music.newRelease.outNow": "\"{title}\" is out now",
+  "music.newRelease.outNow": '"{title}" is out now',
   "music.newRelease.action": "Listen now",
   "music.newRelease.listen": "Listen to {title}",
   "music.spotifyDevices.title": "Play on",
@@ -700,8 +712,10 @@ const music: Record<string, string> = {
   "music.spotifySetup.rejected":
     "Check the Client ID and redirect URI in your Spotify app settings, then try again.",
   "music.spotifySetup.pairTitle": "Pair your Spotify account",
-  "music.spotifySetup.pairBody": "Play Spotify directly in Harbor with Premium. Enter the pairing code at spotify.com/pair and approve it. No Developer app or Client ID is required.",
-  "music.spotifySetup.intro": "Pair Spotify to stream music in Harbor. Spotify Premium is required. Browsing with your own Developer app is optional.",
+  "music.spotifySetup.pairBody":
+    "Play Spotify directly in Harbor with Premium. Enter the pairing code at spotify.com/pair and approve it. No Developer app or Client ID is required.",
+  "music.spotifySetup.intro":
+    "Pair Spotify to stream music in Harbor. Spotify Premium is required. Browsing with your own Developer app is optional.",
   "music.spotifySetup.browseOptional": "Optional",
   "music.spotify.browsingLabel": "Browsing",
   "music.spotify.browsingOwnApp": "Own app authorized",
@@ -720,7 +734,8 @@ const music: Record<string, string> = {
   "music.spotifySetup.pairCopyFailed": "Select the code and copy it manually.",
   "music.spotifySetup.pairManual": "Advanced Spotify browsing",
   "music.spotifySetup.browseRecommended": "Recommended",
-  "music.spotifySetup.browseBody": "Optional: authorize your own Spotify Developer app for a separate browsing quota. This does not enable local playback.",
+  "music.spotifySetup.browseBody":
+    "Optional: authorize your own Spotify Developer app for a separate browsing quota. This does not enable local playback.",
   "music.spotifyBrowse.title": "Browsing shares Spotify's rate limit",
   "music.spotifyBrowse.body":
     "Playback is paired and working. Browsing currently shares librespot's Spotify quota, which saturates often — sign in with your own Spotify app to give browsing its own quota. Playback stays paired.",
@@ -740,7 +755,8 @@ const music: Record<string, string> = {
   "music.recovery.network":
     "Check your connection, then retry. You can also choose another source below.",
   "music.recovery.open": "Open {source}",
-  "music.recovery.spotifySetup": "Pair your Spotify Premium account with Harbor to enable playback.",
+  "music.recovery.spotifySetup":
+    "Pair your Spotify Premium account with Harbor to enable playback.",
   "music.recovery.setupAction": "Set up",
   "music.recovery.search": "Sources could not be checked. Check your connection and try again.",
   "music.recovery.retrySource": "Couldn’t load · Retry this source",

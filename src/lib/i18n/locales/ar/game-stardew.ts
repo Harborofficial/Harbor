@@ -9,7 +9,8 @@ export default {
   "games.stardew.catalogPartial": "تعذر تحميل بعض المشاريع. حدّث للمحاولة مجددًا.",
   "games.stardew.creatorChoose": "اختر مجلد اللعبة أعلاه لمراجعة التثبيت.",
   "games.stardew.creatorGet": "تنزيل من المطوّر",
-  "games.stardew.creatorRoute": "تُفتح التنزيلات الأخرى على Nexus. استورد ملف ZIP الخاص بالمطوّر بعد تنزيله.",
+  "games.stardew.creatorRoute":
+    "تُفتح التنزيلات الأخرى على Nexus. استورد ملف ZIP الخاص بالمطوّر بعد تنزيله.",
   "games.stardew.snapshot": "تاريخ الكتالوج",
   "games.stardew.moreMods": "استكشف المزيد من التعديلات",
   "games.stardew.downloading": "جارٍ التنزيل من المطوّر…",
@@ -19,20 +20,27 @@ export default {
 
   "games.stardew.import": "استيراد ملف ZIP للإضافة",
   "games.stardew.manage": "تُدار عبر Harbor",
-  "games.stardew.manageNote": "استورد إضافة SMAPI محمّلة لإدارتها هنا. لتحديثها، استورد ملف ZIP الأحدث لها.",
+  "games.stardew.manageNote":
+    "استورد إضافة SMAPI محمّلة لإدارتها هنا. لتحديثها، استورد ملف ZIP الأحدث لها.",
   "games.stardew.previous": "الإصدارات السابقة",
   "games.stardew.review": "مراجعة التغييرات",
   "games.stardew.apply": "تطبيق التغييرات",
   "games.stardew.install": "تثبيت الإضافة",
   "games.stardew.update": "تحديث الإضافة",
   "games.stardew.done": "تم تطبيق التغييرات",
-  "games.stardew.reviewNote": "أغلق Stardew Valley أولاً. تحتفظ التحديثات بملف config.json الحالي والملفات المنشأة. تبقى الإصدارات السابقة على هذا الكمبيوتر.",
-  "games.stardew.removeNote": "سيُنقل مجلد الإضافة بالكامل إلى الإصدارات السابقة. يمكنك استعادته لاحقاً.",
+  "games.stardew.reviewNote":
+    "أغلق Stardew Valley أولاً. تحتفظ التحديثات بملف config.json الحالي والملفات المنشأة. تبقى الإصدارات السابقة على هذا الكمبيوتر.",
+  "games.stardew.removeNote":
+    "سيُنقل مجلد الإضافة بالكامل إلى الإصدارات السابقة. يمكنك استعادته لاحقاً.",
   "games.stardew.running": "أغلق Stardew Valley وSMAPI قبل تغيير ملفات الإضافات.",
-  "games.stardew.requirementsError": "إضافة مطلوبة أو إصدار SMAPI مفقود أو قديم جداً. تحقق من متطلبات الإضافة.",
-  "games.stardew.dependentsError": "تتطلب إضافة مفعّلة هذا الإصدار. عطّلها أولاً أو اختر إصداراً متوافقاً.",
-  "games.stardew.unmanagedError": "هذه الإضافة موجودة بالفعل خارج سجلات Harbor. انقل النسخة الموجودة جانباً قبل الاستيراد.",
-  "games.stardew.archiveError": "اختر ZIP يحتوي على مجلد إضافة جاهزة واحد، حتى 32 ميغابايت (128 ميغابايت بعد الاستخراج). ملفات الشفرة المصدرية ليست إضافات قابلة للتثبيت.",
+  "games.stardew.requirementsError":
+    "إضافة مطلوبة أو إصدار SMAPI مفقود أو قديم جداً. تحقق من متطلبات الإضافة.",
+  "games.stardew.dependentsError":
+    "تتطلب إضافة مفعّلة هذا الإصدار. عطّلها أولاً أو اختر إصداراً متوافقاً.",
+  "games.stardew.unmanagedError":
+    "هذه الإضافة موجودة بالفعل خارج سجلات Harbor. انقل النسخة الموجودة جانباً قبل الاستيراد.",
+  "games.stardew.archiveError":
+    "اختر ZIP يحتوي على مجلد إضافة جاهزة واحد، حتى 32 ميغابايت (128 ميغابايت بعد الاستخراج). ملفات الشفرة المصدرية ليست إضافات قابلة للتثبيت.",
   "games.stardew.moreFiles": "{count} ملفات أخرى",
   "games.stardew.partialError": "تعذر فحص بعض الإضافات. عالج الفحص غير المكتمل قبل تغيير الملفات.",
   "games.stardew.linkError": "اختر مجلدات وملفات فعلية بدلاً من الاختصارات أو المجلدات المرتبطة.",
@@ -72,7 +80,8 @@ export default {
   "games.stardew.scanning": "جارٍ قراءة التعديلات…",
   "games.stardew.checking": "جارٍ التحقق عبر SMAPI…",
   "games.stardew.modCount": "{count} تعديلات",
-  "games.stardew.scope": "يفحص المتطلبات التي يعلنها كل تعديل. يظل SMAPI هو الذي يقرر ما يتم تحميله.",
+  "games.stardew.scope":
+    "يفحص المتطلبات التي يعلنها كل تعديل. يظل SMAPI هو الذي يقرر ما يتم تحميله.",
   "games.stardew.noSmapiVersion": "تعذّرت قراءة إصدار SMAPI المثبت. قد لا تتوفر توصيات التحديث.",
   "games.stardew.search": "البحث عن تعديل",
   "games.stardew.filter": "عرض التعديلات",
@@ -80,12 +89,14 @@ export default {
   "games.stardew.attention": "تحتاج إلى مراجعة",
   "games.stardew.updates": "تحديثات متاحة",
   "games.stardew.noMatches": "لا توجد تعديلات تطابق هذه الفلاتر.",
-  "games.stardew.share": "يرسل فحص التحديثات معرّفات التعديلات وإصداراتها ومفاتيح التحديث المدعومة إلى SMAPI. تبقى ملفات الحفظ والإعدادات على هذا الجهاز.",
+  "games.stardew.share":
+    "يرسل فحص التحديثات معرّفات التعديلات وإصداراتها ومفاتيح التحديث المدعومة إلى SMAPI. تبقى ملفات الحفظ والإعدادات على هذا الجهاز.",
   "games.stardew.empty": "لم يتم العثور على تعديلات SMAPI في هذا المجلد.",
   "games.stardew.partial": "تعذّر فحص بعض المجلدات",
   "games.stardew.notChecked": "لم يُفحص",
   "games.stardew.noneSuggested": "لا يوجد تحديث مقترح",
-  "games.stardew.duplicateNote": "يظهر معرّف هذا التعديل في أكثر من مجلد. احتفظ بنسخة واحدة قبل تشغيل SMAPI.",
+  "games.stardew.duplicateNote":
+    "يظهر معرّف هذا التعديل في أكثر من مجلد. احتفظ بنسخة واحدة قبل تشغيل SMAPI.",
   "games.stardew.dllNote": "ملف البرنامج المحدد في ملف تعريف هذا التعديل مفقود.",
   "games.stardew.viewUpdate": "عرض التحديث",
   "games.stardew.project": "صفحة المشروع",
@@ -104,5 +115,5 @@ export default {
   "games.stardew.folderError": "اختر مجلد Stardew Valley الذي يحتوي على اللعبة ومجلد Mods.",
   "games.stardew.changed": "تغيّرت ملفات التعديلات أثناء الفحص. أعد فحص المجلد للمحاولة مجددًا.",
   "games.stardew.networkError": "تعذّر على SMAPI إكمال فحص التحديثات. حاول مجددًا بعد قليل.",
-  "games.stardew.readError": "تعذّرت قراءة المجلد. تحقق من موقعه وصلاحية الوصول إليه ثم حاول مجددًا."
+  "games.stardew.readError": "تعذّرت قراءة المجلد. تحقق من موقعه وصلاحية الوصول إليه ثم حاول مجددًا.",
 };

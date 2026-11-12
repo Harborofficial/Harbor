@@ -7,6 +7,8 @@ export default {
   "games.playtime.days": "दिन",
   "games.playtime.seconds": "सेकंड",
   "games.playtime.preciseDuration": "{hours} घंटे {minutes} मिनट {seconds} सेकंड",
-  "games.playtime.decimalInvalid": "हज़ार के विभाजक के बिना शून्य या धनात्मक संख्याएँ दें, कुल अधिकतम 1,000,000 घंटे।",
-  "games.playtime.decimalHint": "दशमलव मान दिए जा सकते हैं। कुल समय को निकटतम सेकंड तक पूर्णांकित किया जाता है।"
+  "games.playtime.decimalInvalid":
+    "हज़ार के विभाजक के बिना शून्य या धनात्मक संख्याएँ दें, कुल अधिकतम 1,000,000 घंटे।",
+  "games.playtime.decimalHint":
+    "दशमलव मान दिए जा सकते हैं। कुल समय को निकटतम सेकंड तक पूर्णांकित किया जाता है।",
 };

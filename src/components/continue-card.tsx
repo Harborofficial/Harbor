@@ -41,7 +41,13 @@ import { aniZipByAnidb, aniZipByAnilist, aniZipByKitsu, aniZipByMal } from "@/li
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { resolvePreferredAnimeTitle } from "@/lib/anime-title";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
-import { animeCwIdsVersion, getAnimeCwId, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
+import {
+  animeCwIdsVersion,
+  getAnimeCwId,
+  notifyAnimeCwIds,
+  subscribeAnimeCwIds,
+} from "@/lib/anime-cw-ids";
+import { rememberCardCoords } from "@/lib/cw-card-coords";
 import {
   aniZipLookupKey,
   applyAniZipEpisode,
@@ -77,9 +83,9 @@ import { isManualWatchedDismissed } from "@/lib/manual-watched";
 import { isNuvioProviderActive } from "@/lib/active-profile-id";
 
 // Bleach: Thousand-Year Blood War is split across four cours that carry their
-// own arc name appended to the base title (e.g. "... - The Separation"). The
-// library keeps the arc name, but the card should show only the base title.
-// This is a closed set of the four cour subtitles; do not add anime names here.
+// own arc name appended to the title (e.g. "... - The Separation"). Keep the
+// TYBW title but drop the per-cour subtitle. This is a closed set of the four
+// cour subtitles; do not add anime names here.
 const ANIME_ARC_STRIP: ReadonlyArray<{ matcher: string; replace: string }> = [
   { matcher: "The Blood Warfare", replace: "" },
   { matcher: "The Separation", replace: "" },
@@ -257,6 +263,19 @@ export const ContinueCard = memo(function ContinueCard({
     const start = () => {
       if (started) return;
       started = true;
+      // Catalog anime rows do not pass through the native Kitsu branch below.
+      // Resolve their exact cour too so a base Bleach row uses TYBW's title.
+      if (
+        !/^(kitsu|mal|anilist|anidb):/.test(item._id) &&
+        (isAnimeCwItem(item) || getAnimeCwId(item._id) != null) &&
+        ep
+      ) {
+        void resolveCwAnimeVideo(item, ep)
+          .then((video) => {
+            if (!cancelled && video) setKitsuVideo(video);
+          })
+          .catch(() => {});
+      }
       if (/^(kitsu|mal|anilist|anidb):/.test(item._id)) {
         animeKitsuMeta(item._id)
           .then((m) => {
@@ -375,7 +394,7 @@ export const ContinueCard = memo(function ContinueCard({
       cancelled = true;
       io.disconnect();
     };
-  }, [item._id, item.type, item.state?.video_id, authKey]);
+  }, [item._id, item.type, item.state?.video_id, item.state?.season, item.state?.episode, authKey]);
 
   const animeIdsVersion = useSyncExternalStore(subscribeAnimeCwIds, animeCwIdsVersion);
   // The preferred title is a display preference the user can change at any time,
@@ -386,8 +405,12 @@ export const ContinueCard = memo(function ContinueCard({
     // Cinemeta rows whose detail page recorded an anime mapping.
     if (!isAnimeCwItem(item) && getAnimeCwId(item._id) == null) return;
     let cancelled = false;
+    // Once the episode resolves to its exact Kitsu cour, use that entry for the
+    // title too. A base Bleach row with TYBW progress must display TYBW, not the
+    // 2004 series it shares a provider id with.
+    const titleVideoId = kitsuVideo?.id ?? item.state?.video_id;
     resolvePreferredAnimeTitle(item._id, settings.animeTitleLanguage, {
-      videoId: item.state?.video_id,
+      videoId: titleVideoId,
       season: item.state?.season,
       episode: item.state?.episode,
       imdbId:
@@ -408,6 +431,7 @@ export const ContinueCard = memo(function ContinueCard({
     item.state?.episode,
     settings.animeTitleLanguage,
     animeIdsVersion,
+    kitsuVideo?.id,
   ]);
 
   useEffect(() => {
@@ -447,6 +471,21 @@ export const ContinueCard = memo(function ContinueCard({
   );
   const partSeasonCard = splitFranchiseDisplaySeason(cardKitsuId);
   const animeSeasonMapped = providerMappedEpisode(kitsuVideo, ep, seasonForeignCard);
+  const displaySeason = animeSeasonMapped?.season ?? partSeasonCard ?? ep?.season;
+  const displayEpisode = animeSeasonMapped?.episode ?? ep?.episode;
+  useEffect(() => {
+    if (displaySeason == null || displayEpisode == null) return;
+    if (rememberCardCoords(item, { season: displaySeason, episode: displayEpisode })) {
+      notifyAnimeCwIds();
+    }
+  }, [
+    item,
+    item.state?.video_id,
+    item.state?.season,
+    item.state?.episode,
+    displaySeason,
+    displayEpisode,
+  ]);
   const sub =
     isAnimeItem && absoluteNumber != null && Number.isFinite(absoluteNumber) && absoluteNumber > 0
       ? `Ep ${absoluteNumber}`
@@ -474,17 +513,22 @@ export const ContinueCard = memo(function ContinueCard({
     : rawTitle;
 
   const onOpenDetails = () => {
-    const isAnime = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
+    const kitsuId = kitsuVideo ? parseKitsuId(kitsuVideo.id) : null;
+    const animeEntry = kitsuId != null ? `kitsu:${kitsuId}` : getAnimeCwId(item._id);
+    const detailId = animeEntry ?? meta.id;
+    const isAnime = /^(kitsu|mal|anilist|anidb):/.test(detailId);
     // Continue Watching artwork comes from the Stremio library record and may
     // use a different language than the current TMDB image preference. Do not
     // let those cached assets become the detail page's stable/locked artwork;
     // the detail loader will resolve the same localized logo and backdrop used
     // when the title is opened from Search.
-    const detailMeta = isAnime ? meta : { ...meta, background: undefined, logo: undefined };
-    openMeta(
-      detailMeta,
-      ep || isAnime ? { episodeHint: ep ?? undefined, exact: isAnime } : undefined,
-    );
+    const detailMeta = {
+      ...meta,
+      id: detailId,
+      type: isAnime ? ("series" as const) : meta.type,
+      ...(isAnime ? {} : { background: undefined, logo: undefined }),
+    };
+    openMeta(detailMeta, ep || isAnime ? { episodeHint: ep ?? undefined } : undefined);
   };
 
   const resolveEpisode = async (): Promise<PlayEpisode | undefined> => {
@@ -750,6 +794,10 @@ export const ContinueCard = memo(function ContinueCard({
       onDismissed: (result) => {
         if (result?.sync === "queued")
           emitListToast(t("Removed on this device. Stremio synchronization is pending."));
+        if (result?.providerFailures?.length)
+          emitListToast(
+            t("Removed on this device. Some provider playback progress could not be cleared."),
+          );
         if (afterDismiss?.isConnected && !afterDismiss.disabled)
           afterDismiss.focus({ preventScroll: true });
       },

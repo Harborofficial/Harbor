@@ -84,7 +84,9 @@ export function handoffNote(
         "Harbor cannot find this TV's network address, so the phone hand-off is unavailable here.",
       );
     case "servingOff":
-      return t("This opens Harbor to devices on your Wi-Fi. You can turn it off again in Settings.");
+      return t(
+        "This opens Harbor to devices on your Wi-Fi. You can turn it off again in Settings.",
+      );
     case "serveFailed":
       return t("Harbor could not open its web server. Try again, or set this up on the TV.");
     case "stalled":

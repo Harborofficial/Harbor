@@ -3,9 +3,11 @@ export default {
   "games.notes.title": "Meine Notizen",
   "games.notes.new": "Neue Notiz",
   "games.notes.limit": "Maximal 100 Notizen mit je 100.000 Zeichen und insgesamt 2 MB.",
-  "games.notes.readError": "Notizen konnten nicht gelesen werden. Vor erneutem Laden eine Sicherung exportieren.",
+  "games.notes.readError":
+    "Notizen konnten nicht gelesen werden. Vor erneutem Laden eine Sicherung exportieren.",
   "games.notes.saveError": "Speichern fehlgeschlagen. Der Entwurf bleibt erhalten.",
-  "games.notes.conflict": "Notizen wurden anderswo geändert. Vor dem Neuladen den Entwurf exportieren.",
+  "games.notes.conflict":
+    "Notizen wurden anderswo geändert. Vor dem Neuladen den Entwurf exportieren.",
   "games.notes.invalidTitle": "Jede Notiz braucht einen Titel.",
   "games.notes.discard": "Ungespeicherte Änderungen verwerfen?",
   "games.notes.delete": "Diese Notiz aus dem Entwurf löschen?",
@@ -19,7 +21,8 @@ export default {
   "games.notes.up": "Notiz nach oben",
   "games.notes.down": "Notiz nach unten",
   "games.notes.image": "Bild öffnen",
-  "games.notes.emptyBody": "Strategien, Erinnerungen und Entdeckungen festhalten. Markdown wird unterstützt.",
+  "games.notes.emptyBody":
+    "Strategien, Erinnerungen und Entdeckungen festhalten. Markdown wird unterstützt.",
   "games.notes.noteTitle": "Notiztitel",
   "games.notes.body": "Notiztext (Markdown)",
   "games.notes.empty": "Dein Spielnotizbuch",
@@ -28,5 +31,5 @@ export default {
   "games.notes.export": "Sicherung exportieren",
   "games.notes.unsaved": "Ungespeicherte Änderungen",
   "games.notes.local": "In diesem Harbor-Profil gespeichert",
-  "games.notes.importGuide": "In meine Notizen kopieren"
+  "games.notes.importGuide": "In meine Notizen kopieren",
 };

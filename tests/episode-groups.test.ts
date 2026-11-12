@@ -11,10 +11,14 @@ const v = (
   episode: number | null,
   name: string,
   released?: string,
-): CinemetaVideo => ({ season: season ?? undefined, episode: episode ?? undefined, name, released });
+): CinemetaVideo => ({
+  season: season ?? undefined,
+  episode: episode ?? undefined,
+  name,
+  released,
+});
 
-const seasons = (groups: ReturnType<typeof groupEpisodes>) =>
-  groups.map((g) => g.seasonNumber);
+const seasons = (groups: ReturnType<typeof groupEpisodes>) => groups.map((g) => g.seasonNumber);
 const names = (groups: ReturnType<typeof groupEpisodes>, season: number) =>
   groups.find((g) => g.seasonNumber === season)?.episodes.map((e) => e.name);
 

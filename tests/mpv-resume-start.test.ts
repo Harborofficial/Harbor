@@ -14,9 +14,14 @@ test("reused native playback loads at the saved position and resets it for the n
   await h.bridge.load({ url: "first.mkv", startAtSec: 605 });
   await h.bridge.load({ url: "second.mkv", startAtSec: 300 });
   await h.bridge.load({ url: "third.mkv" });
-  const loads = h.commands.filter((c) => c.command === "mpv_command" && (c.args.cmd as any[])?.[0] === "loadfile");
-  assert.deepEqual(loads.map((c) => c.args.cmd), [
-    ["loadfile", "second.mkv", "replace", 0, "start=300"],
-    ["loadfile", "third.mkv", "replace", 0, "start=0"],
-  ]);
+  const loads = h.commands.filter(
+    (c) => c.command === "mpv_command" && (c.args.cmd as any[])?.[0] === "loadfile",
+  );
+  assert.deepEqual(
+    loads.map((c) => c.args.cmd),
+    [
+      ["loadfile", "second.mkv", "replace", 0, "start=300"],
+      ["loadfile", "third.mkv", "replace", 0, "start=0"],
+    ],
+  );
 });

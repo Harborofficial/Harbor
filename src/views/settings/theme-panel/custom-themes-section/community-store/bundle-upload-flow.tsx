@@ -241,7 +241,9 @@ export function BundleUploadFlow({
                 />
               </div>
             </div>
-            {error && <p className="max-w-[70ch] text-[15.5px] leading-[22px] text-danger">{error}</p>}
+            {error && (
+              <p className="max-w-[70ch] text-[15.5px] leading-[22px] text-danger">{error}</p>
+            )}
           </div>
         </div>
       )}
@@ -339,7 +341,9 @@ function Benefit({
         <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">
           {title}
         </span>
-        <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">{children}</span>
+        <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
+          {children}
+        </span>
       </div>
     </li>
   );
@@ -373,7 +377,9 @@ function SuccessView({
         </p>
       </div>
       <div className="flex items-center gap-2 rounded-md bg-surface p-2 ps-3">
-        <span className="max-w-[320px] truncate text-[15.5px] leading-[22px] text-ink-muted">{share}</span>
+        <span className="max-w-[320px] truncate text-[15.5px] leading-[22px] text-ink-muted">
+          {share}
+        </span>
         <button
           onClick={onCopy}
           className="flex h-11 items-center gap-2 rounded-md bg-elevated px-4 text-[15.5px] font-semibold text-ink-muted transition-colors hover:text-ink"

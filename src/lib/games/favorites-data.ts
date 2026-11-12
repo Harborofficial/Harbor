@@ -2,18 +2,26 @@ import type { GameHighlight } from "./catalog";
 import { DEFAULT_CATALOG_FILTERS, type CatalogFilters } from "./catalog-filters";
 
 export const GAME_FAVORITE_FILTERS = ["all", "aaa", "indie", "free"] as const;
-export type GameFavoriteFilter = typeof GAME_FAVORITE_FILTERS[number];
+export type GameFavoriteFilter = (typeof GAME_FAVORITE_FILTERS)[number];
 export const FAVORITE_REVIEW_COUNTS = [0, 1_000, 10_000, 100_000] as const;
 export const FAVORITE_POSITIVE_SCORES = [0, 70, 80, 90, 95] as const;
 export type FavoriteReviewFilters = { minCount: number; minPositive: number };
 export const DEFAULT_FAVORITE_REVIEWS: FavoriteReviewFilters = { minCount: 0, minPositive: 0 };
-export function matchesFavoriteReviews(game: GameHighlight, filters: FavoriteReviewFilters): boolean {
+export function matchesFavoriteReviews(
+  game: GameHighlight,
+  filters: FavoriteReviewFilters,
+): boolean {
   if (!filters.minCount && !filters.minPositive) return true;
   const reviews = game.reviews;
   return !!reviews && reviews.count >= filters.minCount && reviews.positive >= filters.minPositive;
 }
 export function favoriteCatalogFilters(filter: GameFavoriteFilter): CatalogFilters {
-  return { ...DEFAULT_CATALOG_FILTERS, sort: "Reviews_DESC", tags: filter === "indie" ? [492] : [], price: filter === "free" ? "free" : "all" };
+  return {
+    ...DEFAULT_CATALOG_FILTERS,
+    sort: "Reviews_DESC",
+    tags: filter === "indie" ? [492] : [],
+    price: filter === "free" ? "free" : "all",
+  };
 }
 
 // An editorial selection, not an inferred budget classification or a list of
@@ -109,9 +117,26 @@ export const AAA_FAVORITE_IDS: readonly number[] = [
 ];
 
 export function rankAAAFavorites(games: readonly GameHighlight[]): GameHighlight[] {
-  const allowed = new Set(AAA_FAVORITE_IDS), seen = new Set<string>();
-  return games.filter(game => {
-    if (!game.steamId || !allowed.has(game.steamId) || seen.has(game.id) || game.comingSoon || !game.reviews || game.reviews.count <= 0) return false;
-    seen.add(game.id); return true;
-  }).sort((a, b) => b.reviews!.positive - a.reviews!.positive || b.reviews!.count - a.reviews!.count || a.steamId! - b.steamId!);
+  const allowed = new Set(AAA_FAVORITE_IDS),
+    seen = new Set<string>();
+  return games
+    .filter((game) => {
+      if (
+        !game.steamId ||
+        !allowed.has(game.steamId) ||
+        seen.has(game.id) ||
+        game.comingSoon ||
+        !game.reviews ||
+        game.reviews.count <= 0
+      )
+        return false;
+      seen.add(game.id);
+      return true;
+    })
+    .sort(
+      (a, b) =>
+        b.reviews!.positive - a.reviews!.positive ||
+        b.reviews!.count - a.reviews!.count ||
+        a.steamId! - b.steamId!,
+    );
 }

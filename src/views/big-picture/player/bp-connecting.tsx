@@ -375,7 +375,10 @@ export function BpConnecting({
           )}
 
           {!terminal && (
-            <CustomArtwork role="loading" className="h-[clamp(64px,10vh,120px)] w-[clamp(64px,10vh,120px)]" />
+            <CustomArtwork
+              role="loading"
+              className="h-[clamp(64px,10vh,120px)] w-[clamp(64px,10vh,120px)]"
+            />
           )}
           {!terminal && (
             <BpP2pReadout

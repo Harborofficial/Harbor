@@ -41,10 +41,22 @@ function CardRow({
         <span className="text-[12px] tabular-nums text-ink-subtle">{position}</span>
         <span className="truncate text-[14px] font-medium text-ink">{label}</span>
       </span>
-      <button type="button" disabled={first} onClick={() => onMove(-1)} aria-label={t("Move up")} className={iconBtn}>
+      <button
+        type="button"
+        disabled={first}
+        onClick={() => onMove(-1)}
+        aria-label={t("Move up")}
+        className={iconBtn}
+      >
         <ArrowUp size={16} />
       </button>
-      <button type="button" disabled={last} onClick={() => onMove(1)} aria-label={t("Move down")} className={iconBtn}>
+      <button
+        type="button"
+        disabled={last}
+        onClick={() => onMove(1)}
+        aria-label={t("Move down")}
+        className={iconBtn}
+      >
         <ArrowDown size={16} />
       </button>
       <button
@@ -73,7 +85,9 @@ export function ProfileCardsPicker({
   const [order, setOrder] = useState<CardKey[]>(() =>
     effectiveOrder(sanitizeLayout(summary.cardLayout), CARD_ORDER_DEFAULT),
   );
-  const [hidden, setHidden] = useState<string[]>(() => sanitizeLayout(summary.cardLayout).hidden ?? []);
+  const [hidden, setHidden] = useState<string[]>(
+    () => sanitizeLayout(summary.cardLayout).hidden ?? [],
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -99,7 +113,11 @@ export function ProfileCardsPicker({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[185] flex items-center justify-center p-4" role="dialog" aria-modal>
+    <div
+      className="fixed inset-0 z-[185] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal
+    >
       <button aria-label={t("Close")} className="absolute inset-0 bg-black/55" onClick={onClose} />
       <div className="relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-surface ring-1 ring-edge">
         <div className="flex items-center justify-between border-b border-edge-soft px-6 py-4">
@@ -115,7 +133,9 @@ export function ProfileCardsPicker({
 
         <div className="flex-1 overflow-y-auto px-6 py-5">
           <p className="pb-4 text-[13px] text-ink-muted">
-            {t("These cards run down your public profile. Set the order they appear in, and hide any you would rather keep to yourself.")}
+            {t(
+              "These cards run down your public profile. Set the order they appear in, and hide any you would rather keep to yourself.",
+            )}
           </p>
           <ul className="flex flex-col gap-2">
             {order.map((k, i) => (

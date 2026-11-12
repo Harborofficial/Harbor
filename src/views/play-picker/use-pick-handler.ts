@@ -304,7 +304,9 @@ export function usePickHandler({
       // request headers.
       if (intent !== "download" && (hasProxyHeaders || r.data.transcode)) {
         try {
-          const proxied = await registerStreamProxy(r.data.url, r.data.headers, { transcode: r.data.transcode });
+          const proxied = await registerStreamProxy(r.data.url, r.data.headers, {
+            transcode: r.data.transcode,
+          });
           playUrl = proxied.url;
           proxySessionId = proxied.sessionId;
         } catch {

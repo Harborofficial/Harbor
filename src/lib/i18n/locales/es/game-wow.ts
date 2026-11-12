@@ -7,11 +7,14 @@ export default {
   "games.wow.addons.changes": "Notas de la versión",
   "games.wow.addons.fullNotes": "Leer el texto completo en la página del autor",
 
-  "games.wow.manager.errorIdentity": "Las carpetas instaladas no coinciden con el paquete del autor. Vuelve a escanear y comprueba su origen.",
+  "games.wow.manager.errorIdentity":
+    "Las carpetas instaladas no coinciden con el paquete del autor. Vuelve a escanear y comprueba su origen.",
   "games.wow.manager.importInstalled": "Importar addons instalados",
   "games.wow.manager.import": "Gestionar con Harbor",
-  "games.wow.manager.importScope": "Addons instalados con identidad de WoWInterface. Los demás siguen en la lista de instalados.",
-  "games.wow.manager.importNote": "Conserva tus archivos instalados. Harbor comprueba el paquete del autor y guarda la versión anterior antes de futuras actualizaciones o eliminaciones.",
+  "games.wow.manager.importScope":
+    "Addons instalados con identidad de WoWInterface. Los demás siguen en la lista de instalados.",
+  "games.wow.manager.importNote":
+    "Conserva tus archivos instalados. Harbor comprueba el paquete del autor y guarda la versión anterior antes de futuras actualizaciones o eliminaciones.",
   "games.wow.manager.keepVersion": "Conservar la versión instalada {version}",
   "games.wow.manager.keep": "Conservar",
   "games.wow.manager.importSuccess": "Harbor ahora gestiona este addon.",
@@ -19,8 +22,10 @@ export default {
   "games.wow.manager.browse": "Buscar addons",
   "games.wow.manager.managed": "Gestionados por Harbor",
   "games.wow.manager.backups": "Copias de seguridad",
-  "games.wow.manager.catalogNote": "Explora WoWInterface. La compatibilidad con tu WoW instalado se comprueba antes de aplicar cambios.",
-  "games.wow.manager.managedNote": "Aquí solo puedes cambiar addons instalados mediante Harbor. Los demás siguen en la lista de instalados.",
+  "games.wow.manager.catalogNote":
+    "Explora WoWInterface. La compatibilidad con tu WoW instalado se comprueba antes de aplicar cambios.",
+  "games.wow.manager.managedNote":
+    "Aquí solo puedes cambiar addons instalados mediante Harbor. Los demás siguen en la lista de instalados.",
   "games.wow.manager.category": "Categoría",
   "games.wow.manager.allCategories": "Todas las categorías",
   "games.wow.manager.popular": "Descargas mensuales",
@@ -28,31 +33,42 @@ export default {
   "games.wow.manager.name": "Nombre",
   "games.wow.manager.sort": "Ordenar addons",
   "games.wow.manager.monthly": "Descargas este mes",
-  "games.wow.manager.catalogError": "No se pudo cargar el catálogo. Los resultados anteriores podrían estar desactualizados.",
-  "games.wow.manager.categoriesError": "Las categorías no están disponibles. Puedes buscar en todos los addons.",
-  "games.wow.manager.partial": "Faltan algunos datos del proveedor. Los resultados pueden estar incompletos.",
+  "games.wow.manager.catalogError":
+    "No se pudo cargar el catálogo. Los resultados anteriores podrían estar desactualizados.",
+  "games.wow.manager.categoriesError":
+    "Las categorías no están disponibles. Puedes buscar en todos los addons.",
+  "games.wow.manager.partial":
+    "Faltan algunos datos del proveedor. Los resultados pueden estar incompletos.",
   "games.wow.manager.emptyManaged": "Aún no hay addons gestionados por Harbor.",
   "games.wow.manager.emptyBackups": "Aún no se han guardado versiones anteriores.",
-  "games.wow.manager.reviewNote": "Revisa primero el paquete y los cambios de carpetas. Cierra WoW antes de revisar o aplicar cambios.",
+  "games.wow.manager.reviewNote":
+    "Revisa primero el paquete y los cambios de carpetas. Cierra WoW antes de revisar o aplicar cambios.",
   "games.wow.manager.backupNote": "Archivos anteriores guardados localmente: {size}.",
   "games.wow.manager.fileSummary": "{count} archivos · {size}",
   "games.wow.manager.preparing": "Preparando revisión…",
   "games.wow.manager.applying": "Aplicando cambios…",
   "games.wow.manager.success": "Tus addons están actualizados.",
   "games.wow.manager.cancelled": "Cancelado. Actualiza la vista para comprobar el estado actual.",
-  "games.wow.manager.recovery": "Hay un cambio interrumpido que debes recuperar antes de continuar. Cierra WoW primero.",
+  "games.wow.manager.recovery":
+    "Hay un cambio interrumpido que debes recuperar antes de continuar. Cierra WoW primero.",
   "games.wow.manager.recover": "Recuperar configuración",
   "games.wow.manager.add": "Añadir",
   "games.wow.manager.replace": "Reemplazar",
   "games.wow.manager.remove": "Eliminar",
-  "games.wow.manager.error": "No se pudo completar el cambio. Comprueba la conexión y el espacio libre e inténtalo de nuevo.",
+  "games.wow.manager.error":
+    "No se pudo completar el cambio. Comprueba la conexión y el espacio libre e inténtalo de nuevo.",
   "games.wow.manager.errorRunning": "Cierra WoW completamente e inténtalo de nuevo.",
-  "games.wow.manager.errorCompatibility": "Este paquete no coincide con tu edición o versión instalada de WoW.",
-  "games.wow.manager.errorUnmanaged": "Estas carpetas se instalaron fuera de Harbor y no se pueden sobrescribir aquí.",
-  "games.wow.manager.errorChanged": "Los archivos cambiaron o requieren atención. Vuelve a escanear.",
-  "games.wow.manager.errorDependency": "Faltan dependencias necesarias u otro addon necesita estos archivos.",
+  "games.wow.manager.errorCompatibility":
+    "Este paquete no coincide con tu edición o versión instalada de WoW.",
+  "games.wow.manager.errorUnmanaged":
+    "Estas carpetas se instalaron fuera de Harbor y no se pueden sobrescribir aquí.",
+  "games.wow.manager.errorChanged":
+    "Los archivos cambiaron o requieren atención. Vuelve a escanear.",
+  "games.wow.manager.errorDependency":
+    "Faltan dependencias necesarias u otro addon necesita estos archivos.",
   "games.wow.manager.errorExpired": "La revisión ha caducado. Revisa los cambios de nuevo.",
-  "games.wow.manager.errorDesktop": "La gestión de addons requiere la aplicación de escritorio actual de Harbor para Windows.",
+  "games.wow.manager.errorDesktop":
+    "La gestión de addons requiere la aplicación de escritorio actual de Harbor para Windows.",
 
   "games.wow.addons.screenshots": "Capturas del autor",
   "games.wow.addons.screenshotsUnavailable": "No se pudieron cargar las capturas del autor.",
@@ -61,13 +77,16 @@ export default {
   "games.wow.addons.intro": "Versiones y dependencias necesarias para esta instalación.",
   "games.wow.addons.refresh": "Volver a buscar complementos",
   "games.wow.addons.client": "WoW instalado {version}",
-  "games.wow.addons.unavailable": "No se pudo leer esta instalación. Conecta su unidad y vuelve a buscar.",
-  "games.wow.addons.partial": "No se pudieron revisar algunas carpetas. La lista puede estar incompleta.",
+  "games.wow.addons.unavailable":
+    "No se pudo leer esta instalación. Conecta su unidad y vuelve a buscar.",
+  "games.wow.addons.partial":
+    "No se pudieron revisar algunas carpetas. La lista puede estar incompleta.",
   "games.wow.addons.search": "Buscar un complemento",
   "games.wow.addons.attention": "Requiere atención",
   "games.wow.addons.unreadable": "No se pudo leer el manifiesto de este complemento.",
   "games.wow.addons.noManifest": "No se encontró un manifiesto para este cliente.",
-  "games.wow.addons.ambiguous": "Hay varios manifiestos coincidentes. Revisa la instalación del complemento.",
+  "games.wow.addons.ambiguous":
+    "Hay varios manifiestos coincidentes. Revisa la instalación del complemento.",
   "games.wow.addons.missing": "Faltan carpetas necesarias: {names}",
   "games.wow.addons.gameVersions": "Versiones del juego declaradas",
   "games.wow.addons.requires": "Requiere",
@@ -76,10 +95,12 @@ export default {
   "games.wow.addons.noMatches": "Ningún complemento coincide con estos filtros.",
   "games.wow.addons.more": "Mostrar más complementos",
   "games.wow.addons.empty": "No se encontraron complementos para esta instalación.",
-  "games.wow.addons.scope": "El autor declara las versiones del juego. No se comprueban la activación ni las actualizaciones disponibles.",
+  "games.wow.addons.scope":
+    "El autor declara las versiones del juego. No se comprueban la activación ni las actualizaciones disponibles.",
   "games.wow.realm.LOCKED": "Bloqueado",
   "games.wow.classic.title": "Estado de los reinos",
-  "games.wow.classic.intro": "Consulta tu reino antes de viajar a Azeroth. Estado en directo de Blizzard.",
+  "games.wow.classic.intro":
+    "Consulta tu reino antes de viajar a Azeroth. Estado en directo de Blizzard.",
   "games.wow.classic.classic": "Progresión de Classic",
   "games.wow.classic.classic1x": "Classic Era y temporadas",
   "games.wow.classic.classicann": "Aniversario de Classic",
@@ -88,7 +109,8 @@ export default {
   "games.wow.classic.all": "Todos los reinos",
   "games.wow.classic.pinned": "Fijados",
   "games.wow.classic.saveError": "No se pudieron guardar los reinos fijados en este dispositivo.",
-  "games.wow.classic.unavailable": "El estado de los reinos no está disponible. Actualiza dentro de poco.",
+  "games.wow.classic.unavailable":
+    "El estado de los reinos no está disponible. Actualiza dentro de poco.",
   "games.wow.classic.population": "Población",
   "games.wow.classic.status": "Estado",
   "games.wow.classic.transfersLocked": "Cerrado a transferencias de personajes",
@@ -97,9 +119,12 @@ export default {
   "games.wow.classic.noMatches": "Ningún reino coincide con estos filtros.",
   "games.wow.classic.news": "Noticias de Classic",
   "games.wow.realm.browse": "Explorar reinos",
-  "games.wow.realm.unavailable": "El estado de los reinos no está disponible. Puedes introducir un reino.",
-  "games.wow.realm.unsupported": "El servicio global de Blizzard no cubre esta región. Introduce tu reino manualmente.",
-  "games.wow.realm.noMatches": "No hay reinos coincidentes. Puedes introducir el nombre manualmente.",
+  "games.wow.realm.unavailable":
+    "El estado de los reinos no está disponible. Puedes introducir un reino.",
+  "games.wow.realm.unsupported":
+    "El servicio global de Blizzard no cubre esta región. Introduce tu reino manualmente.",
+  "games.wow.realm.noMatches":
+    "No hay reinos coincidentes. Puedes introducir el nombre manualmente.",
   "games.wow.realm.refresh": "Actualizar estado de los reinos",
   "games.wow.realm.unknown": "Estado desconocido",
   "games.wow.realm.online": "En línea",
@@ -123,7 +148,8 @@ export default {
   "games.wow.character.refresh": "Actualizar personaje",
   "games.wow.character.invalid": "Introduce un reino y un nombre de personaje válidos.",
   "games.wow.character.missing": "Personaje no encontrado. Revisa la región, el reino y el nombre.",
-  "games.wow.character.limited": "Raider.IO está limitando las solicitudes. Inténtalo en unos momentos.",
+  "games.wow.character.limited":
+    "Raider.IO está limitando las solicitudes. Inténtalo en unos momentos.",
   "games.wow.character.unavailable": "Los datos del personaje no están disponibles temporalmente.",
   "games.wow.character.previous": "Se muestra la consulta anterior.",
   "games.wow.character.saveError": "No se pudo guardar este personaje en este dispositivo.",
@@ -137,7 +163,8 @@ export default {
   "games.wow.character.timed": "En tiempo",
   "games.wow.character.overtime": "Fuera de tiempo",
   "games.wow.character.noRuns": "No hay partidas registradas para esta temporada.",
-  "games.wow.character.runsUnavailable": "Los datos de partidas de la temporada actual no están disponibles.",
+  "games.wow.character.runsUnavailable":
+    "Los datos de partidas de la temporada actual no están disponibles.",
   "games.wow.character.raidProgress": "Progreso en bandas",
   "games.wow.character.normal": "Normal",
   "games.wow.character.heroic": "Heroico",
@@ -145,16 +172,19 @@ export default {
   "games.wow.character.raidUnavailable": "El progreso actual en bandas no está disponible.",
   "games.wow.character.updated": "Perfil actualizado: {date}",
   "games.wow.character.gearUpdated": "Equipo actualizado: {date}",
-  "games.wow.character.sourceNote": "Datos públicos de Raider.IO. Las actualizaciones pueden retrasarse respecto al juego.",
+  "games.wow.character.sourceNote":
+    "Datos públicos de Raider.IO. Las actualizaciones pueden retrasarse respecto al juego.",
   "games.wow.title": "Esta semana en Azeroth",
   "games.wow.region": "Región",
   "games.wow.refresh": "Actualizar datos de WoW",
-  "games.wow.unavailable": "No se pudo actualizar. La información anterior puede estar desactualizada.",
+  "games.wow.unavailable":
+    "No se pudo actualizar. La información anterior puede estar desactualizada.",
   "games.wow.reset": "Próximo reinicio semanal",
   "games.wow.resetNote": "Tu hora local. El mantenimiento puede durar más que el reinicio.",
   "games.wow.resetUnavailable": "La hora del reinicio no está disponible.",
   "games.wow.affixes": "Afijos de esta semana",
-  "games.wow.affixesUnavailable": "Los afijos actuales no están disponibles. Vuelve a comprobarlo tras el reinicio regional.",
+  "games.wow.affixesUnavailable":
+    "Los afijos actuales no están disponibles. Vuelve a comprobarlo tras el reinicio regional.",
   "games.wow.dungeons": "Mazmorras míticas+",
   "games.wow.timer": "Límite de {minutes} min",
   "games.wow.rankings": "Ver clasificación",
@@ -163,7 +193,8 @@ export default {
   "games.wow.bosses": "Jefes · {count}",
   "games.wow.raidsUnavailable": "La información de bandas actuales no está disponible.",
   "games.wow.checked": "Comprobado: {date}",
-  "games.wow.scope": "Datos de Retail de Raider.IO. Los tiempos corresponden a piedras angulares; los afijos dependen de su nivel.",
+  "games.wow.scope":
+    "Datos de Retail de Raider.IO. Los tiempos corresponden a piedras angulares; los afijos dependen de su nivel.",
   "games.wow.region.us": "América / Oceanía",
   "games.wow.region.eu": "Europa",
   "games.wow.region.kr": "Corea",

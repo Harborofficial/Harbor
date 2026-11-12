@@ -9,7 +9,8 @@ type Kind = "dualsense" | "xbox" | "generic";
 function classify(name: string): Kind {
   const n = name.toLowerCase();
   if (/xbox|xinput|045e|microsoft/.test(n)) return "xbox";
-  if (/dualsense|dualshock|playstation|sony|054c|0ce6|09cc|05c4|ps5|ps4/.test(n)) return "dualsense";
+  if (/dualsense|dualshock|playstation|sony|054c|0ce6|09cc|05c4|ps5|ps4/.test(n))
+    return "dualsense";
   return "generic";
 }
 
@@ -22,7 +23,9 @@ function BpControllerArt({ kind }: { kind: Kind }) {
   const stick = (cx: number, cy: number) => (
     <circle cx={cx} cy={cy} r="8" fill="var(--bp-void)" stroke="var(--bp-edge-2)" strokeWidth="2" />
   );
-  const dot = (cx: number, cy: number, fill: string) => <circle cx={cx} cy={cy} r="3.4" fill={fill} />;
+  const dot = (cx: number, cy: number, fill: string) => (
+    <circle cx={cx} cy={cy} r="3.4" fill={fill} />
+  );
 
   return (
     <svg
@@ -51,7 +54,16 @@ function BpControllerArt({ kind }: { kind: Kind }) {
       ) : kind === "dualsense" ? (
         <>
           {/* Touchpad with the light-bar accent */}
-          <rect x="49" y="21" width="30" height="19" rx="4" fill="var(--bp-panel)" stroke="var(--bp-touch)" strokeWidth="2" />
+          <rect
+            x="49"
+            y="21"
+            width="30"
+            height="19"
+            rx="4"
+            fill="var(--bp-panel)"
+            stroke="var(--bp-touch)"
+            strokeWidth="2"
+          />
           {stick(51, 63)}
           {stick(77, 63)}
           {/* D-pad left */}

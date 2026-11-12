@@ -3,7 +3,14 @@ type IconProps = { size?: number; className?: string };
 function brand(path: string) {
   return function Icon({ size = 18, className }: IconProps) {
     return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden
+        className={className}
+      >
         <path d={path} />
       </svg>
     );

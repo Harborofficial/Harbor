@@ -42,5 +42,5 @@ export default {
   "games.osrs.averages": "缺少交易记录时保留空缺。此处不计算交易所税费。",
   "games.osrs.table": "最近24个区间",
   "games.osrs.time": "时间",
-  "games.osrs.volume": "交易数量"
+  "games.osrs.volume": "交易数量",
 };

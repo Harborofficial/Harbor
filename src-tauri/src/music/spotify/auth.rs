@@ -8,7 +8,6 @@ use tauri::AppHandle;
 pub const EXPIRED: &str = "Spotify sign in expired";
 pub const REJECTED_CLIENT: &str = "Spotify rejected that client id";
 pub const MISSING_CLIENT_ID: &str = "Spotify needs your own client id";
-pub const BRING_YOUR_OWN: &str = "Pair this device or use your own Spotify app";
 
 const REDIRECT_PORT: u16 = 8898;
 const OAUTH_TIMEOUT: Duration = Duration::from_secs(90);

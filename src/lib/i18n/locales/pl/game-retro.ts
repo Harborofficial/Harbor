@@ -6,10 +6,13 @@ export default {
   "games.retro.keyboardOnly": "Klawiatura gotowa · naciśnij przycisk kontrolera, aby go połączyć",
   "games.retro.resetControls": "Resetuj przypisania",
   "games.retro.controlsSaved": "Zapisano dla tego profilu i systemu",
-  "games.retro.pressKey": "Naciśnij klawisz. Esc anuluje. F1, F2 i F4 są zarezerwowane dla odtwarzacza.",
+  "games.retro.pressKey":
+    "Naciśnij klawisz. Esc anuluje. F1, F2 i F4 są zarezerwowane dla odtwarzacza.",
   "games.retro.pressButton": "Naciśnij przycisk kontrolera lub porusz drążkiem.",
-  "games.retro.disconnected": "Kontroler odłączony. Podłącz go ponownie i wznów, gdy będziesz gotowy.",
-  "games.retro.controlsSaveFailed": "Przypisania działają w tej sesji, ale nie udało się ich zapisać.",
+  "games.retro.disconnected":
+    "Kontroler odłączony. Podłącz go ponownie i wznów, gdy będziesz gotowy.",
+  "games.retro.controlsSaveFailed":
+    "Przypisania działają w tej sesji, ale nie udało się ich zapisać.",
   "games.retro.menuChord": "Select + Start: menu",
   "games.retro.pause": "Pauza",
   "games.retro.resume": "Wznów",
@@ -18,7 +21,8 @@ export default {
   "games.retro.controls": "Sterowanie",
   "games.retro.saveExit": "Zapisz i wyjdź",
   "games.retro.popout": "Osobne okno",
-  "games.retro.dock": "Wróć do Harbor",  "games.retro.mute": "Wycisz",
+  "games.retro.dock": "Wróć do Harbor",
+  "games.retro.mute": "Wycisz",
   "games.retro.unmute": "Włącz dźwięk",
   "games.retro.volume": "Głośność",
   "games.retro.picture": "Obraz",
@@ -27,7 +31,8 @@ export default {
   "games.retro.fullscreen": "Pełny ekran",
   "games.retro.exitFullscreen": "Opuść pełny ekran",
   "games.retro.playInside": "Graj w Harbor",
-  "games.retro.setup": "Zainstaluj odtwarzacz {system} raz i graj tutaj. Gra pozostaje na tym urządzeniu.",
+  "games.retro.setup":
+    "Zainstaluj odtwarzacz {system} raz i graj tutaj. Gra pozostaje na tym urządzeniu.",
   "games.retro.install": "Zainstaluj i graj · {size} MB",
   "games.retro.runtime": "EmulatorJS {version} · jedno pobranie, dostępny offline",
   "games.retro.aboutRuntime": "Kod źródłowy i licencje",

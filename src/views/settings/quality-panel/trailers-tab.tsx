@@ -11,15 +11,14 @@ export function TrailersTab() {
   const t = useT();
   const { settings, update } = useSettings();
   return (
-    <Section
-      title={t("Trailer quality")}
-      subtitle={t("Choose trailer playback quality.")}
-    >
+    <Section title={t("Trailer quality")} subtitle={t("Choose trailer playback quality.")}>
       <SettingRow
         icon={<Film size={18} strokeWidth={2} />}
         label={t("Playback quality")}
         desc={t("Auto follows your connection speed.")}
-        tip={t("How sharp trailers play. Auto follows your connection speed, and the Watch Trailer button targets 1080p. Pick 1080p or Best (up to 4K when the source has it) to force higher. 1080p and Best merge separate video and audio with the bundled ffmpeg, so they take a beat longer to start.")}
+        tip={t(
+          "How sharp trailers play. Auto follows your connection speed, and the Watch Trailer button targets 1080p. Pick 1080p or Best (up to 4K when the source has it) to force higher. 1080p and Best merge separate video and audio with the bundled ffmpeg, so they take a beat longer to start.",
+        )}
       >
         <div className="flex w-full min-w-0 flex-col gap-3">
           <div className="w-[280px] max-w-full">
@@ -44,7 +43,9 @@ export function TrailersTab() {
 
       <ToggleRow
         label={t("Auto-play trailer on detail pages")}
-        sub={t("Plays a muted trailer in the backdrop when you open a title. Click the speaker to unmute. Falls back to the image when no trailer is available.")}
+        sub={t(
+          "Plays a muted trailer in the backdrop when you open a title. Click the speaker to unmute. Falls back to the image when no trailer is available.",
+        )}
         value={settings.detailTrailerAutoplay}
         onChange={(v) => update({ detailTrailerAutoplay: v })}
         leading={
@@ -64,7 +65,9 @@ export function TrailersTab() {
         <Nested>
           <ToggleRow
             label={t("Start trailers with audio")}
-            sub={t("Detail page trailers begin unmuted. Falls back to muted if the browser blocks sound until you interact.")}
+            sub={t(
+              "Detail page trailers begin unmuted. Falls back to muted if the browser blocks sound until you interact.",
+            )}
             value={settings.detailTrailerAudio}
             onChange={(v) => update({ detailTrailerAudio: v })}
             leading={
@@ -79,7 +82,9 @@ export function TrailersTab() {
       )}
       <ToggleRow
         label={t("Scroll up for the trailer")}
-        sub={t("From the very top of a detail page, keep scrolling up to open the trailer. Off by default.")}
+        sub={t(
+          "From the very top of a detail page, keep scrolling up to open the trailer. Off by default.",
+        )}
         value={settings.scrollUpTrailer}
         onChange={(v) => update({ scrollUpTrailer: v })}
         leading={

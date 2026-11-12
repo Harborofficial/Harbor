@@ -52,12 +52,16 @@ export function useSettingsAnchor(
         return;
       }
       const root = scrollRef.current;
-      const el = root && Array.from(root.querySelectorAll<HTMLElement>("[id]")).find(
-        (candidate) => candidate.id === request.anchor && candidate.getClientRects().length > 0,
-      );
+      const el =
+        root &&
+        Array.from(root.querySelectorAll<HTMLElement>("[id]")).find(
+          (candidate) => candidate.id === request.anchor && candidate.getClientRects().length > 0,
+        );
       if (el) {
         el.scrollIntoView({
-          behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+          behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+            ? "instant"
+            : "smooth",
           block: "start",
         });
         el.classList.remove("hset-jumped");

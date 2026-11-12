@@ -26,7 +26,8 @@ export default {
   "games.modHub.entryNote": "Esplora le mod e gestisci i contenuti installati.",
   "games.modHub.switchGame": "Cambia gioco",
   "games.modHub.creatorDownload": "Scarica dal creatore",
-  "games.modHub.legacyNote": "I contenuti per The Sims 2 e The Sims 3 si scaricano dal creatore. La gestione locale delle mod supporta attualmente The Sims 4.",
+  "games.modHub.legacyNote":
+    "I contenuti per The Sims 2 e The Sims 3 si scaricano dal creatore. La gestione locale delle mod supporta attualmente The Sims 4.",
   "games.modHub.bodyShop": "Body Shop",
   "games.modHub.patterns": "Motivi",
   "games.modHub.sets": "Set a tema",
@@ -42,5 +43,5 @@ export default {
   "games.modHub.creator": "Autore",
   "games.modHub.viewOnSource": "Pagina dell’autore",
   "games.modHub.filesPending": "Caricamento dei file del progetto…",
-  "games.modHub.picked": "Scelta MTS"
+  "games.modHub.picked": "Scelta MTS",
 };

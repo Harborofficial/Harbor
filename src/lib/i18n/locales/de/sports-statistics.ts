@@ -1,8 +1,8 @@
 export default {
   "Match stats": "Spielstatistiken",
-  "Timeline": "Spielverlauf",
+  Timeline: "Spielverlauf",
   "Head to head": "Direkter Vergleich",
-  "Standings": "Tabelle",
+  Standings: "Tabelle",
   "Loading team results…": "Teamergebnisse werden geladen…",
   "No completed matches were returned for this team.":
     "Für dieses Team wurden keine abgeschlossenen Spiele zurückgegeben.",

@@ -1,14 +1,17 @@
 export default {
   "games.shortcuts.reviewLaunch": "Tinjau peluncuran",
   "games.shortcuts.state.local": "Peluncuran langsung tersedia",
-  "games.shortcuts.shortcut_identity": "Steam belum memberi ID yang valid untuk pintasan ini. Tinjau pengaturannya dan luncurkan langsung, atau simpan lagi di Steam lalu muat ulang.",
+  "games.shortcuts.shortcut_identity":
+    "Steam belum memberi ID yang valid untuk pintasan ini. Tinjau pengaturannya dan luncurkan langsung, atau simpan lagi di Steam lalu muat ulang.",
 
   "games.shortcuts.activity.open": "Aktivitas",
   "games.shortcuts.activity.title": "Aktivitas pintasan",
-  "games.shortcuts.activity.note": "Pemindaian dan peluncuran terbaru untuk profil Harbor ini. Hingga 300 entri.",
+  "games.shortcuts.activity.note":
+    "Pemindaian dan peluncuran terbaru untuk profil Harbor ini. Hingga 300 entri.",
   "games.shortcuts.activity.remember": "Simpan antar sesi",
   "games.shortcuts.activity.detailed": "Sertakan detail pemindaian",
-  "games.shortcuts.activity.storageError": "Aktivitas tersimpan tidak dapat diakses. Entri sesi ini tetap ditampilkan.",
+  "games.shortcuts.activity.storageError":
+    "Aktivitas tersimpan tidak dapat diakses. Entri sesi ini tetap ditampilkan.",
   "games.shortcuts.activity.empty": "Belum ada aktivitas.",
   "games.shortcuts.activity.clear": "Hapus aktivitas",
   "games.shortcuts.activity.duration": "{ms} md",
@@ -25,9 +28,12 @@ export default {
 
   "games.shortcuts.launchDirect": "Jalankan langsung",
   "games.shortcuts.viaSteam": "Main lewat Steam",
-  "games.shortcuts.directNote": "Menjalankan berkas program ini dengan opsi peluncuran dan folder awalnya.",
-  "games.shortcuts.shortcut_changed": "Pintasan ini berubah di Steam. Muat ulang pustaka dan tinjau pengaturan peluncurannya.",
-  "games.shortcuts.shortcut_options": "Opsi peluncuran ini memakai pembungkus perintah Steam. Jalankan pintasan ini lewat Steam.",
+  "games.shortcuts.directNote":
+    "Menjalankan berkas program ini dengan opsi peluncuran dan folder awalnya.",
+  "games.shortcuts.shortcut_changed":
+    "Pintasan ini berubah di Steam. Muat ulang pustaka dan tinjau pengaturan peluncurannya.",
+  "games.shortcuts.shortcut_options":
+    "Opsi peluncuran ini memakai pembungkus perintah Steam. Jalankan pintasan ini lewat Steam.",
   "games.dock.shortcut": "Pintasan Steam",
   "games.shortcuts.note": "Game non-Steam yang ditambahkan ke pustaka Steam.",
   "games.shortcuts.chooseFolder": "Pilih folder Steam",
@@ -35,7 +41,8 @@ export default {
   "games.shortcuts.accountNumber": "Akun {id}",
   "games.shortcuts.automatic": "Gunakan folder terdeteksi",
   "games.shortcuts.pickerError": "Pemilih folder tidak dapat dibuka. Coba lagi.",
-  "games.shortcuts.partial": "Beberapa pintasan tidak dapat dibaca. Segarkan setelah Steam selesai menyimpan.",
+  "games.shortcuts.partial":
+    "Beberapa pintasan tidak dapat dibaca. Segarkan setelah Steam selesai menyimpan.",
   "games.shortcuts.empty": "Tidak ada pintasan. Tambahkan game non-Steam di Steam, lalu segarkan.",
   "games.shortcuts.state.ready": "Siap dimainkan",
   "games.shortcuts.state.missing": "Berkas eksekusi hilang",
@@ -47,9 +54,11 @@ export default {
   "games.shortcuts.tags": "Tag",
   "games.shortcuts.storeError": "Pengaturan tidak dapat disimpan.",
   "games.shortcuts.shortcut_location": "Pilih folder Steam atau folder userdata di dalamnya.",
-  "games.shortcuts.shortcut_account": "Buka Steam dengan akun pintasan ini, lalu segarkan. Harbor harus menggunakan instalasi Steam yang sama.",
+  "games.shortcuts.shortcut_account":
+    "Buka Steam dengan akun pintasan ini, lalu segarkan. Harbor harus menggunakan instalasi Steam yang sama.",
   "games.shortcuts.shortcut_missing": "Pintasan ini sudah tidak ada. Segarkan pustaka.",
-  "games.shortcuts.shortcut_executable": "Berkas eksekusi hilang atau jalur absolutnya tidak didukung.",
+  "games.shortcuts.shortcut_executable":
+    "Berkas eksekusi hilang atau jalur absolutnya tidak didukung.",
   "games.shortcuts.shortcut_launch": "Steam tidak dapat membuka pintasan ini. Coba lagi.",
-  "games.shortcuts.shortcut_read": "Pintasan Steam tidak dapat dibaca. Coba segarkan."
+  "games.shortcuts.shortcut_read": "Pintasan Steam tidak dapat dibaca. Coba segarkan.",
 };

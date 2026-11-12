@@ -630,8 +630,8 @@
 .hot-poster-open:has(> .sh-video-preview:is([data-state="playing"], [data-state="buffering"]))
   :is(.hot-art, .hot-poster-copy, .hot-reason),
 .hot-poster-open:has(
-  > .sh-video-preview:is([data-state="playing"], [data-state="buffering"])
-):after {
+    > .sh-video-preview:is([data-state="playing"], [data-state="buffering"])
+  ):after {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;

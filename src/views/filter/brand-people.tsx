@@ -6,13 +6,25 @@ import type { MetaFilter } from "@/lib/view";
 
 type Branded = MetaFilter & { kind: "studio" | "network"; id: number; name: string };
 
-export function PeopleRail<T extends BrandPerson>({ title, kicker, people, note }: { title: string; kicker: string; people: T[]; note: (p: T) => string }) {
+export function PeopleRail<T extends BrandPerson>({
+  title,
+  kicker,
+  people,
+  note,
+}: {
+  title: string;
+  kicker: string;
+  people: T[];
+  note: (p: T) => string;
+}) {
   const posterRow = usePosterRow();
   if (people.length === 0) return null;
   const heading = (
     <span className="flex flex-col">
       <span className="text-[20px] font-medium tracking-tight text-ink">{title}</span>
-      <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">{kicker}</span>
+      <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">
+        {kicker}
+      </span>
     </span>
   );
   return (

@@ -96,19 +96,35 @@ pub async fn subtitle_extract_ass(
 ) -> Result<String, String> {
     let ffmpeg = crate::transcode::locate_ffmpeg().ok_or_else(|| "ffmpeg not found".to_string())?;
     let map = format!("0:s:{}", stream_index.unwrap_or(0));
+    let remote = source.starts_with("https://") || source.starts_with("http://");
     let mut cmd = std::process::Command::new(&ffmpeg);
     cmd.arg("-nostdin").arg("-loglevel").arg("error");
-    if let Some(h) = &headers {
-        if let Some(ua) = h.get("User-Agent").or_else(|| h.get("user-agent")) {
-            cmd.arg("-user_agent").arg(ua);
+    if remote {
+        // Normalization runs while the same stream is playing, so mirror the
+        // player's HTTP identity and do not let a stalled connection hold the
+        // task until the whole-file deadline.
+        let (ua, _) = crate::mpv::stream_http_options(&headers);
+        cmd.arg("-user_agent").arg(ua);
+        if let Some(h) = &headers {
+            let fields = crate::subsync::url_guard::safe_header_blob(h);
+            if !fields.is_empty() {
+                cmd.arg("-headers").arg(fields);
+            }
         }
+        cmd.arg("-rw_timeout")
+            .arg(ASS_HEADER_TIMEOUT.as_micros().to_string());
     }
+    // Only the ASS script header (style names and font sizes) is needed for
+    // normalization. Copying without a duration made ffmpeg demux the whole
+    // file, which is far too slow for a remote MKV and hit the timeout.
     cmd.arg("-i")
         .arg(&source)
         .arg("-map")
         .arg(&map)
         .arg("-c:s")
         .arg("copy")
+        .arg("-t")
+        .arg("2")
         .arg("-f")
         .arg("ass")
         .arg("-");

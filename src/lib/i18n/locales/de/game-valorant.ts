@@ -20,8 +20,10 @@ export default {
   "games.valorant.sentinel": "Wächter",
   "games.valorant.search": "Agent suchen",
   "games.valorant.referenceError": "Die Spielreferenz konnte nicht geladen werden.",
-  "games.valorant.stale": "Aktualisierung fehlgeschlagen. Zuletzt geladene Ergebnisse werden angezeigt.",
-  "games.valorant.metaError": "Ranglistenstatistiken sind nicht verfügbar. Die Agentenreferenz bleibt verfügbar.",
+  "games.valorant.stale":
+    "Aktualisierung fehlgeschlagen. Zuletzt geladene Ergebnisse werden angezeigt.",
+  "games.valorant.metaError":
+    "Ranglistenstatistiken sind nicht verfügbar. Die Agentenreferenz bleibt verfügbar.",
   "games.valorant.agents": "Agenten-Rangliste",
   "games.valorant.sort": "Agenten sortieren",
   "games.valorant.winSort": "Höchste Siegrate",
@@ -34,20 +36,24 @@ export default {
   "games.valorant.sampleNote": "Agenten mit weniger als 200 Einsätzen stehen am Ende.",
   "games.valorant.empty": "Keine Treffer für diese Filter.",
   "games.valorant.checked": "Geprüft: {date}",
-  "games.valorant.metaScope": "OP.GG-Ranglistendaten für den ausgewählten Patch. Die Auswahlrate ist der Anteil an Agenteneinsätzen. Die Ergebnisse beziehen sich auf die Stichprobe der Quelle, nicht auf alle Spieler.",
-  "games.valorant.referenceScope": "Spielgrafiken und Referenzen über Valorant-API. Aktualisierungen können verzögert eintreffen. Harbor wird nicht von Riot Games unterstützt.",
+  "games.valorant.metaScope":
+    "OP.GG-Ranglistendaten für den ausgewählten Patch. Die Auswahlrate ist der Anteil an Agenteneinsätzen. Die Ergebnisse beziehen sich auf die Stichprobe der Quelle, nicht auf alle Spieler.",
+  "games.valorant.referenceScope":
+    "Spielgrafiken und Referenzen über Valorant-API. Aktualisierungen können verzögert eintreffen. Harbor wird nicht von Riot Games unterstützt.",
   "games.valorant.samples": "{count} Einsätze",
   "games.valorant.smallSample": "Kleine Stichprobe",
   "games.valorant.abilities": "Fähigkeiten",
   "games.valorant.watchAbility": "Fähigkeit ansehen",
   "games.valorant.videoError": "Die Demonstration konnte nicht abgespielt werden.",
   "games.valorant.mapMeta": "Agenten-Meta für diese Karte",
-  "games.valorant.mapScope": "Kartenreferenz, einschließlich Karten außerhalb der aktuellen Ranglistenrotation. Kartennamen und Ortsbezeichnungen sind auf Englisch.",
+  "games.valorant.mapScope":
+    "Kartenreferenz, einschließlich Karten außerhalb der aktuellen Ranglistenrotation. Kartennamen und Ortsbezeichnungen sind auf Englisch.",
   "games.valorant.callouts": "Ortsbezeichnungen",
   "games.valorant.compareWeapon": "Vergleichen mit",
   "games.valorant.weapon": "Waffe",
   "games.valorant.distance": "Entfernung",
-  "games.valorant.damageScope": "Basiswerte des Primärfeuers vor Rüstung, Durchschlag oder Fähigkeiten. Bei Schrotflinten gilt der Schaden pro Schrotkugel.",
+  "games.valorant.damageScope":
+    "Basiswerte des Primärfeuers vor Rüstung, Durchschlag oder Fähigkeiten. Bei Schrotflinten gilt der Schaden pro Schrotkugel.",
   "games.valorant.weaponStats": "Waffenwerte",
   "games.valorant.cost": "Credits",
   "games.valorant.magazine": "Magazin",
@@ -55,5 +61,5 @@ export default {
   "games.valorant.reload": "Nachladen · Sekunden",
   "games.valorant.head": "Kopfschaden",
   "games.valorant.body": "Körperschaden",
-  "games.valorant.legs": "Beinschaden"
+  "games.valorant.legs": "Beinschaden",
 };

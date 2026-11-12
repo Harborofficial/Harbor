@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, Check, Loader2, Plus, Star, TrendingUp } from "lucide-react";
-import { addonSiteUrl, isAdultAddon, listAddons, listRising, type SAAddon } from "@/lib/providers/stremio-addons";
+import {
+  addonSiteUrl,
+  isAdultAddon,
+  listAddons,
+  listRising,
+  type SAAddon,
+} from "@/lib/providers/stremio-addons";
 import { useSettings } from "@/lib/settings";
 import { fetchManifestAt, installAddon, manifestToConfigureUrl } from "@/lib/addon-store";
 import { rememberPendingAddon } from "@/lib/addons-store/pending-detail";
@@ -93,9 +99,11 @@ function SpotlightCard({
     if (!m?.id || busy || installed) return;
     setBusy(true);
     try {
-      let hints = (m as { behaviorHints?: { configurable?: boolean; configurationRequired?: boolean } })
-        .behaviorHints;
-      if (!hints) hints = (await fetchManifestAt(addon.manifestUrl).catch(() => null))?.behaviorHints;
+      let hints = (
+        m as { behaviorHints?: { configurable?: boolean; configurationRequired?: boolean } }
+      ).behaviorHints;
+      if (!hints)
+        hints = (await fetchManifestAt(addon.manifestUrl).catch(() => null))?.behaviorHints;
       if (hints?.configurable === true || hints?.configurationRequired === true) {
         openInstallerViewport(manifestToConfigureUrl(addon.manifestUrl), name, logo ?? null);
         return;
@@ -120,7 +128,12 @@ function SpotlightCard({
           style={{ opacity: 0.9 }}
         />
       ) : (
-        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, var(--color-elevated), var(--color-raised))" }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(135deg, var(--color-elevated), var(--color-raised))",
+          }}
+        />
       )}
       <div
         className="absolute inset-0"
@@ -129,12 +142,19 @@ function SpotlightCard({
             "linear-gradient(180deg, oklch(0.1 0.02 260 / 0.15) 0%, oklch(0.09 0.02 260 / 0.45) 46%, oklch(0.07 0.02 260 / 0.86) 82%, oklch(0.06 0.02 260 / 0.95) 100%)",
         }}
       />
-      <div className="absolute inset-0" style={{ background: "linear-gradient(80deg, oklch(0.07 0.02 260 / 0.72) 0%, transparent 58%)" }} />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "linear-gradient(80deg, oklch(0.07 0.02 260 / 0.72) 0%, transparent 58%)",
+        }}
+      />
 
       <div className="relative flex h-full min-h-[300px] flex-col justify-end gap-3.5 p-7 sm:p-9">
         <span className="flex w-fit items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.16em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.85)]">
           <TrendingUp size={11} strokeWidth={2.6} className="text-accent" />
-          {trending ? t("Trending on {site}", { site: SITE }) : t("Top rated on {site}", { site: SITE })}
+          {trending
+            ? t("Trending on {site}", { site: SITE })
+            : t("Top rated on {site}", { site: SITE })}
         </span>
         <div className="flex items-center gap-3.5">
           {logo && (
@@ -174,7 +194,11 @@ function SpotlightCard({
               disabled={busy || !m?.id}
               className="flex h-11 items-center gap-2 rounded-full bg-white px-6 text-[13.5px] font-semibold text-black transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 motion-reduce:transform-none"
             >
-              {busy ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} strokeWidth={2.6} />}
+              {busy ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : (
+                <Plus size={15} strokeWidth={2.6} />
+              )}
               {t("Install")}
             </button>
           )}

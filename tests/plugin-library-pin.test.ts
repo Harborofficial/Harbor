@@ -51,11 +51,10 @@ test("a catalogue that is no longer here pins nothing", () => {
   const forced = [{ base: PROVIDER_BASE, id: "capstan:vega:abc" }];
   assert.equal(pinnedPluginUrl(forced, [httpAddon]), undefined);
   assert.equal(
-    pinnedPluginUrl([{ base: "https://v3-cinemeta.strem.io", id: "tt0137523" }], [
-      httpAddon,
-      pluginAddon,
-      otherPlugin,
-    ]),
+    pinnedPluginUrl(
+      [{ base: "https://v3-cinemeta.strem.io", id: "tt0137523" }],
+      [httpAddon, pluginAddon, otherPlugin],
+    ),
     undefined,
     "a row from a normal addon leaves every plugin free",
   );
@@ -63,10 +62,12 @@ test("a catalogue that is no longer here pins nothing", () => {
 });
 
 test("a saved row keeps internal plugin identifiers and omits network transport URLs", () => {
-  assert.deepEqual(
-    persistableAddonOrigin({ id: "k", name: "n", base: PROVIDER_BASE }),
-    { id: "k", name: "n", logo: undefined, base: PROVIDER_BASE },
-  );
+  assert.deepEqual(persistableAddonOrigin({ id: "k", name: "n", base: PROVIDER_BASE }), {
+    id: "k",
+    name: "n",
+    logo: undefined,
+    base: PROVIDER_BASE,
+  });
   assert.deepEqual(
     persistableAddonOrigin({ id: "k", name: "n", base: "https://v3-cinemeta.strem.io" }),
     {

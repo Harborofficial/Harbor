@@ -14,7 +14,11 @@ import {
 import { BpCollectionItems } from "./bp-collection-items";
 import { BpConnect } from "./bp-connect";
 import { publishBpBand } from "./use-bp-sections";
-import { BP_COLLECTIONS_ALL, BP_COLLECTION_CATEGORIES, type BpCollectionTarget } from "./use-bp-collections";
+import {
+  BP_COLLECTIONS_ALL,
+  BP_COLLECTION_CATEGORIES,
+  type BpCollectionTarget,
+} from "./use-bp-collections";
 import { setBpFocus } from "./use-bp-focus";
 import {
   BP_COLLECTION_SOURCES,
@@ -119,9 +123,7 @@ export function BpCollections({ onOpen }: { onOpen: (target: BpCollectionTarget)
     return () => publishBpBand(null);
   }, []);
   const feed = useBpCollectionFeed(source, source === "tmdb" ? category : BP_COLLECTIONS_ALL);
-  const lastTvdb = feed.tvdbCapped
-    ? feed.entries.map((e) => e.source).lastIndexOf("tvdb")
-    : -1;
+  const lastTvdb = feed.tvdbCapped ? feed.entries.map((e) => e.source).lastIndexOf("tvdb") : -1;
 
   const open = useCallback(
     (entry: BpCollectionEntry) => {
@@ -237,7 +239,11 @@ export function BpCollections({ onOpen }: { onOpen: (target: BpCollectionTarget)
         ))}
         {feed.loading && !first && (
           <p className="flex items-center justify-center gap-2 pb-8 text-[clamp(12px,1.65vh,19px)] font-semibold text-ink-subtle">
-            <Loader2 size={17} strokeWidth={2.4} className="animate-spin motion-reduce:animate-none" />
+            <Loader2
+              size={17}
+              strokeWidth={2.4}
+              className="animate-spin motion-reduce:animate-none"
+            />
             {t("Loading more collections...")}
           </p>
         )}

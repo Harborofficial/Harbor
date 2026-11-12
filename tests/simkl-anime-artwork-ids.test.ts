@@ -32,10 +32,7 @@ test("Simkl anime artwork ids resolve from the synced activity cache", async () 
   const cache = emptyCache();
   cache.items[String(item.simklId)] = item;
   indexItem(cache, item, { kitsu: 12, mal: 21, imdb: "tt1234567", tmdb: 7 });
-  localStorage.setItem(
-    `harbor.simkl.cache.v2.${activeProfileId()}`,
-    JSON.stringify(cache),
-  );
+  localStorage.setItem(`harbor.simkl.cache.v2.${activeProfileId()}`, JSON.stringify(cache));
   resetForProfile();
 
   assert.deepEqual(await simklAnimeArtworkIds(item.simklId), {

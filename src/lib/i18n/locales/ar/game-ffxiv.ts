@@ -35,5 +35,5 @@ export default {
   "games.ffxiv.sold": "وقت البيع",
   "games.ffxiv.noSales": "لا توجد مبيعات حديثة في هذه اللقطة.",
   "games.ffxiv.community": "قد تكون بيانات المجتمع قديمة. ربما بيعت العروض منذ آخر تحديث.",
-  "games.ffxiv.open": "عرض على Universalis"
+  "games.ffxiv.open": "عرض على Universalis",
 };

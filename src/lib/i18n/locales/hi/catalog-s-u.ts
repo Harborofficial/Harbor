@@ -40,7 +40,8 @@ const catalogSU: Record<string, string> = {
   "Same Wi-Fi as this computer": "इस कंप्यूटर वाले Wi-Fi नेटवर्क पर",
   "Same file": "वही फ़ाइल",
   "Same file as host": "होस्ट वाली ही फ़ाइल",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Real-Debrid की तरह सिर्फ़ पढ़ने की अनुमति वाला इस्तेमाल। साथ ही, प्ले पिकर से कैश न किए गए स्रोतों को कतार में लगाने देता है।",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Real-Debrid की तरह सिर्फ़ पढ़ने की अनुमति वाला इस्तेमाल। साथ ही, प्ले पिकर से कैश न किए गए स्रोतों को कतार में लगाने देता है।",
   "Same-genre picks from your installed sources": "आपके इंस्टॉल किए गए स्रोतों से उसी शैली के सुझाव",
   "Sample title": "नमूना शीर्षक",
   "Sandman Picks": "Sandman की पसंद",
@@ -383,7 +384,8 @@ const catalogSU: Record<string, string> = {
   "Select renderer": "रेंडरर चुनें",
   "Self-host": "सेल्फ़-होस्ट करें",
   "Self-test": "स्व-परीक्षण",
-  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.": "सख्त रिमोट स्ट्रीमिंग चालू होने पर स्व-परीक्षण बंद रहता है। यह इस मशीन पर पीयर-टू-पीयर के ज़रिए एक छोटी टेस्ट फ़ाइल डाउनलोड करता है।",
+  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.":
+    "सख्त रिमोट स्ट्रीमिंग चालू होने पर स्व-परीक्षण बंद रहता है। यह इस मशीन पर पीयर-टू-पीयर के ज़रिए एक छोटी टेस्ट फ़ाइल डाउनलोड करता है।",
   Send: "भेजें",
   "Send a bug report": "बग रिपोर्ट भेजें",
   "Send a bug report straight to the Harbor team. Screenshots and screen recordings welcome.":
@@ -767,7 +769,8 @@ const catalogSU: Record<string, string> = {
     "कीबोर्ड से पॉज़ या फिर से शुरू करने पर प्लेयर कंट्रोल दिखाएँ। उन्हें छिपाए रखने के लिए इसे बंद करें, ताकि वे सबटाइटल को न ढकें।",
   "Show the player controls when you pause or resume using the keyboard. Turn off to keep them hidden so they don't cover subtitles.":
     "कीबोर्ड से पॉज़ या फिर से शुरू करने पर प्लेयर कंट्रोल दिखाएँ। उन्हें छिपाए रखने के लिए इसे बंद करें, ताकि वे सबटाइटल को न ढकें।",
-  "Show the report button on every P2P stream, not just likely new releases.": "रिपोर्ट बटन हर P2P स्ट्रीम पर दिखाएँ, केवल संभावित नई रिलीज़ पर नहीं।",
+  "Show the report button on every P2P stream, not just likely new releases.":
+    "रिपोर्ट बटन हर P2P स्ट्रीम पर दिखाएँ, केवल संभावित नई रिलीज़ पर नहीं।",
   "Show them anyway": "फिर भी दिखाएँ",
   "Show this catalog": "यह कैटलॉग दिखाएँ",
   "Show this control": "यह कंट्रोल दिखाएँ",
@@ -1854,7 +1857,8 @@ const catalogSU: Record<string, string> = {
   "The editor is a working copy of the player. Click any control on it to move, resize, restyle or hide that control.":
     "एडिटर प्लेयर की कार्यशील कॉपी है। किसी भी कंट्रोल को खिसकाने, उसका आकार बदलने, उसकी स्टाइल बदलने या उसे छिपाने के लिए उस पर क्लिक करें।",
   "The end time has to be after the start.": "समाप्ति समय, प्रारंभ समय के बाद होना चाहिए।",
-  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.": "इंजन एक लोकल पोर्ट पर कनेक्शन स्वीकार करता है और पीयर खोजने के लिए DHT से जुड़ता है। सक्रिय ट्रांसफ़र वे स्ट्रीम हैं जो अभी इसमें खुली हुई हैं।",
+  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.":
+    "इंजन एक लोकल पोर्ट पर कनेक्शन स्वीकार करता है और पीयर खोजने के लिए DHT से जुड़ता है। सक्रिय ट्रांसफ़र वे स्ट्रीम हैं जो अभी इसमें खुली हुई हैं।",
   "The escape hatch for power users. One mpv option per line as key=value, exactly like mpv.conf. These apply last, so they override every dial above. Anything Harbor can't read is skipped, so a typo won't break playback. Restart playback to apply.":
     "पावर यूज़र के लिए उन्नत विकल्प। हर पंक्ति में key=value के रूप में एक mpv विकल्प दें, बिल्कुल mpv.conf की तरह। ये सबसे अंत में लागू होते हैं, इसलिए ऊपर की हर सेटिंग को ओवरराइड करते हैं। Harbor जिस विकल्प को पढ़ नहीं सकता, उसे छोड़ दिया जाता है, इसलिए टाइपो से प्लेबैक नहीं बिगड़ेगा। लागू करने के लिए प्लेबैक फिर से शुरू करें।",
   "The free tier is $0 for personal use. Just pick the first option, no payment needed.":
@@ -2396,7 +2400,8 @@ const catalogSU: Record<string, string> = {
   "Torrent name": "टोरेंट का नाम",
   "P2P streaming": "P2P स्ट्रीमिंग",
   Torrents: "टोरेंट",
-  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.": "P2P बंद है। जो स्ट्रीम कैश में नहीं हैं, वे तब तक नहीं चलेंगी जब तक वे किसी डीब्रिड सेवा या सीधे लिंक से न आएँ। P2P इस्तेमाल करने के लिए इसे बंद करें।",
+  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.":
+    "P2P बंद है। जो स्ट्रीम कैश में नहीं हैं, वे तब तक नहीं चलेंगी जब तक वे किसी डीब्रिड सेवा या सीधे लिंक से न आएँ। P2P इस्तेमाल करने के लिए इसे बंद करें।",
   "Total Shots": "कुल शॉट्स",
   "Total Technical Fouls": "कुल तकनीकी फ़ाउल",
   "Total Turnovers": "कुल टर्नओवर",
@@ -2838,7 +2843,8 @@ const catalogSU: Record<string, string> = {
     "स्ट्रीमिंग उपलब्धता और अभी चल रही फ़िल्मों की रिलीज़ अवधि के लिए इस्तेमाल होता है। कोई देश चुनें और Harbor उसके अनुसार इंटरफ़ेस, मेटाडेटा और सबटाइटल की भाषाएँ तय कर सकता है।",
   "Used for your cursor in Watch Together, your draw color, and your name pill in chat.":
     "साथ में देखें में आपके कर्सर, ड्रॉइंग के रंग और चैट में आपके नाम वाली पिल के लिए इस्तेमाल होता है।",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "कैश जांचने और लिंक पर लगी पाबंदी हटाने के लिए इस्तेमाल होता है। Harbor कभी भी अपने-आप आपके खाते में कुछ जोड़ता या हटाता नहीं है।",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "कैश जांचने और लिंक पर लगी पाबंदी हटाने के लिए इस्तेमाल होता है। Harbor कभी भी अपने-आप आपके खाते में कुछ जोड़ता या हटाता नहीं है।",
   "Used to lift Time's Up and to leave the kids space.":
     "Time's Up हटाने और किड्स स्पेस से बाहर निकलने के लिए इस्तेमाल होता है।",
   Usenet: "Usenet",

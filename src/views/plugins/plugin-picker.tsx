@@ -51,7 +51,11 @@ export function PluginPicker({
     <div ref={ref} className="relative shrink-0">
       <button type="button" onClick={() => setOpen((v) => !v)} className={TRIGGER}>
         {active?.icon ? (
-          <img src={active.icon} alt="" className="h-[15px] w-[15px] shrink-0 rounded-[3px] object-contain" />
+          <img
+            src={active.icon}
+            alt=""
+            className="h-[15px] w-[15px] shrink-0 rounded-[3px] object-contain"
+          />
         ) : (
           <Puzzle size={15} className="text-ink-subtle" />
         )}
@@ -114,7 +118,12 @@ function Row({
     >
       <span className="flex min-w-0 items-center gap-2">
         {icon ? (
-          <img src={icon} alt="" loading="lazy" className="h-4 w-4 shrink-0 rounded-sm object-contain" />
+          <img
+            src={icon}
+            alt=""
+            loading="lazy"
+            className="h-4 w-4 shrink-0 rounded-sm object-contain"
+          />
         ) : (
           <Puzzle size={14} className="shrink-0 text-ink-subtle" />
         )}

@@ -20,7 +20,12 @@ export function AnimeRelatedRail({
       <h3 className="mb-3 text-[15px] font-semibold text-ink">{title}</h3>
       <ArrowedScrollRow className="-mx-1 pb-1">
         {nodes.map((node) => (
-          <RelatedCard key={node.anilistId} node={node} onOpen={onOpen} badgeCollections={badgeCollections} />
+          <RelatedCard
+            key={node.anilistId}
+            node={node}
+            onOpen={onOpen}
+            badgeCollections={badgeCollections}
+          />
         ))}
       </ArrowedScrollRow>
     </section>
@@ -36,7 +41,11 @@ function RelatedCard({
   onOpen?: (node: AnilistRelatedNode) => void;
   badgeCollections?: boolean;
 }) {
-  const meta = [node.format, node.year ? String(node.year) : undefined, node.rating ? `★ ${node.rating}` : undefined]
+  const meta = [
+    node.format,
+    node.year ? String(node.year) : undefined,
+    node.rating ? `★ ${node.rating}` : undefined,
+  ]
     .filter(Boolean)
     .join(" • ");
   const Wrap: "button" | "div" = onOpen ? "button" : "div";
@@ -46,7 +55,12 @@ function RelatedCard({
       {...wrapProps}
       className={`group flex w-36 shrink-0 flex-col gap-2 text-start ${onOpen ? "" : "cursor-default"}`}
     >
-      <Poster src={node.poster} seed={String(node.anilistId)} ratio="portrait" className="rounded-xl">
+      <Poster
+        src={node.poster}
+        seed={String(node.anilistId)}
+        ratio="portrait"
+        className="rounded-xl"
+      >
         <span className="pointer-events-none absolute start-1.5 top-1.5 rounded-full bg-canvas/80 px-2 py-0.5 text-[10px] text-ink backdrop-blur">
           {node.relation}
         </span>

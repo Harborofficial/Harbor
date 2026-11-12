@@ -11,12 +11,14 @@ export default {
   "games.mods.restore": "पिछला बहाल करें",
   "games.mods.restored": "पिछला संस्करण बहाल कर दिया गया।",
   "games.mods.changeTitle": "बदली जाने वाली फ़ाइलें",
-  "games.mods.backupNote": "बदले गए संस्करण स्थानीय बैकअप में रहते हैं। वापस जाने के लिए अपने सेटअप में पिछला बहाल करें चुनें; निर्भरताएँ फिर जाँची जाएँगी।",
+  "games.mods.backupNote":
+    "बदले गए संस्करण स्थानीय बैकअप में रहते हैं। वापस जाने के लिए अपने सेटअप में पिछला बहाल करें चुनें; निर्भरताएँ फिर जाँची जाएँगी।",
   "games.mods.currentVersion": "इंस्टॉल है: {version}",
   "games.mods.current": "इंस्टॉल है",
-  "games.mods.versionNote": "संगत संस्करण चुनें। Harbor बदलावों की जाँच करता है और पिछला संस्करण स्थानीय रूप से रखता है। बदलाव लागू करने से पहले Minecraft बंद करें।",
+  "games.mods.versionNote":
+    "संगत संस्करण चुनें। Harbor बदलावों की जाँच करता है और पिछला संस्करण स्थानीय रूप से रखता है। बदलाव लागू करने से पहले Minecraft बंद करें।",
   "games.mods.applyChanges": "बदलाव लागू करें",
   "games.mods.reviewChanges": "बदलावों की समीक्षा",
   "games.mods.previousVersion": "पिछला: {version}",
-  "games.mods.restoreConfirm": "संस्करण {version} बहाल करें? पहले Minecraft बंद करें।"
+  "games.mods.restoreConfirm": "संस्करण {version} बहाल करें? पहले Minecraft बंद करें।",
 } satisfies Record<string, string>;

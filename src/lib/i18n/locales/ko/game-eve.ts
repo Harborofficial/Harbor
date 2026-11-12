@@ -46,7 +46,8 @@ export default {
   "games.eve.avoid": "{name} 회피",
   "games.eve.less": "경유지 적게 보기",
   "games.eve.allStops": "모든 경유지 보기",
-  "games.eve.activityNote": "보고된 활동은 과거 기록이며 웜홀 우주는 제외됩니다. 보안 선호 설정이 안전한 항로를 보장하지는 않습니다.",
+  "games.eve.activityNote":
+    "보고된 활동은 과거 기록이며 웜홀 우주는 제외됩니다. 보안 선호 설정이 안전한 항로를 보장하지는 않습니다.",
   "games.eve.noRoute": "스타게이트 항로를 찾지 못했습니다.",
   "games.eve.incursions": "인커전",
   "games.eve.refreshIncursions": "인커전 새로고침",
@@ -60,5 +61,5 @@ export default {
   "games.eve.influence": "영향력",
   "games.eve.systems": "성계 · {count}",
   "games.eve.boss": "보스 출현",
-  "games.eve.routeThere": "여기로 항로 설정"
+  "games.eve.routeThere": "여기로 항로 설정",
 };

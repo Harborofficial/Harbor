@@ -1,18 +1,24 @@
 export default {
-  "games.battlenet.changed": "The Battle.net account changed. Sign in again to replace this profile’s imports.",
+  "games.battlenet.changed":
+    "The Battle.net account changed. Sign in again to replace this profile’s imports.",
   "games.battlenet.connect": "Sign in",
-  "games.battlenet.intro": "Sign in to Battle.net to import your games. This connection belongs to your current Harbor profile.",
+  "games.battlenet.intro":
+    "Sign in to Battle.net to import your games. This connection belongs to your current Harbor profile.",
   "games.battlenet.installed": "Show installed games",
   "games.battlenet.uninstalled": "Show account games that are not installed",
-  "games.battlenet.partial": "Some account data could not refresh. Previously imported games are still shown.",
-  "games.battlenet.unresolved": "Some account entries could not be matched to an exact game edition.",
-  "games.battlenet.expired": "Your Battle.net session expired. Sign in again; your imported games are still here.",
+  "games.battlenet.partial":
+    "Some account data could not refresh. Previously imported games are still shown.",
+  "games.battlenet.unresolved":
+    "Some account entries could not be matched to an exact game edition.",
+  "games.battlenet.expired":
+    "Your Battle.net session expired. Sign in again; your imported games are still here.",
   "games.battlenet.timeout": "Battle.net did not respond in time. Try again.",
   "games.battlenet.busy": "A Battle.net account action is already running.",
   "games.battlenet.update": "Restart the updated Harbor desktop app to connect Battle.net.",
   "games.battlenet.error": "Battle.net could not update. Your last imported library is still here.",
   "games.battlenet.disconnect": "Disconnect Battle.net",
-  "games.battlenet.removeNote": "Remove this profile’s account imports. Installed files and other profiles are kept.",
+  "games.battlenet.removeNote":
+    "Remove this profile’s account imports. Installed files and other profiles are kept.",
   "games.battlenet.signing": "Finish signing in in the Battle.net window.",
   "games.battlenet.cached": "{count} account games · Last updated {date}",
 
@@ -25,15 +31,18 @@ export default {
   "games.steamImport.excluded": "Ignored by your import settings",
   "games.steamImport.ignoreSettings": "Ignored Steam IDs ({count})",
   "games.steamImport.ignoreLabel": "Steam IDs to ignore",
-  "games.steamImport.ignoreNote": "Skip these IDs during manual imports. Existing library entries and files stay in place. Clear the field to stop ignoring these IDs.",
+  "games.steamImport.ignoreNote":
+    "Skip these IDs during manual imports. Existing library entries and files stay in place. Clear the field to stop ignoring these IDs.",
   "games.steamImport.ignoreSave": "Save ignored IDs",
   "games.steamImport.ignoreSaved": "Ignored IDs saved.",
   "games.steamImport.title": "Import Steam games",
-  "games.steamImport.note": "Keep game records in this Harbor profile. Ownership and installation are checked separately.",
+  "games.steamImport.note":
+    "Keep game records in this Harbor profile. Ownership and installation are checked separately.",
   "games.steamImport.input": "Steam app IDs or store URLs",
   "games.steamImport.profile": "Choose Depressurizer profile",
   "games.steamImport.count": "{selected} selected · {total} entries",
-  "games.steamImport.unavailableNote": "Unavailable entries are unchecked. Select one to keep its ID and load its details later.",
+  "games.steamImport.unavailableNote":
+    "Unavailable entries are unchecked. Select one to keep its ID and load its details later.",
   "games.steamImport.unknown": "Steam app {id}",
   "games.steamImport.ready": "Steam details found",
   "games.steamImport.profileName": "Name from profile",
@@ -43,9 +52,12 @@ export default {
   "games.steamImport.invalid": "Invalid ID or URL",
   "games.steamImport.duplicate": "Duplicate entry",
   "games.steamImport.nonSteam": "Non-Steam shortcut · skipped",
-  "games.steamImport.limit": "A profile supports up to 5,000 imported games. Files must be under 4 MB.",
-  "games.steamImport.inputError": "Enter valid Steam IDs or store URLs, or choose a valid Depressurizer profile.",
-  "games.steamImport.writeError": "Could not save the import. Your existing entries are unchanged. Try again.",
+  "games.steamImport.limit":
+    "A profile supports up to 5,000 imported games. Files must be under 4 MB.",
+  "games.steamImport.inputError":
+    "Enter valid Steam IDs or store URLs, or choose a valid Depressurizer profile.",
+  "games.steamImport.writeError":
+    "Could not save the import. Your existing entries are unchanged. Try again.",
   "games.steamImport.readError": "Imported games could not be read. Retry before making changes.",
   "games.steamImport.done": "Added to library: {count}",
   "games.steamImport.stop": "Stop checking",
@@ -65,7 +77,8 @@ export default {
   "games.libraryStatus.finished": "Finished",
   "games.libraryStatus.onHold": "On hold",
   "games.libraryStatus.stopped": "Stopped playing",
-  "games.libraryStatus.note": "Your choice for this copy, saved to this Harbor profile. Playtime and achievements never change it.",
+  "games.libraryStatus.note":
+    "Your choice for this copy, saved to this Harbor profile. Playtime and achievements never change it.",
 
   "games.unified.playtime": "Playtime",
   "games.unified.playtime.all": "Any playtime",
@@ -78,8 +91,10 @@ export default {
   "games.unified.playtime.steam": "{time} on Steam",
   "games.unified.playtime.zeroSteam": "No playtime recorded on Steam",
   "games.unified.playtime.zeroHarbor": "No playtime recorded in Harbor",
-  "games.unified.playtime.unknownHint": "Steam account playtime is unavailable, or this source does not report playtime.",
-  "games.unified.playtime.note": "Uses Steam totals and time recorded in Harbor, including your corrections. Unavailable playtime is kept separate.",
+  "games.unified.playtime.unknownHint":
+    "Steam account playtime is unavailable, or this source does not report playtime.",
+  "games.unified.playtime.note":
+    "Uses Steam totals and time recorded in Harbor, including your corrections. Unavailable playtime is kept separate.",
   "games.unified.note": "Your Steam library, PC games and imported ROMs in one view.",
   "games.unified.allSources": "All sources",
   "games.unified.availability": "Availability",
@@ -94,10 +109,13 @@ export default {
   "games.unified.state.setup": "Setup needed",
   "games.unified.state.unknown": "Installation not checked",
   "games.unified.refresh": "Refresh local libraries",
-  "games.unified.scanNote": "Some libraries could not be checked. Their games stay here with an unknown or unavailable state.",
-  "games.unified.partial": "Some folders could not be checked; installation matches may be incomplete.",
+  "games.unified.scanNote":
+    "Some libraries could not be checked. Their games stay here with an unknown or unavailable state.",
+  "games.unified.partial":
+    "Some folders could not be checked; installation matches may be incomplete.",
   "games.unified.empty": "Bring your games together",
-  "games.unified.emptyNote": "Connect Steam, add a PC game, or import a ROM folder to see them here.",
+  "games.unified.emptyNote":
+    "Connect Steam, add a PC game, or import a ROM folder to see them here.",
   "games.unified.pcGames": "Manage PC games",
   "games.unified.roms": "Manage ROMs",
   "games.unified.steam": "Manage Steam",
@@ -117,5 +135,5 @@ export default {
   "games.libraryNews.failed": "Game updates couldn't be loaded.",
   "games.libraryNews.hide": "Hide game updates",
   "games.libraryNews.show": "Show game updates",
-  "games.libraryNews.pending": "Checking game updates…"
+  "games.libraryNews.pending": "Checking game updates…",
 };

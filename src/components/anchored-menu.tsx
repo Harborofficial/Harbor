@@ -100,7 +100,8 @@ export function AnchoredMenu({
     };
     const onPointer = (event: PointerEvent) => {
       const target = event.target as Node | null;
-      if (target && !anchorRef.current?.contains(target) && !menuRef.current?.contains(target)) onClose();
+      if (target && !anchorRef.current?.contains(target) && !menuRef.current?.contains(target))
+        onClose();
     };
     if (!backdrop) document.addEventListener("pointerdown", onPointer, true);
     window.addEventListener("resize", place);

@@ -1,14 +1,17 @@
 export default {
   "Search shortcuts": "Сокращения для поиска",
   "Steam search shortcut": "Сокращение для поиска в Steam",
-  "Type “st ” or “st:” to search the Steam store. Turn off to use normal Harbor search for these queries.": "Введите «st » или «st:», чтобы искать в магазине Steam. Отключите, чтобы использовать обычный поиск Harbor для таких запросов.",
+  "Type “st ” or “st:” to search the Steam store. Turn off to use normal Harbor search for these queries.":
+    "Введите «st » или «st:», чтобы искать в магазине Steam. Отключите, чтобы использовать обычный поиск Harbor для таких запросов.",
   "games.storeSearch.title": "Магазин Steam",
   "games.storeSearch.hint": "Введите «st » в поиске Harbor, чтобы искать прямо в Steam.",
   "games.storeSearch.automatic": "Автоматически",
   "games.storeSearch.region": "Регион магазина",
   "games.storeSearch.showLibrary": "Отмечать игры, уже добавленные в библиотеку",
-  "games.storeSearch.settingsError": "Не удалось сохранить или прочитать настройки поиска. Повторите попытку перед их изменением.",
-  "games.storeSearch.openError": "Не удалось открыть ссылку. Убедитесь, что Steam или браузер доступны, и повторите попытку.",
+  "games.storeSearch.settingsError":
+    "Не удалось сохранить или прочитать настройки поиска. Повторите попытку перед их изменением.",
+  "games.storeSearch.openError":
+    "Не удалось открыть ссылку. Убедитесь, что Steam или браузер доступны, и повторите попытку.",
   "games.storeSearch.empty": "Введите название игры.",
   "games.storeSearch.saved": "Результаты и цены сохранены {date}.",
   "games.storeSearch.error": "Поиск Steam недоступен. Повторите попытку.",
@@ -16,5 +19,5 @@ export default {
   "games.storeSearch.inLibrary": "В вашей библиотеке",
   "games.storeSearch.unavailable": "Цена недоступна",
   "games.storeSearch.web": "Сайт",
-  "games.storeSearch.client": "Открыть в Steam"
+  "games.storeSearch.client": "Открыть в Steam",
 };

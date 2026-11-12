@@ -92,7 +92,11 @@ test("a licensed landscape photograph wins the hero and reports its credit", asy
     urls.push(url);
     return search(
       { ns: 6, title: "File:IEM logo.svg", imageinfo: [photoInfo()] },
-      { ...photoPage(), title: "File:Spodek portrait.jpg", imageinfo: [{ ...photoInfo(), width: 900, height: 1600 }] },
+      {
+        ...photoPage(),
+        title: "File:Spodek portrait.jpg",
+        imageinfo: [{ ...photoInfo(), width: 900, height: 1600 }],
+      },
       photoPage(),
     );
   });
@@ -131,7 +135,9 @@ test("an unapproved image host in a licensed Commons record still rejects", asyn
     search({
       ns: 6,
       title: "File:Spodek IEM.jpg",
-      imageinfo: [{ ...photoInfo(), thumburl: "https://liquipedia.net/commons/images/a/iem.jpg", url: "" }],
+      imageinfo: [
+        { ...photoInfo(), thumburl: "https://liquipedia.net/commons/images/a/iem.jpg", url: "" },
+      ],
     }),
   );
   assert.equal(photo, null);
@@ -213,7 +219,12 @@ test("playlist entries from different channels are all kept", () => {
   const videos = parseEventPlaylistFeed(
     feed(
       entry("aaaaaaaaaaa", "Grand Final Highlights", "2026-02-01T10:00:00+00:00", "ESL CS") +
-        entry("bbbbbbbbbbb", "Full Match: Map 2 &amp; Overtime", "2026-02-02T10:00:00+00:00", "BLAST"),
+        entry(
+          "bbbbbbbbbbb",
+          "Full Match: Map 2 &amp; Overtime",
+          "2026-02-02T10:00:00+00:00",
+          "BLAST",
+        ),
     ),
     PLAYLIST,
   );
@@ -242,13 +253,28 @@ test("the playlist feed caps at fifteen entries and falls back to the feed title
 
 test("a hostile, mismatched or unparseable feed produces nothing", () => {
   assert.deepEqual(
-    parseEventPlaylistFeed(`<!DOCTYPE feed><feed>${entry("aaaaaaaaaaa", "x", "2026-01-01Z")}</feed>`, PLAYLIST),
+    parseEventPlaylistFeed(
+      `<!DOCTYPE feed><feed>${entry("aaaaaaaaaaa", "x", "2026-01-01Z")}</feed>`,
+      PLAYLIST,
+    ),
     [],
   );
-  assert.deepEqual(parseEventPlaylistFeed(feed(entry("aaaaaaaaaaa", "x", "2026-02-01T10:00:00Z")), "PLother1234567890"), []);
+  assert.deepEqual(
+    parseEventPlaylistFeed(
+      feed(entry("aaaaaaaaaaa", "x", "2026-02-01T10:00:00Z")),
+      "PLother1234567890",
+    ),
+    [],
+  );
   assert.deepEqual(parseEventPlaylistFeed("<rss></rss>", PLAYLIST), []);
-  assert.deepEqual(parseEventPlaylistFeed(feed(entry("short", "x", "2026-02-01T10:00:00Z")), PLAYLIST), []);
-  assert.deepEqual(parseEventPlaylistFeed(feed(entry("aaaaaaaaaaa", "x", "not a date")), PLAYLIST), []);
+  assert.deepEqual(
+    parseEventPlaylistFeed(feed(entry("short", "x", "2026-02-01T10:00:00Z")), PLAYLIST),
+    [],
+  );
+  assert.deepEqual(
+    parseEventPlaylistFeed(feed(entry("aaaaaaaaaaa", "x", "not a date")), PLAYLIST),
+    [],
+  );
   assert.equal(eventPlaylistFeedUrl("javascript:alert(1)"), "");
   assert.equal(
     eventPlaylistFeedUrl(PLAYLIST),
@@ -408,7 +434,10 @@ test("champion splash carries no version segment while the square portrait does"
     lolChampionArt("Ahri", "square", "16.19.1").url,
     "https://ddragon.leagueoflegends.com/cdn/16.19.1/img/champion/Ahri.png",
   );
-  assert.match(lolChampionArt("Ahri", "loading").url, /\/cdn\/img\/champion\/loading\/Ahri_0\.jpg$/);
+  assert.match(
+    lolChampionArt("Ahri", "loading").url,
+    /\/cdn\/img\/champion\/loading\/Ahri_0\.jpg$/,
+  );
   // A name that cannot form an id still paints the publisher backdrop.
   assert.equal(lolChampionArt("###").url, esportsEventGameArt("lol").url);
 });
@@ -417,8 +446,16 @@ test("VALORANT agent art joins on uuid and degrades to publisher art", async () 
   resetEventMediaCaches();
   const index = await valorantAgentIndex(async () => ({
     data: [
-      { uuid: "add6443a-41bd-e414-f6ad-e58d267f4e95", displayName: "Jett", isPlayableCharacter: true },
-      { uuid: "ded3520f-4264-bfed-162d-b080e2abccf9", displayName: "Sova", isPlayableCharacter: true },
+      {
+        uuid: "add6443a-41bd-e414-f6ad-e58d267f4e95",
+        displayName: "Jett",
+        isPlayableCharacter: true,
+      },
+      {
+        uuid: "ded3520f-4264-bfed-162d-b080e2abccf9",
+        displayName: "Sova",
+        isPlayableCharacter: true,
+      },
     ],
   }));
   assert.equal(index.jett.uuid, "add6443a-41bd-e414-f6ad-e58d267f4e95");

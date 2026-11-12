@@ -36,7 +36,11 @@ export function FeedRow({
 
   return (
     <div
-      style={{ animationDelay: `${Math.min(index * 26, 300)}ms`, animationDuration: "400ms", animationFillMode: "both" }}
+      style={{
+        animationDelay: `${Math.min(index * 26, 300)}ms`,
+        animationDuration: "400ms",
+        animationFillMode: "both",
+      }}
       className="group flex items-center gap-3 rounded-lg bg-surface p-2.5 ring-1 ring-edge-soft transition-colors duration-200 hover:bg-elevated motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1"
     >
       <button
@@ -45,7 +49,12 @@ export function FeedRow({
         aria-label={item.actor.alias}
         className="shrink-0 transition-transform duration-150 hover:scale-[1.06]"
       >
-        <Avatar src={item.actor.avatarUrl} size={36} online={item.actor.online} alias={item.actor.alias} />
+        <Avatar
+          src={item.actor.avatarUrl}
+          size={36}
+          online={item.actor.online}
+          alias={item.actor.alias}
+        />
       </button>
 
       <button

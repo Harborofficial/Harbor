@@ -107,7 +107,9 @@ export function TmdbStep() {
               className="animate-done-pop text-accent"
             />
           )}
-          {status === "bad" && <X size={16} strokeWidth={2.5} className="animate-done-pop text-danger" />}
+          {status === "bad" && (
+            <X size={16} strokeWidth={2.5} className="animate-done-pop text-danger" />
+          )}
         </div>
         <button
           onClick={validate}
@@ -134,7 +136,9 @@ export function TmdbStep() {
         </button>
       </div>
       <p className="text-[13px] text-ink-subtle">
-        {t("Skip if you'd rather just use Cinemeta. Harbor still works, you'll just see fewer rails.")}
+        {t(
+          "Skip if you'd rather just use Cinemeta. Harbor still works, you'll just see fewer rails.",
+        )}
       </p>
     </div>
   );

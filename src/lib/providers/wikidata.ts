@@ -168,7 +168,11 @@ function classify(name: string): AwardType {
   if (n.includes("academy award") || n.includes("oscar")) return "oscar";
   if (n.includes("primetime emmy") || n.includes("emmy")) return "emmy";
   if (n.includes("golden globe")) return "golden_globe";
-  if (n.includes("bafta tv") || n.includes("bafta television") || n.includes("british academy television"))
+  if (
+    n.includes("bafta tv") ||
+    n.includes("bafta television") ||
+    n.includes("british academy television")
+  )
     return "bafta_tv";
   if (n.includes("bafta") || n.includes("british academy")) return "bafta";
   if (n.includes("annie award")) return "annie";
@@ -206,7 +210,15 @@ function parseRows(data: any, result: "won" | "nominated"): AwardEntry[] {
     let bucket = map.get(key);
     if (!bucket) {
       bucket = {
-        entry: { type: classify(awardName), awardName, category, year, result, workTitle, workImdb },
+        entry: {
+          type: classify(awardName),
+          awardName,
+          category,
+          year,
+          result,
+          workTitle,
+          workImdb,
+        },
         recipients: new Set<string>(),
       };
       map.set(key, bucket);
@@ -405,7 +417,10 @@ export function awardSummary(entries: AwardEntry[]): {
   const ranked = order
     .filter((t) => map.has(t))
     .map((t) => ({ type: t, ...(map.get(t) as { wins: number; nominations: number }) }));
-  ranked.sort((a, b) => (b.wins > 0 ? 1 : 0) - (a.wins > 0 ? 1 : 0) || order.indexOf(a.type) - order.indexOf(b.type));
+  ranked.sort(
+    (a, b) =>
+      (b.wins > 0 ? 1 : 0) - (a.wins > 0 ? 1 : 0) || order.indexOf(a.type) - order.indexOf(b.type),
+  );
   return ranked;
 }
 

@@ -44,7 +44,11 @@ test("the fill for a 16:9 picture on a 21:9 screen is reachable", () => {
 test("the hotkeys use the shared step instead of their own number", () => {
   assert.match(hotkeys, /videoFill\.step\(ZOOM_STEP\)/);
   assert.match(hotkeys, /videoFill\.step\(-ZOOM_STEP\)/);
-  assert.doesNotMatch(hotkeys, /videoFill\.step\(-?0\.\d+\)/, "a literal step drifted from the clamp");
+  assert.doesNotMatch(
+    hotkeys,
+    /videoFill\.step\(-?0\.\d+\)/,
+    "a literal step drifted from the clamp",
+  );
 });
 
 test("the readout appears when zoomed out, not only when zoomed in", () => {

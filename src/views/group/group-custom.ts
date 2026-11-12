@@ -1,5 +1,10 @@
 import type { GroupDetail } from "@/lib/social/groups";
-import { CANVAS_DEFAULT, validColor, validFont, validImage } from "@/views/profile/customization/customization-types";
+import {
+  CANVAS_DEFAULT,
+  validColor,
+  validFont,
+  validImage,
+} from "@/views/profile/customization/customization-types";
 
 export type ResolvedGroupCustom = {
   font: string;
@@ -26,8 +31,8 @@ export function resolveGroupCustom(g: GroupDetail): ResolvedGroupCustom {
   } else if (bgColor) {
     background = bgColor;
   }
-  const html = shown ? g.customHtml ?? "" : "";
-  const css = shown ? g.customCss ?? "" : "";
+  const html = shown ? (g.customHtml ?? "") : "";
+  const css = shown ? (g.customCss ?? "") : "";
   return {
     font,
     fontHref: font

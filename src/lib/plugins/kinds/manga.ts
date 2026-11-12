@@ -30,7 +30,13 @@ import {
 import type { MangayomiIndexEntry } from "@/lib/manga/sources/mangayomi/types";
 import { normalizeRepoUrl, repoTitle } from "@/lib/streams/plugins/manifest";
 import { PluginError } from "@/lib/streams/plugins/types";
-import { repoHost, type EntryView, type KindAdapter, type PluginView, type RepoView } from "../types";
+import {
+  repoHost,
+  type EntryView,
+  type KindAdapter,
+  type PluginView,
+  type RepoView,
+} from "../types";
 
 type Cached = {
   repo: PluginRepo | null;
@@ -61,7 +67,13 @@ function subscribe(cb: () => void): () => void {
 }
 
 async function browse(url: string): Promise<void> {
-  const cur = cache.get(url) ?? { repo: null, index: null, error: null, loading: false, checkedAt: null };
+  const cur = cache.get(url) ?? {
+    repo: null,
+    index: null,
+    error: null,
+    loading: false,
+    checkedAt: null,
+  };
   cache.set(url, { ...cur, loading: true });
   notify();
   try {

@@ -231,7 +231,8 @@ function itemOf(
     return { ...seed, kind: "Toggle", toggleOn: boolOf(args[2]), options: null };
   }
   if (fn === "bsChoice") {
-    if (args.length > 4 && !args[4].startsWith("letter")) drift(`extra bsChoice argument on ${key}`);
+    if (args.length > 4 && !args[4].startsWith("letter"))
+      drift(`extra bsChoice argument on ${key}`);
     return {
       ...seed,
       kind: "Choice",
@@ -277,10 +278,7 @@ function itemsOf(src: string, consts: Map<string, string>, ctx: OptionCtx): Kotl
     for (let k = i; k < call.end; k += 1) chars[k] = " ";
     i = call.end;
   }
-  const residue = stripStrings(chars.join("")).replace(
-    /listOf|to|THEME_GROUP_TITLE|[(),\s]/g,
-    "",
-  );
+  const residue = stripStrings(chars.join("")).replace(/listOf|to|THEME_GROUP_TITLE|[(),\s]/g, "");
   if (residue.length > 0) drift(`SETTING_GROUPS holds unread text: ${residue.slice(0, 80)}`);
   if (out.length === 0) drift("SETTING_GROUPS is empty");
   return out;

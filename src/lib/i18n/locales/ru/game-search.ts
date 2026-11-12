@@ -7,11 +7,13 @@ export default {
   "games.searchUi.web": "Данные из интернета",
   "games.searchUi.settings": "Настройки ИИ",
   "games.searchUi.setup": "Подключите провайдера ИИ",
-  "games.searchUi.setupNote": "Используйте ту же учётную запись OpenRouter или Groq и модель, что и в Harbor.",
+  "games.searchUi.setupNote":
+    "Используйте ту же учётную запись OpenRouter или Groq и модель, что и в Harbor.",
   "games.searchUi.aiHint": "Нажмите Enter. Выбранные фильтры применяются и к результатам ИИ.",
   "games.searchUi.thinking": "Поиск игр и проверка в Steam…",
   "games.searchUi.verified": "Совпадений в Steam: {count} · Предложения ИИ",
-  "games.searchUi.noAiResults": "С этими фильтрами нет подтверждённых совпадений в Steam. Измените описание или уберите часть фильтров.",
+  "games.searchUi.noAiResults":
+    "С этими фильтрами нет подтверждённых совпадений в Steam. Измените описание или уберите часть фильтров.",
   "games.searchUi.random": "Случайная игра",
   "games.searchUi.randomHint": "Выбрать случайную игру по текущему запросу и фильтрам.",
   "games.searchUi.picking": "Выбираем…",
@@ -21,5 +23,5 @@ export default {
   "games.searchUi.sources": "Steam + IGDB · Игры для ПК, консолей и ROM-хаки.",
   "games.searchUi.steamScope": "Эти фильтры или порядок сортировки используют данные Steam.",
   "games.searchUi.allCatalogs": "Искать во всех каталогах",
-  "games.searchUi.partial": "Часть результатов недоступна: {providers}."
+  "games.searchUi.partial": "Часть результатов недоступна: {providers}.",
 };

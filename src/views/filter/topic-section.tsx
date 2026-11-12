@@ -9,13 +9,7 @@ import { tmdbDiscover, tmdbResolveKeywordIds } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { MAX_PAGES, MIN_INITIAL_FILL, SpotlightGateContext } from "./spotlight-gate";
 
-export function TopicSection({
-  topic,
-  mediaType,
-}: {
-  topic: Topic;
-  mediaType: "movie" | "tv";
-}) {
+export function TopicSection({ topic, mediaType }: { topic: Topic; mediaType: "movie" | "tv" }) {
   const t = useT();
   const posterRow = usePosterRow();
   const { settings } = useSettings();
@@ -141,11 +135,12 @@ export function TopicSection({
   return (
     <Row {...posterRow} title={title} onEndReached={onEndReached}>
       {items
-        ? items.map((m) => (
-            <PickCard key={m.id} meta={m} />
-          ))
+        ? items.map((m) => <PickCard key={m.id} meta={m} />)
         : Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className={`${posterRow.shape === "landscape" ? "aspect-[16/9]" : "aspect-[2/3]"} animate-pulse rounded-xl bg-elevated/40`} />
+            <div
+              key={i}
+              className={`${posterRow.shape === "landscape" ? "aspect-[16/9]" : "aspect-[2/3]"} animate-pulse rounded-xl bg-elevated/40`}
+            />
           ))}
     </Row>
   );

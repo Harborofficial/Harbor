@@ -73,20 +73,32 @@ export function MinimalShell({
             <span className="truncate text-[14px] font-semibold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
               {title}
             </span>
-            {live ? <LiveBadge /> : <MinimalTime durationSec={snap.durationSec} visible={visible} />}
+            {live ? (
+              <LiveBadge />
+            ) : (
+              <MinimalTime durationSec={snap.durationSec} visible={visible} />
+            )}
           </div>
           <button
             onClick={onFullscreen}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md transition-colors hover:bg-black/85"
             aria-label={fullscreen ? t("Exit fullscreen") : t("Fullscreen")}
           >
-            {fullscreen ? <Minimize size={16} strokeWidth={2.2} /> : <Maximize size={16} strokeWidth={2.2} />}
+            {fullscreen ? (
+              <Minimize size={16} strokeWidth={2.2} />
+            ) : (
+              <Maximize size={16} strokeWidth={2.2} />
+            )}
           </button>
         </div>
-        {live ? <>
-          <GoToLive durationSec={snap.durationSec} onSeek={onSeek} />
-          <LiveSeekBar durationSec={snap.durationSec} active={visible} onSeek={onSeek} />
-        </> : <MinimalTrack durationSec={snap.durationSec} visible={visible} onSeek={onSeek} />}
+        {live ? (
+          <>
+            <GoToLive durationSec={snap.durationSec} onSeek={onSeek} />
+            <LiveSeekBar durationSec={snap.durationSec} active={visible} onSeek={onSeek} />
+          </>
+        ) : (
+          <MinimalTrack durationSec={snap.durationSec} visible={visible} onSeek={onSeek} />
+        )}
       </div>
     </>
   );

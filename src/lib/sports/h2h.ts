@@ -214,7 +214,8 @@ export async function fetchHeadToHead(
 
   for (const meeting of all) {
     const sideB = sideFor(meeting, teamBId);
-    if (sideB && !teamB) teamB = { id: sideB.id, name: sideB.name, abbr: sideB.abbr, logo: sideB.logo };
+    if (sideB && !teamB)
+      teamB = { id: sideB.id, name: sideB.name, abbr: sideB.abbr, logo: sideB.logo };
     if (meeting.state !== "post") continue;
     const sideA = sideFor(meeting, teamAId);
     if (!sideA || !sideB) continue;

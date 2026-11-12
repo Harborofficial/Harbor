@@ -56,7 +56,13 @@ export function SongIdToast() {
       <span className="rounded-full bg-black/70 px-4 py-1.5 text-sm font-semibold text-white/90 shadow-lg backdrop-blur">
         ▶ {t("Now Playing")}
       </span>
-      <SongIdCard message={msg} style={style} showDetails={showDetails} onOpen={open} className={anim} />
+      <SongIdCard
+        message={msg}
+        style={style}
+        showDetails={showDetails}
+        onOpen={open}
+        className={anim}
+      />
     </div>
   );
 }

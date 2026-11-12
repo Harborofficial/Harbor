@@ -72,7 +72,13 @@ export function TempFilesCard() {
           </button>
         </SettingRow>
       </SettingGroup>
-      {failed && <p role="alert" className="mt-3 text-[15px] text-danger">{t("Could not clear temporary files. Close any active downloads or playback and try again.")}</p>}
+      {failed && (
+        <p role="alert" className="mt-3 text-[15px] text-danger">
+          {t(
+            "Could not clear temporary files. Close any active downloads or playback and try again.",
+          )}
+        </p>
+      )}
     </Section>
   );
 }

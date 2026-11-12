@@ -192,7 +192,8 @@ const extra: Record<string, string> = {
   Budget: "Orçamento",
   "Buffer fill": "Preenchimento do buffer",
   "Reveal the dot on hover": "Mostrar o ponto ao passar o cursor",
-  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.": "O ponto fica fora do caminho e aparece quando você aponta para a barra. Desligue para mantê-lo sempre visível.",
+  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.":
+    "O ponto fica fora do caminho e aparece quando você aponta para a barra. Desligue para mantê-lo sempre visível.",
   "Buffer fill brightness": "Brilho do preenchimento do buffer",
   Buffering: "Armazenando em buffer",
   Build: "Build",
@@ -249,7 +250,8 @@ const extra: Record<string, string> = {
     "Conecte um serviço debrid (Real-Debrid, TorBox, AllDebrid) para HD instantâneo sem espera.",
   "Connect MyAnimeList": "Conectar MyAnimeList",
   "Connect your MyAnimeList account": "Conecte sua conta do MyAnimeList",
-  "Connect your Trakt account to leave comments and reviews.": "Conecte sua conta Trakt para deixar comentários e avaliações.",
+  "Connect your Trakt account to leave comments and reviews.":
+    "Conecte sua conta Trakt para deixar comentários e avaliações.",
   "Connected as {username}": "Conectado como {username}",
   "Connected as @{user}": "Conectado como @{user}",
   "Connected as @{username}": "Conectado como @{username}",
@@ -263,7 +265,8 @@ const extra: Record<string, string> = {
   "Continue from last watched": "Continuar de onde parou",
   "Continue in your browser...": "Continue no seu navegador...",
   "Copy diagnostics": "Copiar diagnóstico",
-  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.": "Copiar diagnóstico captura o status do mecanismo e suas configurações de P2P como JSON, útil para colar em um relatório de bug. A pasta do mecanismo guarda o cache do DHT (dht.json) e os dados de transferências ativas.",
+  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.":
+    "Copiar diagnóstico captura o status do mecanismo e suas configurações de P2P como JSON, útil para colar em um relatório de bug. A pasta do mecanismo guarda o cache do DHT (dht.json) e os dados de transferências ativas.",
   "Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor. Safe to run again, Trakt skips anything it already has.":
     "Copie sua watchlist do Harbor para o Trakt, ou importe sua watchlist do Trakt para o Harbor. Pode executar novamente com segurança, o Trakt ignora o que já existe.",
   "Corner radius": "Raio das bordas",
@@ -863,7 +866,8 @@ const extra: Record<string, string> = {
   "Show the full notes for this build": "Mostrar as notas completas desta versão",
   "Show the IMDb rating and synopsis on episodes across the list, grid, and panel layouts.":
     "Mostra a nota do IMDb e a sinopse dos episódios nos layouts de lista, grade e painel.",
-  "Show the report button on every P2P stream, not just likely new releases.": "Mostra o botão de denúncia em todo stream P2P, não só em prováveis lançamentos novos.",
+  "Show the report button on every P2P stream, not just likely new releases.":
+    "Mostra o botão de denúncia em todo stream P2P, não só em prováveis lançamentos novos.",
   "Show the Skip button": "Mostrar o botão Pular",
   "Show title": "Mostrar título",
   "Show TMDB score on cards": "Mostrar nota do TMDB nos cards",

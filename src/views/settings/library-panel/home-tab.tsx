@@ -360,6 +360,19 @@ export function HomeTab() {
               });
             }}
           />
+          <ToggleRow
+            label={t("Also clear provider playback progress")}
+            sub={t(
+              "When you dismiss a Continue Watching card, also delete its saved playback position from every connected provider. Watch history, ratings, and watchlist statuses are unchanged.",
+            )}
+            value={settings.cwClearProviderProgress}
+            onChange={(v) => update({ cwClearProviderProgress: v })}
+            lockReason={
+              !isNuvio && settings.cwPerProfile
+                ? t("Unavailable while Continue Watching is kept private to each profile.")
+                : undefined
+            }
+          />
         </SettingGroup>
 
         <SettingGroup label={t("Navigation")}>

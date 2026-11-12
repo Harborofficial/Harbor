@@ -7,11 +7,14 @@ export default {
   "games.wow.addons.changes": "Catatan rilis",
   "games.wow.addons.fullNotes": "Baca teks lengkap di halaman pembuat",
 
-  "games.wow.manager.errorIdentity": "Folder terpasang tidak cocok dengan paket pembuat addon. Pindai ulang dan periksa sumbernya.",
+  "games.wow.manager.errorIdentity":
+    "Folder terpasang tidak cocok dengan paket pembuat addon. Pindai ulang dan periksa sumbernya.",
   "games.wow.manager.importInstalled": "Impor addon terpasang",
   "games.wow.manager.import": "Kelola dengan Harbor",
-  "games.wow.manager.importScope": "Addon terpasang dengan identitas WoWInterface. Addon lain tetap dalam daftar terpasang.",
-  "games.wow.manager.importNote": "Pertahankan file terpasang. Harbor memeriksa paket pembuat dan menyimpan versi sebelumnya sebelum pembaruan atau penghapusan berikutnya.",
+  "games.wow.manager.importScope":
+    "Addon terpasang dengan identitas WoWInterface. Addon lain tetap dalam daftar terpasang.",
+  "games.wow.manager.importNote":
+    "Pertahankan file terpasang. Harbor memeriksa paket pembuat dan menyimpan versi sebelumnya sebelum pembaruan atau penghapusan berikutnya.",
   "games.wow.manager.keepVersion": "Pertahankan versi terpasang {version}",
   "games.wow.manager.keep": "Pertahankan",
   "games.wow.manager.importSuccess": "Addon ini kini dikelola oleh Harbor.",
@@ -19,8 +22,10 @@ export default {
   "games.wow.manager.browse": "Cari addon",
   "games.wow.manager.managed": "Dikelola Harbor",
   "games.wow.manager.backups": "Cadangan",
-  "games.wow.manager.catalogNote": "Jelajahi WoWInterface. Kompatibilitas dengan WoW terpasang diperiksa sebelum perubahan diterapkan.",
-  "games.wow.manager.managedNote": "Hanya addon yang dipasang melalui Harbor yang dapat diubah di sini. Addon lain tetap ada dalam daftar terpasang.",
+  "games.wow.manager.catalogNote":
+    "Jelajahi WoWInterface. Kompatibilitas dengan WoW terpasang diperiksa sebelum perubahan diterapkan.",
+  "games.wow.manager.managedNote":
+    "Hanya addon yang dipasang melalui Harbor yang dapat diubah di sini. Addon lain tetap ada dalam daftar terpasang.",
   "games.wow.manager.category": "Kategori",
   "games.wow.manager.allCategories": "Semua kategori",
   "games.wow.manager.popular": "Unduhan bulanan",
@@ -28,31 +33,42 @@ export default {
   "games.wow.manager.name": "Nama",
   "games.wow.manager.sort": "Urutkan addon",
   "games.wow.manager.monthly": "Unduhan bulan ini",
-  "games.wow.manager.catalogError": "Katalog tidak dapat dimuat. Hasil sebelumnya mungkin sudah usang.",
-  "games.wow.manager.categoriesError": "Kategori tidak tersedia. Anda tetap dapat mencari semua addon.",
-  "games.wow.manager.partial": "Sebagian data penyedia tidak tersedia. Hasil mungkin tidak lengkap.",
+  "games.wow.manager.catalogError":
+    "Katalog tidak dapat dimuat. Hasil sebelumnya mungkin sudah usang.",
+  "games.wow.manager.categoriesError":
+    "Kategori tidak tersedia. Anda tetap dapat mencari semua addon.",
+  "games.wow.manager.partial":
+    "Sebagian data penyedia tidak tersedia. Hasil mungkin tidak lengkap.",
   "games.wow.manager.emptyManaged": "Belum ada addon yang dikelola Harbor.",
   "games.wow.manager.emptyBackups": "Belum ada versi sebelumnya yang disimpan.",
-  "games.wow.manager.reviewNote": "Tinjau paket dan perubahan folder terlebih dahulu. Tutup WoW sebelum meninjau atau menerapkan perubahan.",
+  "games.wow.manager.reviewNote":
+    "Tinjau paket dan perubahan folder terlebih dahulu. Tutup WoW sebelum meninjau atau menerapkan perubahan.",
   "games.wow.manager.backupNote": "File sebelumnya disimpan secara lokal: {size}.",
   "games.wow.manager.fileSummary": "{count} file · {size}",
   "games.wow.manager.preparing": "Menyiapkan tinjauan perubahan…",
   "games.wow.manager.applying": "Menerapkan perubahan…",
   "games.wow.manager.success": "Konfigurasi addon diperbarui.",
   "games.wow.manager.cancelled": "Dibatalkan. Segarkan untuk memeriksa keadaan terbaru.",
-  "games.wow.manager.recovery": "Perubahan yang terputus harus dipulihkan sebelum melanjutkan. Tutup WoW terlebih dahulu.",
+  "games.wow.manager.recovery":
+    "Perubahan yang terputus harus dipulihkan sebelum melanjutkan. Tutup WoW terlebih dahulu.",
   "games.wow.manager.recover": "Pulihkan konfigurasi",
   "games.wow.manager.add": "Tambah",
   "games.wow.manager.replace": "Ganti",
   "games.wow.manager.remove": "Hapus",
-  "games.wow.manager.error": "Perubahan tidak dapat diselesaikan. Periksa koneksi dan ruang disk, lalu coba lagi.",
+  "games.wow.manager.error":
+    "Perubahan tidak dapat diselesaikan. Periksa koneksi dan ruang disk, lalu coba lagi.",
   "games.wow.manager.errorRunning": "Tutup WoW sepenuhnya, lalu coba lagi.",
-  "games.wow.manager.errorCompatibility": "Paket ini tidak cocok dengan edisi atau versi WoW terpasang.",
-  "games.wow.manager.errorUnmanaged": "Folder ini dipasang di luar Harbor dan tidak dapat ditimpa di sini.",
-  "games.wow.manager.errorChanged": "File berubah atau perlu diperiksa. Pindai ulang sebelum mencoba lagi.",
-  "games.wow.manager.errorDependency": "Dependensi wajib tidak ada atau addon lain membutuhkan file ini.",
+  "games.wow.manager.errorCompatibility":
+    "Paket ini tidak cocok dengan edisi atau versi WoW terpasang.",
+  "games.wow.manager.errorUnmanaged":
+    "Folder ini dipasang di luar Harbor dan tidak dapat ditimpa di sini.",
+  "games.wow.manager.errorChanged":
+    "File berubah atau perlu diperiksa. Pindai ulang sebelum mencoba lagi.",
+  "games.wow.manager.errorDependency":
+    "Dependensi wajib tidak ada atau addon lain membutuhkan file ini.",
   "games.wow.manager.errorExpired": "Tinjauan telah kedaluwarsa. Tinjau kembali perubahannya.",
-  "games.wow.manager.errorDesktop": "Pengelolaan addon memerlukan aplikasi desktop Harbor terbaru di Windows.",
+  "games.wow.manager.errorDesktop":
+    "Pengelolaan addon memerlukan aplikasi desktop Harbor terbaru di Windows.",
 
   "games.wow.addons.screenshots": "Tangkapan layar pembuat",
   "games.wow.addons.screenshotsUnavailable": "Tangkapan layar pembuat tidak dapat dimuat.",
@@ -61,8 +77,10 @@ export default {
   "games.wow.addons.intro": "Versi dan dependensi yang diperlukan untuk instalasi ini.",
   "games.wow.addons.refresh": "Pindai ulang addon",
   "games.wow.addons.client": "WoW terpasang {version}",
-  "games.wow.addons.unavailable": "Instalasi ini tidak dapat dibaca. Hubungkan drive lalu pindai ulang.",
-  "games.wow.addons.partial": "Beberapa folder tidak dapat dipindai. Daftar ini mungkin belum lengkap.",
+  "games.wow.addons.unavailable":
+    "Instalasi ini tidak dapat dibaca. Hubungkan drive lalu pindai ulang.",
+  "games.wow.addons.partial":
+    "Beberapa folder tidak dapat dipindai. Daftar ini mungkin belum lengkap.",
   "games.wow.addons.search": "Cari addon",
   "games.wow.addons.attention": "Perlu diperiksa",
   "games.wow.addons.unreadable": "Manifes addon ini tidak dapat dibaca.",
@@ -76,7 +94,8 @@ export default {
   "games.wow.addons.noMatches": "Tidak ada addon yang cocok dengan filter ini.",
   "games.wow.addons.more": "Tampilkan addon lainnya",
   "games.wow.addons.empty": "Tidak ada addon untuk instalasi ini.",
-  "games.wow.addons.scope": "Versi game dinyatakan oleh pembuat addon. Status aktif dan pembaruan tersedia tidak diperiksa.",
+  "games.wow.addons.scope":
+    "Versi game dinyatakan oleh pembuat addon. Status aktif dan pembaruan tersedia tidak diperiksa.",
   "games.wow.realm.LOCKED": "Terkunci",
   "games.wow.classic.title": "Status realm",
   "games.wow.classic.intro": "Periksa realm sebelum menuju Azeroth. Status langsung dari Blizzard.",
@@ -98,8 +117,10 @@ export default {
   "games.wow.classic.news": "Berita Classic",
   "games.wow.realm.browse": "Jelajahi realm",
   "games.wow.realm.unavailable": "Status realm tidak tersedia. Kamu tetap bisa memasukkan realm.",
-  "games.wow.realm.unsupported": "Layanan status global Blizzard tidak mencakup wilayah ini. Masukkan realm secara manual.",
-  "games.wow.realm.noMatches": "Tidak ada realm yang cocok. Kamu bisa memasukkan nama secara manual.",
+  "games.wow.realm.unsupported":
+    "Layanan status global Blizzard tidak mencakup wilayah ini. Masukkan realm secara manual.",
+  "games.wow.realm.noMatches":
+    "Tidak ada realm yang cocok. Kamu bisa memasukkan nama secara manual.",
   "games.wow.realm.refresh": "Segarkan status realm",
   "games.wow.realm.unknown": "Status tidak diketahui",
   "games.wow.realm.online": "Online",
@@ -145,16 +166,19 @@ export default {
   "games.wow.character.raidUnavailable": "Progres raid saat ini tidak tersedia.",
   "games.wow.character.updated": "Profil diperbarui {date}",
   "games.wow.character.gearUpdated": "Perlengkapan diperbarui {date}",
-  "games.wow.character.sourceNote": "Data publik Raider.IO. Pembaruan mungkin tertinggal dari permainan.",
+  "games.wow.character.sourceNote":
+    "Data publik Raider.IO. Pembaruan mungkin tertinggal dari permainan.",
   "games.wow.title": "Pekan ini di Azeroth",
   "games.wow.region": "Wilayah",
   "games.wow.refresh": "Segarkan data WoW",
-  "games.wow.unavailable": "Tidak dapat menyegarkan. Informasi sebelumnya mungkin sudah kedaluwarsa.",
+  "games.wow.unavailable":
+    "Tidak dapat menyegarkan. Informasi sebelumnya mungkin sudah kedaluwarsa.",
   "games.wow.reset": "Reset mingguan berikutnya",
   "games.wow.resetNote": "Waktu lokal Anda. Pemeliharaan dapat berlanjut setelah reset.",
   "games.wow.resetUnavailable": "Waktu reset tidak tersedia.",
   "games.wow.affixes": "Afiks pekan ini",
-  "games.wow.affixesUnavailable": "Afiks saat ini tidak tersedia. Periksa lagi setelah reset wilayah.",
+  "games.wow.affixesUnavailable":
+    "Afiks saat ini tidak tersedia. Periksa lagi setelah reset wilayah.",
   "games.wow.dungeons": "Dungeon Mythic+",
   "games.wow.timer": "Batas waktu {minutes} menit",
   "games.wow.rankings": "Lihat peringkat",
@@ -163,7 +187,8 @@ export default {
   "games.wow.bosses": "{count} bos",
   "games.wow.raidsUnavailable": "Informasi raid saat ini tidak tersedia.",
   "games.wow.checked": "Diperiksa {date}",
-  "games.wow.scope": "Data Retail dari Raider.IO. Timer berlaku untuk keystone; afiks berbeda menurut level kunci.",
+  "games.wow.scope":
+    "Data Retail dari Raider.IO. Timer berlaku untuk keystone; afiks berbeda menurut level kunci.",
   "games.wow.region.us": "Amerika / Oseania",
   "games.wow.region.eu": "Eropa",
   "games.wow.region.kr": "Korea",

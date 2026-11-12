@@ -153,7 +153,8 @@ export function BpPlayerSubtitles(props: BpPlayerSubtitlesProps) {
 
   const selected = tracks.find((track) => track.id === selectedId) ?? null;
   const syncBusy = autoSync?.status === "analyzing" || autoSync?.status === "listening";
-  const canSync = selected?.external === true || syncBusy === true || isAppliedAutoSync(autoSync?.status);
+  const canSync =
+    selected?.external === true || syncBusy === true || isAppliedAutoSync(autoSync?.status);
   const offset = offsetLabel(delaySec, t);
   const context = isSeries
     ? `${props.metaTitle ?? ""} · S${String(props.season).padStart(2, "0")}E${String(props.episode).padStart(2, "0")}`

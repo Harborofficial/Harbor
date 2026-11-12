@@ -9,7 +9,11 @@ const SEASONS = [
 ];
 
 /** Mirrors the scoping series-episodes.tsx applies before resumeDefaultSeason sees Trakt keys. */
-function scopedTraktKeys(account: Iterable<string>, imdbId: string | null, metaId: string): string[] {
+function scopedTraktKeys(
+  account: Iterable<string>,
+  imdbId: string | null,
+  metaId: string,
+): string[] {
   const mine = new Set<string>();
   if (imdbId) mine.add(`imdb:${imdbId}`);
   const tmdb = /^tmdb:(\d+)/.exec(metaId)?.[1];

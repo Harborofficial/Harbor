@@ -7,6 +7,7 @@ export default {
   "games.playtime.days": "أيام",
   "games.playtime.seconds": "ثوانٍ",
   "games.playtime.preciseDuration": "{hours} س {minutes} د {seconds} ث",
-  "games.playtime.decimalInvalid": "استخدم أرقامًا غير سالبة دون فواصل آلاف، بحد أقصى 1,000,000 ساعة إجمالًا.",
-  "games.playtime.decimalHint": "يمكن إدخال قيم عشرية. يُقرّب المجموع إلى أقرب ثانية."
+  "games.playtime.decimalInvalid":
+    "استخدم أرقامًا غير سالبة دون فواصل آلاف، بحد أقصى 1,000,000 ساعة إجمالًا.",
+  "games.playtime.decimalHint": "يمكن إدخال قيم عشرية. يُقرّب المجموع إلى أقرب ثانية.",
 };

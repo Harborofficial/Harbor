@@ -5,6 +5,8 @@ const subtitles: Record<string, string> = {
     "带样式的字幕（ASS）会保留颜色、字号和画面文字的位置，但改用你的字体。",
   "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.":
     "Harbor 会把字幕发送到你的 mpv。请在 mpv 自带的字幕菜单中选择。",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "带样式的字幕（ASS）会保留颜色、字号和画面文字的位置，但改用你的字体。",
 };
 
 export default subtitles;

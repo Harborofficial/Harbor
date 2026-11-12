@@ -95,7 +95,9 @@ export function KindEditorModal({ kind, onClose }: { kind: BadgeKind; onClose: (
           </button>
         </div>
         <p className={`max-w-[70ch] ${ROW_DESC}`}>
-          {t("Paste a link to a png, webp, or svg. Harbor will use it for this badge everywhere streams show format chips.")}
+          {t(
+            "Paste a link to a png, webp, or svg. Harbor will use it for this badge everywhere streams show format chips.",
+          )}
         </p>
       </div>
 

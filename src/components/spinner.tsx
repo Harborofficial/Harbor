@@ -1,10 +1,4 @@
-export function Spinner({
-  size = 20,
-  className = "",
-}: {
-  size?: number;
-  className?: string;
-}) {
+export function Spinner({ size = 20, className = "" }: { size?: number; className?: string }) {
   return (
     <span
       aria-hidden

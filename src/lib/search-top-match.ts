@@ -1,9 +1,71 @@
 import type { Addon } from "./addons";
 import type { Meta } from "./cinemeta";
-import type { SearchResults } from "./search";
+import type { AnimeHit, SearchResults } from "./search";
 import { addonConfigurationKey } from "./addon-configuration-key";
 import { metadataAddonKey, orderedMetadataAddons } from "./metadata-addons";
 import { normalizeSearchQuery } from "./search-query";
+
+// Compare titles without punctuation: "Bleach: Thousand-Year Blood War" and
+// "Bleach Thousand Year Blood War" are the same result.
+function titleKey(value: string): string {
+  return value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
+export function sameSearchTitle(name: string | null | undefined, query: string): boolean {
+  if (!name) return false;
+  return titleKey(name) === titleKey(query);
+}
+
+function animeYear(hit: AnimeHit): number {
+  const year = Number(hit.year);
+  return Number.isFinite(year) && year > 0 ? year : Number.POSITIVE_INFINITY;
+}
+
+export function animeTopMatch(anime: AnimeHit[], query: string): SearchResults["topMatch"] {
+  const wanted = titleKey(query);
+  if (!wanted) return null;
+  const exact = anime.find((a) => titleKey(a.name) === wanted);
+  const prefix = anime.filter((a) => wanted.length >= 4 && titleKey(a.name).startsWith(wanted));
+  // A franchise prefix like "rascal does not dream of" matches several entries;
+  // use the oldest, which is the franchise's base series, not the newest cour.
+  const earliest = prefix.sort((a, b) => animeYear(a) - animeYear(b))[0];
+  const contains =
+    wanted.split(" ").length >= 2 ? anime.filter((a) => titleKey(a.name).includes(wanted)) : [];
+  const hit = exact ?? earliest ?? (contains.length === 1 ? contains[0] : undefined);
+  if (!hit) return null;
+  const id = hit.kitsuId
+    ? `kitsu:${hit.kitsuId}`
+    : hit.malId
+      ? `mal:${hit.malId}`
+      : hit.anilistId
+        ? `anilist:${hit.anilistId}`
+        : null;
+  if (!id) return null;
+  const meta = {
+    id,
+    type: "anime",
+    name: hit.name,
+    poster: hit.poster ?? undefined,
+    background: hit.background ?? hit.poster ?? undefined,
+    description: hit.overview,
+    releaseInfo: hit.year ?? undefined,
+    imdbRating: hit.score > 0 ? hit.score.toFixed(1) : undefined,
+    malId: hit.malId || undefined,
+    animeFormat: hit.format ?? undefined,
+  } as Meta;
+  return {
+    kind: "series",
+    meta,
+    popularity: 0,
+    backdrop: hit.background ?? hit.poster ?? undefined,
+    overview: hit.overview,
+    voteAverage: hit.score > 0 ? hit.score : undefined,
+  };
+}
 
 export function addonsBeforeTmdb(addons: Addon[], chain: string[]): Addon[] {
   const tmdbAt = chain.indexOf("tmdb");

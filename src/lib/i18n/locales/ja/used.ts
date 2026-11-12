@@ -21,7 +21,8 @@ const used: Record<string, string> = {
   "Blur up looks smoothest. Fade is lighter on older devices. Instant turns it off.":
     "「ブラーアップ」が最も滑らかです。「フェード」は古い端末への負荷が軽く、「即時」では効果がオフになります。",
   "Browse public groups": "公開グループを見る",
-  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.": "視聴中や一時停止中もファイル全体をバックグラウンドでバッファリングします。容量の大きいリマックスも先読みされ、キャッシュ済みのファイルなら再バッファリングなしでシークできます。デブリッドとP2Pのストリームに対応しています。ディスク容量と帯域幅を多く使用し、切り替え時や終了時に消去されます。",
+  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.":
+    "視聴中や一時停止中もファイル全体をバックグラウンドでバッファリングします。容量の大きいリマックスも先読みされ、キャッシュ済みのファイルなら再バッファリングなしでシークできます。デブリッドとP2Pのストリームに対応しています。ディスク容量と帯域幅を多く使用し、切り替え時や終了時に消去されます。",
   "Bulk upload is not live yet, sending one rating per second.":
     "一括アップロードはまだ利用できないため、評価を1秒に1件ずつ送信します。",
   "Cancel import": "インポートをキャンセル",

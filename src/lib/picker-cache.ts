@@ -58,16 +58,25 @@ export function setPickerCache(
   animePreferImdbStreams?: boolean,
 ): void {
   if (result.picker.all.length === 0) return;
-  const stripped: StoredResult = { picker: result.picker, rejected: result.rejected.slice(0, 60), debridErrors: result.debridErrors };
-  lruSet(cache, entryKey(meta, episode), {
-    meta,
-    episode,
-    result: stripped,
-    fetchedAt: Date.now(),
-    configHash,
-    animePreferImdbStreams,
-    complete,
-  }, MAX_ENTRIES);
+  const stripped: StoredResult = {
+    picker: result.picker,
+    rejected: result.rejected.slice(0, 60),
+    debridErrors: result.debridErrors,
+  };
+  lruSet(
+    cache,
+    entryKey(meta, episode),
+    {
+      meta,
+      episode,
+      result: stripped,
+      fetchedAt: Date.now(),
+      configHash,
+      animePreferImdbStreams,
+      complete,
+    },
+    MAX_ENTRIES,
+  );
   notify();
 }
 
@@ -120,9 +129,11 @@ export function peekPickerCache(
 ): Entry | null {
   const entry = cache.get(entryKey(meta, episode));
   if (
-    entry?.animePreferImdbStreams != null && animePreferImdbStreams != null &&
+    entry?.animePreferImdbStreams != null &&
+    animePreferImdbStreams != null &&
     entry.animePreferImdbStreams !== animePreferImdbStreams
-  ) return null;
+  )
+    return null;
   return entry ?? null;
 }
 

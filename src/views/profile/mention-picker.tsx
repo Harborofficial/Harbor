@@ -29,7 +29,8 @@ function loadFriends(): Promise<Friend[]> {
 function rank(friends: Friend[], query: string): Friend[] {
   const q = query.toLowerCase();
   if (!q) return friends.slice(0, MAX_OPTIONS);
-  const hit = (f: Friend, fn: (v: string) => boolean) => fn(f.handle.toLowerCase()) || fn(f.alias.toLowerCase());
+  const hit = (f: Friend, fn: (v: string) => boolean) =>
+    fn(f.handle.toLowerCase()) || fn(f.alias.toLowerCase());
   const starts = friends.filter((f) => hit(f, (v) => v.startsWith(q)));
   const rest = friends.filter((f) => !starts.includes(f) && hit(f, (v) => v.includes(q)));
   return [...starts, ...rest].slice(0, MAX_OPTIONS);
@@ -68,7 +69,8 @@ export function useMentionSuggest(text: string, caret: number) {
     options,
     open,
     index: active,
-    move: (step: number) => setIndex((i) => (options.length ? (i + step + options.length) % options.length : 0)),
+    move: (step: number) =>
+      setIndex((i) => (options.length ? (i + step + options.length) % options.length : 0)),
     hover: setIndex,
     dismiss: () => setDismissedAt(token?.start ?? null),
   };
@@ -103,7 +105,9 @@ export function MentionPicker({
           }`}
         >
           <Avatar src={f.avatarUrl} size={28} online={f.online} alias={f.alias} />
-          <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">{f.alias}</span>
+          <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
+            {f.alias}
+          </span>
           <span className="shrink-0 text-[12px] text-ink-subtle">@{f.handle}</span>
         </button>
       ))}

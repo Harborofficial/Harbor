@@ -288,7 +288,10 @@ export function BpAnimeEpisodeStrip({
     // strip back to card one.
     if (t0.width < 2 || c.width < 2) return;
     parkedRef.current = stamp;
-    track.scrollTo({ left: Math.max(0, track.scrollLeft + (c.left - t0.left) - 24), behavior: "auto" });
+    track.scrollTo({
+      left: Math.max(0, track.scrollLeft + (c.left - t0.left) - 24),
+      behavior: "auto",
+    });
   }, [nextUpId, seasonKey, list]);
 
   return (

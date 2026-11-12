@@ -15,7 +15,10 @@ export default {
   "artwork.resetLaunch": "Réinitialiser le logo de lancement",
   "artwork.local": "Enregistré sur cet appareil. Le mouvement réduit utilise une image fixe.",
   "artwork.error.large": "Choisissez un fichier plus petit : 8 Mo et 4096 × 4096 pixels maximum.",
-  "artwork.error.external": "Cette animation utilise des médias externes. Exportez-la avec les images intégrées.",
-  "artwork.error.storage": "Impossible d’enregistrer le fichier sur cet appareil. Votre choix précédent est conservé.",
-  "artwork.error.invalid": "Impossible de lire ce fichier. Choisissez Lottie (.json ou .lottie), GIF, PNG, JPEG ou WebP."
+  "artwork.error.external":
+    "Cette animation utilise des médias externes. Exportez-la avec les images intégrées.",
+  "artwork.error.storage":
+    "Impossible d’enregistrer le fichier sur cet appareil. Votre choix précédent est conservé.",
+  "artwork.error.invalid":
+    "Impossible de lire ce fichier. Choisissez Lottie (.json ou .lottie), GIF, PNG, JPEG ou WebP.",
 };

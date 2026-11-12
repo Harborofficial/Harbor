@@ -1,5 +1,11 @@
 import { useEffect, useSyncExternalStore } from "react";
-import { autoDlList, isAutoDownloaded, recordGrab, updateAutoDownload, type AutoDlSeries } from "@/lib/auto-download";
+import {
+  autoDlList,
+  isAutoDownloaded,
+  recordGrab,
+  updateAutoDownload,
+  type AutoDlSeries,
+} from "@/lib/auto-download";
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { enqueueDownload } from "@/lib/download/downloads-store";
 import { resolveMeta } from "@/lib/meta-resource";
@@ -32,7 +38,11 @@ function subscribeState(fn: () => void): () => void {
 }
 
 export function useNextRunAt(): number | null {
-  return useSyncExternalStore(subscribeState, () => nextRunAt, () => nextRunAt);
+  return useSyncExternalStore(
+    subscribeState,
+    () => nextRunAt,
+    () => nextRunAt,
+  );
 }
 
 export function useIsChecking(id: string): boolean {
@@ -184,7 +194,11 @@ async function processSeries(
   }
 }
 
-async function runSeriesList(list: AutoDlSeries[], signal: AbortSignal, gen: number): Promise<void> {
+async function runSeriesList(
+  list: AutoDlSeries[],
+  signal: AbortSignal,
+  gen: number,
+): Promise<void> {
   const ctx = await gatherContext();
   if (signal.aborted || gen !== runGen) return;
   const grabbed = new Set<string>();

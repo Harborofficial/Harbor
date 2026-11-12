@@ -20,8 +20,10 @@ export default {
   "games.valorant.sentinel": "Guardiano",
   "games.valorant.search": "Cerca un agente",
   "games.valorant.referenceError": "Impossibile caricare i riferimenti del gioco.",
-  "games.valorant.stale": "Aggiornamento non riuscito. Sono mostrati gli ultimi risultati caricati.",
-  "games.valorant.metaError": "Statistiche competitive non disponibili. Le schede degli agenti restano accessibili.",
+  "games.valorant.stale":
+    "Aggiornamento non riuscito. Sono mostrati gli ultimi risultati caricati.",
+  "games.valorant.metaError":
+    "Statistiche competitive non disponibili. Le schede degli agenti restano accessibili.",
   "games.valorant.agents": "Classifica agenti",
   "games.valorant.sort": "Ordina agenti",
   "games.valorant.winSort": "Più vittorie",
@@ -34,20 +36,24 @@ export default {
   "games.valorant.sampleNote": "Gli agenti con meno di 200 presenze sono elencati per ultimi.",
   "games.valorant.empty": "Nessun risultato con questi filtri.",
   "games.valorant.checked": "Verificato: {date}",
-  "games.valorant.metaScope": "Dati competitivi OP.GG per la patch selezionata. La percentuale di scelta indica la quota delle presenze degli agenti. I risultati descrivono il campione della fonte, non tutti i giocatori.",
-  "games.valorant.referenceScope": "Immagini e riferimenti tramite Valorant-API. Gli aggiornamenti possono arrivare in ritardo. Harbor non è approvato da Riot Games.",
+  "games.valorant.metaScope":
+    "Dati competitivi OP.GG per la patch selezionata. La percentuale di scelta indica la quota delle presenze degli agenti. I risultati descrivono il campione della fonte, non tutti i giocatori.",
+  "games.valorant.referenceScope":
+    "Immagini e riferimenti tramite Valorant-API. Gli aggiornamenti possono arrivare in ritardo. Harbor non è approvato da Riot Games.",
   "games.valorant.samples": "{count} presenze",
   "games.valorant.smallSample": "Campione ridotto",
   "games.valorant.abilities": "Abilità",
   "games.valorant.watchAbility": "Guarda abilità",
   "games.valorant.videoError": "Impossibile riprodurre la dimostrazione.",
   "games.valorant.mapMeta": "Meta degli agenti su questa mappa",
-  "games.valorant.mapScope": "Riferimento delle mappe, comprese quelle fuori dalla rotazione competitiva attuale. Nomi e posizioni sono in inglese.",
+  "games.valorant.mapScope":
+    "Riferimento delle mappe, comprese quelle fuori dalla rotazione competitiva attuale. Nomi e posizioni sono in inglese.",
   "games.valorant.callouts": "Posizioni",
   "games.valorant.compareWeapon": "Confronta con",
   "games.valorant.weapon": "Arma",
   "games.valorant.distance": "Distanza",
-  "games.valorant.damageScope": "Valori base del fuoco primario prima di armatura, penetrazione o abilità. Per i fucili a pompa il danno è per pallino.",
+  "games.valorant.damageScope":
+    "Valori base del fuoco primario prima di armatura, penetrazione o abilità. Per i fucili a pompa il danno è per pallino.",
   "games.valorant.weaponStats": "Statistiche arma",
   "games.valorant.cost": "Crediti",
   "games.valorant.magazine": "Caricatore",
@@ -55,5 +61,5 @@ export default {
   "games.valorant.reload": "Ricarica · secondi",
   "games.valorant.head": "Danni alla testa",
   "games.valorant.body": "Danni al corpo",
-  "games.valorant.legs": "Danni alle gambe"
+  "games.valorant.legs": "Danni alle gambe",
 };

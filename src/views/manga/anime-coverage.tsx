@@ -75,7 +75,14 @@ export function AnimeCoverage({
       <p className="text-[14px] leading-relaxed text-ink-muted">
         {lead}
         {strong(start ?? end ?? "")}
-        {start && end ? <>{t(" through ")}{strong(end)}.</> : "."}
+        {start && end ? (
+          <>
+            {t(" through ")}
+            {strong(end)}.
+          </>
+        ) : (
+          "."
+        )}
       </p>
       {resumeLabel && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">

@@ -246,25 +246,53 @@ test("malformed paths and cancelled consumers never trigger requests", async () 
   assert.equal(calls, 0);
 });
 
-const golfRef = (path: string) => ({ $ref: `http://sports.core.api.espn.com/v2/sports/golf/leagues/${path}?lang=en&region=us` });
+const golfRef = (path: string) => ({
+  $ref: `http://sports.core.api.espn.com/v2/sports/golf/leagues/${path}?lang=en&region=us`,
+});
 const golfLog = (years = [2026, 2024], id = "11056", tour = "pga") => ({
   entries: years.map((year) => ({
     season: golfRef(`${tour}/seasons/${year}`),
-    statistics: [{ statistics: golfRef(`${tour}/seasons/${year}/types/2/athletes/${id}/statistics/0`) }],
+    statistics: [
+      { statistics: golfRef(`${tour}/seasons/${year}/types/2/athletes/${id}/statistics/0`) },
+    ],
   })),
 });
 const golfSeason = (year = 2026, id = "11056", tour = "pga") => ({
   athlete: golfRef(`${tour}/seasons/${year}/athletes/${id}`),
   season: golfRef(`${tour}/seasons/${year}`),
-  splits: { type: "total", categories: [{ name: "general", stats: [
-    { name: "tournamentsPlayed", abbreviation: "EVENTS", displayName: "Tournaments played", value: 22, displayValue: "22" },
-    { name: "wins", displayName: "Wins", value: 0, displayValue: "0" },
-    { name: "scoringAverage", displayName: "Scoring average per round", value: 70.21212, displayValue: "70.2" },
-    { name: "amount", displayName: "Official money won", value: 1959986, displayValue: "$1,959,986" },
-    { name: "yardsPerDrive", displayValue: "0" },
-    { name: "birdies", displayValue: "—" },
-    { name: "puttsGirAvg" },
-  ] }] },
+  splits: {
+    type: "total",
+    categories: [
+      {
+        name: "general",
+        stats: [
+          {
+            name: "tournamentsPlayed",
+            abbreviation: "EVENTS",
+            displayName: "Tournaments played",
+            value: 22,
+            displayValue: "22",
+          },
+          { name: "wins", displayName: "Wins", value: 0, displayValue: "0" },
+          {
+            name: "scoringAverage",
+            displayName: "Scoring average per round",
+            value: 70.21212,
+            displayValue: "70.2",
+          },
+          {
+            name: "amount",
+            displayName: "Official money won",
+            value: 1959986,
+            displayValue: "$1,959,986",
+          },
+          { name: "yardsPerDrive", displayValue: "0" },
+          { name: "birdies", displayValue: "—" },
+          { name: "puttsGirAvg" },
+        ],
+      },
+    ],
+  },
 });
 
 test("golf discovers published seasons in order, skipping gaps, duplicates, foreign tours and other athletes", () => {
@@ -272,7 +300,8 @@ test("golf discovers published seasons in order, skipping gaps, duplicates, fore
   data.entries.push({ season: golfRef("pga/seasons/2025"), statistics: [] });
   data.entries.push(...golfLog([2027], "999").entries, ...golfLog([2028], "11056", "lpga").entries);
   const malicious = golfLog([2029]);
-  malicious.entries[0].statistics[0].statistics.$ref = "https://evil.test/v2/sports/golf/leagues/pga/seasons/2029/types/2/athletes/11056/statistics/0";
+  malicious.entries[0].statistics[0].statistics.$ref =
+    "https://evil.test/v2/sports/golf/leagues/pga/seasons/2029/types/2/athletes/11056/statistics/0";
   data.entries.push(...malicious.entries);
   assert.deepEqual(golfStatSeasons(data, "pga", "11056"), ["2026", "2024"]);
   assert.deepEqual(golfStatSeasons(null, "pga", "11056"), []);
@@ -287,7 +316,8 @@ test("golf preserves the season, source rounding, money and genuine zeroes witho
   assert.deepEqual(parseGolfAthleteSeason(golfSeason(), "pga", "999", "2026"), []);
   assert.deepEqual(parseGolfAthleteSeason(golfSeason(), "pga", "11056", "2025"), []);
   assert.deepEqual(parseGolfAthleteSeason(golfSeason(), "lpga", "11056", "2026"), []);
-  const split = golfSeason(); split.splits.type = "home";
+  const split = golfSeason();
+  split.splits.type = "home";
   assert.deepEqual(parseGolfAthleteSeason(split, "pga", "11056", "2026"), []);
 });
 
@@ -340,10 +370,13 @@ test("empty golf feeds are bounded, while transient errors remain retryable and 
 
 test("cancelling a golf profile stops the follow-up request even if the transport completes late", async () => {
   const controller = new AbortController();
-  let calls = 0, resolve: (raw: unknown) => void = () => {};
+  let calls = 0,
+    resolve: (raw: unknown) => void = () => {};
   const client = createAthleteCareerClient(async () => {
     calls++;
-    return new Promise((done) => { resolve = done; });
+    return new Promise((done) => {
+      resolve = done;
+    });
   });
   const pending = client("golf/pga", "11056", controller.signal);
   await new Promise((done) => setTimeout(done, 0));

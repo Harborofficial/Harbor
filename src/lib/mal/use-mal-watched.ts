@@ -13,7 +13,9 @@ export function useMalWatched(harborId: string, episodes: KitsuEpisode[]): MalWa
   const [result, setResult] = useState<MalWatched>(EMPTY);
   const epSig = useMemo(
     () =>
-      episodes.map((e) => `${e.id}:${e.seasonNumber ?? 1}:${e.number}:${e.airdate ?? ""}`).join("|"),
+      episodes
+        .map((e) => `${e.id}:${e.seasonNumber ?? 1}:${e.number}:${e.airdate ?? ""}`)
+        .join("|"),
     [episodes],
   );
   const episodesRef = useRef(episodes);

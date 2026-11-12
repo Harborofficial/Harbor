@@ -29,7 +29,8 @@ export async function resolveAndPlayMusicTrack(
   const match =
     usable.find((candidate) => candidate.connectorId === preferred) ??
     [...usable].sort(
-      (left, right) => musicSourcePriority(left.connectorId) - musicSourcePriority(right.connectorId),
+      (left, right) =>
+        musicSourcePriority(left.connectorId) - musicSourcePriority(right.connectorId),
     )[0];
   if (!match) return null;
   const selected = adoptRequestedIdentity(match.track, track);

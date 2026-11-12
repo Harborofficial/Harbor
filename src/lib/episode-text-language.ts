@@ -25,7 +25,10 @@ const SCRIPT_TEST: Record<string, RegExp> = {
 const FOREIGN_SCRIPT =
   /[\u0600-\u06FF\u0750-\u077F\u0400-\u04FF\u0370-\u03FF\u0900-\u097F\u0E00-\u0E7F\u0590-\u05FF\uAC00-\uD7AF\u1100-\u11FF\u3400-\u4DBF\u4E00-\u9FFF\u3040-\u30FF]/;
 
-export function isTextInLanguage(text: string | null | undefined, lang: string | null | undefined): boolean {
+export function isTextInLanguage(
+  text: string | null | undefined,
+  lang: string | null | undefined,
+): boolean {
   if (!text) return false;
   const base = lang?.trim().split("-")[0]?.toLowerCase() ?? "";
   if (!base || base === "en") return true;
@@ -34,7 +37,10 @@ export function isTextInLanguage(text: string | null | undefined, lang: string |
   return !FOREIGN_SCRIPT.test(text);
 }
 
-export function isUsableLocalizedText(text: string | null | undefined, lang: string | null | undefined): boolean {
+export function isUsableLocalizedText(
+  text: string | null | undefined,
+  lang: string | null | undefined,
+): boolean {
   if (!text) return false;
   if (isTextInLanguage(text, lang)) return true;
   const base = lang?.trim().split("-")[0]?.toLowerCase() ?? "";
@@ -42,10 +48,34 @@ export function isUsableLocalizedText(text: string | null | undefined, lang: str
 }
 
 const ISO3: Record<string, string> = {
-  eng: "en", spa: "es", fra: "fr", deu: "de", ita: "it", jpn: "ja", kor: "ko",
-  rus: "ru", por: "pt", zho: "zh", ara: "ar", nld: "nl", pol: "pl", tur: "tr",
-  swe: "sv", dan: "da", fin: "fi", nor: "no", ces: "cs", hun: "hu", ell: "el",
-  heb: "he", tha: "th", vie: "vi", ind: "id", ukr: "uk", ron: "ro", hin: "hi",
+  eng: "en",
+  spa: "es",
+  fra: "fr",
+  deu: "de",
+  ita: "it",
+  jpn: "ja",
+  kor: "ko",
+  rus: "ru",
+  por: "pt",
+  zho: "zh",
+  ara: "ar",
+  nld: "nl",
+  pol: "pl",
+  tur: "tr",
+  swe: "sv",
+  dan: "da",
+  fin: "fi",
+  nor: "no",
+  ces: "cs",
+  hun: "hu",
+  ell: "el",
+  heb: "he",
+  tha: "th",
+  vie: "vi",
+  ind: "id",
+  ukr: "uk",
+  ron: "ro",
+  hin: "hi",
 };
 
 export function episodeLanguageBase(language?: string | null): string {
@@ -63,11 +93,20 @@ export function episodeTextLanguage(
 ): string {
   if (!text?.trim()) return "und";
   const lang = episodeLanguageBase(requested);
-  if (english?.trim() && text.trim() === english.trim() && !FOREIGN_SCRIPT.test(english)) return "en";
-  if (Array.isArray(availableLanguages) && !availableLanguages.some((available) => episodeLanguageBase(available) === lang)) return "und";
+  if (english?.trim() && text.trim() === english.trim() && !FOREIGN_SCRIPT.test(english))
+    return "en";
+  if (
+    Array.isArray(availableLanguages) &&
+    !availableLanguages.some((available) => episodeLanguageBase(available) === lang)
+  )
+    return "und";
   if (lang === "en") return FOREIGN_SCRIPT.test(text) ? "und" : "en";
   if (!isTextInLanguage(text, lang)) return "und";
-  if (Array.isArray(availableLanguages) && availableLanguages.some((available) => episodeLanguageBase(available) === lang)) return lang;
+  if (
+    Array.isArray(availableLanguages) &&
+    availableLanguages.some((available) => episodeLanguageBase(available) === lang)
+  )
+    return lang;
   // A different Latin original is not evidence of a requested translation.
   if (SCRIPT_TEST[lang]) return lang;
   return "und";
@@ -76,7 +115,11 @@ export function episodeTextLanguage(
 export type EpisodeTextCandidate = { text?: string | null; language?: string; score?: number };
 export type EpisodeTextInput = string | null | undefined | EpisodeTextCandidate;
 
-export function episodeTextRank(text: string, language: string | undefined, requested?: string | null): 0 | 1 | 2 | 3 {
+export function episodeTextRank(
+  text: string,
+  language: string | undefined,
+  requested?: string | null,
+): 0 | 1 | 2 | 3 {
   const lang = episodeLanguageBase(requested);
   if (!text.trim()) return 0;
   if (lang === "en" && FOREIGN_SCRIPT.test(text)) return 0;
@@ -90,7 +133,6 @@ export function episodeTextRank(text: string, language: string | undefined, requ
   if (lang !== "en" && SCRIPT_TEST[lang]?.test(text)) return 3;
   return 2;
 }
-
 
 export function isForeignScriptTitle(text: string | null | undefined): boolean {
   return !!text && FOREIGN_SCRIPT.test(text);

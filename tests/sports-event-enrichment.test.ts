@@ -69,10 +69,19 @@ test("opened individual results share athlete enrichment while provider failure 
   const urls: string[] = [];
   const json = async (url: string) => {
     urls.push(url);
-    if (url.includes("eventresults")) return { results: [
-      { idEvent: "761", idResult: "999", idPlayer: "1234", strPlayer: "Published Player", intPosition: "1" },
-      { idEvent: "other", idPlayer: "5678", strPlayer: "Other Player", intPosition: "2" },
-    ] };
+    if (url.includes("eventresults"))
+      return {
+        results: [
+          {
+            idEvent: "761",
+            idResult: "999",
+            idPlayer: "1234",
+            strPlayer: "Published Player",
+            intPosition: "1",
+          },
+          { idEvent: "other", idPlayer: "5678", strPlayer: "Other Player", intPosition: "2" },
+        ],
+      };
     return { events: [{ ...event, idEvent: "761", idLeague: "4555" }] };
   };
   const first = loadPublishedEvent(selected, snooker, new AbortController().signal, json);
@@ -85,7 +94,9 @@ test("opened individual results share athlete enrichment while provider failure 
   await loadPublishedEvent(selected, snooker, new AbortController().signal, json);
   assert.equal(urls.length, 2);
   const partial = await loadPublishedEvent(
-    { ...selected, id: "762" }, snooker, new AbortController().signal,
+    { ...selected, id: "762" },
+    snooker,
+    new AbortController().signal,
     async (url) => {
       if (url.includes("eventresults")) throw new Error("Classification unavailable");
       return { events: [{ ...event, idEvent: "762", idLeague: "4555" }] };

@@ -1,7 +1,8 @@
 const musicGif: Record<string, string> = {
   "music.gif.title": "Visualizador GIF personalizado",
   "music.gif.body": "Tu GIF sobre la barra de música. Se guarda en este dispositivo.",
-  "music.gif.timingHelp": "Sigue los pulsos detectados y se pausa con la reproducción. Ajusta el ciclo a tu GIF.",
+  "music.gif.timingHelp":
+    "Sigue los pulsos detectados y se pausa con la reproducción. Ajusta el ciclo a tu GIF.",
   "music.gif.upload": "Subir GIF",
   "music.gif.replace": "Reemplazar GIF",
   "music.gif.remove": "Eliminar",
@@ -16,6 +17,6 @@ const musicGif: Record<string, string> = {
   "music.gif.error.invalid": "No se pudo leer este GIF. Prueba otro archivo.",
   "music.gif.error.large": "Elige un GIF de menos de 25 MB con menos fotogramas o de menor tamaño.",
   "music.gif.error.storage": "No se pudo guardar el GIF en este dispositivo.",
-  "music.gif.error.missing": "Este GIF no está disponible. Vuelve a subirlo."
+  "music.gif.error.missing": "Este GIF no está disponible. Vuelve a subirlo.",
 };
 export default musicGif;

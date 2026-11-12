@@ -17,7 +17,8 @@ export default {
   "games.achievementManager.applying": "جارٍ تطبيق التغييرات…",
   "games.achievementManager.applied": "أكد Steam جميع التغييرات وعددها {count}.",
   "games.achievementManager.unconfirmed": "غير مؤكد",
-  "games.achievementManager.partial": "أكد Steam ‏{count} من أصل {total} من التغييرات. حدّث للتحقق من الإنجازات المتبقية.",
+  "games.achievementManager.partial":
+    "أكد Steam ‏{count} من أصل {total} من التغييرات. حدّث للتحقق من الإنجازات المتبقية.",
   "games.achievementManager.refresh": "تحديث من Steam",
   "games.achievementManager.back": "متابعة التعديل",
   "games.achievementManager.note": "ستُرسل التغييرات المدرجة فقط إلى Steam.",
@@ -27,11 +28,14 @@ export default {
   "games.achievementManager.error.offline": "افتح Steam وسجّل الدخول ثم أعد المحاولة.",
   "games.achievementManager.error.accountChanged": "تغير حساب Steam النشط. حدّث قبل التعديل.",
   "games.achievementManager.error.notOwned": "حساب Steam النشط لا يملك حق الوصول إلى هذه اللعبة.",
-  "games.achievementManager.error.timeout": "لم يُرجع Steam بيانات الإنجازات في الوقت المحدد. جرّب التحديث.",
+  "games.achievementManager.error.timeout":
+    "لم يُرجع Steam بيانات الإنجازات في الوقت المحدد. جرّب التحديث.",
   "games.achievementManager.error.unavailable": "تعذرت قراءة إنجازات اللعبة من Steam.",
   "games.achievementManager.error.rejected": "رفض Steam التحديث. حدّث للتحقق من الحالة الحالية.",
-  "games.achievementManager.error.uncertain": "لم يؤكد Steam النتيجة. حدّث للتحقق قبل إجراء تغييرات أخرى.",
-  "games.achievementManager.error.platform": "تتوفر إدارة الإنجازات حاليًا في Harbor على Windows x64.",
+  "games.achievementManager.error.uncertain":
+    "لم يؤكد Steam النتيجة. حدّث للتحقق قبل إجراء تغييرات أخرى.",
+  "games.achievementManager.error.platform":
+    "تتوفر إدارة الإنجازات حاليًا في Harbor على Windows x64.",
   "games.achievementManager.error.invalid": "اختر ما يصل إلى 2,000 تغيير في المرة الواحدة.",
   "games.achievementManager.error.stale": "تغيرت هذه الإنجازات في Steam. حدّث قبل التعديل.",
   "games.achievementManager.error.protected": "تدير اللعبة هذا الإنجاز. لا يستطيع Harbor تعديله.",
@@ -47,12 +51,15 @@ export default {
   "games.discovery.steamCharts": "تصنيفات Steam",
   "games.achievementManager.commit": "تطبيق التغييرات",
   "games.achievementManager.consentTitle": "فتح إنجازات Steam",
-  "games.achievementManager.consentBody": "افتح الإنجازات أو أعد قفلها في حساب Steam المسجّل دخوله. تبقى اختياراتك مسودة حتى تطبّق التغييرات.",
-  "games.achievementManager.consentRules": "يستخدم Harbor واجهة إنجازات Steam دون حقن كود في الألعاب. تظل قواعد كل لعبة وشروط مكافآتها سارية.",
+  "games.achievementManager.consentBody":
+    "افتح الإنجازات أو أعد قفلها في حساب Steam المسجّل دخوله. تبقى اختياراتك مسودة حتى تطبّق التغييرات.",
+  "games.achievementManager.consentRules":
+    "يستخدم Harbor واجهة إنجازات Steam دون حقن كود في الألعاب. تظل قواعد كل لعبة وشروط مكافآتها سارية.",
   "games.achievementManager.consentSam": "مستوحى من أسلوب إدارة الإنجازات في SAM",
   "games.achievementManager.consentOnce": "يظهر مرة واحدة لملف Harbor هذا.",
   "games.achievementManager.consentAccept": "فهمت",
-  "games.achievementManager.desktopOnly": "استخدم Harbor على Windows مع تشغيل Steam لتغيير الإنجازات.",
+  "games.achievementManager.desktopOnly":
+    "استخدم Harbor على Windows مع تشغيل Steam لتغيير الإنجازات.",
   "games.achievementManager.all": "الكل",
   "games.achievementManager.filter": "تصفية الإنجازات",
   "games.achievementManager.rewards": "مكافآت العناصر",
@@ -67,10 +74,12 @@ export default {
   "games.achievementManager.rewardGame": "عنصر في {game}",
   "games.achievementManager.rewardVia": "عبر {achievement}",
   "games.achievementManager.rewardAction": "فتح {item}",
-  "games.achievementManager.rewardNote": "تمنح اللعبة العناصر. فتح الإنجاز لا يؤكد تسليم العنصر، ولا تُمنح المكافآت المستلمة سابقًا مرة أخرى.",
+  "games.achievementManager.rewardNote":
+    "تمنح اللعبة العناصر. فتح الإنجاز لا يؤكد تسليم العنصر، ولا تُمنح المكافآت المستلمة سابقًا مرة أخرى.",
   "games.achievementManager.progressCount": "تم كسب {count} من {total}",
   "games.achievementManager.progressLoading": "جارٍ قراءة تقدمك في Steam…",
-  "games.achievementManager.progressUnavailable": "تقدمك غير متاح. افتح Steam أو اربط حساب Steam ثم حدّث.",
+  "games.achievementManager.progressUnavailable":
+    "تقدمك غير متاح. افتح Steam أو اربط حساب Steam ثم حدّث.",
   "games.achievementManager.progressReadOnly": "تقدمك في Steam · التصفح لا يغيّر الإنجازات.",
   "games.achievementManager.progressPublic": "إحصاءات عامة فقط · التقدم الشخصي غير متاح.",
   "games.achievementManager.status.steam": "اتصل بـ Steam",
@@ -88,23 +97,29 @@ export default {
   "games.achievementManager.status.filtered": "لا توجد نتائج مطابقة",
   "games.achievementManager.status.noGames": "لم يُعثر على ألعاب Steam",
   "games.achievementManager.status.library": "تعذرت قراءة مكتبة Steam",
-  "games.achievementManager.status.libraryNote": "حاول الفحص مرة أخرى. لا تزال ألعاب حساب Steam المتصل متاحة.",
+  "games.achievementManager.status.libraryNote":
+    "حاول الفحص مرة أخرى. لا تزال ألعاب حساب Steam المتصل متاحة.",
   "games.achievementManager.status.emptyNote": "لم يُرجع Steam أي إنجازات للعبة {game}.",
   "games.achievementManager.status.store": "عرض على Steam",
-  "games.achievementManager.recentGamesNote": "سيُظهر Steam لعبة {game} ضمن ألعابك التي لعبتها مؤخرًا بعد ذلك.",
+  "games.achievementManager.recentGamesNote":
+    "سيُظهر Steam لعبة {game} ضمن ألعابك التي لعبتها مؤخرًا بعد ذلك.",
   "games.achievementManager.rewardOwned": "مفتوح بالفعل",
   "games.achievementManager.pending": "قيد الانتظار",
   "games.achievementManager.managed": "تديره اللعبة",
   "games.achievementManager.clear": "مسح التغييرات",
-  "games.achievementManager.discardConfirm": "سيؤدي التحديث من Steam إلى تجاهل التغييرات المحددة وعددها {count}.",
-  "games.achievementManager.schemaMissing": "لا توجد تفاصيل إنجازات مخزنة مؤقتًا لهذه اللعبة في Steam على هذا الكمبيوتر، لذا فالإنجازات هنا للقراءة فقط. شغّل اللعبة مرة واحدة من Steam ثم حدّث.",
+  "games.achievementManager.discardConfirm":
+    "سيؤدي التحديث من Steam إلى تجاهل التغييرات المحددة وعددها {count}.",
+  "games.achievementManager.schemaMissing":
+    "لا توجد تفاصيل إنجازات مخزنة مؤقتًا لهذه اللعبة في Steam على هذا الكمبيوتر، لذا فالإنجازات هنا للقراءة فقط. شغّل اللعبة مرة واحدة من Steam ثم حدّث.",
   "games.achievementManager.pickGame": "اختر لعبة أخرى",
   "games.achievementManager.pickTitle": "اختر لعبة",
   "games.achievementManager.pickSearch": "ابحث في ألعابك",
-  "games.achievementManager.pickNote": "يمكن لـ Harbor تعديل إنجازات اللعبة بعد تخزينها مؤقتًا في Steam على هذا الكمبيوتر.",
+  "games.achievementManager.pickNote":
+    "يمكن لـ Harbor تعديل إنجازات اللعبة بعد تخزينها مؤقتًا في Steam على هذا الكمبيوتر.",
   "games.achievementManager.pickInstalled": "مثبّتة",
   "games.achievementManager.pickEmpty": "لا توجد ألعاب تطابق بحثك.",
-  "games.achievementManager.pickUnavailable": "لم يُعثر على ألعاب Steam. ثبّت لعبة عبر Steam أو اربط حساب Steam ثم حاول مجددًا.",
+  "games.achievementManager.pickUnavailable":
+    "لم يُعثر على ألعاب Steam. ثبّت لعبة عبر Steam أو اربط حساب Steam ثم حاول مجددًا.",
   "games.achievementManager.pickMore": "عرض المزيد من الألعاب",
   "games.achievementManager.status.getSteam": "تنزيل Steam",
   "games.achievementManager.showLockedDetails": "إظهار التفاصيل المقفلة",

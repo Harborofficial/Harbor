@@ -110,14 +110,18 @@ const music: Record<string, string> = {
   "music.broadcast.output": "Đầu ra",
   "music.broadcast.stop": "Dừng",
   "music.broadcast.start": "Bắt đầu",
-  "music.broadcast.blurb": "Gửi âm thanh đang phát tới một micro ảo để bạn bè trong cuộc gọi nghe được. Bạn vẫn nghe trên loa của mình.",
+  "music.broadcast.blurb":
+    "Gửi âm thanh đang phát tới một micro ảo để bạn bè trong cuộc gọi nghe được. Bạn vẫn nghe trên loa của mình.",
   "music.broadcast.title": "Phát sang trò chuyện thoại",
-  "music.cable.mac.installNeeded": "Harbor có thể cài micrô ảo của riêng mình. macOS sẽ hỏi mật khẩu quản trị, sau đó Core Audio khởi động lại.",
+  "music.cable.mac.installNeeded":
+    "Harbor có thể cài micrô ảo của riêng mình. macOS sẽ hỏi mật khẩu quản trị, sau đó Core Audio khởi động lại.",
   "music.cable.mac.installMissing": "Bản dựng Harbor này không kèm trình điều khiển micrô ảo.",
   "music.cable.mac.installCancelled": "Đã hủy cài đặt.",
   "music.cable.mac.installFailed": "Không cài được micrô ảo.",
-  "music.cable.mac.restartNeeded": "Micrô ảo đã được cài nhưng Core Audio chưa nhận ra. Khởi động lại máy Mac để hoàn tất.",
-  "music.cable.mac.updateAvailable": "Phiên bản Harbor này có micrô ảo mới hơn. Hãy cài để cáp tiếp tục hoạt động.",
+  "music.cable.mac.restartNeeded":
+    "Micrô ảo đã được cài nhưng Core Audio chưa nhận ra. Khởi động lại máy Mac để hoàn tất.",
+  "music.cable.mac.updateAvailable":
+    "Phiên bản Harbor này có micrô ảo mới hơn. Hãy cài để cáp tiếp tục hoạt động.",
   "music.cable.title": "Micro ảo của Harbor",
   "music.cable.blurb": "Harbor tự dựng micro ảo. Không phải tải, không phải cài gì cả.",
   "music.cable.create": "Tạo micro ảo",
@@ -359,7 +363,8 @@ const music: Record<string, string> = {
   "music.explore.scene": "Từ scene",
   "music.artist.inPlaylists": "Playlist có {name}",
   "music.audio.preferredSource": "Nguồn ưu tiên",
-  "music.audio.preferredSourceHint": "Harbor phát từ đây trước, sau đó chuyển sang bất kỳ nguồn nào hoạt động.",
+  "music.audio.preferredSourceHint":
+    "Harbor phát từ đây trước, sau đó chuyển sang bất kỳ nguồn nào hoạt động.",
   "music.spotify.connect": "Spotify Premium",
   "music.spotify.connectDetail": "Kết nối một lần để phát trực tiếp, không quảng cáo.",
   "music.spotify.connectAction": "Kết nối",
@@ -520,9 +525,11 @@ const music: Record<string, string> = {
   "music.ytm.loading": "Đang tải YouTube Music",
   "music.row.scrobble": "Vì bạn scrobble {tag}",
   "music.row.scrobbleWaiting": "Last.fm đã kết nối nhưng chưa gửi kệ thẻ nào.",
-  "music.connect.scrobbleBody": "Kết nối Last.fm và kệ này sẽ dựng từ những thẻ bạn thực sự scrobble.",
+  "music.connect.scrobbleBody":
+    "Kết nối Last.fm và kệ này sẽ dựng từ những thẻ bạn thực sự scrobble.",
   "music.connect.serverName": "một máy chủ media hoặc thư mục",
-  "music.connect.serverBody": "Trỏ Harbor tới một thư mục, Plex, Jellyfin, Navidrome hoặc Subsonic và kệ này sẽ đầy những album bạn đã có.",
+  "music.connect.serverBody":
+    "Trỏ Harbor tới một thư mục, Plex, Jellyfin, Navidrome hoặc Subsonic và kệ này sẽ đầy những album bạn đã có.",
   "music.row.recents": "Tiếp tục từ chỗ bạn dừng",
   "music.row.fresh": "Mới từ nghệ sĩ bạn hay nghe",
   "music.row.freshSubtitle": "Bản phát hành gần đây của nghệ sĩ trong lịch sử nghe của bạn",
@@ -571,7 +578,8 @@ const music: Record<string, string> = {
   "music.surprise.back": "Quay lại",
   "music.surprise.title": "Gây bất ngờ",
   "music.surprise.stop": "Dừng Gây bất ngờ",
-  "music.surprise.body": "Những bài bạn chưa nghe, dựa trên lịch sử nghe và danh sách phát của bạn.",
+  "music.surprise.body":
+    "Những bài bạn chưa nghe, dựa trên lịch sử nghe và danh sách phát của bạn.",
   "music.surprise.loading": "Đang tìm các bài tiếp theo cho bạn…",
   "music.surprise.waiting": "Đang tìm thêm nhạc cho bạn…",
   "music.surprise.empty": "Chọn sở thích hoặc lưu vài bài hát để bắt đầu.",
@@ -587,7 +595,8 @@ const music: Record<string, string> = {
   "music.quickListen.loop": "Lặp lại đoạn nghe thử",
   "music.quickListen.mute": "Tắt tiếng",
   "music.quickListen.unmute": "Bật tiếng",
-  "music.quickListen.empty": "Không tìm thấy bài hát chưa nghe. Hãy khám phá thêm nhạc rồi thử lại.",
+  "music.quickListen.empty":
+    "Không tìm thấy bài hát chưa nghe. Hãy khám phá thêm nhạc rồi thử lại.",
   "music.quickListen.finding": "Đang tìm những bài hát bạn chưa nghe…",
   "music.quickListen.more": "Tùy chọn khác",
   "music.playlist.search": "Tìm danh sách phát",

@@ -7,7 +7,11 @@ import {
   type BrowseCatalog,
 } from "@/lib/catalog-browse";
 import { isExtensionCatalogueBase, subscribeStreamPlugins } from "@/lib/streams/plugins";
-import { searchPlugins, searchPluginPage, type PluginSearchGroup } from "@/lib/streams/plugins/extension/search";
+import {
+  searchPlugins,
+  searchPluginPage,
+  type PluginSearchGroup,
+} from "@/lib/streams/plugins/extension/search";
 import { useScrollMemory, useView } from "@/lib/view";
 import { useSessionState } from "@/lib/session-state";
 import { useT } from "@/lib/i18n";
@@ -313,7 +317,9 @@ export function Plugins({ active = true }: { active?: boolean }) {
                     {pluginName.charAt(0).toUpperCase()}
                   </span>
                 )}
-                <h2 className="text-[15.5px] font-semibold tracking-tight text-ink">{pluginName}</h2>
+                <h2 className="text-[15.5px] font-semibold tracking-tight text-ink">
+                  {pluginName}
+                </h2>
                 <span className="text-[12px] text-ink-subtle">{list.length}</span>
               </div>
               <div className="flex flex-col gap-7">

@@ -21,7 +21,9 @@ export function CountryBody({ filter }: { filter: CountryFilter }) {
       <Rails filter={filter} />
       {stats && filter.mediaType === "movie" && <BoxOfficeRail stats={stats} />}
       {stats && <FranchisesRail stats={stats} name={filter.name} />}
-      {stats && filter.mediaType === "tv" && <LongestRunningRail stats={stats} name={filter.name} />}
+      {stats && filter.mediaType === "tv" && (
+        <LongestRunningRail stats={stats} name={filter.name} />
+      )}
       <CountryPeopleRails name={filter.name} people={people} />
       {stats && <DecadesSection filter={filter} stats={stats} />}
       <BrandBrowse filter={filter} />

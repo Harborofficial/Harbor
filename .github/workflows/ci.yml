@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+      - beta-branch
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,7 +19,7 @@ jobs:
   quality:
     name: Frontend
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -27,6 +29,9 @@ jobs:
       - name: Setup Vite+
         uses: voidzero-dev/setup-vp@v1
         with:
+          # Pinned: the formatter's output changes between minors, and a silent
+          # "latest" upgrade turns a green PR red without any code change.
+          version: 1.5.1
           node-version: 24
           cache: true
           run-install: |
@@ -41,7 +46,8 @@ jobs:
           set -euo pipefail
 
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-            BASE_SHA="${GITHUB_SHA}^1"
+            # Compare against the merge base so every commit in a multi-commit PR is checked.
+            BASE_SHA="$(git merge-base "$BASE_SHA" "$GITHUB_SHA" || echo "${GITHUB_SHA}^1")"
           elif [[ -z "${BASE_SHA:-}" || "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
             BASE_SHA="$(git rev-list --max-parents=0 "$GITHUB_SHA")"
           fi
@@ -53,8 +59,11 @@ jobs:
           format_files=()
           code_files=()
           for file in "${changed_files[@]}"; do
+            # Generated data, bundled third-party assets, and vendored crates keep
+            # their own layout, so they are not part of the format gate.
             case "$file" in
-              *.cjs | *.css | *.html | *.js | *.json | *.jsonc | *.jsx | *.md | *.mdx | *.mjs | *.scss | *.toml | *.ts | *.tsx | *.yaml | *.yml)
+              .coderabbit.yaml | src-tauri/vendor/* | public/* | src/assets/* | android-extension-compat/spec/* | *.json | *.jsonc) ;;
+              *.cjs | *.css | *.html | *.js | *.jsx | *.md | *.mdx | *.mjs | *.scss | *.toml | *.ts | *.tsx | *.yaml | *.yml)
                 format_files+=("$file")
                 ;;
             esac
@@ -109,7 +118,8 @@ jobs:
           set -euo pipefail
 
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-            BASE_SHA="${GITHUB_SHA}^1"
+            # Compare against the merge base so every commit in a multi-commit PR is checked.
+            BASE_SHA="$(git merge-base "$BASE_SHA" "$GITHUB_SHA" || echo "${GITHUB_SHA}^1")"
           elif [[ -z "${BASE_SHA:-}" || "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
             BASE_SHA="$(git rev-list --max-parents=0 "$GITHUB_SHA")"
           fi

@@ -83,7 +83,9 @@ export function MusicConnectionRow({
   const rowRef = useRef<HTMLLIElement>(null);
   useMusicSourceConsent();
   const [open, setOpen] = useState(
-    defaultOpen && (connection.needs.length > 0 || connection.id === "spotify") && musicSourceAllowed(connection.id),
+    defaultOpen &&
+      (connection.needs.length > 0 || connection.id === "spotify") &&
+      musicSourceAllowed(connection.id),
   );
   const [values, setValues] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<Busy>(null);
@@ -213,7 +215,10 @@ export function MusicConnectionRow({
             </span>
           )}
           {failure && (
-            <span role="alert" className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] leading-5 text-danger">
+            <span
+              role="alert"
+              className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] leading-5 text-danger"
+            >
               <span className="min-w-0">{displayError(failure)}</span>
               <button
                 type="button"
@@ -267,7 +272,9 @@ export function MusicConnectionRow({
             connection={connection}
             busy={busy}
             open={open}
-            onConnect={() => (connection.needs.length > 0 || spotifySetup ? setOpen(true) : connect({}))}
+            onConnect={() =>
+              connection.needs.length > 0 || spotifySetup ? setOpen(true) : connect({})
+            }
             onDisconnect={disconnect}
           />
         )}
@@ -355,9 +362,9 @@ export function MusicConnectionRow({
               onClick={() => {
                 setOpen(false);
                 requestAnimationFrame(() =>
-                  rowRef.current?.querySelector<HTMLButtonElement>(
-                    ":scope > div:first-child > button",
-                  )?.focus(),
+                  rowRef.current
+                    ?.querySelector<HTMLButtonElement>(":scope > div:first-child > button")
+                    ?.focus(),
                 );
               }}
               className={SECONDARY_BUTTON}
@@ -367,7 +374,6 @@ export function MusicConnectionRow({
           </div>
         </form>
       )}
-
     </li>
   );
 }
@@ -474,8 +480,15 @@ function FieldControl({
       <div className="music-connect-folder">
         <label htmlFor={id}>{field.label}</label>
         <div className="music-connect-folder-control">
-          <input id={id} readOnly value={value} placeholder={field.placeholder || t("music.connect.chooseFolder")}
-            disabled={disabled} title={value || undefined} dir="auto" />
+          <input
+            id={id}
+            readOnly
+            value={value}
+            placeholder={field.placeholder || t("music.connect.chooseFolder")}
+            disabled={disabled}
+            title={value || undefined}
+            dir="auto"
+          />
           <button type="button" onClick={onPick} disabled={disabled} className={SECONDARY_BUTTON}>
             <FolderOpen size={20} aria-hidden="true" />
             {t("music.connect.chooseFolder")}

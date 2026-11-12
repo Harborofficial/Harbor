@@ -91,12 +91,7 @@ function tokens(value: string): string[] {
 }
 
 function candidateTitles(media: AniMedia): string[] {
-  return [
-    media.title?.romaji,
-    media.title?.english,
-    media.title?.native,
-    ...(media.synonyms ?? []),
-  ]
+  return [media.title?.romaji, media.title?.english, media.title?.native, ...(media.synonyms ?? [])]
     .filter((t): t is string => !!t)
     .map(norm)
     .filter(Boolean);

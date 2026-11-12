@@ -3,7 +3,8 @@ export default {
   "games.wow.runs.title": "Tentativas de masmorra",
   "games.wow.runs.all": "Todos os afixos",
   "games.wow.runs.current": "Afixos atuais",
-  "games.wow.runs.currentNote": "Corresponde à combinação atual de afixos, incluindo semanas anteriores.",
+  "games.wow.runs.currentNote":
+    "Corresponde à combinação atual de afixos, incluindo semanas anteriores.",
   "games.wow.runs.allNote": "Melhores tentativas registradas com todos os afixos desta temporada.",
   "games.wow.runs.page": "Página {page}",
   "games.wow.runs.refresh": "Atualizar tentativas",
@@ -19,11 +20,12 @@ export default {
   "games.wow.runs.copy": "Copiar talentos",
   "games.wow.runs.copyFailed": "Não foi possível copiar. Tente novamente.",
   "games.wow.runs.party": "Composição do grupo",
-  "games.wow.runs.snapshots": "Os talentos e equipamentos publicados são registros do provedor. Podem diferir dos usados nesta tentativa.",
+  "games.wow.runs.snapshots":
+    "Os talentos e equipamentos publicados são registros do provedor. Podem diferir dos usados nesta tentativa.",
   "games.wow.runs.gear": "Equipamento",
   "games.wow.runs.tank": "Tanque",
   "games.wow.runs.healer": "Curador",
   "games.wow.runs.dps": "Dano",
   "games.wow.runs.snapshotAt": "Registro de equipamento: {date}",
-  "games.wow.runs.closeGear": "Fechar equipamento"
+  "games.wow.runs.closeGear": "Fechar equipamento",
 };

@@ -13,7 +13,8 @@ test("headphone listening keeps the eyes closed without periodic looks up", () =
 test("eyes ease shut in wall time, including at ten frames per second", () => {
   for (const step of [10, 100]) {
     const eyes = createMikuExpression();
-    let previous = 0, elapsed = 0;
+    let previous = 0,
+      elapsed = 0;
     while (elapsed < 300) {
       elapsed += step;
       const p = eyes.advance(step, true);
@@ -37,7 +38,7 @@ test("leaving the listening pose or resetting clears the eye overlay", () => {
   const eyes = createMikuExpression();
   eyes.advance(200, true);
   assert.deepEqual(eyes.advance(0, false), { closure: 0, kind: "open" });
-  assert.equal(eyes.advance(90, true).closure, .5);
+  assert.equal(eyes.advance(90, true).closure, 0.5);
   eyes.reset();
   assert.equal(eyes.advance(0, true).closure, 0);
 });

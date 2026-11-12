@@ -46,20 +46,23 @@ export function useGroupDiscovery(signedIn: boolean): DiscoveryState {
   useEffect(() => {
     const ctrl = new AbortController();
     setPhase("loading");
-    const timer = window.setTimeout(() => {
-      fetchPublicGroups({ q: q.trim() || undefined, tag: tag || undefined }, ctrl.signal)
-        .then((d) => {
-          if (ctrl.signal.aborted) return;
-          setGroups(d.groups);
-          setTopTags(d.topTags);
-          setTotal(d.total);
-          setCursor(d.nextCursor);
-          setPhase("ready");
-        })
-        .catch(() => {
-          if (!ctrl.signal.aborted) setPhase("error");
-        });
-    }, q ? 260 : 0);
+    const timer = window.setTimeout(
+      () => {
+        fetchPublicGroups({ q: q.trim() || undefined, tag: tag || undefined }, ctrl.signal)
+          .then((d) => {
+            if (ctrl.signal.aborted) return;
+            setGroups(d.groups);
+            setTopTags(d.topTags);
+            setTotal(d.total);
+            setCursor(d.nextCursor);
+            setPhase("ready");
+          })
+          .catch(() => {
+            if (!ctrl.signal.aborted) setPhase("error");
+          });
+      },
+      q ? 260 : 0,
+    );
     return () => {
       ctrl.abort();
       window.clearTimeout(timer);
@@ -81,7 +84,18 @@ export function useGroupDiscovery(signedIn: boolean): DiscoveryState {
   const reload = useCallback(() => setTick((n) => n + 1), []);
 
   return {
-    q, setQ, tag, setTag, mine, groups, topTags, total,
-    phase, loadingMore, hasMore: !!cursor, loadMore, reload,
+    q,
+    setQ,
+    tag,
+    setTag,
+    mine,
+    groups,
+    topTags,
+    total,
+    phase,
+    loadingMore,
+    hasMore: !!cursor,
+    loadMore,
+    reload,
   };
 }

@@ -178,9 +178,10 @@ export function startMusicTaskbarButtons(): () => void {
   // Video takes ownership while its player is mounted. Once it closes,
   // republish any loaded music track after the video cleanup clears SMTC.
   const unsubscribeOwner = subscribeVideoMediaKeyOwner((owns) => {
-    if (!owns) queueMicrotask(() => {
-      if (live && !videoOwnsMediaKeys()) pushSession();
-    });
+    if (!owns)
+      queueMicrotask(() => {
+        if (live && !videoOwnsMediaKeys()) pushSession();
+      });
   });
   push();
   return () => {

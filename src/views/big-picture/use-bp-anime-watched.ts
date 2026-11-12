@@ -58,10 +58,7 @@ export function useBpAnimeWatched(ids: string[]): BpAnimeWatched {
     return [...out].sort().join("|");
   }, [ids.join("|")]);
 
-  const wanted = useMemo(
-    () => (wantedKey === "" ? NO_IDS : wantedKey.split("|")),
-    [wantedKey],
-  );
+  const wanted = useMemo(() => (wantedKey === "" ? NO_IDS : wantedKey.split("|")), [wantedKey]);
 
   useEffect(() => {
     if (wanted.length === 0) return;

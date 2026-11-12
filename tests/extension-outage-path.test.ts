@@ -32,10 +32,16 @@ test("an empty search and a null load both report the reason instead of passing 
   assert.match(run, /outage: \(text: string\) => void/);
   const searchEmpty = run.indexOf("if (!urls.length) {");
   assert.ok(searchEmpty > 0);
-  assert.match(run.slice(searchEmpty, searchEmpty + 260), /found\.note.*outage\(provider, found\.note/s);
+  assert.match(
+    run.slice(searchEmpty, searchEmpty + 260),
+    /found\.note.*outage\(provider, found\.note/s,
+  );
   const loadNull = run.indexOf("if (!media) {");
   assert.ok(loadNull > 0, "a null load is being dropped without a word again");
-  assert.match(run.slice(loadNull, loadNull + 240), /loaded\.note.*outage\(provider, loaded\.note/s);
+  assert.match(
+    run.slice(loadNull, loadNull + 240),
+    /loaded\.note.*outage\(provider, loaded\.note/s,
+  );
   assert.doesNotMatch(run, /if \(!media\) continue;/);
 });
 

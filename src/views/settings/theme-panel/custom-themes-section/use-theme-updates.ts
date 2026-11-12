@@ -2,7 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { browseThemes, downloadTheme } from "@/lib/theme-store";
 import { getDownloadRecords, markStoreThemeUpdated } from "@/lib/theme-updates";
 
-export type ThemeUpdate = { savedId: string; storeId: string; name: string; from: number; to: number };
+export type ThemeUpdate = {
+  savedId: string;
+  storeId: string;
+  name: string;
+  from: number;
+  to: number;
+};
 
 export function useThemeUpdates() {
   const [updates, setUpdates] = useState<ThemeUpdate[]>([]);
@@ -21,7 +27,9 @@ export function useThemeUpdates() {
     } catch {
       return;
     }
-    const byStore = new Map<string, number>(current.map((t) => [t.id, t.versionsCount ?? 0] as [string, number]));
+    const byStore = new Map<string, number>(
+      current.map((t) => [t.id, t.versionsCount ?? 0] as [string, number]),
+    );
     const byStoreId = new Map<string, ThemeUpdate>();
     for (const savedId of savedIds) {
       const rec = recs[savedId];
@@ -29,7 +37,13 @@ export function useThemeUpdates() {
       if (cur == null || cur <= rec.version) continue;
       const existing = byStoreId.get(rec.storeId);
       if (existing && existing.from <= rec.version) continue;
-      byStoreId.set(rec.storeId, { savedId, storeId: rec.storeId, name: rec.name, from: rec.version, to: cur });
+      byStoreId.set(rec.storeId, {
+        savedId,
+        storeId: rec.storeId,
+        name: rec.name,
+        from: rec.version,
+        to: cur,
+      });
     }
     setUpdates([...byStoreId.values()]);
   }, []);

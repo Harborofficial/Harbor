@@ -14,6 +14,6 @@ const gameWowProgress: Record<string, string> = {
   "games.wow.progress.noCounts": "完成次数暂不可用",
   "games.wow.progress.counts": "共 {total} 次 · 限时 {timed} 次",
   "games.wow.progress.best": "最佳记录",
-  "games.wow.progress.explore": "浏览记录"
+  "games.wow.progress.explore": "浏览记录",
 };
 export default gameWowProgress;

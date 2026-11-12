@@ -8,11 +8,7 @@ import {
 } from "../src/lib/ebook/collections.ts";
 import type { EBook } from "../src/lib/ebook/api.ts";
 
-function book(
-  id: string,
-  title: string,
-  options: Partial<EBook> = {},
-): EBook {
+function book(id: string, title: string, options: Partial<EBook> = {}): EBook {
   return {
     id: `source:demo:${id}`,
     source: "source",
@@ -33,7 +29,10 @@ test("source collections preserve the installed source's popular order", () => {
     book("2", "Second"),
   ]);
   const popular = collections.find((collection) => collection.id === "catalog:popular");
-  assert.deepEqual(popular?.books.map((item) => item.title), ["Third", "First", "Second"]);
+  assert.deepEqual(
+    popular?.books.map((item) => item.title),
+    ["Third", "First", "Second"],
+  );
 });
 
 test("popular eBooks prefer the installed source and fall back to metadata", () => {
@@ -52,7 +51,10 @@ test("source collections group distinct source books by explicit series title", 
   ]);
   const series = collections.find((collection) => collection.id === "series:the story cycle");
   assert.equal(series?.kind, "series");
-  assert.deepEqual(series?.books.map((item) => item.title), ["Story One", "Story Two"]);
+  assert.deepEqual(
+    series?.books.map((item) => item.title),
+    ["Story One", "Story Two"],
+  );
 });
 
 test("collection cache scopes include every installed provider", () => {

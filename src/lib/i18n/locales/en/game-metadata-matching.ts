@@ -15,12 +15,15 @@ export default {
   "games.metadata.type.fork": "Fork",
   "games.metadata.type.pack": "Pack",
   "games.metadata.type.update": "Update",
-  "games.metadata.note": "Choose the game's artwork and details. Its launcher and files stay the same.",
-  "games.metadata.conflict": "This game's match changed in another window. Close and reopen to review the latest choice.",
+  "games.metadata.note":
+    "Choose the game's artwork and details. Its launcher and files stay the same.",
+  "games.metadata.conflict":
+    "This game's match changed in another window. Close and reopen to review the latest choice.",
   "games.match.title": "Find artwork & details",
   "games.match.use": "Use this game",
   "games.match.remove": "Remove match",
   "games.match.source": "Artwork & details from IGDB",
-  "games.match.note": "Choose the edition that matches your file. Harbor keeps the original file and filename.",
-  "games.match.empty": "Try the game title without region or revision labels."
+  "games.match.note":
+    "Choose the edition that matches your file. Harbor keeps the original file and filename.",
+  "games.match.empty": "Try the game title without region or revision labels.",
 };

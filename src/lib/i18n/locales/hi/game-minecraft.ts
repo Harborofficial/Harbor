@@ -2,12 +2,14 @@ export default {
   "games.minecraft.discovery.viewAll": "सभी देखें",
   "games.minecraft.discovery.searchCurseForge": "CurseForge में खोजें",
   "games.minecraft.discovery.downloads": "डाउनलोड",
-  "games.minecraft.discovery.curseForgeBlocked": "CurseForge अभी Harbor को यह कैटलॉग लोड करने नहीं दे रहा है। दोबारा प्रयास करें या स्रोत खोलें।",
+  "games.minecraft.discovery.curseForgeBlocked":
+    "CurseForge अभी Harbor को यह कैटलॉग लोड करने नहीं दे रहा है। दोबारा प्रयास करें या स्रोत खोलें।",
   "games.minecraft.discovery.unavailable": "यह निर्देशिका लोड नहीं हो सकी। दोबारा प्रयास करें।",
   "games.minecraft.discovery.openSource": "स्रोत वेबसाइट खोलें",
   "games.minecraft.discovery.loadMore": "और लोड करें",
   "games.minecraft.discovery.servers": "सर्वर",
-  "games.minecraft.discovery.serverNote": "स्वतंत्र निर्देशिकाएँ। Harbor इन साइटों या सर्वरों से संबद्ध नहीं है। आँकड़े संबंधित निर्देशिका देती है।",
+  "games.minecraft.discovery.serverNote":
+    "स्वतंत्र निर्देशिकाएँ। Harbor इन साइटों या सर्वरों से संबद्ध नहीं है। आँकड़े संबंधित निर्देशिका देती है।",
   "games.minecraft.discovery.searchServers": "लोड किए गए सर्वर खोजें",
   "games.minecraft.discovery.directory": "निर्देशिका",
   "games.minecraft.discovery.mode": "गेम मोड",
@@ -15,7 +17,8 @@ export default {
   "games.minecraft.discovery.directoryRank": "निर्देशिका की रैंकिंग",
   "games.minecraft.discovery.playersLoaded": "खिलाड़ी · लोड किए गए सर्वर",
   "games.minecraft.discovery.loaded": "{count} सर्वर लोड हुए",
-  "games.minecraft.discovery.noLoadedMatches": "लोड किए गए सर्वरों में कोई परिणाम नहीं। और लोड करें या खोज बदलें।",
+  "games.minecraft.discovery.noLoadedMatches":
+    "लोड किए गए सर्वरों में कोई परिणाम नहीं। और लोड करें या खोज बदलें।",
   "games.minecraft.discovery.copy": "{address} कॉपी करें",
   "games.minecraft.discovery.copied": "पता कॉपी हुआ",
   "games.minecraft.discovery.copyError": "कॉपी नहीं हुआ। कॉपी करने के लिए पता चुनें।",
@@ -38,22 +41,28 @@ export default {
   "games.minecraft.lifecycle.worlds": "दुनिया शामिल करें",
   "games.minecraft.lifecycle.settings": "नियंत्रण और सर्वर सूची शामिल करें",
   "games.minecraft.lifecycle.exportNote": "अपने मॉड और सेटिंग्स के साथ पोर्टेबल .mrpack फ़ाइल बनाएँ।",
-  "games.minecraft.lifecycle.privateNote": "Harbor खाते का डेटा, रनटाइम फ़ाइलें और लॉग शामिल नहीं होते। साझा करने से पहले मॉड की सेटिंग्स जाँचें।",
+  "games.minecraft.lifecycle.privateNote":
+    "Harbor खाते का डेटा, रनटाइम फ़ाइलें और लॉग शामिल नहीं होते। साझा करने से पहले मॉड की सेटिंग्स जाँचें।",
   "games.minecraft.lifecycle.included": "शामिल फ़ाइलें",
   "games.minecraft.lifecycle.referenced": "डाउनलोड संदर्भ",
-  "games.minecraft.lifecycle.referenceNote": "सत्यापित प्रदाता फ़ाइलें आयात के समय फिर डाउनलोड होती हैं। बदली हुई और स्थानीय फ़ाइलें आर्काइव में शामिल होती हैं।",
+  "games.minecraft.lifecycle.referenceNote":
+    "सत्यापित प्रदाता फ़ाइलें आयात के समय फिर डाउनलोड होती हैं। बदली हुई और स्थानीय फ़ाइलें आर्काइव में शामिल होती हैं।",
   "games.minecraft.lifecycle.edit": "चयन संपादित करें",
-  "games.minecraft.lifecycle.storageNote": "पैक अपडेट के दौरान रखे गए पुराने संस्करण। पैक संस्करणों से नवीनतम प्रति बहाल करें।",
+  "games.minecraft.lifecycle.storageNote":
+    "पैक अपडेट के दौरान रखे गए पुराने संस्करण। पैक संस्करणों से नवीनतम प्रति बहाल करें।",
   "games.minecraft.lifecycle.latest": "मौजूदा बहाली बिंदु",
   "games.minecraft.lifecycle.reviewCopy": "{version} की समीक्षा करें",
   "games.minecraft.lifecycle.review": "फ़ाइलों की समीक्षा करें",
   "games.minecraft.lifecycle.empty": "अभी कोई पुनर्प्राप्ति प्रति नहीं है।",
   "games.minecraft.lifecycle.unreadable": "{count} अपठनीय प्रतियाँ जस की तस रहेंगी।",
-  "games.minecraft.lifecycle.removeNote": "ट्रैश में भेजने से पहले इस इंस्टेंस और इसकी पुनर्प्राप्ति प्रतियों की समीक्षा करें।",
+  "games.minecraft.lifecycle.removeNote":
+    "ट्रैश में भेजने से पहले इस इंस्टेंस और इसकी पुनर्प्राप्ति प्रतियों की समीक्षा करें।",
   "games.minecraft.lifecycle.worldCount": "दुनिया: {count}",
-  "games.minecraft.lifecycle.latestNote": "इस प्रति को हटाने से मौजूदा बहाली बिंदु हट जाएगा। सक्रिय इंस्टेंस नहीं बदलेगा।",
+  "games.minecraft.lifecycle.latestNote":
+    "इस प्रति को हटाने से मौजूदा बहाली बिंदु हट जाएगा। सक्रिय इंस्टेंस नहीं बदलेगा।",
   "games.minecraft.lifecycle.copiesIncluded": "इसमें {count} पुनर्प्राप्ति प्रतियाँ शामिल हैं।",
-  "games.minecraft.lifecycle.trashNote": "इन फ़ाइलों को सिस्टम ट्रैश में भेजें। ट्रैश खाली करने पर डिस्क की जगह वापस मिलेगी।",
+  "games.minecraft.lifecycle.trashNote":
+    "इन फ़ाइलों को सिस्टम ट्रैश में भेजें। ट्रैश खाली करने पर डिस्क की जगह वापस मिलेगी।",
   "games.minecraft.lifecycle.undoNote": "वापस लाने के लिए सिस्टम ट्रैश से मूल फ़ोल्डर बहाल करें।",
   "games.minecraft.lifecycle.trash": "ट्रैश में भेजें",
   "games.minecraft.lifecycle.save": "मॉडपैक सहेजें",
@@ -65,12 +74,15 @@ export default {
   "games.minecraft.lifecycle.choosing": "सहेजने की जगह चुनें…",
   "games.minecraft.lifecycle.exporting": "मॉडपैक निर्यात हो रहा है…",
   "games.minecraft.lifecycle.removing": "फ़ाइलें ट्रैश में भेजी जा रही हैं…",
-  "games.minecraft.lifecycle.trashError": "सभी फ़ोल्डर ट्रैश में नहीं भेजे जा सके। मौजूदा स्थिति देखने के लिए रीफ़्रेश करें।",
+  "games.minecraft.lifecycle.trashError":
+    "सभी फ़ोल्डर ट्रैश में नहीं भेजे जा सके। मौजूदा स्थिति देखने के लिए रीफ़्रेश करें।",
   "games.minecraft.lifecycle.pathError": "अपनी इंस्टेंस लाइब्रेरी के बाहर .mrpack फ़ाइल चुनें।",
   "games.minecraft.lifecycle.existsError": "यह फ़ाइल पहले से मौजूद है। नया नाम चुनें।",
-  "games.minecraft.lifecycle.limitError": "निर्यात 256 MB की आर्काइव सीमा से अधिक है। दुनिया शामिल किए बिना कोशिश करें।",
+  "games.minecraft.lifecycle.limitError":
+    "निर्यात 256 MB की आर्काइव सीमा से अधिक है। दुनिया शामिल किए बिना कोशिश करें।",
 
-  "games.minecraft.update.compatibilityError": "ये मॉड चुने गए Minecraft और लोडर संस्करणों के अनुकूल नहीं हैं। आपका मौजूदा इंस्टेंस नहीं बदला है।",
+  "games.minecraft.update.compatibilityError":
+    "ये मॉड चुने गए Minecraft और लोडर संस्करणों के अनुकूल नहीं हैं। आपका मौजूदा इंस्टेंस नहीं बदला है।",
   "games.minecraft.update.title": "पैक संस्करण",
   "games.minecraft.update.complete": "पैक संस्करण तैयार है",
   "games.minecraft.update.completeNote": "आपकी दुनिया और निजी सेटिंग सुरक्षित हैं। खेलने से पहले गेम सेटअप जाँचें।",
@@ -82,12 +94,15 @@ export default {
   "games.minecraft.update.localNote": "अपडेट की समीक्षा के लिए स्थानीय .mrpack फ़ाइल चुनें।",
   "games.minecraft.update.chooseFile": ".mrpack फ़ाइल चुनें",
   "games.minecraft.update.restoreVersion": "{version} बहाल करें",
-  "games.minecraft.update.reviewNote": "लागू करने से पहले हर फ़ाइल का बदलाव देखें। Harbor पिछले इंस्टेंस की अलग कॉपी रखता है।",
+  "games.minecraft.update.reviewNote":
+    "लागू करने से पहले हर फ़ाइल का बदलाव देखें। Harbor पिछले इंस्टेंस की अलग कॉपी रखता है।",
   "games.minecraft.update.changeVersion": "संस्करण बदलें",
   "games.minecraft.update.download": "डाउनलोड",
   "games.minecraft.update.recoveryCopy": "रिकवरी कॉपी",
-  "games.minecraft.update.loaderConflict": "अतिरिक्त मॉड अलग लोडर में नहीं ले जाए जा सकते। लोडर बदलने से पहले उन्हें हटाएँ।",
-  "games.minecraft.update.conflictNote": "कुछ पैक फ़ाइलें बदले गए या अलग से प्रबंधित मॉड से टकराती हैं। लागू करने से पहले टकराव सुलझाएँ।",
+  "games.minecraft.update.loaderConflict":
+    "अतिरिक्त मॉड अलग लोडर में नहीं ले जाए जा सकते। लोडर बदलने से पहले उन्हें हटाएँ।",
+  "games.minecraft.update.conflictNote":
+    "कुछ पैक फ़ाइलें बदले गए या अलग से प्रबंधित मॉड से टकराती हैं। लागू करने से पहले टकराव सुलझाएँ।",
   "games.minecraft.update.environmentNote": "Minecraft या लोडर का संस्करण बदलेगा। बाद में गेम सेटअप जाँचें।",
   "games.minecraft.update.fileGroups": "पैक फ़ाइलें",
   "games.minecraft.update.changes": "बदलाव",
@@ -100,7 +115,8 @@ export default {
   "games.minecraft.update.action.conflict": "टकराव",
   "games.minecraft.update.noChanges": "इस दृश्य में कोई फ़ाइल नहीं है।",
   "games.minecraft.update.extraMods": "{count} अतिरिक्त मॉड सुरक्षित रखे गए",
-  "games.minecraft.update.preserveNote": "मौजूदा दुनिया, निजी सेटिंग और बदली हुई कॉन्फ़िगरेशन बनी रहेंगी। पैक संस्करण बहाल करने पर भी दुनिया की मौजूदा प्रगति सुरक्षित रहेगी।",
+  "games.minecraft.update.preserveNote":
+    "मौजूदा दुनिया, निजी सेटिंग और बदली हुई कॉन्फ़िगरेशन बनी रहेंगी। पैक संस्करण बहाल करने पर भी दुनिया की मौजूदा प्रगति सुरक्षित रहेगी।",
   "games.minecraft.update.chooseOriginal": "मूल .mrpack चुनें",
   "games.minecraft.update.originalSelected": "मूल पैक चुना गया",
   "games.minecraft.update.footer": "बदलाव तैयार होने तक आपका मौजूदा इंस्टेंस उपलब्ध रहता है।",
@@ -111,11 +127,14 @@ export default {
   "games.minecraft.update.phase.copy": "रिकवरी कॉपी बन रही है…",
   "games.minecraft.update.phase.commit": "संस्करण बदलाव पूरा हो रहा है…",
   "games.minecraft.update.running": "पैक संस्करण बदलने से पहले यह Minecraft इंस्टेंस बंद करें।",
-  "games.minecraft.update.recoveryError": "रिकवरी फ़ाइलें सत्यापित नहीं हो सकीं। आपके मौजूदा फ़ोल्डर सुरक्षित रखे गए हैं।",
+  "games.minecraft.update.recoveryError":
+    "रिकवरी फ़ाइलें सत्यापित नहीं हो सकीं। आपके मौजूदा फ़ोल्डर सुरक्षित रखे गए हैं।",
   "games.minecraft.update.sourceError": "उसी मॉडपैक का संस्करण चुनें।",
-  "games.minecraft.update.originalError": "इस पुराने स्थानीय इंस्टॉल को पैक की फ़ाइलें पहचानने के लिए उसकी मूल .mrpack फ़ाइल चाहिए।",
+  "games.minecraft.update.originalError":
+    "इस पुराने स्थानीय इंस्टॉल को पैक की फ़ाइलें पहचानने के लिए उसकी मूल .mrpack फ़ाइल चाहिए।",
   "games.minecraft.update.previousError": "पैक का पिछला संस्करण उपलब्ध नहीं है।",
-  "games.minecraft.update.spaceError": "रिकवरी कॉपी और नई फ़ाइलों के लिए पर्याप्त जगह की पुष्टि नहीं हो सकी। ड्राइव जाँचकर फिर कोशिश करें।",
+  "games.minecraft.update.spaceError":
+    "रिकवरी कॉपी और नई फ़ाइलों के लिए पर्याप्त जगह की पुष्टि नहीं हो सकी। ड्राइव जाँचकर फिर कोशिश करें।",
   "games.minecraft.creation.style": "खेलने का तरीका",
   "games.minecraft.creation.vanillaNote": "Minecraft का मूल अनुभव।",
   "games.minecraft.creation.fabricNote": "अपना मॉड वाला सेटअप बनाएँ।",
@@ -123,19 +142,26 @@ export default {
   "games.minecraft.creation.loading": "संगत {loader} संस्करण खोजे जा रहे हैं…",
   "games.minecraft.creation.version": "{loader} Loader संस्करण",
   "games.minecraft.creation.preview": "पूर्वावलोकन",
-  "games.minecraft.creation.unavailable": "Minecraft {version} के लिए {loader} उपलब्ध नहीं है। दूसरा संस्करण या Vanilla चुनें।",
-  "games.minecraft.creation.note": "एक अलग गेम फ़ोल्डर बनाता है। गेम फ़ाइलें और Java गेम सेटअप में तैयार किए जाते हैं।",
+  "games.minecraft.creation.unavailable":
+    "Minecraft {version} के लिए {loader} उपलब्ध नहीं है। दूसरा संस्करण या Vanilla चुनें।",
+  "games.minecraft.creation.note":
+    "एक अलग गेम फ़ोल्डर बनाता है। गेम फ़ाइलें और Java गेम सेटअप में तैयार किए जाते हैं।",
   "games.minecraft.creation.creating": "आपका इंस्टेंस बनाया जा रहा है…",
-  "games.minecraft.creation.versionError": "चुने गए Minecraft संस्करण के लिए यह लोडर संस्करण उपलब्ध नहीं है। विकल्प रीफ़्रेश करके फिर से कोशिश करें।",
+  "games.minecraft.creation.versionError":
+    "चुने गए Minecraft संस्करण के लिए यह लोडर संस्करण उपलब्ध नहीं है। विकल्प रीफ़्रेश करके फिर से कोशिश करें।",
   "games.minecraft.content.title": "मॉड प्रबंधित करें",
-  "games.minecraft.content.compatible": "Minecraft {version} के लिए Fabric मॉड। इंस्टॉल करने से पहले बदलावों की समीक्षा करें।",
+  "games.minecraft.content.compatible":
+    "Minecraft {version} के लिए Fabric मॉड। इंस्टॉल करने से पहले बदलावों की समीक्षा करें।",
   "games.minecraft.content.search": "मॉड खोजें",
   "games.minecraft.content.packFiles": "पैक और अन्य फ़ाइलें",
-  "games.minecraft.content.packFilesNote": "पैक में शामिल या इस प्रबंधक के बाहर जोड़ी गई फ़ाइलें। यहाँ ये केवल पढ़ने के लिए हैं।",
+  "games.minecraft.content.packFilesNote":
+    "पैक में शामिल या इस प्रबंधक के बाहर जोड़ी गई फ़ाइलें। यहाँ ये केवल पढ़ने के लिए हैं।",
   "games.minecraft.content.empty": "ब्राउज़ से संगत मॉड जोड़ें। वे इस इंस्टेंस में इंस्टॉल होंगे।",
-  "games.minecraft.content.ready": "आपके मॉड {name} में तैयार हैं। खेलने के लिए यह पैनल बंद करें और गेम सेटअप खोलें।",
+  "games.minecraft.content.ready":
+    "आपके मॉड {name} में तैयार हैं। खेलने के लिए यह पैनल बंद करें और गेम सेटअप खोलें।",
   "games.minecraft.content.reviewNote": "बदलाव इस इंस्टेंस पर लागू होंगे। दुनिया और कॉन्फ़िगरेशन सुरक्षित रहेंगे।",
-  "games.minecraft.content.running": "मॉड बदलने से पहले Minecraft का यह इंस्टेंस बंद करें, फिर दोबारा कोशिश करें।",
+  "games.minecraft.content.running":
+    "मॉड बदलने से पहले Minecraft का यह इंस्टेंस बंद करें, फिर दोबारा कोशिश करें।",
   "games.minecraft.launch.play": "खेलें",
   "games.minecraft.launch.account": "Minecraft खाता",
   "games.minecraft.launch.accountNote": "इस खाते से खेलें।",
@@ -153,7 +179,8 @@ export default {
   "games.minecraft.launch.failed": "गेम कोड {code} के साथ बंद हुआ।",
   "games.minecraft.launch.log": "गेम लॉग",
   "games.minecraft.launch.noLog": "इस सत्र का लॉग उपलब्ध नहीं है।",
-  "games.minecraft.launch.filesError": "कुछ गेम फ़ाइलें गायब हैं या बदली गई हैं। फ़ाइलें सत्यापित करें और फिर कोशिश करें।",
+  "games.minecraft.launch.filesError":
+    "कुछ गेम फ़ाइलें गायब हैं या बदली गई हैं। फ़ाइलें सत्यापित करें और फिर कोशिश करें।",
   "games.minecraft.launch.argumentsError": "इस वर्ज़न का लॉन्च कॉन्फ़िगरेशन अभी समर्थित नहीं है।",
   "games.minecraft.launch.startError": "Minecraft शुरू नहीं हो सका। Java की जाँच करें और फिर कोशिश करें।",
   "games.minecraft.launch.stateError": "चल रहे गेम की जाँच नहीं हो सकी। लॉन्च करने से पहले फिर कोशिश करें।",
@@ -180,7 +207,8 @@ export default {
   "games.minecraft.java.metadataError": "संगत Java डाउनलोड की जाँच नहीं हो सकी। फिर कोशिश करें।",
   "games.minecraft.java.managedNote": "Harbor यह वर्ज़न आपकी Minecraft लाइब्रेरी में रखता है।",
   "games.minecraft.runtime.setup": "गेम सेटअप",
-  "games.minecraft.runtime.note": "इस इंस्टेंस के लिए आधिकारिक गेम फ़ाइलें इंस्टॉल करें। आपकी दुनिया और मॉड सुरक्षित रहेंगे।",
+  "games.minecraft.runtime.note":
+    "इस इंस्टेंस के लिए आधिकारिक गेम फ़ाइलें इंस्टॉल करें। आपकी दुनिया और मॉड सुरक्षित रहेंगे।",
   "games.minecraft.runtime.gameFiles": "Minecraft फ़ाइलें",
   "games.minecraft.runtime.fileCount": "{count} आवश्यक फ़ाइलें",
   "games.minecraft.runtime.java": "Java {version}",
@@ -190,13 +218,15 @@ export default {
   "games.minecraft.runtime.installing": "Minecraft फ़ाइलें इंस्टॉल हो रही हैं…",
   "games.minecraft.runtime.progress": "{total} में से {done} फ़ाइलें",
   "games.minecraft.runtime.ready": "गेम फ़ाइलें तैयार हैं",
-  "games.minecraft.runtime.readyNote": "फ़ाइलें सत्यापित हैं। खेलने के लिए अभी Java {version} और जुड़ा हुआ Minecraft खाता चाहिए।",
+  "games.minecraft.runtime.readyNote":
+    "फ़ाइलें सत्यापित हैं। खेलने के लिए अभी Java {version} और जुड़ा हुआ Minecraft खाता चाहिए।",
   "games.minecraft.runtime.preserved": "आपकी दुनिया और मॉड बदले नहीं गए हैं।",
   "games.minecraft.runtime.resumeNote": "रद्द करने पर पूरे हो चुके डाउनलोड रखे जाते हैं।",
   "games.minecraft.runtime.install": "फ़ाइलें इंस्टॉल करें",
   "games.minecraft.runtime.verify": "फ़ाइलें सत्यापित करें",
   "games.minecraft.runtime.metadataError": "इन गेम फ़ाइलों की जाँच नहीं हो सकी। बाद में फिर कोशिश करें।",
-  "games.minecraft.runtime.legacyError": "यह संस्करण ऐसा सेटअप या लॉन्च फ़ॉर्मैट इस्तेमाल करता है जिसे Harbor अभी समर्थित नहीं करता।",
+  "games.minecraft.runtime.legacyError":
+    "यह संस्करण ऐसा सेटअप या लॉन्च फ़ॉर्मैट इस्तेमाल करता है जिसे Harbor अभी समर्थित नहीं करता।",
   "games.minecraft.runtime.loaderError": "इस लोडर का सेटअप फ़ॉर्मैट अभी समर्थित नहीं है।",
   "games.minecraft.runtime.platformError": "इस सिस्टम पर गेम सेटअप अभी समर्थित नहीं है।",
   "games.minecraft.runtime.versionError": "यह Minecraft वर्ज़न आधिकारिक कैटलॉग में नहीं मिला।",
@@ -209,7 +239,8 @@ export default {
   "games.minecraft.instances.search": "अपने इंस्टेंस खोजें",
   "games.minecraft.instances.storage": "स्टोरेज फ़ोल्डर",
   "games.minecraft.instances.chooseFolder": "स्टोरेज फ़ोल्डर चुनें",
-  "games.minecraft.instances.unreadable": "{count} इंस्टेंस रिकॉर्ड पढ़े नहीं जा सके। उनकी फ़ाइलें नहीं बदली गई हैं।",
+  "games.minecraft.instances.unreadable":
+    "{count} इंस्टेंस रिकॉर्ड पढ़े नहीं जा सके। उनकी फ़ाइलें नहीं बदली गई हैं।",
   "games.minecraft.instances.files": "{count} फ़ाइलें",
   "games.minecraft.instances.newWorld": "नया इंस्टेंस",
   "games.minecraft.instances.runtimeNeeded": "खेलने से पहले गेम फ़ाइलें और Java रनटाइम इंस्टॉल करना बाकी है।",
@@ -224,23 +255,27 @@ export default {
   "games.minecraft.instances.rename": "इंस्टेंस का नाम बदलें",
   "games.minecraft.instances.review": "पैक की समीक्षा करें",
   "games.minecraft.instances.name": "इंस्टेंस का नाम",
-  "games.minecraft.instances.createNote": "इस संस्करण के लिए अलग Vanilla गेम फ़ोल्डर बनाता है। गेम और Java अलग से इंस्टॉल किए जाते हैं।",
+  "games.minecraft.instances.createNote":
+    "इस संस्करण के लिए अलग Vanilla गेम फ़ोल्डर बनाता है। गेम और Java अलग से इंस्टॉल किए जाते हैं।",
   "games.minecraft.instances.contents": "पैक की सामग्री",
   "games.minecraft.instances.filterFiles": "फ़ाइलें फ़िल्टर करें",
   "games.minecraft.instances.optional": "वैकल्पिक",
   "games.minecraft.instances.filterMore": "{count} और फ़ाइलें। उन्हें देखने के लिए फ़िल्टर सीमित करें।",
   "games.minecraft.instances.overrides": "{count} कॉन्फ़िगरेशन और ओवरराइड फ़ाइलें शामिल हैं।",
   "games.minecraft.instances.skipped": "सिर्फ़ सर्वर के लिए बनी {count} फ़ाइलें छोड़ी गईं।",
-  "games.minecraft.instances.verifyNote": "डाउनलोड को पैक की फ़ाइलों के हैश से जाँचा जाता है। मौजूदा दुनिया और इंस्टेंस अलग रहते हैं।",
+  "games.minecraft.instances.verifyNote":
+    "डाउनलोड को पैक की फ़ाइलों के हैश से जाँचा जाता है। मौजूदा दुनिया और इंस्टेंस अलग रहते हैं।",
   "games.minecraft.instances.reviewAgain": "फिर समीक्षा करें",
   "games.minecraft.instances.loadingVersions": "Minecraft संस्करण लोड हो रहे हैं…",
   "games.minecraft.instances.added": "आपके इंस्टेंस में जोड़ा गया",
-  "games.minecraft.instances.storageNote": "Minecraft इंस्टेंस रखने की जगह चुनें। यहाँ हर Harbor प्रोफ़ाइल का अपना फ़ोल्डर होगा।",
+  "games.minecraft.instances.storageNote":
+    "Minecraft इंस्टेंस रखने की जगह चुनें। यहाँ हर Harbor प्रोफ़ाइल का अपना फ़ोल्डर होगा।",
   "games.minecraft.instances.isolated": "नए, अलग इंस्टेंस में इंस्टॉल होता है।",
   "games.minecraft.instances.cancelling": "रद्द किया जा रहा है…",
   "games.minecraft.instances.install": "पैक फ़ाइलें इंस्टॉल करें",
   "games.minecraft.instances.save": "नाम सहेजें",
-  "games.minecraft.instances.packNote": "नवीनतम मेल खाने वाली रिलीज़ की समीक्षा करें या संस्करण में कोई रिलीज़ चुनें।",
+  "games.minecraft.instances.packNote":
+    "नवीनतम मेल खाने वाली रिलीज़ की समीक्षा करें या संस्करण में कोई रिलीज़ चुनें।",
   "games.minecraft.instances.phase.pack": "पैक डाउनलोड हो रहा है…",
   "games.minecraft.instances.phase.review": "पैक की सामग्री पढ़ी जा रही है…",
   "games.minecraft.instances.phase.files": "फ़ाइलें इंस्टॉल हो रही हैं…",
@@ -248,16 +283,22 @@ export default {
   "games.minecraft.instances.phase.done": "फ़ाइलें इंस्टॉल हो गईं",
   "games.minecraft.instances.folderError": "इस Harbor प्रोफ़ाइल के लिए सुलभ स्थानीय फ़ोल्डर चुनें।",
   "games.minecraft.instances.writeError": "इंस्टेंस लिखा नहीं जा सका। फ़ोल्डर की अनुमतियाँ और खाली जगह जाँचें।",
-  "games.minecraft.instances.readError": "यह इंस्टेंस पढ़ा नहीं जा सका। जाँचें कि ड्राइव जुड़ी है और फ़ाइलें उपलब्ध हैं।",
-  "games.minecraft.instances.networkError": "डाउनलोड विफल हुआ। अपना कनेक्शन जाँचें और पैक की फिर समीक्षा करें।",
+  "games.minecraft.instances.readError":
+    "यह इंस्टेंस पढ़ा नहीं जा सका। जाँचें कि ड्राइव जुड़ी है और फ़ाइलें उपलब्ध हैं।",
+  "games.minecraft.instances.networkError":
+    "डाउनलोड विफल हुआ। अपना कनेक्शन जाँचें और पैक की फिर समीक्षा करें।",
   "games.minecraft.instances.rateLimit": "प्रदाता व्यस्त है। थोड़ी देर बाद फिर कोशिश करें।",
-  "games.minecraft.instances.integrityError": "एक फ़ाइल पैक के चेकसम से मेल नहीं खाती। आपकी लाइब्रेरी में कुछ नहीं जोड़ा गया।",
-  "games.minecraft.instances.changedError": "पैक बदल गया या समीक्षा की समय-सीमा खत्म हो गई। फिर समीक्षा करें।",
+  "games.minecraft.instances.integrityError":
+    "एक फ़ाइल पैक के चेकसम से मेल नहीं खाती। आपकी लाइब्रेरी में कुछ नहीं जोड़ा गया।",
+  "games.minecraft.instances.changedError":
+    "पैक बदल गया या समीक्षा की समय-सीमा खत्म हो गई। फिर समीक्षा करें।",
   "games.minecraft.instances.formatError": "यह समर्थित, मान्य .mrpack आर्काइव नहीं है।",
   "games.minecraft.instances.loaderError": "यह पैक अज्ञात या टकराने वाले गेम लोडर का इस्तेमाल करता है।",
-  "games.minecraft.instances.sourceError": "इस पैक को ऐसे डाउनलोड स्रोत की ज़रूरत है जिसका Harbor समर्थन नहीं करता।",
+  "games.minecraft.instances.sourceError":
+    "इस पैक को ऐसे डाउनलोड स्रोत की ज़रूरत है जिसका Harbor समर्थन नहीं करता।",
   "games.minecraft.instances.limitError": "यह पैक या लाइब्रेरी समर्थित आकार सीमा से अधिक है।",
-  "games.minecraft.instances.busyError": "पैक का एक और काम चल रहा है। उसके पूरा होने का इंतज़ार करें या उसे रद्द करें।",
+  "games.minecraft.instances.busyError":
+    "पैक का एक और काम चल रहा है। उसके पूरा होने का इंतज़ार करें या उसे रद्द करें।",
   "games.minecraft.instances.error": "यह काम पूरा नहीं हो सका। फिर कोशिश करें।",
   "games.minecraft.catalog.updated": "अपडेट किया गया",
   "games.minecraft.catalog.gameVersion": "Minecraft संस्करण",
@@ -297,14 +338,17 @@ export default {
   "games.minecraft.catalog.issues": "समस्या बताएँ",
   "games.minecraft.catalog.wiki": "विकी",
   "games.minecraft.catalog.linkError": "यह लिंक नहीं खुल सका।",
-  "games.minecraft.catalog.manageNote": "जुड़े हुए Fabric मॉड फ़ोल्डर में संगत फ़ाइलों और निर्भरताओं की समीक्षा करें।",
+  "games.minecraft.catalog.manageNote":
+    "जुड़े हुए Fabric मॉड फ़ोल्डर में संगत फ़ाइलों और निर्भरताओं की समीक्षा करें।",
   "games.minecraft.catalog.manage": "मॉड में प्रबंधित करें",
   "games.minecraft.catalog.discover": "खोजें",
   "games.minecraft.account.signIn": "साइन इन करें",
   "games.minecraft.account.title": "आपका Minecraft खाता",
-  "games.minecraft.account.intro": "अपनी Minecraft स्किन और केप देखने और अपने डिज़ाइन लागू करने के लिए Microsoft जोड़ें।",
+  "games.minecraft.account.intro":
+    "अपनी Minecraft स्किन और केप देखने और अपने डिज़ाइन लागू करने के लिए Microsoft जोड़ें।",
   "games.minecraft.account.desktop": "Minecraft खाता जोड़ने के लिए Harbor डेस्कटॉप खोलें।",
-  "games.minecraft.account.setup": "इस Harbor बिल्ड में Microsoft साइन इन अभी सेट नहीं है। आप स्किन स्थानीय रूप से संपादित कर सकते हैं।",
+  "games.minecraft.account.setup":
+    "इस Harbor बिल्ड में Microsoft साइन इन अभी सेट नहीं है। आप स्किन स्थानीय रूप से संपादित कर सकते हैं।",
   "games.minecraft.account.codeNote": "Microsoft के साइन इन पेज पर यह कोड डालें।",
   "games.minecraft.account.copy": "कोड कॉपी करें",
   "games.minecraft.account.openMicrosoft": "Microsoft पर आगे बढ़ें",
@@ -324,9 +368,11 @@ export default {
   "games.minecraft.account.reconnect": "यह खाता फिर जोड़ने के लिए दोबारा साइन इन करें।",
   "games.minecraft.account.expired": "साइन इन कोड समाप्त हो गया। नए कोड के लिए फिर शुरू करें।",
   "games.minecraft.account.declined": "साइन इन रद्द या अस्वीकार कर दिया गया।",
-  "games.minecraft.account.notOwned": "इस खाते को Minecraft: Java Edition और Minecraft प्रोफ़ाइल चाहिए।",
+  "games.minecraft.account.notOwned":
+    "इस खाते को Minecraft: Java Edition और Minecraft प्रोफ़ाइल चाहिए।",
   "games.minecraft.account.xbox": "Xbox वेबसाइट पर अपनी प्रोफ़ाइल बनाएँ, फिर कोशिश करें।",
-  "games.minecraft.account.restricted": "Microsoft या Xbox सेटिंग साइन इन रोक रही है। खाते की उम्र, परिवार या क्षेत्र की सेटिंग जाँचें।",
+  "games.minecraft.account.restricted":
+    "Microsoft या Xbox सेटिंग साइन इन रोक रही है। खाते की उम्र, परिवार या क्षेत्र की सेटिंग जाँचें।",
   "games.minecraft.account.skinError": "यह स्किन या केप लागू नहीं हो सकी। खाता रीफ़्रेश करके फिर कोशिश करें।",
   "games.minecraft.account.storeError": "Harbor इस डिवाइस पर खाता सुरक्षित रूप से नहीं सहेज सका।",
   "games.minecraft.account.error": "खाते का अनुरोध विफल रहा। फिर कोशिश करें।",
@@ -370,7 +416,8 @@ export default {
   "games.minecraft.pixel": "पिक्सेल {x}, {y}: {color}",
   "games.minecraft.webgl": "3D पूर्वावलोकन उपलब्ध नहीं है। आप संपादन और निर्यात कर सकते हैं।",
   "games.minecraft.errorImport": "64 × 64 या 64 × 32 की Minecraft PNG चुनें, अधिकतम 1 MB।",
-  "games.minecraft.errorSave": "सहेजा नहीं जा सका। स्थानीय जगह खाली करें या पुरानी स्किन हटाएँ; लाइब्रेरी में 40 स्किन रह सकती हैं।",
+  "games.minecraft.errorSave":
+    "सहेजा नहीं जा सका। स्थानीय जगह खाली करें या पुरानी स्किन हटाएँ; लाइब्रेरी में 40 स्किन रह सकती हैं।",
   "games.minecraft.head": "सिर",
   "games.minecraft.body": "धड़",
   "games.minecraft.rightArm": "दायाँ हाथ",
@@ -401,17 +448,21 @@ export default {
   "games.minecraft.release.embedded": "शामिल",
   "games.minecraft.release.dependencyError": "कुछ निर्भरताओं का विवरण लोड नहीं हो सका।",
   "games.minecraft.release.moreDependencies": "और निर्भरताएँ दिखाएँ",
-  "games.minecraft.release.dependencyLimit": "{count} निर्भरताएँ दिखाई जा रही हैं। पूरी सूची Modrinth पर देखें।",
-  "games.minecraft.release.versionLimit": "{count} रिलीज़ दिखाई जा रही हैं। और खोजने के लिए फ़िल्टर सीमित करें।",
+  "games.minecraft.release.dependencyLimit":
+    "{count} निर्भरताएँ दिखाई जा रही हैं। पूरी सूची Modrinth पर देखें।",
+  "games.minecraft.release.versionLimit":
+    "{count} रिलीज़ दिखाई जा रही हैं। और खोजने के लिए फ़िल्टर सीमित करें।",
   "games.minecraft.release.release": "स्थिर",
   "games.minecraft.release.beta": "बीटा",
   "games.minecraft.release.alpha": "अल्फ़ा",
   "games.minecraft.creation.forgeNote": "Forge मॉड और मॉडपैक के लिए।",
   "games.minecraft.creation.neoforgeNote": "NeoForge मॉड और मॉडपैक के लिए।",
-  "games.minecraft.runtime.processorNote": "{loader} गेम फ़ाइलें तैयार करने के लिए Java इस्तेमाल करता है। इंस्टॉल करने से पहले Java सेट अप करें।",
+  "games.minecraft.runtime.processorNote":
+    "{loader} गेम फ़ाइलें तैयार करने के लिए Java इस्तेमाल करता है। इंस्टॉल करने से पहले Java सेट अप करें।",
   "games.minecraft.runtime.preparingLoader": "{loader} तैयार हो रहा है…",
   "games.minecraft.runtime.processorProgress": "चरण {done} / {total}",
-  "games.minecraft.runtime.processorError": "लोडर अपनी फ़ाइलें तैयार नहीं कर सका। सत्यापित डाउनलोड का फिर से इस्तेमाल करने के लिए दोबारा कोशिश करें।",
+  "games.minecraft.runtime.processorError":
+    "लोडर अपनी फ़ाइलें तैयार नहीं कर सका। सत्यापित डाउनलोड का फिर से इस्तेमाल करने के लिए दोबारा कोशिश करें।",
   "games.minecraft.runtime.javaRequired": "संगत Java सेट अप करें, फिर दोबारा इंस्टॉल करें।",
   "games.minecraft.notes.title": "बदलावों का विवरण",
   "games.minecraft.notes.version": "रिलीज़",
@@ -427,4 +478,3 @@ export default {
   "games.minecraft.hub.curseforge": "CurseForge चयन",
   "games.minecraft.hub.browseCurseforge": "CurseForge ब्राउज़ करें",
 } satisfies Record<string, string>;
-

@@ -9,9 +9,12 @@ export default {
   "games.pick.heading0": "Na co masz teraz ochotę?",
   "games.pick.heading1": "Kilka ulubionych gier bardzo pomoże.",
   "games.pick.heading2": "Coś, w co warto zagrać.",
-  "games.pick.note0": "Wybierz, na co masz dziś ochotę. Najpierw dokładne dopasowania, potem najbliższe alternatywy. Tryb gry i pozostałe filtry nadal obowiązują.",
-  "games.pick.note1": "Wybierz do pięciu ulubionych gier. Uwzględnimy ich cechy i Twoją ostatnią aktywność.",
-  "games.pick.note2": "Propozycje według Twoich wyborów, wspólnych zainteresowań i recenzji graczy.",
+  "games.pick.note0":
+    "Wybierz, na co masz dziś ochotę. Najpierw dokładne dopasowania, potem najbliższe alternatywy. Tryb gry i pozostałe filtry nadal obowiązują.",
+  "games.pick.note1":
+    "Wybierz do pięciu ulubionych gier. Uwzględnimy ich cechy i Twoją ostatnią aktywność.",
+  "games.pick.note2":
+    "Propozycje według Twoich wyborów, wspólnych zainteresowań i recenzji graczy.",
   "games.pick.company": "Z kim grasz?",
   "games.pick.refine": "Doprecyzuj wyszukiwanie",
   "games.pick.tagSearch": "Szukaj innych tagów, gatunków i funkcji…",
@@ -37,7 +40,8 @@ export default {
   "games.pick.remove": "Usuń {name} z ulubionych",
   "games.pick.addFavorite": "Użyj {name} jako ulubionej gry",
   "games.pick.history": "Użyj aktywności mojej biblioteki",
-  "games.pick.historyNote": "Ostatnio i najczęściej grane, nowo dodane i zapisane gry. Ulubione mają większą wagę.",
+  "games.pick.historyNote":
+    "Ostatnio i najczęściej grane, nowo dodane i zapisane gry. Ulubione mają większą wagę.",
   "games.pick.signal.recent": "Ostatnio grane",
   "games.pick.signal.mostPlayed": "Najczęściej grane",
   "games.pick.signal.added": "Ostatnio dodane",
@@ -45,13 +49,15 @@ export default {
   "games.pick.hours": "godz.",
   "games.pick.noHistory": "Brak aktywności. Wybierz ulubione lub połącz Steam w ustawieniach gier.",
   "games.pick.manualOnly": "Propozycje będą oparte tylko na ulubionych i wybranych filtrach.",
-  "games.pick.addedNote": "„Ostatnio dodane” oznacza pierwsze wykrycie w Harbor po początkowym imporcie, a nie datę zakupu.",
+  "games.pick.addedNote":
+    "„Ostatnio dodane” oznacza pierwsze wykrycie w Harbor po początkowym imporcie, a nie datę zakupu.",
   "games.pick.because": "Bo lubisz {name}",
   "games.pick.matches": "Pasuje do Twojego wyboru",
   "games.pick.steamCatalog": "Katalog Steam",
   "games.pick.edit": "Zmień wybór",
   "games.pick.finding": "Szukamy Twojej następnej gry…",
-  "games.pick.partial": "Nie udało się wczytać części danych. Propozycje korzystają z dostępnych informacji.",
+  "games.pick.partial":
+    "Nie udało się wczytać części danych. Propozycje korzystają z dostępnych informacji.",
   "games.pick.cached": "Zawiera dane katalogu zapisane {date}.",
   "games.pick.startHere": "Zacznij tutaj",
   "games.pick.notForMe": "Nie dla mnie",
@@ -59,11 +65,14 @@ export default {
   "games.pick.undo": "Cofnij",
   "games.pick.resetHidden": "Pokaż ponownie odrzucone gry",
   "games.pick.more": "Znajdź więcej propozycji",
-  "games.pick.rankingNote": "Kolejność według wspólnych tagów Steam, aktywności, wiarygodności recenzji i różnorodności. Wyniki to pozytywne recenzje Steam. Dostępność i ceny według katalogu USA.",
+  "games.pick.rankingNote":
+    "Kolejność według wspólnych tagów Steam, aktywności, wiarygodności recenzji i różnorodności. Wyniki to pozytywne recenzje Steam. Dostępność i ceny według katalogu USA.",
   "games.pick.error": "Następna gra może chwilę poczekać.",
-  "games.pick.errorNote": "Nie udało się połączyć z katalogiem. Twój wybór jest zapisany; spróbuj ponownie.",
+  "games.pick.errorNote":
+    "Nie udało się połączyć z katalogiem. Twój wybór jest zapisany; spróbuj ponownie.",
   "games.pick.noMatches": "Nie znaleziono jeszcze gier spełniających te wymagania.",
-  "games.pick.noMatchesNote": "Poszerz wybór platformy, ceny lub biblioteki. Zbliżone propozycje według nastroju są już uwzględnione.",
+  "games.pick.noMatchesNote":
+    "Poszerz wybór platformy, ceny lub biblioteki. Zbliżone propozycje według nastroju są już uwzględnione.",
   "games.pick.saveError": "Wybór działa w tej sesji, ale nie został zapisany na urządzeniu.",
   "games.pick.selected": "Wybrane tagi: {count}",
   "games.pick.favoriteCount": "Ulubione: {count} z 5",
@@ -74,7 +83,8 @@ export default {
   "games.pick.reviews": "Recenzje: {count}",
   "games.pick.unrated": "Brak oceny",
   "games.pick.owned": "W Twojej bibliotece",
-  "games.pick.closest": "Uwzględniono zbliżone propozycje. Tryb gry i pozostałe filtry nadal obowiązują.",
+  "games.pick.closest":
+    "Uwzględniono zbliżone propozycje. Tryb gry i pozostałe filtry nadal obowiązują.",
   "games.pick.closeMatch": "Pasuje do {count} z {total} tagów nastroju",
-  "games.pick.missing": "Brak tagów: {tags}"
+  "games.pick.missing": "Brak tagów: {tags}",
 };

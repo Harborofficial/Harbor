@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { authToken } from "@/lib/theme-auth";
 import { socialPost } from "./client";
-import {
-  computeWatchedBreakdown,
-  isWatchedItem,
-  type WatchedBreakdown,
-} from "./watched-breakdown";
+import { computeWatchedBreakdown, isWatchedItem, type WatchedBreakdown } from "./watched-breakdown";
 
 export { computeWatchedBreakdown, isWatchedItem };
 export type { WatchedBreakdown };

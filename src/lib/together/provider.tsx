@@ -1,10 +1,24 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useSettings } from "@/lib/settings";
 import { randomUuid } from "@/lib/uuid";
 import { TogetherClient, type RoomEvent, type RoomSnapshot } from "./client";
 import { useSelfIdentity } from "./use-self-identity";
 import { isPublicRelay, relayOutdated } from "./relay-version";
-import { deriveHostSource, deriveRoomGuestPick, type HostSourceInfo, type LastInviteMeta } from "./room-derive";
+import {
+  deriveHostSource,
+  deriveRoomGuestPick,
+  type HostSourceInfo,
+  type LastInviteMeta,
+} from "./room-derive";
 import { applyRoomEvent } from "./provider-events";
 import type {
   ChatMessage,
@@ -17,7 +31,12 @@ import type {
   RemoteCursor,
 } from "./provider-types";
 import { createCommandSender } from "./seek-coalesce";
-import { clearInviteParams, onTogetherInvite, parseInviteFromLocation, type ParsedInvite } from "./invite";
+import {
+  clearInviteParams,
+  onTogetherInvite,
+  parseInviteFromLocation,
+  type ParsedInvite,
+} from "./invite";
 import {
   WT_PROTO,
   generateRoomCode,
@@ -68,7 +87,14 @@ type TogetherValue = {
   dismissSummon: () => void;
   sendCursor: (x: number, y: number, visible: boolean, path: string) => void;
   remoteCursors: RemoteCursor[];
-  sendDraw: (strokeId: string, phase: "start" | "point" | "end" | "clear", path: string, x?: number, y?: number, color?: string) => void;
+  sendDraw: (
+    strokeId: string,
+    phase: "start" | "point" | "end" | "clear",
+    path: string,
+    x?: number,
+    y?: number,
+    color?: string,
+  ) => void;
   onIncomingDraw: (cb: (e: IncomingDraw) => void) => () => void;
   sendPresence: (location?: ParticipantLocation) => void;
   presenceMap: Map<string, number>;
@@ -170,13 +196,14 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
   const modalOpen = modalOwner !== null;
   const [incomingInvite, setIncomingInvite] = useState<IncomingInvite | null>(null);
   const [incomingHostLeaving, setIncomingHostLeaving] = useState<IncomingHostLeaving | null>(null);
-  const [incomingParticipantLeft, setIncomingParticipantLeft] = useState<IncomingParticipantLeft | null>(null);
+  const [incomingParticipantLeft, setIncomingParticipantLeft] =
+    useState<IncomingParticipantLeft | null>(null);
   const [incomingSummon, setIncomingSummon] = useState<IncomingSummon | null>(null);
   const [cursorMap, setCursorMap] = useState<Map<string, RemoteCursor>>(new Map());
   const [presenceMap, setPresenceMap] = useState<Map<string, number>>(new Map());
-  const [participantLocations, setParticipantLocations] = useState<Map<string, ParticipantLocation>>(
-    new Map(),
-  );
+  const [participantLocations, setParticipantLocations] = useState<
+    Map<string, ParticipantLocation>
+  >(new Map());
 
   const openModal = useCallback((owner: string) => setModalOwner(owner), []);
   const closeModal = useCallback(() => setModalOwner(null), []);

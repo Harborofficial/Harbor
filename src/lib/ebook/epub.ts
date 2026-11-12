@@ -188,11 +188,7 @@ function navigationLink(base: string, href: string, title: string): NavigationLi
   }
 }
 
-function navigationLinks(
-  document: Document | null,
-  path: string,
-  ncx = false,
-): NavigationLink[] {
+function navigationLinks(document: Document | null, path: string, ncx = false): NavigationLink[] {
   if (!document) return [];
   if (ncx)
     return elements(document, "navPoint").flatMap((point) => {
@@ -264,7 +260,7 @@ function documentSections(
   const visit = (node: Node, preserve = false): void => {
     if (node.nodeType === 3 || node.nodeType === 4) {
       chunks.push(
-        preserve ? node.textContent ?? "" : (node.textContent ?? "").replace(/\s+/g, " "),
+        preserve ? (node.textContent ?? "") : (node.textContent ?? "").replace(/\s+/g, " "),
       );
       return;
     }
@@ -351,7 +347,8 @@ export async function parseEpub(buffer: ArrayBuffer): Promise<EpubBook> {
   const documents = spine.length
     ? spine
     : [...manifest.values()].filter(
-        (item) => /xhtml|html/.test(item.mediaType) && !item.properties.split(/\s+/).includes("nav"),
+        (item) =>
+          /xhtml|html/.test(item.mediaType) && !item.properties.split(/\s+/).includes("nav"),
       );
   const scanned = documents.map((item, index) => {
     const document = contentDocument(entry(entries, item.path));

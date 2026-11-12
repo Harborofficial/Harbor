@@ -16,24 +16,35 @@ export default {
   "games.patch.saveCopy": "حفظ نسخة جديدة",
   "games.patch.verified": "تم التحقق من الملفات",
   "games.patch.ready": "التعديل جاهز",
-  "games.patch.verifiedNote": "تتطابق اللعبة الأصلية والتعديل والنسخة النهائية مع قيم التحقق المحفوظة في تعديل BPS.",
-  "games.patch.ipsNote": "لا يتضمن IPS قيمة تحقق للعبة الأصلية. راجع إصدار اللعبة المطلوب في المشروع قبل الحفظ.",
+  "games.patch.verifiedNote":
+    "تتطابق اللعبة الأصلية والتعديل والنسخة النهائية مع قيم التحقق المحفوظة في تعديل BPS.",
+  "games.patch.ipsNote":
+    "لا يتضمن IPS قيمة تحقق للعبة الأصلية. راجع إصدار اللعبة المطلوب في المشروع قبل الحفظ.",
   "games.patch.output": "النسخة النهائية",
   "games.patch.fingerprint": "بصمة الملف · SHA-256",
   "games.patch.fingerprints": "بصمات الملفات · SHA-256",
   "games.patch.localNote": "على جهازك · BPS · IPS · UPS · حتى 256 ميغابايت",
-  "games.patch.desktop": "طبّق التعديلات في تطبيق Harbor لسطح المكتب على Windows أو macOS أو Linux. تبقى ملفاتك على جهازك وتُحفظ اللعبة الأصلية دون تغيير.",
+  "games.patch.desktop":
+    "طبّق التعديلات في تطبيق Harbor لسطح المكتب على Windows أو macOS أو Linux. تبقى ملفاتك على جهازك وتُحفظ اللعبة الأصلية دون تغيير.",
   "games.patch.done": "جاهز لمغامرة جديدة",
   "games.patch.preserved": "تم حفظ نسختك المعدّلة. لم تتغير اللعبة الأصلية أو ملف التعديل.",
-  "games.patch.patch_source_mismatch": "يتطلب هذا التعديل ملفًا أو إصدارًا آخر من اللعبة الأصلية. راجع متطلبات المشروع واختر الملف المطابق.",
-  "games.patch.patch_checksum_mismatch": "قيمة التحقق من التعديل غير متطابقة. قد يكون الملف ناقصًا؛ نزّل نسخة جديدة من صفحة المشروع.",
-  "games.patch.patch_target_mismatch": "لا تتطابق النسخة النهائية مع قيمة التحقق المتوقعة. لم يتم حفظ أي شيء.",
+  "games.patch.patch_source_mismatch":
+    "يتطلب هذا التعديل ملفًا أو إصدارًا آخر من اللعبة الأصلية. راجع متطلبات المشروع واختر الملف المطابق.",
+  "games.patch.patch_checksum_mismatch":
+    "قيمة التحقق من التعديل غير متطابقة. قد يكون الملف ناقصًا؛ نزّل نسخة جديدة من صفحة المشروع.",
+  "games.patch.patch_target_mismatch":
+    "لا تتطابق النسخة النهائية مع قيمة التحقق المتوقعة. لم يتم حفظ أي شيء.",
   "games.patch.patch_expired": "انتهت صلاحية هذا التحضير. افحص التعديل مجددًا.",
-  "games.patch.patch_inputs_changed": "تغيّر أحد الملفات المختارة بعد التحقق. افحص التعديل مجددًا قبل الحفظ.",
-  "games.patch.patch_output_exists": "يوجد ملف بهذا الاسم في هذا الموقع. اختر اسمًا آخر؛ لن يستبدل Harbor الملفات الموجودة.",
-  "games.patch.patch_read_failed": "تعذّرت قراءة أحد الملفات المختارة. تأكد من أنه ما زال متاحًا ثم اختره مجددًا.",
-  "games.patch.patch_write_failed": "تعذّر حفظ النسخة. تحقق من المجلد والمساحة المتاحة أو اختر موقعًا آخر.",
-  "games.patch.patch_too_large": "يجب ألا يتجاوز حجم كل من اللعبة الأصلية والتعديل والنسخة النهائية 256 ميغابايت.",
+  "games.patch.patch_inputs_changed":
+    "تغيّر أحد الملفات المختارة بعد التحقق. افحص التعديل مجددًا قبل الحفظ.",
+  "games.patch.patch_output_exists":
+    "يوجد ملف بهذا الاسم في هذا الموقع. اختر اسمًا آخر؛ لن يستبدل Harbor الملفات الموجودة.",
+  "games.patch.patch_read_failed":
+    "تعذّرت قراءة أحد الملفات المختارة. تأكد من أنه ما زال متاحًا ثم اختره مجددًا.",
+  "games.patch.patch_write_failed":
+    "تعذّر حفظ النسخة. تحقق من المجلد والمساحة المتاحة أو اختر موقعًا آخر.",
+  "games.patch.patch_too_large":
+    "يجب ألا يتجاوز حجم كل من اللعبة الأصلية والتعديل والنسخة النهائية 256 ميغابايت.",
   "games.patch.patch_busy": "تجري معالجة تعديل آخر. حاول مجددًا بعد انتهائه.",
   "games.patch.patch_game_type": "اختر ملف لعبة مدعومًا، مثل GBA أو GB أو NES أو SFC أو NDS أو ROM.",
   "games.patch.patch_output_type": "احتفظ بامتداد ملف اللعبة الأصلية عند حفظ نسختك.",
@@ -60,10 +71,12 @@ export default {
   "games.atlas.sort.rated": "الأعلى تقييمًا",
   "games.atlas.sort.newest": "الأحدث",
   "games.atlas.sort.oldest": "الأقدم",
-  "games.hub.stepPatch": "اختر لعبتك الأصلية وتعديلًا بصيغة BPS أو IPS أو UPS. يحفظ Harbor نسخة منفصلة.",
-  "games.patch.description": "اختر لعبتك الأصلية وتعديلًا بصيغة BPS أو IPS أو UPS. يحفظ Harbor نسخة منفصلة.",
+  "games.hub.stepPatch":
+    "اختر لعبتك الأصلية وتعديلًا بصيغة BPS أو IPS أو UPS. يحفظ Harbor نسخة منفصلة.",
+  "games.patch.description":
+    "اختر لعبتك الأصلية وتعديلًا بصيغة BPS أو IPS أو UPS. يحفظ Harbor نسخة منفصلة.",
   "games.patch.choosePatch": "اختر تعديلًا (BPS، IPS، UPS)",
   "games.patch.patch_unsupported": "هذا الملف ليس تعديلًا مدعومًا بصيغة BPS أو IPS أو UPS.",
   "games.discovery.viewGame": "عرض اللعبة",
-  "games.atlas.basedOn": "مبني على هذه اللعبة"
+  "games.atlas.basedOn": "مبني على هذه اللعبة",
 };

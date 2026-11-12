@@ -80,7 +80,11 @@ export function ControllerPreview({ enabled }: { enabled: boolean }) {
             disabled={!active}
             onClick={() => setGamepadCapture(!testing)}
           >
-            {testing ? <Square size={15} strokeWidth={2.6} /> : <Gamepad2 size={17} strokeWidth={2} />}
+            {testing ? (
+              <Square size={15} strokeWidth={2.6} />
+            ) : (
+              <Gamepad2 size={17} strokeWidth={2} />
+            )}
             {testing ? t("Stop test") : t("Test controller")}
           </SButton>
         </div>

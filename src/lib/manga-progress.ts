@@ -46,9 +46,7 @@ export function listMangaProgress(pid: string): MangaProgressEntry[] {
     if (!raw) return [];
     const arr = JSON.parse(raw);
     if (!Array.isArray(arr)) return [];
-    return arr.filter(
-      (e) => e && typeof e.id === "string" && typeof e.chapterId === "string",
-    );
+    return arr.filter((e) => e && typeof e.id === "string" && typeof e.chapterId === "string");
   } catch {
     return [];
   }
@@ -81,7 +79,10 @@ export function recordMangaProgress(pid: string, entry: MangaProgressEntry): voi
 }
 
 export function removeMangaProgressEntry(pid: string, id: string): void {
-  write(pid, listMangaProgress(pid).filter((e) => e.id !== id));
+  write(
+    pid,
+    listMangaProgress(pid).filter((e) => e.id !== id),
+  );
   notify();
 }
 

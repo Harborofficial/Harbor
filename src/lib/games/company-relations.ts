@@ -12,5 +12,11 @@ export function companyCatalogClause(id: number, includeSubsidiaries = true): st
 
 export function companyCatalogIds(id: number, includeSubsidiaries = true): number[] {
   if (!Number.isSafeInteger(id) || id <= 0) throw Error("Invalid company");
-  return includeSubsidiaries ? id === 139 ? [139, 20228] : id === 8 || id === 20228 ? [8, 20228] : [id] : [id];
+  return includeSubsidiaries
+    ? id === 139
+      ? [139, 20228]
+      : id === 8 || id === 20228
+        ? [8, 20228]
+        : [id]
+    : [id];
 }

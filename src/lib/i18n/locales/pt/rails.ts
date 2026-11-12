@@ -110,11 +110,15 @@ const rails: Record<string, string> = {
   "Show me more like this": "Mostrar mais como este",
   "Show me less like this": "Mostrar menos como este",
   "Tune your recommendations": "Ajuste suas recomendações",
-  "Thumbs down hides this title from Featured. Thumbs up helps surface similar picks.": "Não curtir oculta este título dos Destaques. Curtir ajuda a mostrar escolhas parecidas.",
+  "Thumbs down hides this title from Featured. Thumbs up helps surface similar picks.":
+    "Não curtir oculta este título dos Destaques. Curtir ajuda a mostrar escolhas parecidas.",
   "Your addons": "Seus addons",
-  "What each addon is actually serving up right now.": "O que cada addon está entregando agora mesmo.",
-  "This addon provides streams only. It has no catalog to browse, but it still works behind every title you open.": "Este addon fornece apenas streams. Não tem catálogo para navegar, mas continua funcionando por trás de cada título que você abre.",
-  "This catalog came back empty. Try another one, or check the addon in Settings.": "Este catálogo voltou vazio. Tente outro ou verifique o addon nas Configurações.",
+  "What each addon is actually serving up right now.":
+    "O que cada addon está entregando agora mesmo.",
+  "This addon provides streams only. It has no catalog to browse, but it still works behind every title you open.":
+    "Este addon fornece apenas streams. Não tem catálogo para navegar, mas continua funcionando por trás de cada título que você abre.",
+  "This catalog came back empty. Try another one, or check the addon in Settings.":
+    "Este catálogo voltou vazio. Tente outro ou verifique o addon nas Configurações.",
 };
 
 export default rails;

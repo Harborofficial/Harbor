@@ -206,7 +206,9 @@ export function OverviewModal({
             {tagline && (
               <>
                 <Quote size={22} className="shrink-0 text-accent" />
-                <p className="font-display text-[16px] italic leading-[1.55] text-ink/90">{tagline}</p>
+                <p className="font-display text-[16px] italic leading-[1.55] text-ink/90">
+                  {tagline}
+                </p>
               </>
             )}
             <p className="overflow-y-auto pe-2 text-[14px] leading-[1.65] text-ink-muted">

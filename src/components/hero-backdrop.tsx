@@ -46,7 +46,11 @@ function Layer({
           height >= 640 &&
           width / height >= 1.45 &&
           width / height <= 2.4);
-      rememberHeroArtQuality(url, suitable ? Math.max(width, 1600) : width, suitable ? Math.max(height, 800) : height);
+      rememberHeroArtQuality(
+        url,
+        suitable ? Math.max(width, 1600) : width,
+        suitable ? Math.max(height, 800) : height,
+      );
       onMeasured(suitable);
     }
     setReady(true);

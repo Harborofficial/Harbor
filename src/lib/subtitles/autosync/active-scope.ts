@@ -8,9 +8,13 @@ export function isOwnGeneratedSyncTrack(
   track: Pick<TrackInfo, "title" | "external" | "externalFilename" | "url" | "originalUrl"> | null,
   generatedTrackPath: string | null | undefined,
 ): boolean {
-  if (!track || track.external !== true ||
-      !/^Synced \((?:SRT|VTT)\)/.test(track.title ?? "") ||
-      !generatedTrackPath) return false;
+  if (
+    !track ||
+    track.external !== true ||
+    !/^Synced \((?:SRT|VTT)\)/.test(track.title ?? "") ||
+    !generatedTrackPath
+  )
+    return false;
   const normalized = (value: string) => value.replace(/\\/g, "/").toLowerCase();
   const expected = normalized(generatedTrackPath);
   return [track.externalFilename, track.url, track.originalUrl].some(

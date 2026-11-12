@@ -33,16 +33,26 @@ test("mentions survive inside bbcode formatting", () => {
 });
 
 test("the author is clickable and hoverable in both surfaces", () => {
-  for (const [name, src] of [["theme", item], ["profile", profile]] as const) {
+  for (const [name, src] of [
+    ["theme", item],
+    ["profile", profile],
+  ] as const) {
     assert.match(src, /UserHoverCard/, `${name} comments need a hover card`);
     assert.match(src, /Avatar/, `${name} comments need an avatar`);
   }
-  assert.match(item, /requestOpenProfile\(handle\)/, "clicking the theme author opens their profile");
+  assert.match(
+    item,
+    /requestOpenProfile\(handle\)/,
+    "clicking the theme author opens their profile",
+  );
 });
 
 test("the theme comment type carries the fields the server now returns", () => {
   const types = read("src/lib/theme-store.ts");
   assert.match(types, /authorHandle\?: string \| null;/);
   assert.match(types, /authorAvatar\?: string \| null;/);
-  assert.match(types, /authorHandle: typeof c\.authorHandle === "string" \? c\.authorHandle : null/);
+  assert.match(
+    types,
+    /authorHandle: typeof c\.authorHandle === "string" \? c\.authorHandle : null/,
+  );
 });

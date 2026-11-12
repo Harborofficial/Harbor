@@ -7,11 +7,13 @@ export default {
   "games.searchUi.web": "वेब संदर्भ",
   "games.searchUi.settings": "AI सेटिंग्स",
   "games.searchUi.setup": "अपना AI प्रदाता जोड़ें",
-  "games.searchUi.setupNote": "Harbor में इस्तेमाल होने वाला वही OpenRouter या Groq खाता और मॉडल उपयोग करें।",
+  "games.searchUi.setupNote":
+    "Harbor में इस्तेमाल होने वाला वही OpenRouter या Groq खाता और मॉडल उपयोग करें।",
   "games.searchUi.aiHint": "तैयार होने पर Enter दबाएँ। चुने हुए फ़िल्टर AI परिणामों पर भी लागू होंगे।",
   "games.searchUi.thinking": "गेम खोजे जा रहे हैं और Steam पर जाँचे जा रहे हैं…",
   "games.searchUi.verified": "Steam पर {count} मिलान · AI सुझाव",
-  "games.searchUi.noAiResults": "इन फ़िल्टर के साथ Steam पर कोई सत्यापित मिलान नहीं मिला। विवरण बदलें या फ़िल्टर कम करें।",
+  "games.searchUi.noAiResults":
+    "इन फ़िल्टर के साथ Steam पर कोई सत्यापित मिलान नहीं मिला। विवरण बदलें या फ़िल्टर कम करें।",
   "games.searchUi.random": "रैंडम गेम",
   "games.searchUi.randomHint": "इस खोज और फ़िल्टर से मेल खाने वाला कोई रैंडम गेम चुनें।",
   "games.searchUi.picking": "चुना जा रहा है…",
@@ -21,5 +23,5 @@ export default {
   "games.searchUi.sources": "Steam + IGDB · पीसी, कंसोल गेम और ROM हैक।",
   "games.searchUi.steamScope": "ये फ़िल्टर या यह क्रम Steam के डेटा का उपयोग करते हैं।",
   "games.searchUi.allCatalogs": "सभी कैटलॉग में खोजें",
-  "games.searchUi.partial": "कुछ नतीजे उपलब्ध नहीं हैं: {providers}।"
+  "games.searchUi.partial": "कुछ नतीजे उपलब्ध नहीं हैं: {providers}।",
 };

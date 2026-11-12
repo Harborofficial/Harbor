@@ -14,8 +14,7 @@ export function isAnimeItem(item: {
   const hasAnim =
     (item.genre_ids ?? []).includes(16) ||
     (item.genres ?? []).some((g: any) => g === "Animation" || g?.id === 16);
-  const isJp =
-    item.original_language === "ja" || (item.origin_country ?? []).includes("JP");
+  const isJp = item.original_language === "ja" || (item.origin_country ?? []).includes("JP");
   return hasAnim && isJp;
 }
 

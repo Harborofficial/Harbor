@@ -156,10 +156,19 @@
         cursor: pointer;
         transition: background-color var(--t-hover) var(--ease);
       }
-      .d-nav:hover { background: oklch(0.18 0.004 260 / 0.92); }
-      .d-prev { left: 18px; }
-      .d-next { right: 18px; }
-      .d-nav svg { width: 18px; height: 18px; }
+      .d-nav:hover {
+        background: oklch(0.18 0.004 260 / 0.92);
+      }
+      .d-prev {
+        left: 18px;
+      }
+      .d-next {
+        right: 18px;
+      }
+      .d-nav svg {
+        width: 18px;
+        height: 18px;
+      }
 
       .d-foot {
         display: flex;
@@ -180,7 +189,9 @@
         border-radius: var(--r-pill);
         background: var(--wash);
         cursor: pointer;
-        transition: background-color var(--t-hover) var(--ease), width var(--t-state) var(--ease);
+        transition:
+          background-color var(--t-hover) var(--ease),
+          width var(--t-state) var(--ease);
       }
       .d-dot.on {
         width: 26px;
@@ -198,9 +209,12 @@
 
       body.no-scrim .d-scrim,
       body.no-scrim .d-cap,
-      body.no-scrim
-      body.no-drift .hb-i-drift { animation: none !important; }
-      body.solo-art .hb-i-photo { display: none; }
+      body.no-scrim body.no-drift .hb-i-drift {
+        animation: none !important;
+      }
+      body.solo-art .hb-i-photo {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -223,10 +237,28 @@
 
       <div class="d-viewer" id="viewer">
         <button class="d-nav d-prev" id="prev" type="button" aria-label="Previous panel">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 L8 12 L15 19"/></svg>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M15 5 L8 12 L15 19" />
+          </svg>
         </button>
         <button class="d-nav d-next" id="next" type="button" aria-label="Next panel">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 L16 12 L9 19"/></svg>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 5 L16 12 L9 19" />
+          </svg>
         </button>
       </div>
 
@@ -237,51 +269,51 @@
     </div>
 
     <script type="module">
-      import { PANELS } from './screens/installing.js';
+      import { PANELS } from "./screens/installing.js";
 
-      const viewer = document.getElementById('viewer');
-      const dotsEl = document.getElementById('dots');
-      const countEl = document.getElementById('count');
+      const viewer = document.getElementById("viewer");
+      const dotsEl = document.getElementById("dots");
+      const countEl = document.getElementById("count");
 
       let manifest = { panels: [] };
       try {
-        const r = await fetch('assets/slideshow/manifest.json');
+        const r = await fetch("assets/slideshow/manifest.json");
         if (r.ok) manifest = await r.json();
       } catch (e) {
         manifest = { panels: [] };
       }
 
       const slides = PANELS.map((panel, i) => {
-        const slide = document.createElement('div');
-        slide.className = 'd-slide';
+        const slide = document.createElement("div");
+        slide.className = "d-slide";
 
-        const plate = document.createElement('div');
-        plate.className = 'hb-i-plate is-live';
+        const plate = document.createElement("div");
+        plate.className = "hb-i-plate is-live";
 
         const entry = (manifest.panels || [])[i];
         if (entry && entry.image) {
-          const img = document.createElement('img');
-          img.className = 'hb-i-photo';
+          const img = document.createElement("img");
+          img.className = "hb-i-photo";
           img.src = entry.image;
-          img.alt = '';
-          img.addEventListener('load', () => plate.classList.add('has-photo'));
+          img.alt = "";
+          img.addEventListener("load", () => plate.classList.add("has-photo"));
           plate.appendChild(img);
         }
 
-        const drift = document.createElement('div');
-        drift.className = 'hb-i-drift';
-        const shot = document.createElement('img');
-        shot.className = 'hb-i-shot';
-        shot.src = 'assets/slides/' + panel.shot;
-        shot.alt = '';
+        const drift = document.createElement("div");
+        drift.className = "hb-i-drift";
+        const shot = document.createElement("img");
+        shot.className = "hb-i-shot";
+        shot.src = "assets/slides/" + panel.shot;
+        shot.alt = "";
         drift.appendChild(shot);
         plate.appendChild(drift);
 
-        const scrim = document.createElement('div');
-        scrim.className = 'd-scrim';
+        const scrim = document.createElement("div");
+        scrim.className = "d-scrim";
 
-        const cap = document.createElement('div');
-        cap.className = 'd-cap';
+        const cap = document.createElement("div");
+        cap.className = "d-cap";
         cap.innerHTML = `<i>${panel.eyebrow}</i><b>${panel.headline}</b><span>${panel.support}</span>`;
 
         slide.append(plate, scrim, cap);
@@ -290,11 +322,11 @@
       });
 
       const dots = PANELS.map((panel, i) => {
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = 'd-dot';
-        dot.setAttribute('aria-label', panel.eyebrow);
-        dot.addEventListener('click', () => show(i));
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "d-dot";
+        dot.setAttribute("aria-label", panel.eyebrow);
+        dot.addEventListener("click", () => show(i));
         dotsEl.appendChild(dot);
         return dot;
       });
@@ -302,28 +334,28 @@
       let index = 0;
       function show(next) {
         index = (next + PANELS.length) % PANELS.length;
-        slides.forEach((s, i) => s.classList.toggle('is-live', i === index));
-        dots.forEach((d, i) => d.classList.toggle('on', i === index));
-        countEl.innerHTML = `<b>${String(index + 1).padStart(2, '0')}</b> of ${String(PANELS.length).padStart(2, '0')} &nbsp;&middot;&nbsp; ${PANELS[index].eyebrow}`;
+        slides.forEach((s, i) => s.classList.toggle("is-live", i === index));
+        dots.forEach((d, i) => d.classList.toggle("on", i === index));
+        countEl.innerHTML = `<b>${String(index + 1).padStart(2, "0")}</b> of ${String(PANELS.length).padStart(2, "0")} &nbsp;&middot;&nbsp; ${PANELS[index].eyebrow}`;
       }
 
-      document.getElementById('prev').addEventListener('click', () => show(index - 1));
-      document.getElementById('next').addEventListener('click', () => show(index + 1));
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') show(index - 1);
-        if (e.key === 'ArrowRight') show(index + 1);
+      document.getElementById("prev").addEventListener("click", () => show(index - 1));
+      document.getElementById("next").addEventListener("click", () => show(index + 1));
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") show(index - 1);
+        if (e.key === "ArrowRight") show(index + 1);
       });
 
       const toggle = (id, cls) => {
         const btn = document.getElementById(id);
-        btn.addEventListener('click', () => {
+        btn.addEventListener("click", () => {
           const on = document.body.classList.toggle(cls);
-          btn.classList.toggle('on', on);
+          btn.classList.toggle("on", on);
         });
       };
-      toggle('t-scrim', 'no-scrim');
-      toggle('t-drift', 'no-drift');
-      toggle('t-photo', 'solo-art');
+      toggle("t-scrim", "no-scrim");
+      toggle("t-drift", "no-drift");
+      toggle("t-photo", "solo-art");
 
       show(0);
     </script>

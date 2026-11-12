@@ -24,7 +24,13 @@ export type TraktIds = {
 
 export type TraktTarget =
   | { kind: "movie"; ids: TraktIds }
-  | { kind: "episode"; show: { ids: TraktIds }; season: number; number: number; episodeIds?: TraktIds }
+  | {
+      kind: "episode";
+      show: { ids: TraktIds };
+      season: number;
+      number: number;
+      episodeIds?: TraktIds;
+    }
   | { kind: "show"; ids: TraktIds };
 
 export type ScrobbleAction = "start" | "pause" | "stop";

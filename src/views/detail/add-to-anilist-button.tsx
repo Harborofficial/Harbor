@@ -149,14 +149,22 @@ export function AddToAnilistButton({ harborId, title }: { harborId: string; titl
 
   if (status == null) {
     return (
-      <HoverTooltip label={t("Add {title} to AniList", { title })} align="center" className="shrink-0">
+      <HoverTooltip
+        label={t("Add {title} to AniList", { title })}
+        align="center"
+        className="shrink-0"
+      >
         <button
           type="button"
           disabled={busy}
           onClick={() => void setTo("PLANNING")}
           className="flex h-12 items-center gap-2.5 rounded-full bg-canvas/80 px-6 text-[15px] font-medium text-ink transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.98] disabled:opacity-60"
         >
-          <img src={anilistLogo} alt="" className="h-[18px] w-[18px] rounded-[3px] object-contain" />
+          <img
+            src={anilistLogo}
+            alt=""
+            className="h-[18px] w-[18px] rounded-[3px] object-contain"
+          />
           <Plus size={16} strokeWidth={2.2} className="-ms-1" />
           {t("Add to AniList")}
         </button>
@@ -180,7 +188,12 @@ export function AddToAnilistButton({ harborId, title }: { harborId: string; titl
           className={`text-ink-muted transition-transform ${menuOpen ? "rotate-180" : ""}`}
         />
       </button>
-      <AnchoredMenu anchorRef={btnRef} open={menuOpen} onClose={() => setMenuOpen(false)} width={224}>
+      <AnchoredMenu
+        anchorRef={btnRef}
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        width={224}
+      >
         <div className="overflow-hidden rounded-2xl border border-edge bg-raised py-1.5 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.7)]">
           {STATUS_ORDER.map((s) => (
             <button

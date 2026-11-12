@@ -88,8 +88,7 @@ function apiUrl(title: RiotTitle, op: string, hl: string, extra?: Record<string,
 export const riotScheduleUrl = (title: RiotTitle, hl = "en-US"): string =>
   apiUrl(title, "getSchedule", hl);
 
-export const riotLiveUrl = (title: RiotTitle, hl = "en-US"): string =>
-  apiUrl(title, "getLive", hl);
+export const riotLiveUrl = (title: RiotTitle, hl = "en-US"): string => apiUrl(title, "getLive", hl);
 
 export function riotEventDetailsUrl(title: RiotTitle, matchId: string, hl = "en-US"): string {
   if (!NUMERIC_ID.test(matchId))

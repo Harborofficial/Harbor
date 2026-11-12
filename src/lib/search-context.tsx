@@ -28,7 +28,13 @@ import { createSearchRequestGuard } from "@/lib/search-request-guard";
 import { normalizeSearchQuery } from "@/lib/search-query";
 import { orderedMetadataAddons } from "@/lib/metadata-addons";
 import { addonKeyFromSource } from "@/lib/metadata-sources";
-import { addonsBeforeTmdb, addonTopMatch, prioritizedTopMatch } from "@/lib/search-top-match";
+import {
+  addonsBeforeTmdb,
+  addonTopMatch,
+  animeTopMatch,
+  prioritizedTopMatch,
+  sameSearchTitle,
+} from "@/lib/search-top-match";
 import { searchManga } from "@/lib/manga/api";
 import type { MangaSummary } from "@/lib/manga/model";
 import { searchEBooks, type EBook } from "@/lib/ebook/api";
@@ -440,13 +446,21 @@ export function SearchProvider({ children }: { children: ReactNode }) {
           earlyAddons.length > 0
             ? addonTopMatch(earlyAddons, topMatchCandidates, trimmed, beforeTmdb)
             : null;
-        const topMatch = prioritizedTopMatch({
+        const configuredTop = prioritizedTopMatch({
           chain: searchChain,
           tmdbTop: settings.searchTmdbTopMatch ? base.topMatch : null,
           addonTop,
           earlyAddonTop,
           tmdbEnabled: settings.searchTmdbTopMatch,
         });
+        // TMDB models a later anime cour as a season of the franchise, so its
+        // top-level match is the older series. Prefer an exact anime title when
+        // the configured top match is a different title.
+        const exactAnimeTop = animeTopMatch(acc.anime, trimmed);
+        const topMatch =
+          exactAnimeTop && !sameSearchTitle(configuredTop?.meta.name, trimmed)
+            ? exactAnimeTop
+            : configuredTop;
         setResults({
           ...base,
           topMatch:

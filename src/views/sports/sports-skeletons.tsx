@@ -161,10 +161,7 @@ export function SportsHotEventsSkeleton() {
       <div className="hot-grid">
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <article className="hot-poster" key={i}>
-            <span
-              className="sk-block"
-              style={{ minHeight: 350, borderRadius: "13px 13px 0 0" }}
-            />
+            <span className="sk-block" style={{ minHeight: 350, borderRadius: "13px 13px 0 0" }} />
             <div className="hot-poster-footer">
               <div className="sk-line sk-fill">
                 <Dot size={22} delay={(i % 3) as 0 | 1 | 2} />

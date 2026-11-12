@@ -59,7 +59,10 @@ export function CalendarConfigRail({
     if (value.trackedPeople.some((x) => x.id === p.id)) return;
     onChange({
       ...value,
-      trackedPeople: [...value.trackedPeople, { id: p.id, name: p.name, profile: p.profile, role: "any" }],
+      trackedPeople: [
+        ...value.trackedPeople,
+        { id: p.id, name: p.name, profile: p.profile, role: "any" },
+      ],
     });
   };
   const removePerson = (id: number) =>
@@ -200,7 +203,12 @@ export function CalendarConfigRail({
             onToggle={() => toggleGroup("people")}
             onClear={() => clearGroup("trackedPeople")}
           >
-            <PeopleField tmdbKey={tmdbKey} tracked={value.trackedPeople} onAdd={addPerson} onRemove={removePerson} />
+            <PeopleField
+              tmdbKey={tmdbKey}
+              tracked={value.trackedPeople}
+              onAdd={addPerson}
+              onRemove={removePerson}
+            />
           </ConfigGroup>
         </div>
         <div className="flex flex-col gap-2.5">
@@ -214,7 +222,11 @@ export function CalendarConfigRail({
           />
           <TraktSourceRow
             label={t("My Trakt watchlist")}
-            sub={traktConnected ? t("Upcoming items from your watchlist") : t("Connect Trakt in settings first")}
+            sub={
+              traktConnected
+                ? t("Upcoming items from your watchlist")
+                : t("Connect Trakt in settings first")
+            }
             on={value.includeTraktWatchlist}
             onToggle={() => toggleSource("includeTraktWatchlist")}
             disabled={!traktConnected}
@@ -227,7 +239,8 @@ export function CalendarConfigRail({
         <span className="text-[12.5px] text-ink-muted">
           {activeCount > 0 ? (
             <>
-              <span className="font-semibold tabular-nums text-ink">{activeCount}</span> {t("active")}
+              <span className="font-semibold tabular-nums text-ink">{activeCount}</span>{" "}
+              {t("active")}
             </>
           ) : (
             t("No filters")
@@ -266,7 +279,9 @@ export function CalendarConfigRail({
   }
 
   if (!open) {
-    return <RailHandle summary={summary} activeCount={activeCount} onExpand={() => onOpenChange(true)} />;
+    return (
+      <RailHandle summary={summary} activeCount={activeCount} onExpand={() => onOpenChange(true)} />
+    );
   }
 
   return (
@@ -278,6 +293,8 @@ export function CalendarConfigRail({
 
 function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <span className="px-0.5 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-subtle">{children}</span>
+    <span className="px-0.5 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-subtle">
+      {children}
+    </span>
   );
 }

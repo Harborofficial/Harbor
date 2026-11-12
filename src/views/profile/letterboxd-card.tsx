@@ -116,13 +116,7 @@ function ListRow({ list }: { list: LetterboxdPublishedList }) {
   );
 }
 
-function Body({
-  data,
-  isOwner,
-}: {
-  data: LetterboxdPublished;
-  isOwner: boolean;
-}) {
+function Body({ data, isOwner }: { data: LetterboxdPublished; isOwner: boolean }) {
   const t = useT();
   const { openSettings } = useView();
   return (
@@ -159,13 +153,7 @@ function Body({
   );
 }
 
-function Shell({
-  hideTitle,
-  children,
-}: {
-  hideTitle?: boolean;
-  children: React.ReactNode;
-}) {
+function Shell({ hideTitle, children }: { hideTitle?: boolean; children: React.ReactNode }) {
   const t = useT();
   return (
     <section

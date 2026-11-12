@@ -1158,7 +1158,8 @@ const wired: Record<string, string> = {
   "RPDB key": "Clé RPDB",
   RTL: "RTL",
   "Safe by design": "Sûr dès la conception",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Même utilisation en lecture seule que Real-Debrid. Vous permet aussi de mettre en file d’attente des sources non mises en cache depuis le sélecteur de lecture.",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Même utilisation en lecture seule que Real-Debrid. Vous permet aussi de mettre en file d’attente des sources non mises en cache depuis le sélecteur de lecture.",
   "Same-genre picks from your installed sources":
     "Sélections du même genre provenant de vos sources installées",
   "Sample title": "Exemple de titre",
@@ -1531,7 +1532,8 @@ const wired: Record<string, string> = {
     "Utilisez votre clé API pour traduire les chapitres dans votre langue. Obtenez une clé auprès de",
   "Use {color} for the line tracker": "Utiliser {color} pour la ligne de suivi",
   "Use {color} ink": "Utiliser l’encre {color}",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "Sert à vérifier le cache et à débrider les liens. Harbor n’ajoute ni ne supprime jamais quoi que ce soit sur votre compte de sa propre initiative.",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "Sert à vérifier le cache et à débrider les liens. Harbor n’ajoute ni ne supprime jamais quoi que ce soit sur votre compte de sa propre initiative.",
   "Uses the directdl endpoint, which skips queueing for anything already cached.":
     "Utilise le point de terminaison directdl, qui évite la file d’attente pour tout contenu déjà en cache.",
   "Uses up to 150 MB": "Utilise jusqu’à 150 Mo",

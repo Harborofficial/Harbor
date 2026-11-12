@@ -18,12 +18,15 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "Video chơi game",
   "games.roms.watchVideo": "Xem video",
   "games.roms.noVideos": "Chưa có video cho các trò chơi này.",
-  "games.roms.libraryNote": "Thêm game của bạn. Nhập tệp, chọn trình giả lập và tập hợp bộ sưu tập tại một nơi.",
+  "games.roms.libraryNote":
+    "Thêm game của bạn. Nhập tệp, chọn trình giả lập và tập hợp bộ sưu tập tại một nơi.",
   "games.roms.openLibrary": "Mở thư viện",
   "games.roms.downloadCharts": "ROM hack được tải nhiều nhất",
-  "games.roms.downloadChartsNote": "Tổng lượt tải bản vá trên Romhack Plaza. Mở dự án để xem tác giả, phiên bản và yêu cầu.",
+  "games.roms.downloadChartsNote":
+    "Tổng lượt tải bản vá trên Romhack Plaza. Mở dự án để xem tác giả, phiên bản và yêu cầu.",
   "games.roms.downloadCount": "{count} lượt tải",
-  "games.roms.chartUnavailable": "Bảng xếp hạng tải xuống hiện chưa khả dụng. Bạn vẫn có thể duyệt Romhack Plaza.",
+  "games.roms.chartUnavailable":
+    "Bảng xếp hạng tải xuống hiện chưa khả dụng. Bạn vẫn có thể duyệt Romhack Plaza.",
   "games.roms.allPlatforms": "Tất cả nền tảng",
   "games.roms.moreReleases": "Xem thêm bản phát hành",
   "games.roms.fewerReleases": "Thu gọn bản phát hành",
@@ -49,7 +52,8 @@ const gameRoms: Record<string, string> = {
   "games.roms.coop": "Vui hơn khi có bạn",
   "games.roms.coopNote": "Trò chơi co-op trên những hệ máy bạn yêu thích.",
   "games.roms.rpg": "Thêm một chương nữa",
-  "games.roms.rpgNote": "Trò chơi nhập vai, từ những chuyến phiêu lưu trên máy cầm tay đến các thế giới rộng lớn.",
+  "games.roms.rpgNote":
+    "Trò chơi nhập vai, từ những chuyến phiêu lưu trên máy cầm tay đến các thế giới rộng lớn.",
   "games.roms.platformer": "Nhảy vào cuộc lần nữa",
   "games.roms.platformerNote": "Những trò chơi đi cảnh đáng để chơi lại.",
   "games.roms.seeAll": "Xem tất cả",
@@ -59,14 +63,16 @@ const gameRoms: Record<string, string> = {
   "games.roms.noCollection": "Chưa có trò chơi phù hợp với bộ sưu tập này trên hệ máy đã chọn.",
   "games.roms.community": "Do cộng đồng tạo nên",
   "games.roms.hacksTitle": "Trò chơi quen thuộc. Cuộc phiêu lưu mới.",
-  "games.roms.hacksNote": "Khám phá ROM hack, tìm trò chơi gốc làm nền tảng và chuẩn bị bản sao đã vá để chơi.",
+  "games.roms.hacksNote":
+    "Khám phá ROM hack, tìm trò chơi gốc làm nền tảng và chuẩn bị bản sao đã vá để chơi.",
   "games.roms.catalogNote": "Duyệt danh mục theo hệ máy, thể loại, thời kỳ phát hành và loạt game.",
   "games.roms.genre": "Thể loại",
   "games.roms.allGenres": "Tất cả thể loại",
   "games.roms.era": "Thời kỳ phát hành",
   "games.roms.reset": "Đặt lại bộ lọc",
   "games.roms.empty": "Thử tên khác hoặc mở rộng bộ lọc cho hệ máy này.",
-  "games.roms.source": "Dữ liệu trò chơi và mối liên hệ giữa các trò chơi từ IGDB. Nhập tệp cục bộ của bạn để chơi các trò chơi được hỗ trợ trong Harbor.",
+  "games.roms.source":
+    "Dữ liệu trò chơi và mối liên hệ giữa các trò chơi từ IGDB. Nhập tệp cục bộ của bạn để chơi các trò chơi được hỗ trợ trong Harbor.",
   "games.roms.playerScore": "Điểm người chơi IGDB · {count} lượt đánh giá",
   "games.roms.combinedScore": "Điểm tổng hợp IGDB · {count} lượt đánh giá",
   "games.roms.sort.discussed": "Nhiều lượt đánh giá nhất",

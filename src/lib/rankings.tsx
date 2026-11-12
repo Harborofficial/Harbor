@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useSettings } from "./settings";
 
 const TMDB = "https://api.themoviedb.org/3";
@@ -117,7 +125,11 @@ type RankingsValue = {
   topList: (dept: string) => PersonEntry[];
 };
 
-const Ctx = createContext<RankingsValue>({ ready: false, rank: () => undefined, topList: () => [] });
+const Ctx = createContext<RankingsValue>({
+  ready: false,
+  rank: () => undefined,
+  topList: () => [],
+});
 
 export function RankingsProvider({ children }: { children: ReactNode }) {
   const { settings } = useSettings();

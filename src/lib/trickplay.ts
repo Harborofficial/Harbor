@@ -97,10 +97,7 @@ export function thumbCacheNearest(bucket: number, maxDistance: number): string |
   return bestDist <= maxDistance ? best : undefined;
 }
 
-export function trickplaySetUrl(
-  url: string,
-  headers?: Record<string, string>,
-): Promise<void> {
+export function trickplaySetUrl(url: string, headers?: Record<string, string>): Promise<void> {
   const current = ++generation;
   session = null;
   prefetchAllowed = false;

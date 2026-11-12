@@ -22,10 +22,14 @@ test("external selected subtitles retain their intentional finite manual delay",
 
 test("new track and Auto sync exits apply a track-specific baseline", () => {
   const autoload = readFileSync(
-    new URL("../src/views/player/hooks/use-track-autoload.ts", import.meta.url), "utf8");
+    new URL("../src/views/player/hooks/use-track-autoload.ts", import.meta.url),
+    "utf8",
+  );
   const autosync = readFileSync(
-    new URL("../src/views/player/hooks/use-auto-sync.ts", import.meta.url), "utf8");
-  assert.match(autoload, /currentSubtitle\?\.id, currentSubtitle\?\.external/);
+    new URL("../src/views/player/hooks/use-auto-sync.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(autoload, /currentSubtitle\?\.id,\s*currentSubtitle\?\.external/);
   assert.match(autoload, /initialDelayForSelectedTrack\(/);
   assert.match(autosync, /initialDelayForSelectedTrack\(\s*selected,\s*baseline,/);
   assert.match(autosync, /initialDelayForSelectedTrack\(\s*selectedTrack,\s*baseline,/);

@@ -23,8 +23,7 @@ const ART_SCRIM =
 const SHELL =
   "group relative flex shrink-0 flex-col overflow-hidden rounded-[var(--bp-r-lg)] border border-[var(--bp-edge)] bg-[var(--bp-panel)] text-start";
 
-const MARK =
-  "shrink-0 text-[clamp(10px,1.32vh,14.5px)] font-bold uppercase tracking-[0.18em]";
+const MARK = "shrink-0 text-[clamp(10px,1.32vh,14.5px)] font-bold uppercase tracking-[0.18em]";
 
 const META = "line-clamp-1 text-[clamp(11px,1.5vh,16.5px)] font-semibold text-ink-muted";
 

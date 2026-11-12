@@ -8,7 +8,8 @@ export default {
   "games.warhammerUniverse.sections": "استكشف هذا العالم",
   "games.warhammerUniverse.start": "ابدأ هنا",
   "games.warhammerUniverse.storyTitle": "تابع Titus خارج اللعبة",
-  "games.warhammerUniverse.storyNote": "انتقل من Space Marine 2 إلى Secret Level، ثم استكشف العالم المحيط بهما.",
+  "games.warhammerUniverse.storyNote":
+    "انتقل من Space Marine 2 إلى Secret Level، ثم استكشف العالم المحيط بهما.",
   "games.warhammerUniverse.playing": "{count} يلعبون على Steam الآن",
   "games.warhammerUniverse.openSeries": "افتح المسلسل",
   "games.warhammerUniverse.trailer": "شاهد الإعلان",
@@ -18,15 +19,18 @@ export default {
   "games.warhammerUniverse.screenNote": "رسوم متحركة أصلية وفيلم طويل من الألفية الحادية والأربعين.",
   "games.warhammerUniverse.free": "مجانًا على Warhammer TV",
   "games.warhammerUniverse.subscription": "قد يتطلب اشتراك Warhammer+",
-  "games.warhammerUniverse.movieNote": "فيلم الرسوم المتحركة لعام 2010. افتح تفاصيل Harbor للممثلين والإعلانات والمصادر.",
-  "games.warhammerUniverse.screenScope": "مختارات Warhammer TV العامة. يمتد Hammer and Bolter عبر عدة عوالم؛ يحدد المزود إمكانية المشاهدة.",
+  "games.warhammerUniverse.movieNote":
+    "فيلم الرسوم المتحركة لعام 2010. افتح تفاصيل Harbor للممثلين والإعلانات والمصادر.",
+  "games.warhammerUniverse.screenScope":
+    "مختارات Warhammer TV العامة. يمتد Hammer and Bolter عبر عدة عوالم؛ يحدد المزود إمكانية المشاهدة.",
   "games.warhammerUniverse.lore": "في أعماق الحكاية",
   "games.warhammerUniverse.loreNote": "شخصيات وفصائل وأحداث محورية بصور من صانعي هذه العوالم.",
   "games.warhammerUniverse.setting": "اختر العالم",
   "games.warhammerUniverse.searchLore": "ابحث عن شخصية أو فصيل أو حدث",
   "games.warhammerUniverse.subjects": "{count} موضوعًا",
   "games.warhammerUniverse.watchLore": "شاهد على Warhammer TV",
-  "games.warhammerUniverse.loreScope": "ملخصات الحلقات الرسمية بالإنجليزية. لكل عالم مكتبته الخاصة؛ هذه نقطة انطلاق وليست موسوعة شاملة.",
+  "games.warhammerUniverse.loreScope":
+    "ملخصات الحلقات الرسمية بالإنجليزية. لكل عالم مكتبته الخاصة؛ هذه نقطة انطلاق وليست موسوعة شاملة.",
   "games.warhammerUniverse.fullLibrary": "مكتبة الخلفيات الكاملة",
   "games.warhammerUniverse.settingGuide": "دليل عالم 40K",
   "games.warhammerUniverse.books": "روايات وكتب صوتية",
@@ -35,5 +39,5 @@ export default {
   "games.warhammerUniverse.videosNote": "شروحات وحوارات مطولة وقصص من صناع محتوى YouTube.",
   "games.warhammerUniverse.searchVideos": "ابحث عن فيديوهات Warhammer",
   "games.warhammerUniverse.unavailable": "تعذر تحديث هذا المصدر. الأقسام الأخرى ما زالت متاحة.",
-  "games.warhammerUniverse.partial": "هذه المجموعة غير مكتملة. افتح المكتبة الكاملة للمزيد."
+  "games.warhammerUniverse.partial": "هذه المجموعة غير مكتملة. افتح المكتبة الكاملة للمزيد.",
 };

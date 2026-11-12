@@ -108,9 +108,7 @@ export function useBpCollectionFeed(
 
   const mine = useMemo(
     () =>
-      source === "all" || source === "mine"
-        ? owned.map((c) => ownedEntry(c, "mine", null))
-        : [],
+      source === "all" || source === "mine" ? owned.map((c) => ownedEntry(c, "mine", null)) : [],
     [owned, source],
   );
 
@@ -156,7 +154,11 @@ export function useBpCollectionFeed(
     const run = runRef.current;
     setLoading(true);
     const added: BpCollectionEntry[] = [];
-    for (let i = 0; i < STEPS_PER_PULL && added.length === 0 && ctx.at < ctx.phases.length; i += 1) {
+    for (
+      let i = 0;
+      i < STEPS_PER_PULL && added.length === 0 && ctx.at < ctx.phases.length;
+      i += 1
+    ) {
       added.push(...(await step(ctx)));
     }
     // Clearing the mutex before the staleness check would let an abandoned run

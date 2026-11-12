@@ -38,6 +38,7 @@ function fixture({ only = true, addons = [], results = {}, order = [] } = {}) {
     "cinemeta.ts",
     {
       "./metadata-policy": policy,
+      "./addon-configuration-key": { persistableAddonOrigin: () => undefined },
       "@/lib/cinemeta-cache": { withMetaCache: async (_type, _id, work) => (await work()).value },
       "@/lib/addon-configuration-key": { addonConfigurationKey: () => undefined },
       "@/lib/safe-fetch": {
@@ -70,6 +71,10 @@ function fixture({ only = true, addons = [], results = {}, order = [] } = {}) {
       "./metadata-policy": policy,
       "./cinemeta": cinemeta,
       "./metadata-addons": metadata,
+      "@/lib/addon-url": {
+        addonBaseUrl: (url) => url.replace(/\/manifest\.json\/?$/i, "").replace(/\/+$/, ""),
+        addonResourceUrl: (base, path) => `${base.replace(/\/$/, "")}/${path.replace(/^\/+/, "")}`,
+      },
       "./safe-fetch": {
         safeFetch: async (url) => {
           requests.push(url);

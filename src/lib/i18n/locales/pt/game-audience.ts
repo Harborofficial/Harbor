@@ -3,11 +3,13 @@ export default {
   "games.audience.deck": "Steam Deck · mais jogados",
   "games.audience.deckNote": "Jogos mais jogados no Steam Deck · última semana",
   "games.audience.deckSource": "Steam Deck · ranking semanal",
-  "games.audience.deckCoverage": "Ranking semanal do Steam Deck da Valve, atualizado automaticamente. Não são publicadas contagens de jogadores simultâneos para esta lista.",
+  "games.audience.deckCoverage":
+    "Ranking semanal do Steam Deck da Valve, atualizado automaticamente. Não são publicadas contagens de jogadores simultâneos para esta lista.",
   "games.audience.xbox": "Xbox · mais jogados",
   "games.audience.xboxNote": "Jogos Xbox mais jogados · Estados Unidos",
   "games.audience.xboxSource": "Xbox · ranking atual",
-  "games.audience.xboxCoverage": "Ranking atual do Xbox nos EUA pela Microsoft, atualizado automaticamente. O Xbox não publica totais de jogadores.",
+  "games.audience.xboxCoverage":
+    "Ranking atual do Xbox nos EUA pela Microsoft, atualizado automaticamente. O Xbox não publica totais de jogadores.",
   "games.audience.xboxChecked": "Verificado em {date}",
   "games.audience.xboxView": "Ver no Xbox",
   "games.audience.pc": "PC · todos os launchers",
@@ -19,6 +21,7 @@ export default {
   "games.audience.monthlyRank": "Posição mensal {rank}",
   "games.audience.onSteamNow": "agora no Steam",
   "games.audience.source": "Newzoo · jogadores ativos mensais",
-  "games.audience.coverage": "Top 10 publicado por jogadores ativos mensais em 37 mercados, excluindo China e Índia. Classificação datada, não contagens ao vivo nem classificação mundial.",
-  "games.audience.snapshot": "Newzoo · classificação publicada · {month}"
+  "games.audience.coverage":
+    "Top 10 publicado por jogadores ativos mensais em 37 mercados, excluindo China e Índia. Classificação datada, não contagens ao vivo nem classificação mundial.",
+  "games.audience.snapshot": "Newzoo · classificação publicada · {month}",
 };

@@ -15,12 +15,15 @@ export default {
   "games.metadata.type.fork": "Dérivé",
   "games.metadata.type.pack": "Pack",
   "games.metadata.type.update": "Mise à jour",
-  "games.metadata.note": "Choisissez les images et les détails du jeu. Son lanceur et ses fichiers restent inchangés.",
-  "games.metadata.conflict": "L'association a changé dans une autre fenêtre. Fermez puis rouvrez pour vérifier le choix actuel.",
+  "games.metadata.note":
+    "Choisissez les images et les détails du jeu. Son lanceur et ses fichiers restent inchangés.",
+  "games.metadata.conflict":
+    "L'association a changé dans une autre fenêtre. Fermez puis rouvrez pour vérifier le choix actuel.",
   "games.match.title": "Trouver les images et détails",
   "games.match.use": "Utiliser ce jeu",
   "games.match.remove": "Retirer l'association",
   "games.match.source": "Images et détails d'IGDB",
-  "games.match.note": "Choisissez l'édition correspondant à votre fichier. Harbor conserve le fichier et son nom d'origine.",
-  "games.match.empty": "Essayez le titre sans indication de région ou de révision."
+  "games.match.note":
+    "Choisissez l'édition correspondant à votre fichier. Harbor conserve le fichier et son nom d'origine.",
+  "games.match.empty": "Essayez le titre sans indication de région ou de révision.",
 };

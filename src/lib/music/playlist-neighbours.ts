@@ -3,7 +3,8 @@ import { artistIdentityKey } from "./artist-popularity";
 import type { MusicArtistRef } from "./types";
 
 type Row = Record<string, unknown>;
-const rows = (value: unknown): Row[] => (Array.isArray(value) ? value.filter((row): row is Row => !!row && typeof row === "object") : []);
+const rows = (value: unknown): Row[] =>
+  Array.isArray(value) ? value.filter((row): row is Row => !!row && typeof row === "object") : [];
 const text = (value: unknown) => (typeof value === "string" ? value.trim() : "");
 const count = (value: unknown) => (typeof value === "number" && Number.isFinite(value) ? value : 0);
 
@@ -34,7 +35,11 @@ async function deezer(path: string, signal: AbortSignal): Promise<Row> {
  * for less the longer it is, so a focused mixtape outweighs an everything bucket, and an
  * artist has to turn up on more than one list before it can reach the queue.
  */
-export async function playlistNeighbours(name: string, signal: AbortSignal, limit = 12): Promise<MusicArtistRef[]> {
+export async function playlistNeighbours(
+  name: string,
+  signal: AbortSignal,
+  limit = 12,
+): Promise<MusicArtistRef[]> {
   const seed = artistIdentityKey(name);
   if (!seed) return [];
   const held = cache.get(seed);
@@ -43,21 +48,35 @@ export async function playlistNeighbours(name: string, signal: AbortSignal, limi
   try {
     const search = await deezer(`search/playlist?q=${encodeURIComponent(name)}&limit=12`, signal);
     const lists = rows(search.data)
-      .filter(row => count(row.nb_tracks) >= 15 && count(row.nb_tracks) <= 400)
+      .filter((row) => count(row.nb_tracks) >= 15 && count(row.nb_tracks) <= 400)
       .slice(0, LISTS_PER_SEED);
-    const details = await Promise.all(lists.map(list => {
-      const id = count(list.id);
-      return id ? deezer(`playlist/${id}?limit=${TRACKS_PER_LIST}`, signal).catch(() => null) : null;
-    }));
+    const details = await Promise.all(
+      lists.map((list) => {
+        const id = count(list.id);
+        return id
+          ? deezer(`playlist/${id}?limit=${TRACKS_PER_LIST}`, signal).catch(() => null)
+          : null;
+      }),
+    );
     for (const detail of details) {
       if (signal.aborted) break;
       if (!detail) continue;
       const credits = new Map<string, MusicArtistRef>();
       for (const track of rows((detail.tracks as Row | undefined)?.data)) {
-        const artist = (track.artist && typeof track.artist === "object" ? track.artist : {}) as Row;
-        const artistId = count(artist.id), artistName = text(artist.name), key = artistIdentityKey(artistName);
+        const artist = (
+          track.artist && typeof track.artist === "object" ? track.artist : {}
+        ) as Row;
+        const artistId = count(artist.id),
+          artistName = text(artist.name),
+          key = artistIdentityKey(artistName);
         if (!artistId || !key || key === seed) continue;
-        if (!credits.has(key)) credits.set(key, { id: `deezer:artist:${artistId}`, connectorId: "catalog", name: artistName, artwork: text(artist.picture_big) || undefined });
+        if (!credits.has(key))
+          credits.set(key, {
+            id: `deezer:artist:${artistId}`,
+            connectorId: "catalog",
+            name: artistName,
+            artwork: text(artist.picture_big) || undefined,
+          });
       }
       if (credits.size < MIN_LIST_ARTISTS || credits.size > MAX_LIST_ARTISTS) continue;
       const weight = 1 / Math.sqrt(credits.size);
@@ -68,9 +87,13 @@ export async function playlistNeighbours(name: string, signal: AbortSignal, limi
         found.set(key, entry);
       }
     }
-  } catch { /* A quiet lane is better than a failed mix. */ }
-  const ranked = [...found.values()].filter(entry => entry.lists >= MIN_SHARED_LISTS)
-    .sort((a, b) => b.score - a.score).map(entry => entry.ref);
+  } catch {
+    /* A quiet lane is better than a failed mix. */
+  }
+  const ranked = [...found.values()]
+    .filter((entry) => entry.lists >= MIN_SHARED_LISTS)
+    .sort((a, b) => b.score - a.score)
+    .map((entry) => entry.ref);
   if (ranked.length) {
     cache.set(seed, ranked);
     while (cache.size > 80) cache.delete(cache.keys().next().value!);

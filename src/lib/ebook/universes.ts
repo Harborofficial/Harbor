@@ -55,10 +55,8 @@ export const EBOOK_UNIVERSES: EBookUniverse[] = [
     query: "Solo Leveling",
     aliases: ["Only I Level Up", "I Alone Level Up"],
     accent: 260,
-    backdrop:
-      "https://s4.anilist.co/file/anilistcdn/media/anime/banner/151807-37yfQA3ym8PA.jpg",
-    logo:
-      "https://artworks.thetvdb.com/banners/v4/series/389597/clearlogo/6749c5054f0aa.png",
+    backdrop: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/151807-37yfQA3ym8PA.jpg",
+    logo: "https://artworks.thetvdb.com/banners/v4/series/389597/clearlogo/6749c5054f0aa.png",
   },
   {
     id: "martial-peak",
@@ -164,10 +162,8 @@ export const EBOOK_UNIVERSES: EBookUniverse[] = [
     query: "That Time I Got Reincarnated as a Slime",
     aliases: ["Tensei Shitara Slime Datta Ken"],
     accent: 210,
-    backdrop:
-      "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101280-9t7J3774n955.jpg",
-    logo:
-      "https://artworks.thetvdb.com/banners/v4/series/352408/clearlogo/611c83c1eba90.png",
+    backdrop: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101280-9t7J3774n955.jpg",
+    logo: "https://artworks.thetvdb.com/banners/v4/series/352408/clearlogo/611c83c1eba90.png",
   },
 ];
 
@@ -192,10 +188,7 @@ function bookKeys(book: EBook): string[] {
     .filter(Boolean);
 }
 
-export function findEBookUniverseMatch(
-  universe: EBookUniverse,
-  candidates: EBook[],
-): EBook | null {
+export function findEBookUniverseMatch(universe: EBookUniverse, candidates: EBook[]): EBook | null {
   const keys = universeKeys(universe);
   let best: EBook | null = null;
   let bestScore = -Infinity;

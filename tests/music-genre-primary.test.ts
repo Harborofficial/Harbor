@@ -6,8 +6,21 @@ import { MUSIC_GENRES } from "../src/lib/music/genre-catalog";
 import { genreTagScore, primaryGenre, genreMatchesTags } from "../src/lib/music/genre-membership";
 
 const SCENES = new Set([
-  "hip-hop", "electronic", "dance", "pop", "rock", "rnb", "metal",
-  "jazz", "country", "reggae", "reggaeton", "classical", "afrobeats", "k-pop", "j-pop",
+  "hip-hop",
+  "electronic",
+  "dance",
+  "pop",
+  "rock",
+  "rnb",
+  "metal",
+  "jazz",
+  "country",
+  "reggae",
+  "reggaeton",
+  "classical",
+  "afrobeats",
+  "k-pop",
+  "j-pop",
 ]);
 const scene = MUSIC_GENRES.filter((g) => SCENES.has(g.slug));
 const bySlug = (slug: string) => scene.find((g) => g.slug === slug)!;

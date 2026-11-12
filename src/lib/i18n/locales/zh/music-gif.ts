@@ -16,6 +16,6 @@ const musicGif: Record<string, string> = {
   "music.gif.error.invalid": "无法读取此 GIF，请尝试其他文件。",
   "music.gif.error.large": "请选择小于 25 MB、帧数更少或画面尺寸更小的 GIF。",
   "music.gif.error.storage": "无法将 GIF 保存在此设备上。",
-  "music.gif.error.missing": "此 GIF 不可用，请重新上传。"
+  "music.gif.error.missing": "此 GIF 不可用，请重新上传。",
 };
 export default musicGif;

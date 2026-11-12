@@ -12,13 +12,20 @@ function generateVerifier(): string {
   return result;
 }
 
-type PendingAuthorization = { verifier: string; state: string; profileId: string; createdAt: number };
+type PendingAuthorization = {
+  verifier: string;
+  state: string;
+  profileId: string;
+  createdAt: number;
+};
 const PENDING_KEY = "harbor.mal.authorization.v1";
 let pendingAuthorization: PendingAuthorization | null = null;
 
 export function cancelAuthorization(): void {
   pendingAuthorization = null;
-  try { sessionStorage.removeItem(PENDING_KEY); } catch {}
+  try {
+    sessionStorage.removeItem(PENDING_KEY);
+  } catch {}
 }
 
 function getPendingAuthorization(): PendingAuthorization | null {
@@ -26,9 +33,15 @@ function getPendingAuthorization(): PendingAuthorization | null {
     pendingAuthorization ??= JSON.parse(sessionStorage.getItem(PENDING_KEY) || "null");
   } catch {}
   const pending = pendingAuthorization;
-  if (!pending || typeof pending.verifier !== "string" || typeof pending.state !== "string" ||
-    pending.profileId !== activeProfileId() || !Number.isFinite(pending.createdAt) ||
-    Date.now() - pending.createdAt > 15 * 60 * 1000) return null;
+  if (
+    !pending ||
+    typeof pending.verifier !== "string" ||
+    typeof pending.state !== "string" ||
+    pending.profileId !== activeProfileId() ||
+    !Number.isFinite(pending.createdAt) ||
+    Date.now() - pending.createdAt > 15 * 60 * 1000
+  )
+    return null;
   return pending;
 }
 
@@ -36,7 +49,9 @@ export function buildAuthorizeUrl(): string {
   const verifier = generateVerifier();
   const state = generateVerifier();
   pendingAuthorization = { verifier, state, profileId: activeProfileId(), createdAt: Date.now() };
-  try { sessionStorage.setItem(PENDING_KEY, JSON.stringify(pendingAuthorization)); } catch {}
+  try {
+    sessionStorage.setItem(PENDING_KEY, JSON.stringify(pendingAuthorization));
+  } catch {}
 
   const params = new URLSearchParams({
     response_type: "code",
@@ -70,19 +85,24 @@ async function tauriFetch(input: string, init?: RequestInit): Promise<Response> 
   return fetch(input, init);
 }
 
-export async function completeAuthorization(pastedCode: string, requireState = false): Promise<MalSession> {
+export async function completeAuthorization(
+  pastedCode: string,
+  requireState = false,
+): Promise<MalSession> {
   const code = extractMalCode(pastedCode);
   if (!code) throw new Error("Paste the code from MyAnimeList to continue");
   const pending = getPendingAuthorization();
   if (!pending) throw new Error("Session expired. Start over and authorize again.");
   if (requireState) {
     const params = new URL(pastedCode).searchParams;
-    if (params.get("state") !== pending.state) throw new Error("This authorization belongs to another attempt. Authorize again.");
+    if (params.get("state") !== pending.state)
+      throw new Error("This authorization belongs to another attempt. Authorize again.");
   }
   const tokenData = await exchangeCode(code, pending.verifier);
 
   const userName = await fetchUserName(tokenData.access_token);
-  if (getPendingAuthorization() !== pending) throw new Error("Authorization was cancelled. Start over and authorize again.");
+  if (getPendingAuthorization() !== pending)
+    throw new Error("Authorization was cancelled. Start over and authorize again.");
   cancelAuthorization();
 
   const now = Date.now();
@@ -136,7 +156,7 @@ export async function refreshAccessToken(): Promise<MalSession | null> {
       setSession(null);
       return null;
     }
-    const data = await res.json() as {
+    const data = (await res.json()) as {
       access_token: string;
       refresh_token: string;
       expires_in: number;

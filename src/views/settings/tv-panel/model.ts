@@ -47,8 +47,7 @@ export const TV_GROUPS: TvGroup[] = [
   {
     id: "picture",
     title: "Picture and feel",
-    subtitle:
-      "Adjust the screen edges and the artwork shown while browsing.",
+    subtitle: "Adjust the screen edges and the artwork shown while browsing.",
     wire: "settings",
     rows: [
       {
@@ -150,7 +149,8 @@ export const TV_GROUPS: TvGroup[] = [
   {
     id: "bingeing",
     title: "Between episodes",
-    subtitle: "Choose when the next episode starts and when Harbor checks that you are still watching.",
+    subtitle:
+      "Choose when the next episode starts and when Harbor checks that you are still watching.",
     wire: "settings",
     rows: [
       { kind: "toggle", key: "autoNext", label: "Auto-play next episode", def: true },

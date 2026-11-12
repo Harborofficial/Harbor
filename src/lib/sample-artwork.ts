@@ -16,7 +16,9 @@ const ARTWORK: SampleArtwork = {
   logo: null,
 };
 
-export function useSampleArtwork(index = 0): SampleArtwork & { name: string; description?: string } {
+export function useSampleArtwork(
+  index = 0,
+): SampleArtwork & { name: string; description?: string } {
   const sample = useSettingsSampleMeta(index);
   return {
     poster: sample.poster || ARTWORK.poster,
@@ -46,14 +48,19 @@ export const SETTINGS_FILMS = [
   { id: "safety-last", name: "Safety Last!", poster: safetyPoster },
 ];
 
-const FALLBACK: Meta[] = [SETTINGS_SAMPLE_META, ...SETTINGS_FILMS.slice(1).map((film) => ({ ...film, type: "movie" as const }))];
+const FALLBACK: Meta[] = [
+  SETTINGS_SAMPLE_META,
+  ...SETTINGS_FILMS.slice(1).map((film) => ({ ...film, type: "movie" as const })),
+];
 let samples: Meta[] = FALLBACK;
 let refreshedAt = 0;
 let pending: Promise<void> | undefined;
 const listeners = new Set<() => void>();
 const subscribe = (listener: () => void) => {
   listeners.add(listener);
-  return () => { listeners.delete(listener); };
+  return () => {
+    listeners.delete(listener);
+  };
 };
 
 // Some catalog image URLs return a successful, almost-solid title placeholder.
@@ -97,7 +104,9 @@ function hasPosterArtwork(src: string): Promise<boolean> {
 }
 
 async function previewPicks(items: Meta[], onBatch: (picks: Meta[]) => void): Promise<Meta[]> {
-  const candidates = items.filter((item) => item.poster && item.background && Number(item.imdbRating) > 0 && !item.adult).slice(0, 20);
+  const candidates = items
+    .filter((item) => item.poster && item.background && Number(item.imdbRating) > 0 && !item.adult)
+    .slice(0, 20);
   const picks: Meta[] = [];
   for (let index = 0; index < candidates.length; index += 4) {
     const batch = candidates.slice(index, index + 4);
@@ -123,7 +132,10 @@ function refreshSamples(): Promise<void> {
     if (picks.length) {
       const first = picks[0];
       if (!first.background || !first.description) {
-        const detail = await cinemetaMeta(first.type === "movie" ? "movie" : "series", first.id).catch(() => null);
+        const detail = await cinemetaMeta(
+          first.type === "movie" ? "movie" : "series",
+          first.id,
+        ).catch(() => null);
         if (detail) {
           picks = [{ ...first, ...detail, poster: first.poster }, ...picks.slice(1)];
           publish(picks);
@@ -132,13 +144,19 @@ function refreshSamples(): Promise<void> {
     }
     // Avoid repeatedly retrying an offline provider on every slider change.
     refreshedAt = Date.now();
-  })().finally(() => { pending = undefined; });
+  })().finally(() => {
+    pending = undefined;
+  });
   return pending;
 }
 
 export function useSettingsSamples(): Meta[] {
   const { settings } = useSettings();
-  const current = useSyncExternalStore(subscribe, () => samples, () => FALLBACK);
+  const current = useSyncExternalStore(
+    subscribe,
+    () => samples,
+    () => FALLBACK,
+  );
   useEffect(() => {
     if (settings.cinemetaEnabled) void refreshSamples();
   }, [settings.cinemetaEnabled]);

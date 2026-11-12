@@ -16,7 +16,8 @@ export function StreamPill({
 }) {
   const t = useT();
   void cached;
-  const headline = stream.name?.trim() || stream.parsedTitle || stream.title || stream.addonName || t("Source");
+  const headline =
+    stream.name?.trim() || stream.parsedTitle || stream.title || stream.addonName || t("Source");
   const description = stream.title?.trim() || stream.description?.trim() || "";
   const badges = streamBadges(stream);
   return (
@@ -41,7 +42,9 @@ export function StreamPill({
           </p>
         )}
       </div>
-      {intent === "download" && <Download size={17} className="mt-0.5 shrink-0 text-ink-muted" aria-hidden="true" />}
+      {intent === "download" && (
+        <Download size={17} className="mt-0.5 shrink-0 text-ink-muted" aria-hidden="true" />
+      )}
     </button>
   );
 }

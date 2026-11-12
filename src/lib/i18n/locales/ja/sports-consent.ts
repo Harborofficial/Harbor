@@ -32,10 +32,13 @@ export default {
   "Show Sports": "スポーツを表示",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "ナビゲーションにスポーツを表示します。ページを読み込む前にスポーツの通知への同意が必要です。",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "プロバイダーなしでスポーツを有効にするか、Live TV・M3U・Xtream のソースを追加してください。",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "プロバイダーなしでスポーツを有効にするか、Live TV・M3U・Xtream のソースを追加してください。",
   "Set up Live TV": "Live TV を設定",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "スコア・日程・順位はプロバイダーなしで利用できます。Harbor は配信を提供しないため、試合の視聴にはご自身の Live TV・M3U・Xtream ソースが必要です。",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "スコア・日程・順位は公開スポーツデータによるもので、プロバイダーは不要です。Harbor は配信を提供しません。試合の視聴にはご自身の Live TV・M3U・Xtream ソースが必要です。",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "スコア・日程・順位はプロバイダーなしで利用できます。Harbor は配信を提供しないため、試合の視聴にはご自身の Live TV・M3U・Xtream ソースが必要です。",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "スコア・日程・順位は公開スポーツデータによるもので、プロバイダーは不要です。Harbor は配信を提供しません。試合の視聴にはご自身の Live TV・M3U・Xtream ソースが必要です。",
   "Show Sports without a TV provider": "TV プロバイダーなしでスポーツを表示",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "スポーツを有効にしても通知への同意にはなりません。選択はこの端末に保存され、アカウントには同期されません。",

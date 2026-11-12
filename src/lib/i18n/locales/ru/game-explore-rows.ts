@@ -23,7 +23,8 @@ export default {
   "games.launchers.visit": "Открыть {name}",
   "games.launchers.picks": "Подборка игр",
   "games.launchers.unavailable": "Не удалось загрузить актуальные сведения об играх.",
-  "games.launchers.source": "Сведения об играх из IGDB · Ссылки лаунчеров открывают официальные сайты.",
+  "games.launchers.source":
+    "Сведения об играх из IGDB · Ссылки лаунчеров открывают официальные сайты.",
 
   "games.catalog.mode.20": "MMO",
   "games.tag.mmorpg": "MMORPG",
@@ -59,7 +60,8 @@ export default {
   "games.recent.open": "Открыть {name} из {source}",
   "games.recent.files": "Файлы источника",
   "games.recent.empty": "Подключите источник игр, чтобы видеть здесь последние добавления.",
-  "games.recent.undated": "В ваших источниках пока нет игр с датой загрузки. Откройте их в управлении источниками.",
+  "games.recent.undated":
+    "В ваших источниках пока нет игр с датой загрузки. Откройте их в управлении источниками.",
   "games.recent.adult": "Контент для взрослых · изображение размыто",
   "games.recent.artHidden": "Изображение скрыто",
   "games.recent.artUnrated": "Возрастной рейтинг недоступен",
@@ -85,7 +87,8 @@ export default {
   "games.collectionsLive.pacmanRecord": "Выручка аркадных автоматов, 1980–1999",
   "games.collectionsLive.wowRecord": "Пиковое число платных подписчиков",
   "games.collectionsLive.wiiRecord": "Продано копий для Wii",
-  "games.collectionsLive.manhuntRecord": "Первая приключенческая экшен-игра, которой отказали в британской классификации",
+  "games.collectionsLive.manhuntRecord":
+    "Первая приключенческая экшен-игра, которой отказали в британской классификации",
   "games.collectionsLive.gtaVSalesRecord": "Самая продаваемая игра в жанре экшен-приключение",
   "games.collectionsLive.blackOps3Record": "Самый продаваемый шутер от первого лица",
   "games.collectionsLive.smashUltimateRecord": "Самый продаваемый файтинг",
@@ -104,12 +107,14 @@ export default {
   "games.collectionsLive.haloSeriesRecord": "Самая продаваемая серия научно-фантастических шутеров",
   "games.collectionsLive.mortalSeriesRecord": "Самая продаваемая серия файтингов",
   "games.collectionsLive.granTurismoSeriesRecord": "Самая продаваемая серия автосимуляторов",
-  "games.collectionsLive.commandSeriesRecord": "Самая продаваемая серия стратегий в реальном времени",
+  "games.collectionsLive.commandSeriesRecord":
+    "Самая продаваемая серия стратегий в реальном времени",
   "games.collectionsLive.justDanceSeriesRecord": "Самая продаваемая серия танцевальных игр",
   "games.collectionsLive.maddenSeriesRecord": "Самая продаваемая серия по американскому футболу",
   "games.collectionsLive.nba2kSeriesRecord": "Самая продаваемая баскетбольная серия",
   "games.collectionsLive.honorKingsRecord": "Наибольшая выручка мобильной игры за всё время",
-  "games.collectionsLive.gearsBillionRecord": "Первая серия шутеров от третьего лица, достигшая этого",
+  "games.collectionsLive.gearsBillionRecord":
+    "Первая серия шутеров от третьего лица, достигшая этого",
   "games.collectionsLive.oldRepublicRecord": "Самая дорогая разработка MMORPG в истории",
   "games.collectionsLive.mario64AuctionRecord": "Наибольшая сумма за игру на аукционе",
   "games.collectionsLive.dotaPrizeRecord": "Крупнейший призовой фонд киберспорта своего времени",
@@ -142,8 +147,10 @@ export default {
   "games.tournaments.checked": "Даты организаторов проверены {date}",
   "games.tournaments.schedule": "Официальная страница турнира",
   "games.tournaments.watch": "Где смотреть",
-  "games.tournaments.channelsNote": "Официальные каналы. Трансляции проходят по расписанию турнира.",
-  "games.tournaments.broadcastPending": "Данные о трансляции здесь ещё не подтверждены. Проверьте страницу организатора.",
+  "games.tournaments.channelsNote":
+    "Официальные каналы. Трансляции проходят по расписанию турнира.",
+  "games.tournaments.broadcastPending":
+    "Данные о трансляции здесь ещё не подтверждены. Проверьте страницу организатора.",
   "games.tournaments.noDates": "В этом календаре нет подтверждённого предстоящего мейджора.",
   "games.launchers.topGames": "Самые популярные в Steam",
   "games.launchers.chartRank": "{rank}-е место по числу игроков",

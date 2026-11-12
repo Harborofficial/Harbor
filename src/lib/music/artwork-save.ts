@@ -50,7 +50,8 @@ export async function saveArtwork(
   if (!res?.ok) throw new Error("music.artwork.failed");
   const type = res.headers.get("content-type") ?? "";
   const buffer = await res.arrayBuffer();
-  if (buffer.byteLength === 0 || buffer.byteLength > MAX_BYTES) throw new Error("music.artwork.failed");
+  if (buffer.byteLength === 0 || buffer.byteLength > MAX_BYTES)
+    throw new Error("music.artwork.failed");
   const bytes = new Uint8Array(buffer);
   const extension = extensionOf(best, type);
   const name = artworkFileName(title, artist, extension);

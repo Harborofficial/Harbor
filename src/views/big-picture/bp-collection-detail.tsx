@@ -44,13 +44,22 @@ export function BpCollectionDetail({
             />
           )}
           <div className="flex min-w-0 flex-col gap-[clamp(5px,0.7vh,11px)]">
-            <span data-bp-eyebrow className="text-[clamp(11px,1.5vh,17px)] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
+            <span
+              data-bp-eyebrow
+              className="text-[clamp(11px,1.5vh,17px)] font-semibold uppercase tracking-[0.16em] text-ink-subtle"
+            >
               {t("Collection")}
             </span>
-            <h1 data-bp-coll-title className="text-[clamp(24px,4.4vh,54px)] font-bold leading-[1.05] tracking-[-0.02em] text-ink">
+            <h1
+              data-bp-coll-title
+              className="text-[clamp(24px,4.4vh,54px)] font-bold leading-[1.05] tracking-[-0.02em] text-ink"
+            >
               {detail.name}
             </h1>
-            <span data-bp-coll-meta className="text-[clamp(11.5px,1.55vh,18px)] font-semibold text-ink-muted">
+            <span
+              data-bp-coll-meta
+              className="text-[clamp(11.5px,1.55vh,18px)] font-semibold text-ink-muted"
+            >
               {detail.parts.length > 0
                 ? [t("{count} films", { count: detail.parts.length }), detail.years]
                     .filter(Boolean)
@@ -58,7 +67,10 @@ export function BpCollectionDetail({
                 : ""}
             </span>
             {detail.overview && (
-              <p data-bp-coll-overview className="line-clamp-2 max-w-[62ch] text-[clamp(12.5px,1.75vh,20px)] font-medium text-ink-muted">
+              <p
+                data-bp-coll-overview
+                className="line-clamp-2 max-w-[62ch] text-[clamp(12.5px,1.75vh,20px)] font-medium text-ink-muted"
+              >
                 {detail.overview}
               </p>
             )}

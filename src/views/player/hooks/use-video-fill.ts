@@ -31,7 +31,10 @@ const MODES: CropMode[] = [
   { id: "original", label: "2.39:1", panscan: 0, aspect: "2.39:1", zoom: 0 },
 ];
 
-export function cropTransform(modeId: string, zoomLevel = 0): { panscan: number; zoom: number; stretch: boolean } {
+export function cropTransform(
+  modeId: string,
+  zoomLevel = 0,
+): { panscan: number; zoom: number; stretch: boolean } {
   const m = MODES[modeIndex(modeId)];
   return { panscan: m.panscan, zoom: m.id === "zoom" ? zoomLevel : 0, stretch: m.stretch === true };
 }
@@ -45,7 +48,11 @@ const modeIndex = (id: string) => {
   return i < 0 ? 0 : i;
 };
 
-export function useVideoFill(bridgeRef: RefObject<PlayerBridge | null>, srcKey: string, loaded: boolean) {
+export function useVideoFill(
+  bridgeRef: RefObject<PlayerBridge | null>,
+  srcKey: string,
+  loaded: boolean,
+) {
   const { settings, update } = useSettings();
   const [pill, setPill] = useState<string | null>(null);
   const index = useRef(modeIndex(settings.cropMode));

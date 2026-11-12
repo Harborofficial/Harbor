@@ -45,8 +45,8 @@ test("the dock anchors to the visual viewport, not the layout viewport", () => {
   assert.ok(dock.includes("trackViewportBottom()"), "the tracker must be installed");
   assert.equal(
     (dock.match(/bottom: "var\(--harbor-viewport-bottom, 0px\)"/g) ?? []).length,
-    2,
-    "both the dock and its collapsed tab must anchor",
+    3,
+    "the dock, its collapsed tab and auto-hide reveal zone must anchor",
   );
   assert.ok(
     dock.includes("--harbor-dock-gap"),

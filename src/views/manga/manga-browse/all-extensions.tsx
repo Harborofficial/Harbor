@@ -101,17 +101,16 @@ function FeedRail({
           ))}
         </Row>
       )}
-      {state === "ready" &&
-        items.length > 0 && (
-          // Each feed is a single page, so eager-render every card: the Row would
-          // otherwise virtualize items past EAGER_COUNT into blank skeletons that
-          // look like missing manga until scrolled into view.
-          <Row min={140} alwaysActive>
-            {items.map((m) => (
-              <MangaCard key={m.id} manga={m} onOpen={onOpen} />
-            ))}
-          </Row>
-        )}
+      {state === "ready" && items.length > 0 && (
+        // Each feed is a single page, so eager-render every card: the Row would
+        // otherwise virtualize items past EAGER_COUNT into blank skeletons that
+        // look like missing manga until scrolled into view.
+        <Row min={140} alwaysActive>
+          {items.map((m) => (
+            <MangaCard key={m.id} manga={m} onOpen={onOpen} />
+          ))}
+        </Row>
+      )}
     </div>
   );
 }

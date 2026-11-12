@@ -553,20 +553,19 @@
 }
 
 @keyframes hb-skeleton-sweep {
-  from { background-position: 180% 0; }
-  to { background-position: -80% 0; }
+  from {
+    background-position: 180% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
 }
 
 .hb-skeleton {
   display: inline-block;
   border-radius: var(--r-sm);
   background-color: var(--wash-quiet);
-  background-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--wash) 50%,
-    transparent 100%
-  );
+  background-image: linear-gradient(90deg, transparent 0%, var(--wash) 50%, transparent 100%);
   background-size: 200% 100%;
   background-repeat: no-repeat;
   animation: hb-skeleton-sweep 1.5s ease-in-out infinite;
@@ -575,5 +574,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hb-skeleton { animation: none; }
+  .hb-skeleton {
+    animation: none;
+  }
 }

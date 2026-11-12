@@ -73,7 +73,9 @@ export function ListGrid({
       <SortBar sort={sort} onSort={setSort} orderLabel={ORDER_LABEL[list.ordering]} />
       <div
         className="grid gap-x-5 gap-y-8"
-        style={{ gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${minCardWidth}px), 1fr))` }}
+        style={{
+          gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${minCardWidth}px), 1fr))`,
+        }}
       >
         {visible.map((item) => (
           <span key={item.imdb} className="relative block min-w-0">

@@ -16,14 +16,31 @@ export function SportsRefreshButton({ busy, onRefresh }: { busy: boolean; onRefr
     };
     settle();
     motion.addEventListener("change", settle);
-    return () => { clearTimeout(timer); motion.removeEventListener("change", settle); };
+    return () => {
+      clearTimeout(timer);
+      motion.removeEventListener("change", settle);
+    };
   }, [busy, turning]);
   return (
-    <button type="button" className="sh-icon sh-refresh" aria-label={t("Refresh schedules")}
+    <button
+      type="button"
+      className="sh-icon sh-refresh"
+      aria-label={t("Refresh schedules")}
       title={t(busy ? "Updating schedules…" : "Refresh schedules")}
-      aria-busy={busy} disabled={busy || turning} data-refreshing={busy || turning || undefined}
-      onClick={() => { setTurning(true); onRefresh(); }}>
-      <RefreshCw size={16} onAnimationIteration={() => { if (!busy) setTurning(false); }} />
+      aria-busy={busy}
+      disabled={busy || turning}
+      data-refreshing={busy || turning || undefined}
+      onClick={() => {
+        setTurning(true);
+        onRefresh();
+      }}
+    >
+      <RefreshCw
+        size={16}
+        onAnimationIteration={() => {
+          if (!busy) setTurning(false);
+        }}
+      />
     </button>
   );
 }

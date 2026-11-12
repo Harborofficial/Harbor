@@ -96,13 +96,7 @@ export function BpScoreChips({ badges }: { badges: readonly BpCardBadge[] }) {
  * outermost against the end edge in both writing directions. The caller owns
  * the anchor, because the same corner also holds state marks.
  */
-export function BpScoreRow({
-  badges,
-  limit,
-}: {
-  badges: readonly BpCardBadge[];
-  limit: number;
-}) {
+export function BpScoreRow({ badges, limit }: { badges: readonly BpCardBadge[]; limit: number }) {
   const shown = badges.slice(0, limit);
   if (shown.length === 0) return null;
   return (

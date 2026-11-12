@@ -34,5 +34,5 @@ export default {
   "games.fortnite.genre.party-mini-games": "Tiệc & Trò chơi nhỏ",
   "games.fortnite.genre.music-rhythm": "Âm nhạc & Nhịp điệu",
   "games.fortnite.genre.horror": "Kinh dị",
-  "games.fortnite.genre.deathrun-platformer": "Deathrun & Đi cảnh"
+  "games.fortnite.genre.deathrun-platformer": "Deathrun & Đi cảnh",
 };

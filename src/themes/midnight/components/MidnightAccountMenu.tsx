@@ -23,7 +23,7 @@ import {
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { getSecondaryPrivileges } from "@/lib/settings/defaults";
+import { getSecondaryPrivileges } from "@/lib/profiles/privileges";
 import { verifyProfilePassword } from "@/lib/profile-password";
 import { StatusDot, StatusPicker } from "@/chrome/sidebar/status-control";
 import { PRESENCE_META } from "@/lib/social/presence";

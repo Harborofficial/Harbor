@@ -122,15 +122,20 @@ export function ColorPopoverTrigger({
       if (e.key === "Tab") {
         const panel = panelRef.current;
         if (!panel) return;
-        const items = Array.from(panel.querySelectorAll<HTMLElement>(
-          'button:not(:disabled), input:not(:disabled), [tabindex="0"]',
-        )).filter((el) => el.getClientRects().length > 0);
+        const items = Array.from(
+          panel.querySelectorAll<HTMLElement>(
+            'button:not(:disabled), input:not(:disabled), [tabindex="0"]',
+          ),
+        ).filter((el) => el.getClientRects().length > 0);
         const first = items[0];
         const last = items.at(-1);
         if (!first || !last) return;
-        if (!panel.contains(document.activeElement) || document.activeElement === panel ||
-            (e.shiftKey && document.activeElement === first) ||
-            (!e.shiftKey && document.activeElement === last)) {
+        if (
+          !panel.contains(document.activeElement) ||
+          document.activeElement === panel ||
+          (e.shiftKey && document.activeElement === first) ||
+          (!e.shiftKey && document.activeElement === last)
+        ) {
           e.preventDefault();
           e.stopImmediatePropagation();
           (e.shiftKey ? last : first).focus();
@@ -158,19 +163,22 @@ export function ColorPopoverTrigger({
       const panel = panelRef.current;
       const width = panel?.offsetWidth ?? 280;
       const height = panel?.offsetHeight ?? 260;
-      const left = Math.max(8, Math.min(
-        align === "right" ? r.right - width : r.left,
-        window.innerWidth - width - 8,
-      ));
+      const left = Math.max(
+        8,
+        Math.min(align === "right" ? r.right - width : r.left, window.innerWidth - width - 8),
+      );
       const below = r.bottom + 8;
       const above = r.top - height - 8;
       const preferred = direction === "up" ? above : below;
       const alternate = direction === "up" ? below : above;
       const fits = (y: number) => y >= 8 && y + height <= window.innerHeight - 8;
-      const top = Math.max(8, Math.min(
-        fits(preferred) ? preferred : fits(alternate) ? alternate : preferred,
-        window.innerHeight - height - 8,
-      ));
+      const top = Math.max(
+        8,
+        Math.min(
+          fits(preferred) ? preferred : fits(alternate) ? alternate : preferred,
+          window.innerHeight - height - 8,
+        ),
+      );
       setPos({ top, left });
     };
     place();
@@ -341,7 +349,8 @@ export function CustomColorPanel({
         aria-valuemax={100}
         aria-valuenow={Math.round(hsv.s * 100)}
         aria-valuetext={t("Saturation {s}%, brightness {v}%", {
-          s: Math.round(hsv.s * 100), v: Math.round(hsv.v * 100),
+          s: Math.round(hsv.s * 100),
+          v: Math.round(hsv.v * 100),
         })}
         onKeyDown={onSlKey}
         onPointerDown={(e) => {

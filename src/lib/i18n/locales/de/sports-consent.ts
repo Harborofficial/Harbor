@@ -32,10 +32,13 @@ export default {
   "Show Sports": "Sport anzeigen",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "Sport in der Navigation anzeigen. Du musst den Sport-Hinweis bestätigen, bevor die Seite geladen wird.",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "Sport ohne Anbieter aktivieren oder eine Live-TV-, M3U- oder Xtream-Quelle hinzufügen.",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "Sport ohne Anbieter aktivieren oder eine Live-TV-, M3U- oder Xtream-Quelle hinzufügen.",
   "Set up Live TV": "Live-TV einrichten",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "Ergebnisse, Spielpläne und Tabellen funktionieren ohne Anbieter. Harbor liefert keine Streams, zum Ansehen brauchst du eine eigene Live-TV-, M3U- oder Xtream-Quelle.",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "Ergebnisse, Spielpläne und Tabellen stammen aus öffentlichen Sportdaten und brauchen keinen Anbieter. Harbor liefert keine Streams: zum Ansehen brauchst du eine eigene Live-TV-, M3U- oder Xtream-Quelle.",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "Ergebnisse, Spielpläne und Tabellen funktionieren ohne Anbieter. Harbor liefert keine Streams, zum Ansehen brauchst du eine eigene Live-TV-, M3U- oder Xtream-Quelle.",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "Ergebnisse, Spielpläne und Tabellen stammen aus öffentlichen Sportdaten und brauchen keinen Anbieter. Harbor liefert keine Streams: zum Ansehen brauchst du eine eigene Live-TV-, M3U- oder Xtream-Quelle.",
   "Show Sports without a TV provider": "Sport ohne TV-Anbieter anzeigen",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "Das Aktivieren von Sport bestätigt den Hinweis nicht. Deine Auswahl bleibt auf diesem Gerät und wird nicht mit deinem Konto synchronisiert.",

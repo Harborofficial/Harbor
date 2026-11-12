@@ -46,7 +46,8 @@ export default {
   "games.eve.avoid": "{name} vermeiden",
   "games.eve.less": "Weniger Stationen",
   "games.eve.allStops": "Alle Stationen",
-  "games.eve.activityNote": "Die Aktivitätsdaten sind rückblickend und erfassen keinen Wurmlochraum. Die Sicherheitspräferenz garantiert keine sichere Route.",
+  "games.eve.activityNote":
+    "Die Aktivitätsdaten sind rückblickend und erfassen keinen Wurmlochraum. Die Sicherheitspräferenz garantiert keine sichere Route.",
   "games.eve.noRoute": "Keine Sprungtorroute gefunden.",
   "games.eve.incursions": "Incursions",
   "games.eve.refreshIncursions": "Incursions aktualisieren",
@@ -60,5 +61,5 @@ export default {
   "games.eve.influence": "Einfluss",
   "games.eve.systems": "Systeme · {count}",
   "games.eve.boss": "Boss anwesend",
-  "games.eve.routeThere": "Route hierher"
+  "games.eve.routeThere": "Route hierher",
 };

@@ -69,7 +69,9 @@ export function BpStremioShowcase() {
         <div className="flex max-w-[40ch] items-start gap-[clamp(8px,0.8vw,14px)]">
           <span className="mt-[0.5em] h-[2px] w-[clamp(14px,1.4vw,26px)] shrink-0 rounded-full bg-[var(--bp-edge-2)]" />
           <span className="text-[clamp(9.5px,1.25vh,14px)] font-medium leading-relaxed text-ink-subtle">
-            {t("Harbor is an independent client. It is not affiliated with or endorsed by Stremio.")}
+            {t(
+              "Harbor is an independent client. It is not affiliated with or endorsed by Stremio.",
+            )}
           </span>
         </div>
       </div>

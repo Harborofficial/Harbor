@@ -46,7 +46,8 @@ export default {
   "games.eve.avoid": "Hindari {name}",
   "games.eve.less": "Lebih sedikit perhentian",
   "games.eve.allStops": "Semua perhentian",
-  "games.eve.activityNote": "Aktivitas yang dilaporkan adalah catatan lampau dan tidak mencakup ruang wormhole. Preferensi keamanan tidak menjamin rute yang aman.",
+  "games.eve.activityNote":
+    "Aktivitas yang dilaporkan adalah catatan lampau dan tidak mencakup ruang wormhole. Preferensi keamanan tidak menjamin rute yang aman.",
   "games.eve.noRoute": "Rute stargate tidak ditemukan.",
   "games.eve.incursions": "Invasi",
   "games.eve.refreshIncursions": "Perbarui invasi",
@@ -60,5 +61,5 @@ export default {
   "games.eve.influence": "Pengaruh",
   "games.eve.systems": "Sistem · {count}",
   "games.eve.boss": "Bos hadir",
-  "games.eve.routeThere": "Rute ke sini"
+  "games.eve.routeThere": "Rute ke sini",
 };

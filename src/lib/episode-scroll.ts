@@ -4,8 +4,7 @@ export function scrollToDataEp(
   opts: { behavior?: ScrollBehavior; center?: boolean; epId?: number | null } = {},
 ) {
   const prefersReduced =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let tries = 0;
   const tryScroll = () => {
     if (!root) return;
@@ -17,13 +16,20 @@ export function scrollToDataEp(
       return;
     }
     if (opts.center) {
-      target.scrollIntoView({ behavior: prefersReduced ? "auto" : opts.behavior ?? "auto", block: "center", inline: "center" });
+      target.scrollIntoView({
+        behavior: prefersReduced ? "auto" : (opts.behavior ?? "auto"),
+        block: "center",
+        inline: "center",
+      });
       return;
     }
     const rootRect = root.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
     const offset = targetRect.top - rootRect.top + root.scrollTop - 90;
-    root.scrollTo({ top: Math.max(0, offset), behavior: prefersReduced ? "auto" : opts.behavior ?? "smooth" });
+    root.scrollTo({
+      top: Math.max(0, offset),
+      behavior: prefersReduced ? "auto" : (opts.behavior ?? "smooth"),
+    });
   };
   requestAnimationFrame(tryScroll);
 }

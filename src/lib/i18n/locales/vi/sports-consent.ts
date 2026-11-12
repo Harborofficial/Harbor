@@ -32,10 +32,13 @@ export default {
   "Show Sports": "Hiển thị Thể thao",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "Hiển thị Thể thao trong điều hướng. Bạn phải chấp thuận thông báo Thể thao trước khi trang tải.",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "Bật Thể thao mà không cần nhà cung cấp, hoặc thêm nguồn Live TV, M3U hay Xtream.",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "Bật Thể thao mà không cần nhà cung cấp, hoặc thêm nguồn Live TV, M3U hay Xtream.",
   "Set up Live TV": "Thiết lập Live TV",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "Tỉ số, lịch thi đấu và bảng xếp hạng hoạt động mà không cần nhà cung cấp. Harbor không cung cấp luồng phát, nên xem trận đấu cần nguồn Live TV, M3U hoặc Xtream của bạn.",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "Tỉ số, lịch thi đấu và bảng xếp hạng lấy từ dữ liệu thể thao công khai và không cần nhà cung cấp. Harbor không cung cấp luồng phát: xem trận đấu vẫn cần nguồn Live TV, M3U hoặc Xtream của bạn.",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "Tỉ số, lịch thi đấu và bảng xếp hạng hoạt động mà không cần nhà cung cấp. Harbor không cung cấp luồng phát, nên xem trận đấu cần nguồn Live TV, M3U hoặc Xtream của bạn.",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "Tỉ số, lịch thi đấu và bảng xếp hạng lấy từ dữ liệu thể thao công khai và không cần nhà cung cấp. Harbor không cung cấp luồng phát: xem trận đấu vẫn cần nguồn Live TV, M3U hoặc Xtream của bạn.",
   "Show Sports without a TV provider": "Hiện Thể thao khi không có nhà cung cấp TV",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "Bật Thể thao không có nghĩa là chấp thuận thông báo. Lựa chọn được giữ trên thiết bị này và không đồng bộ với tài khoản.",

@@ -14,6 +14,6 @@ const gameWowProgress: Record<string, string> = {
   "games.wow.progress.noCounts": "Jumlah run tidak tersedia",
   "games.wow.progress.counts": "{total} run · {timed} tepat waktu",
   "games.wow.progress.best": "Run terbaik",
-  "games.wow.progress.explore": "Jelajahi run"
+  "games.wow.progress.explore": "Jelajahi run",
 };
 export default gameWowProgress;

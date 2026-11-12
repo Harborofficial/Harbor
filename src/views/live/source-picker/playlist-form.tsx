@@ -16,7 +16,12 @@ export type { PlaylistFormValue, PlaylistKind };
 export const EMPTY_FORM: PlaylistFormValue = EMPTY_PLAYLIST_FORM;
 
 const KINDS: Array<{ id: PlaylistKind; label: string; icon: React.ReactNode; sub: string }> = [
-  { id: "m3u", label: "M3U URL", icon: <Tv size={14} strokeWidth={1.9} />, sub: "Direct .m3u link" },
+  {
+    id: "m3u",
+    label: "M3U URL",
+    icon: <Tv size={14} strokeWidth={1.9} />,
+    sub: "Direct .m3u link",
+  },
   {
     id: "xtream",
     label: "Xtream",
@@ -236,4 +241,3 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </label>
   );
 }
-

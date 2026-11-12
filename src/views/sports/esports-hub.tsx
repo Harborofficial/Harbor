@@ -825,13 +825,17 @@ export function EsportsHub({ active, refresh = 0 }: { active: boolean; refresh?:
         {teamId !== null && !stream && <Team teamId={teamId} onClose={() => setTeamId(null)} />}
       </Suspense>
       {stream && (
-        <EsportsBroadcast key={stream.url} stream={stream} onClose={() => {
-          setStream(null);
-          setMatch(null);
-          setTeamId(null);
-          setSelectedTeam(null);
-          setEventPage(null);
-        }} />
+        <EsportsBroadcast
+          key={stream.url}
+          stream={stream}
+          onClose={() => {
+            setStream(null);
+            setMatch(null);
+            setTeamId(null);
+            setSelectedTeam(null);
+            setEventPage(null);
+          }}
+        />
       )}
     </section>
   );

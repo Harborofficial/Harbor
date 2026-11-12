@@ -29,7 +29,9 @@ export function SourceEditor({ source, onDone }: { source: MangaSource; onDone: 
       if (isHtml) {
         const parsed = parseHtmlConfig(config);
         if (!parsed) {
-          setError(t("That config is not valid. Check baseUrl, popularPath, list, chapters, and pages."));
+          setError(
+            t("That config is not valid. Check baseUrl, popularPath, list, chapters, and pages."),
+          );
           return;
         }
         if (name.trim()) parsed.name = name.trim();

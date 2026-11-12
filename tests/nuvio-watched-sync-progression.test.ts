@@ -133,7 +133,7 @@ test("Nuvio core avatars are preloaded and picker handles missing/failed images 
 });
 
 const activeProfileId = read("../src/lib/active-profile-id.ts");
-const defaults = read("../src/lib/settings/defaults.ts");
+const privileges = read("../src/lib/profiles/privileges.ts");
 const signedOutHero = read("../src/views/account/signed-out-hero.tsx");
 const profilesModule = read("../src/lib/profiles.tsx");
 const accountMenuParts = read("../src/chrome/account-menu/account-menu-parts.tsx");
@@ -151,7 +151,7 @@ test("isStremioActivePrimary and activeProfileIsPrimary evaluate primary status 
 
 test("secondary privileges prioritize direct settings over shared settings", () => {
   assert.match(
-    defaults,
+    privileges,
     /if \(directSource\) return \{\s*\.\.\.DEFAULT_SECONDARY_PRIVILEGES,\s*\.\.\.directSource\s*\};/,
   );
 });

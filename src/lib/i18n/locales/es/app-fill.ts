@@ -730,7 +730,7 @@ const appFill: Record<string, string> = {
   "Your watch year": "Tu año de visualización",
   "Zoom In": "Acercar",
   "Zoom Out": "Alejar",
-  "Dismiss": "Descartar",
+  Dismiss: "Descartar",
 };
 
 export default appFill;

@@ -343,9 +343,7 @@ export function MangaRemote({
           }}
         />
 
-        <div
-          className={`flex items-center justify-center gap-2 px-4 ${chromeCls}`}
-        >
+        <div className={`flex items-center justify-center gap-2 px-4 ${chromeCls}`}>
           <DockButton
             label={t("Previous chapter")}
             disabled={!m.hasPrev}

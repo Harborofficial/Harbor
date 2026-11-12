@@ -5,6 +5,8 @@ const subtitles: Record<string, string> = {
     "Subtitle bergaya (ASS) mempertahankan warna, ukuran, dan posisi teks di layar, tetapi memakai font Anda.",
   "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.":
     "Harbor mengirim subtitle-nya ke mpv Anda. Pilih salah satu di menu subtitle milik mpv.",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "Subtitle bergaya (ASS) mempertahankan warna, ukuran, dan posisi teks di layar, tetapi memakai font Anda.",
 };
 
 export default subtitles;

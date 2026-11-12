@@ -1,4 +1,4 @@
-const gameHub: Record<string,string> = {
+const gameHub: Record<string, string> = {
   "games.hub.filesTitle": "Arquivos do projeto",
   "games.hub.videoUnavailable": "Não foi possível carregar os vídeos de gameplay.",
   "games.hub.noVideos": "Ainda não há vídeos para estes ROM hacks.",
@@ -7,9 +7,12 @@ const gameHub: Record<string,string> = {
   "games.hub.allOriginals": "Todos os jogos originais",
   "games.hub.searchOriginal": "Buscar um jogo original…",
   "games.hub.getFiles": "Obter arquivos",
-  "games.hub.packNote": "Este projeto usa um pacote de mods. Siga o guia do criador para o seu sistema.",
-  "games.hub.noDownload": "Nenhum download direto encontrado. Abra o site do projeto ou cole um link do arquivo.",
-  "games.hub.downloadFailed": "Não foi possível obter os arquivos. Tente novamente ou abra o site do projeto.",
+  "games.hub.packNote":
+    "Este projeto usa um pacote de mods. Siga o guia do criador para o seu sistema.",
+  "games.hub.noDownload":
+    "Nenhum download direto encontrado. Abra o site do projeto ou cole um link do arquivo.",
+  "games.hub.downloadFailed":
+    "Não foi possível obter os arquivos. Tente novamente ou abra o site do projeto.",
   "games.hub.downloadNote": "Baixe o patch do criador e escolha o jogo original ao qual aplicá-lo.",
   "games.hub.downloadLink": "Colar link de download",
   "games.hub.gettingFiles": "Verificando arquivos…",
@@ -20,18 +23,23 @@ const gameHub: Record<string,string> = {
   "games.hub.toolkitNote": "Baixe um patch para o seu jogo original.",
   "games.hub.communityMade": "Feito pela comunidade",
   "games.hub.title": "ROM hacks",
-  "games.hub.note": "Novas aventuras e clássicos reinventados. Encontre um hack, salve e jogue sua cópia modificada no Harbor.",
+  "games.hub.note":
+    "Novas aventuras e clássicos reinventados. Encontre um hack, salve e jogue sua cópia modificada no Harbor.",
   "games.hub.hacksFor": "Hacks de {name}",
   "games.hub.baseNote": "Descubra o que a comunidade criou a partir deste jogo.",
   "games.hub.how": "Como jogar um ROM hack",
-  "games.hub.stepFind": "Abra um hack para encontrar o site do projeto e o jogo original necessário.",
-  "games.hub.stepPatch": "Escolha sua ROM original e um patch BPS ou IPS. O Harbor verifica os arquivos e salva uma cópia separada.",
-  "games.hub.stepPlay": "Adicione a cópia à biblioteca. Jogue os sistemas compatíveis no Harbor ou use seu emulador configurado.",
+  "games.hub.stepFind":
+    "Abra um hack para encontrar o site do projeto e o jogo original necessário.",
+  "games.hub.stepPatch":
+    "Escolha sua ROM original e um patch BPS ou IPS. O Harbor verifica os arquivos e salva uma cópia separada.",
+  "games.hub.stepPlay":
+    "Adicione a cópia à biblioteca. Jogue os sistemas compatíveis no Harbor ou use seu emulador configurado.",
   "games.hub.byOriginal": "Hacks por jogo original",
   "games.hub.allHacks": "Ver todos os hacks",
   "games.hub.baseUnlisted": "Jogo original não informado",
   "games.hub.makePlayable": "Prepare para jogar",
-  "games.hub.installNote": "Obtenha o patch no site do projeto e aplique à sua própria cópia. Confira antes a versão necessária.",
+  "games.hub.installNote":
+    "Obtenha o patch no site do projeto e aplique à sua própria cópia. Confira antes a versão necessária.",
   "games.hub.moreFor": "Mais hacks de {name}",
   "games.hub.project": "Site do projeto",
   "games.hub.relatedError": "Não foi possível carregar os hacks relacionados.",
@@ -41,11 +49,14 @@ const gameHub: Record<string,string> = {
   "games.hub.added": "Adicionado à biblioteca",
   "games.hub.addLibrary": "Adicionar à biblioteca",
   "games.collectionsLive.greats": "Grandes de todos os tempos",
-  "games.collectionsLive.greatsNote": "Os mais bem avaliados no IGDB, com pelo menos 100 avaliações de jogadores e críticos.",
+  "games.collectionsLive.greatsNote":
+    "Os mais bem avaliados no IGDB, com pelo menos 100 avaliações de jogadores e críticos.",
   "games.collectionsLive.coop": "Melhor em companhia",
-  "games.collectionsLive.coopNote": "Jogos cooperativos bem avaliados, com pelo menos 100 avaliações no IGDB. Os modos variam por plataforma.",
+  "games.collectionsLive.coopNote":
+    "Jogos cooperativos bem avaliados, com pelo menos 100 avaliações no IGDB. Os modos variam por plataforma.",
   "games.collectionsLive.records": "Jogos nos livros dos recordes",
-  "games.collectionsLive.recordsNote": "Marcos extraordinários, com a história e a fonte de cada um.",
+  "games.collectionsLive.recordsNote":
+    "Marcos extraordinários, com a história e a fonte de cada um.",
   "games.collectionsLive.minecraft": "Minecraft",
   "games.collectionsLive.minecraftRecord": "Cópias vendidas entre todas as edições",
   "games.collectionsLive.minecraftDate": "Abril de 2025",
@@ -56,6 +67,6 @@ const gameHub: Record<string,string> = {
   "games.collectionsLive.gtaRecord": "Em vendas em apenas três dias",
   "games.collectionsLive.gtaDate": "Setembro de 2013",
   "games.atlas.kind.greats": "Grandes de todos os tempos",
-  "games.atlas.kind.coop": "Jogos cooperativos"
+  "games.atlas.kind.coop": "Jogos cooperativos",
 };
 export default gameHub;

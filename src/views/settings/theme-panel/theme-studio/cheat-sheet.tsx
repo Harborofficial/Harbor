@@ -189,7 +189,9 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                 {WINDOW_HARBOR.map((a) => (
                   <div key={a.call} className="rounded-md bg-canvas px-3.5 py-2.5">
                     <CopyName text={a.call} />
-                    <p className="mt-1 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(a.desc)}</p>
+                    <p className="mt-1 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
+                      {t(a.desc)}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -219,7 +221,9 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                         ))}
                       </span>
                     </div>
-                    <p className="mt-1.5 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(d.desc)}</p>
+                    <p className="mt-1.5 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
+                      {t(d.desc)}
+                    </p>
                     <CodeBlock code={d.example} compact />
                   </div>
                 ))}
@@ -262,10 +266,14 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                   <div key={s.selector} className="rounded-md bg-canvas px-3.5 py-2.5">
                     <div className="flex flex-wrap items-baseline gap-3">
                       <CopyName text={s.selector} />
-                      <span className="text-[15.5px] leading-[22px] text-ink-muted">{t(s.where)}</span>
+                      <span className="text-[15.5px] leading-[22px] text-ink-muted">
+                        {t(s.where)}
+                      </span>
                     </div>
                     {s.tip && (
-                      <p className="mt-1 max-w-[66ch] text-[15.5px] italic leading-[22px] text-ink-subtle">{t(s.tip)}</p>
+                      <p className="mt-1 max-w-[66ch] text-[15.5px] italic leading-[22px] text-ink-subtle">
+                        {t(s.tip)}
+                      </p>
                     )}
                   </div>
                 ))}
@@ -287,8 +295,12 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                       {l.z}
                     </code>
                     <div className="flex min-w-0 flex-col">
-                      <span className="text-[15.5px] font-semibold leading-[22px] text-ink">{t(l.name)}</span>
-                      <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t(l.what)}</span>
+                      <span className="text-[15.5px] font-semibold leading-[22px] text-ink">
+                        {t(l.name)}
+                      </span>
+                      <span className="text-[15.5px] leading-[22px] text-ink-subtle">
+                        {t(l.what)}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -313,7 +325,9 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                         </code>
                       )}
                     </div>
-                    <p className="mt-1 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(e.when)}</p>
+                    <p className="mt-1 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
+                      {t(e.when)}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -333,7 +347,9 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                     <code className="rounded-full bg-elevated px-2.5 py-0.5 font-mono text-[15.5px] leading-[22px] text-ink">
                       {v.id}
                     </code>
-                    <span className="text-[15.5px] leading-[22px] text-ink-muted">{t(v.label)}</span>
+                    <span className="text-[15.5px] leading-[22px] text-ink-muted">
+                      {t(v.label)}
+                    </span>
                   </span>
                 ))}
               </div>
@@ -355,7 +371,9 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                         {t(r.title)}
                       </span>
                     </div>
-                    <p className="mb-2 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(r.why)}</p>
+                    <p className="mb-2 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
+                      {t(r.why)}
+                    </p>
                     <CodeBlock
                       code={r.code}
                       filename={`${slug(r.title)}.${RECIPE_EXT[r.lang.toLowerCase()] ?? "txt"}`}
@@ -408,7 +426,9 @@ function Section({
     <section id={`cs-${id}`} className="flex flex-col gap-4 scroll-mt-4">
       <div className="flex flex-col gap-0.5">
         <h3 className="text-[19px] font-semibold tracking-tight text-ink">{title}</h3>
-        {sub && <span className="max-w-[70ch] text-[15.5px] leading-[22px] text-ink-muted">{sub}</span>}
+        {sub && (
+          <span className="max-w-[70ch] text-[15.5px] leading-[22px] text-ink-muted">{sub}</span>
+        )}
       </div>
       {children}
     </section>
@@ -438,7 +458,9 @@ function TokenTable({ rows, swatch }: { rows: TokenRow[]; swatch?: boolean }) {
               {r.defaultValue}
             </code>
           </div>
-          <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(r.desc)}</span>
+          <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
+            {t(r.desc)}
+          </span>
         </div>
       ))}
     </div>

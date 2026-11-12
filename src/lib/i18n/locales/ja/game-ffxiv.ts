@@ -35,5 +35,5 @@ export default {
   "games.ffxiv.sold": "取引日時",
   "games.ffxiv.noSales": "この記録には最近の取引がありません。",
   "games.ffxiv.community": "投稿データは古い場合があります。更新後に売却済みの可能性があります。",
-  "games.ffxiv.open": "Universalisで見る"
+  "games.ffxiv.open": "Universalisで見る",
 };

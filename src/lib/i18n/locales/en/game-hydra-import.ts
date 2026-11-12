@@ -1,7 +1,8 @@
 export default {
   "games.hydra.checkOnImport": "Game file checked when imported",
   "games.hydra.title": "Import from Hydra",
-  "games.hydra.note": "Review games and source subscriptions from Hydra. Close Hydra before choosing its database folder.",
+  "games.hydra.note":
+    "Review games and source subscriptions from Hydra. Close Hydra before choosing its database folder.",
   "games.hydra.choose": "Choose Hydra database folder",
   "games.hydra.reading": "Reading your Hydra library…",
   "games.hydra.checking": "Checking game files · {count} / {total}",
@@ -14,20 +15,25 @@ export default {
   "games.hydra.missing": "No game file linked",
   "games.hydra.ready": "Game file found",
   "games.hydra.original": "Settings from Hydra",
-  "games.hydra.pendingNote": "After importing, open Manage game to review the file and launch settings before playing.",
-  "games.hydra.unsupported": "Some Hydra settings could not be transferred ({count}). Review them in Hydra.",
+  "games.hydra.pendingNote":
+    "After importing, open Manage game to review the file and launch settings before playing.",
+  "games.hydra.unsupported":
+    "Some Hydra settings could not be transferred ({count}). Review them in Hydra.",
   "games.hydra.skipped": "Skipped deleted or unreadable entries: {count}",
   "games.hydra.done": "Imported {games} games and {sources} sources.",
   "games.hydra.kept": "Kept {count} existing entries.",
-  "games.hydra.scope": "Imports library details and selected catalogs. Game files stay in their current folders.",
+  "games.hydra.scope":
+    "Imports library details and selected catalogs. Game files stay in their current folders.",
   "games.hydra.apply": "Import selected ({count})",
   "games.hydra.stopped": "Stopped. Entries already imported have been kept.",
   "games.hydra.changed": "Hydra changed since this review. Choose the folder again to refresh it.",
-  "games.hydra.space": "There is not enough temporary space to review this database. Free space and try again.",
+  "games.hydra.space":
+    "There is not enough temporary space to review this database. Free space and try again.",
   "games.hydra.busy": "Another Hydra review is running. Try again when it finishes.",
   "games.hydra.timeout": "Reading the database took too long. Close Hydra and try again.",
   "games.hydra.limit": "This database exceeds the supported review size.",
-  "games.hydra.readError": "Could not read this Hydra database. Close Hydra and choose its database folder again.",
+  "games.hydra.readError":
+    "Could not read this Hydra database. Close Hydra and choose its database folder again.",
   "games.hydra.imported": "Imported from Hydra",
   "games.hydra.sourceExists": "Source already added",
   "games.hydra.useFile": "Use saved game file",
@@ -36,5 +42,5 @@ export default {
   "games.hydra.resetTime": "Reset to imported and tracked time",
   "games.hydra.fileLabel": "Game file",
   "games.hydra.argumentsLabel": "Launch options",
-  "games.hydra.prefixLabel": "Compatibility folder"
+  "games.hydra.prefixLabel": "Compatibility folder",
 };

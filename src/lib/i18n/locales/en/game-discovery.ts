@@ -49,9 +49,11 @@ export default {
   "games.discovery.openSports": "Open Sports",
   "games.discovery.viewEvent": "View event",
   "games.discovery.bestOf": "Best of {count}",
-  "games.discovery.esportsEmpty": "No upcoming matches are listed by the connected feeds right now.",
+  "games.discovery.esportsEmpty":
+    "No upcoming matches are listed by the connected feeds right now.",
   "games.discovery.esportsError": "Match schedules couldn't load.",
-  "games.discovery.esportsPartial": "Some match feeds couldn't refresh. More events may be available in Sports.",
+  "games.discovery.esportsPartial":
+    "Some match feeds couldn't refresh. More events may be available in Sports.",
   "games.discovery.esportsCoverage": "{ready} of {total} match feeds available",
   "games.discovery.sale.title": "Steam sales",
   "games.discovery.sale.next": "Next Steam sale",
@@ -75,21 +77,29 @@ export default {
   "games.discovery.sale.cards.included": "Trading cards",
   "games.discovery.sale.cards.none": "No sale cards",
   "games.discovery.sale.cards.unknown": "Cards unconfirmed",
-  "games.discovery.sale.cards.includedNote": "Included under Steam's current sale-card rules. Open Steam for earning requirements.",
-  "games.discovery.sale.cards.noneNote": "Steam's current rules don't include sale trading cards for this season. Other event rewards are separate.",
-  "games.discovery.sale.cards.unknownNote": "Steam's current card rules couldn't be verified. Open Steam to check availability.",
-  "games.discovery.sale.cards.badgeNote": "Collect a set to craft a sale badge, emoticon and profile background.",
+  "games.discovery.sale.cards.includedNote":
+    "Included under Steam's current sale-card rules. Open Steam for earning requirements.",
+  "games.discovery.sale.cards.noneNote":
+    "Steam's current rules don't include sale trading cards for this season. Other event rewards are separate.",
+  "games.discovery.sale.cards.unknownNote":
+    "Steam's current card rules couldn't be verified. Open Steam to check availability.",
+  "games.discovery.sale.cards.badgeNote":
+    "Collect a set to craft a sale badge, emoticon and profile background.",
   "games.steamStatus.connection": "Steam isn't responding reliably",
-  "games.steamStatus.connectionNote": "Harbor's Steam requests are failing. Some live data may be unavailable.",
+  "games.steamStatus.connectionNote":
+    "Harbor's Steam requests are failing. Some live data may be unavailable.",
   "games.steamStatus.tuesday": "Tuesday Steam maintenance",
-  "games.steamStatus.tuesdayNote": "Steam usually runs maintenance on Tuesdays, so the store and friends list can drop out for a few minutes.",
+  "games.steamStatus.tuesdayNote":
+    "Steam usually runs maintenance on Tuesdays, so the store and friends list can drop out for a few minutes.",
   "games.steamStatus.details": "Service status",
   "games.bundles.included": "In a Humble bundle",
   "games.bundles.ends": "Ends {date}",
-  "games.bundles.terms": "Title matched with Humble's live bundle listing. Check the included edition, tier and region before buying.",
+  "games.bundles.terms":
+    "Title matched with Humble's live bundle listing. Check the included edition, tier and region before buying.",
   "games.bundles.unavailable": "Humble bundle availability couldn't be fully checked.",
   "games.retro.playInside": "Play in Harbor",
-  "games.retro.setup": "Add the {system} player once, then play here. Your game stays on this device.",
+  "games.retro.setup":
+    "Add the {system} player once, then play here. Your game stays on this device.",
   "games.retro.install": "Install & play · {size} MB",
   "games.retro.runtime": "EmulatorJS {version} · downloaded once, available offline",
   "games.retro.aboutRuntime": "Runtime source & licenses",
@@ -110,7 +120,8 @@ export default {
   "games.retro.popout": "Pop out",
   "games.retro.dock": "Return to Harbor",
   "games.retro.moving": "Moving your game…",
-  "games.retro.moveFailed": "Couldn't move the player. Your position is saved; try Resume.",  "games.retro.controlsHint": "Choose a binding, then press a key or controller button.",
+  "games.retro.moveFailed": "Couldn't move the player. Your position is saved; try Resume.",
+  "games.retro.controlsHint": "Choose a binding, then press a key or controller button.",
   "games.retro.player": "Player",
   "games.retro.keyboard": "Keyboard",
   "games.retro.controller": "Controller",

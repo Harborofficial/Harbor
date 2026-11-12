@@ -206,7 +206,8 @@ export async function importRatingsBulk(
 
   const at = Date.now();
   const persisted = setRatingsLocalBulk(wire.map((w) => toLocal(w, at)));
-  if (!persisted) addNote(acc, t("Local storage is full, these ratings live on your account only."));
+  if (!persisted)
+    addNote(acc, t("Local storage is full, these ratings live on your account only."));
   report();
 
   const phase = await bulkPhase(wire, acc, report, signal);

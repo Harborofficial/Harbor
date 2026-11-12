@@ -65,7 +65,8 @@ export default {
   "games.league.combosIntro": "Demo singkat pilihan OP.GG. Putar saat kamu siap.",
   "games.league.watchCombo": "Tonton demo",
   "games.league.updated": "Sumber diperbarui {date}",
-  "games.league.buildEmpty": "Belum ada build untuk peran ini. Coba peran lain atau panduan di bawah.",
+  "games.league.buildEmpty":
+    "Belum ada build untuk peran ini. Coba peran lain atau panduan di bawah.",
   "games.league.iconsUnavailable": "Beberapa detail item atau rune gagal dimuat.",
   "games.league.passive": "Pasif",
   "games.league.cooldown": "Cooldown: {seconds}d",
@@ -74,17 +75,22 @@ export default {
   "games.league.story": "Kisah champion",
   "games.league.exploreMore": "Jelajahi lebih jauh",
   "games.league.guides": "Panduan video",
-  "games.league.metaScope": "OP.GG menyediakan peringkat lane dengan sampel bawaannya tanpa menyebut patch, wilayah, atau kelompok rank. Win rate dihitung dari kemenangan dan pertandingan yang dilaporkan; pick rate dibulatkan oleh sumber. Peringkat dan build memakai sampel berbeda.",
-  "games.league.buildNote": "Setiap build memiliki sampel sendiri. Build lengkap lebih banyak berasal dari pertandingan yang cukup lama untuk membeli item; win rate-nya bukan win rate keseluruhan champion. Sampel matchup bisa kecil. Sesuaikan dengan tim dan lawan. Video mungkin berasal dari patch lama.",
-  "games.league.patchDifference": "Statistik build dari {patch}; data item dan ability dari {assets}.",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.metaScope":
+    "OP.GG menyediakan peringkat lane dengan sampel bawaannya tanpa menyebut patch, wilayah, atau kelompok rank. Win rate dihitung dari kemenangan dan pertandingan yang dilaporkan; pick rate dibulatkan oleh sumber. Peringkat dan build memakai sampel berbeda.",
+  "games.league.buildNote":
+    "Setiap build memiliki sampel sendiri. Build lengkap lebih banyak berasal dari pertandingan yang cukup lama untuk membeli item; win rate-nya bukan win rate keseluruhan champion. Sampel matchup bisa kecil. Sesuaikan dengan tim dan lawan. Video mungkin berasal dari patch lama.",
+  "games.league.patchDifference":
+    "Statistik build dari {patch}; data item dan ability dari {assets}.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "Daftar tier",
   "games.league.tierScope": "Ranked solo/duo · Emerald+ · Global",
   "games.league.patchFilter": "Pilih patch",
   "games.league.allRoles": "Semua peran",
   "games.league.banRate": "Rasio ban",
   "games.league.matches": "Pertandingan",
-  "games.league.tierNote": "Peringkat berlaku untuk tiap peran. Build champion menampilkan data terbaru yang tersedia.",
+  "games.league.tierNote":
+    "Peringkat berlaku untuk tiap peran. Build champion menampilkan data terbaru yang tersedia.",
   "games.official.publisherSource": "Unduhan resmi penerbit",
   "games.official.get": "Dapatkan {launcher}",
 };

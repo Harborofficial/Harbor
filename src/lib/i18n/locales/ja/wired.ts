@@ -1470,7 +1470,8 @@ const wired: Record<string, string> = {
   "Report sent": "レポートを送信しました",
   "Reset to original": "オリジナルに戻す",
   "Resolving manifest": "マニフェストを解決中",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Real-Debridと同じ読み取り専用で使用します。また、未キャッシュのソースを再生選択画面からキューに追加できます。",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Real-Debridと同じ読み取り専用で使用します。また、未キャッシュのソースを再生選択画面からキューに追加できます。",
   "Saved to your library.": "ライブラリに保存しました。",
   "Say a title, actor, or genre": "タイトル、俳優、ジャンルを話してください",
   "Scanning your network...": "ネットワークをスキャン中...",
@@ -1543,7 +1544,8 @@ const wired: Record<string, string> = {
     "プロジェクト用ではなく、「personal」キーを使用してください。",
   "Use the v3 key, not the read access token.":
     "読み取りアクセストークンではなく、v3キーを使用してください。",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "キャッシュの確認とリンクの制限解除に使用します。Harborがアカウントに独自に何かを追加または削除することはありません。",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "キャッシュの確認とリンクの制限解除に使用します。Harborがアカウントに独自に何かを追加または削除することはありません。",
   "Uses the directdl endpoint, which skips queueing for anything already cached.":
     "directdlエンドポイントを使用し、キャッシュ済みのものはキューをスキップします。",
   "Uses up to 150 MB": "最大150 MBを使用",

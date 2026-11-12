@@ -18,7 +18,12 @@ import {
 import type { MusicTrack } from "@/lib/music/types";
 import { createListenMixFollower, type ListenMixFollower } from "./mix-follow";
 import { readListenMix, type ListenMix } from "./mix-state";
-import { LISTEN_DRIFT_SECONDS, listenActionFor, listenRoleOf, listenShouldPublish } from "./session";
+import {
+  LISTEN_DRIFT_SECONDS,
+  listenActionFor,
+  listenRoleOf,
+  listenShouldPublish,
+} from "./session";
 import { listenMixFromState, listenStateFromTrack, type ListenTrackRef } from "./track-state";
 
 const SETTLE_MS = 1500;
@@ -50,11 +55,10 @@ function applyTransport(playing: boolean): void {
 }
 
 function writeAudioSettings(next: MusicAudioSettingsValue): Promise<unknown> {
-  return saveMusicAudioSettings(next).catch(
-    () =>
-      new Promise<void>((resolve) => {
-        setTimeout(resolve, SAVE_RETRY_MS);
-      }).then(() => saveMusicAudioSettings(next)),
+  return saveMusicAudioSettings(next).catch(() =>
+    new Promise<void>((resolve) => {
+      setTimeout(resolve, SAVE_RETRY_MS);
+    }).then(() => saveMusicAudioSettings(next)),
   );
 }
 

@@ -74,10 +74,14 @@ export default {
   "games.league.story": "قصة البطل",
   "games.league.exploreMore": "استكشف أكثر",
   "games.league.guides": "أدلة الفيديو",
-  "games.league.metaScope": "تعرض OP.GG ترتيب المسارات بعينتها الافتراضية. لا يحدد هذا المصدر التحديث أو المنطقة أو فئة الرتب. تحسب نسب الفوز من الانتصارات والمباريات المنشورة، ويقرّب المصدر نسب الاختيار. تستخدم التصنيفات وتجهيزات الأبطال عينات منفصلة.",
-  "games.league.buildNote": "لكل تجهيز عينة مختلفة. ترجّح التجهيزات المكتملة المباريات التي استمرت بما يكفي لشرائها؛ ونسب فوزها ليست النسبة العامة للبطل. قد تكون عينات المواجهات صغيرة. تكيّف مع فريقك وخصمك. قد تسبق الفيديوهات التحديث الحالي.",
-  "games.league.patchDifference": "إحصاءات التجهيز من {patch}؛ وبيانات العناصر والقدرات من {assets}.",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.metaScope":
+    "تعرض OP.GG ترتيب المسارات بعينتها الافتراضية. لا يحدد هذا المصدر التحديث أو المنطقة أو فئة الرتب. تحسب نسب الفوز من الانتصارات والمباريات المنشورة، ويقرّب المصدر نسب الاختيار. تستخدم التصنيفات وتجهيزات الأبطال عينات منفصلة.",
+  "games.league.buildNote":
+    "لكل تجهيز عينة مختلفة. ترجّح التجهيزات المكتملة المباريات التي استمرت بما يكفي لشرائها؛ ونسب فوزها ليست النسبة العامة للبطل. قد تكون عينات المواجهات صغيرة. تكيّف مع فريقك وخصمك. قد تسبق الفيديوهات التحديث الحالي.",
+  "games.league.patchDifference":
+    "إحصاءات التجهيز من {patch}؛ وبيانات العناصر والقدرات من {assets}.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "تصنيف الأبطال",
   "games.league.tierScope": "مصنف فردي/ثنائي · زمردي+ · عالمي",
   "games.league.patchFilter": "اختر التحديث",

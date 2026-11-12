@@ -3,8 +3,10 @@ export default {
   "games.sources.links.copied": "已复制",
 
   "games.sources.catalogProgress": "正在检查来源 · {checked}/{total}",
-  "games.sources.source_capacity": "来源目录超过了个人资料的 2 GB 上限。请移除不使用的来源后重试。已保存的目录未发生变化。",
-  "games.sources.source_quota": "存储空间不足，无法保存这些来源。请释放空间或移除不使用的来源后重试。已保存的目录未发生变化。",
+  "games.sources.source_capacity":
+    "来源目录超过了个人资料的 2 GB 上限。请移除不使用的来源后重试。已保存的目录未发生变化。",
+  "games.sources.source_quota":
+    "存储空间不足，无法保存这些来源。请释放空间或移除不使用的来源后重试。已保存的目录未发生变化。",
 
   "games.sources.batch.busy": "正在准备另一组文件。请稍后重试。",
   "games.sources.batch.limit": "每次最多选择 200 个文件。",
@@ -32,12 +34,15 @@ export default {
   "games.sources.browser.direct": "直接下载",
 
   "games.sources.site.title": "打开一个网站",
-  "games.sources.site.note": "粘贴任意网站的下载页面。Harbor 会在自己的窗口中打开，你在那里选择文件，它就会下载到 Harbor。",
+  "games.sources.site.note":
+    "粘贴任意网站的下载页面。Harbor 会在自己的窗口中打开，你在那里选择文件，它就会下载到 Harbor。",
   "games.sources.site.url": "页面链接",
   "games.sources.site.open": "打开网站",
   "games.sources.site.invalid": "需要一个公开的 https 链接。",
-  "games.sources.browser.intro": "无需 Debrid 账户。在 {host} 上选择文件，然后在 Harbor 中选择保存位置。",
-  "games.sources.browser.fallback": "如果下载没有自动开始，请使用 {host} 页面上的备用链接。Harbor 仍会接收该文件。",
+  "games.sources.browser.intro":
+    "无需 Debrid 账户。在 {host} 上选择文件，然后在 Harbor 中选择保存位置。",
+  "games.sources.browser.fallback":
+    "如果下载没有自动开始，请使用 {host} 页面上的备用链接。Harbor 仍会接收该文件。",
 
   "games.sources.browser.choose": "在 {host} 上选择文件",
 
@@ -65,7 +70,8 @@ export default {
 
   "games.sources.partialRecent": "不可用来源：{count}。最近发布的内容可能不完整。",
 
-  "games.sources.source_incomplete": "无法读取部分已保存的目录。请先恢复或移除这些目录，再添加更多数据。",
+  "games.sources.source_incomplete":
+    "无法读取部分已保存的目录。请先恢复或移除这些目录，再添加更多数据。",
 
   "games.sources.saving": "正在保存来源…",
 
@@ -95,11 +101,13 @@ export default {
 
   "games.sources.platform.compatibility": "Windows 版本 · 需要 Wine 或 Proton",
 
-  "games.sources.platform.compatibilityNote": "在 Linux 上，请在本地游戏库中配置 Wine 或 Proton。包括反作弊在内的兼容性因游戏而异。Steam 游戏请使用 Steam 的兼容性设置。",
+  "games.sources.platform.compatibilityNote":
+    "在 Linux 上，请在本地游戏库中配置 Wine 或 Proton。包括反作弊在内的兼容性因游戏而异。Steam 游戏请使用 Steam 的兼容性设置。",
 
   "games.sources.platform.other": "{platform} 版本 · 无法在 {host} 上原生运行",
 
-  "games.sources.platform.otherNote": "请选择适合你操作系统的版本。Harbor 无法在此设备上原生安装或运行此安装包。",
+  "games.sources.platform.otherNote":
+    "请选择适合你操作系统的版本。Harbor 无法在此设备上原生安装或运行此安装包。",
 
   "games.sources.platform.unknown": "未指定平台",
 
@@ -113,15 +121,11 @@ export default {
 
   "games.setup.openNative": "打开安装程序",
 
-
-
   "games.sources.art.torrent": "种子下载",
 
   "games.sources.art.engine": "Harbor 种子引擎",
 
   "games.sources.art.reviewTorrent": "在 Harbor 中下载",
-
-
 
   "games.sources.ad.note": "通过 AllDebrid 准备此文件，然后选择保存位置。",
 
@@ -175,7 +179,8 @@ export default {
 
   "games.sources.discovery.reviewNote": "只保存目录条目。选择文件后才会下载。",
 
-  "games.sources.source_no_catalog": "此网站未发布 Harbor 可读取的目录链接。请粘贴其 JSON 目录链接。",
+  "games.sources.source_no_catalog":
+    "此网站未发布 Harbor 可读取的目录链接。请粘贴其 JSON 目录链接。",
 
   "games.sources.source_url": "输入网站地址、HTTP(S) 目录 URL 或 Hydra 安装链接。",
 
@@ -417,7 +422,5 @@ export default {
 
   "games.sources.batch.destination": "选择文件夹",
 
-  "games.download.transfer_batch_names": "部分文件名重复或无法原样保存。请单独选择这些文件。"
-
+  "games.download.transfer_batch_names": "部分文件名重复或无法原样保存。请单独选择这些文件。",
 };
-

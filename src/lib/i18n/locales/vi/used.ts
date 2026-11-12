@@ -21,7 +21,8 @@ const used: Record<string, string> = {
   "Blur up looks smoothest. Fade is lighter on older devices. Instant turns it off.":
     "Làm rõ dần mượt nhất. Mờ dần nhẹ hơn trên thiết bị cũ. Tức thì sẽ tắt hiệu ứng.",
   "Browse public groups": "Khám phá nhóm công khai",
-  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.": "Lưu toàn bộ tệp vào bộ nhớ đệm trong nền khi bạn xem, kể cả lúc tạm dừng, để các bản remux lớn được tải trước và bạn có thể tua trong tệp đã lưu mà không phải chờ tải lại. Hoạt động với luồng debrid và P2P. Dùng nhiều dung lượng ổ đĩa và băng thông hơn; dữ liệu sẽ bị xóa khi bạn chuyển nguồn hoặc đóng.",
+  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.":
+    "Lưu toàn bộ tệp vào bộ nhớ đệm trong nền khi bạn xem, kể cả lúc tạm dừng, để các bản remux lớn được tải trước và bạn có thể tua trong tệp đã lưu mà không phải chờ tải lại. Hoạt động với luồng debrid và P2P. Dùng nhiều dung lượng ổ đĩa và băng thông hơn; dữ liệu sẽ bị xóa khi bạn chuyển nguồn hoặc đóng.",
   "Bulk upload is not live yet, sending one rating per second.":
     "Tính năng tải lên hàng loạt chưa hoạt động, hiện gửi một lượt đánh giá mỗi giây.",
   "Cancel import": "Hủy nhập",

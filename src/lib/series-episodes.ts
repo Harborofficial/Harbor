@@ -37,7 +37,7 @@ import { tvdbLangFromIso1 } from "./providers/tvdb";
 import { animeKitsuMeta, type AnimeKitsuMeta } from "./providers/anime-kitsu-addon";
 import { kitsuToAnilist, animeMappingByKitsu } from "./providers/anime-mapping";
 import { nextAnimeEntry, resolveAnimeEntry } from "./providers/anime-entry";
-import { parseKitsuId } from "./providers/kitsu";
+import { kitsuEpisodes, parseKitsuId } from "./providers/kitsu";
 import { aniZipByAnilist, pickEpisodeTitle } from "./providers/anizip";
 import { fetchTvdbProxyImages, pickTvdbImage } from "./providers/tvdb-proxy";
 import { franchiseRoot } from "./providers/anime-franchise-root";
@@ -85,17 +85,27 @@ async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
       ? entry.meta
       : await animeKitsuMeta(`kitsu:${kitsuId}`).catch(() => null);
   const raw = addonMeta?.videos ?? [];
+  // The addon stamps a season's videos with the season start date. Use Kitsu's
+  // per-episode airdates so upcoming rows are not treated as already aired.
+  const kitsuRaw = await kitsuEpisodes(kitsuId, 100).catch(() => []);
+  const kitsuByNumber = new Map<number, (typeof kitsuRaw)[number]>();
+  for (const episode of kitsuRaw) kitsuByNumber.set(episode.number, episode);
+  const released = raw.map((v) => v.released ?? null);
+  const sharedReleased =
+    released.length > 1 && released[0] != null && released.every((r) => r === released[0]);
   const eps: PlayEpisode[] = [];
   for (const v of raw) {
     if (!Number.isFinite(v.episode)) continue;
     const season = v.season >= 0 ? v.season : 1;
+    const k = kitsuByNumber.get(v.episode);
     const ep: PlayEpisode = {
       season,
       episode: v.episode,
-      name: v.title || undefined,
-      still: v.thumbnail ?? undefined,
-      overview: v.overview ?? undefined,
-      airDate: v.released,
+      name: v.title || k?.title || undefined,
+      still: v.thumbnail ?? k?.thumbnail ?? undefined,
+      overview: v.overview ?? (k?.synopsis || undefined),
+      airDate:
+        (sharedReleased ? (k?.airdate ?? v.released) : (v.released ?? k?.airdate)) ?? undefined,
     };
     if (v.id) ep.kitsuStreamId = v.id;
     if (v.imdb_id ?? addonMeta?.imdb_id) ep.imdbId = v.imdb_id ?? addonMeta?.imdb_id;
@@ -150,6 +160,49 @@ async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
       if (ep.rating == null && m.rating) {
         const r = Number(m.rating);
         if (Number.isFinite(r) && r > 0) ep.rating = r;
+      }
+    }
+  }
+  if (az?.episodes) {
+    // AniZip carries season 0 entries that the Kitsu addon often omits. They are
+    // playable through the series IMDb id, so add the missing ones here.
+    const specialImdb = seriesImdb ?? az.mappings?.imdb_id;
+    if (specialImdb?.startsWith("tt")) {
+      const seen = new Set(eps.map((e) => `${animeSeasonKey(e)}:${e.episode}`));
+      for (const [kitsuNumber, m] of Object.entries(az.episodes)) {
+        if (m.seasonNumber !== 0) continue;
+        // AniZip keys are entry-relative Kitsu numbers; the value carries the
+        // TVDB special coordinates. Keep both so playback and progress agree.
+        const episode = Number(kitsuNumber);
+        const imdbEpisode = m.episodeNumber;
+        if (
+          !Number.isInteger(episode) ||
+          episode <= 0 ||
+          !Number.isInteger(imdbEpisode) ||
+          imdbEpisode <= 0
+        ) {
+          continue;
+        }
+        const key = `0:${episode}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const air = m.airDateUtc ?? m.airDate ?? m.airdate;
+        const rating = m.rating != null ? Number(m.rating) : NaN;
+        eps.push({
+          season: 0,
+          episode,
+          name: pickEpisodeTitle(m) ?? undefined,
+          still: m.image ?? undefined,
+          overview: m.overview ?? undefined,
+          airDate: air,
+          runtime: m.runtime && m.runtime > 0 ? m.runtime : undefined,
+          rating: Number.isFinite(rating) && rating > 0 ? rating : undefined,
+          kitsuStreamId: `kitsu:${kitsuId}:${episode}`,
+          imdbId: specialImdb,
+          imdbSeason: 0,
+          imdbEpisode,
+          absoluteNumber: m.absoluteEpisodeNumber,
+        });
       }
     }
   }
@@ -664,7 +717,7 @@ function uniqueAnimeSeasons(eps: PlayEpisode[] | null): number[] {
   const set = new Set<number>();
   for (const e of eps) {
     const s = animeSeasonKey(e);
-    if (s >= 1) set.add(s);
+    if (s >= 0) set.add(s);
   }
   return [...set].sort((a, b) => a - b);
 }
@@ -712,7 +765,10 @@ export async function fetchSeasonEpisodes(
   }
   if (addonOnlyMetadata() || preferCustomMeta())
     return ((await getAddonEpisodes(meta.id)) ?? []).filter((e) => e.season === season);
-  if ((meta.type !== "series" && !isAnimeId(meta.id)) || season < 1) return [];
+  if ((meta.type !== "series" && !isAnimeId(meta.id)) || season < 0) return [];
+  // Anime specials live in season 0. Live-action specials stay out of the
+  // player's season browser until that path is modelled.
+  if (season === 0 && !isAnimeId(meta.id)) return [];
   if (meta.id.startsWith("tt")) {
     const eps = await loadCinemetaEpisodes(meta.id, opts.tmdbKey);
     return (eps ?? []).filter((e) => e.season === season);

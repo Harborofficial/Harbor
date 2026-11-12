@@ -52,7 +52,11 @@ export function CrownArt({ art, seed }: { art: PreviewArt; seed: string }) {
   return (
     <div data-stagger="0" className="absolute inset-0">
       {stack.map((item, i) => (
-        <div key={item.key} ref={i === stack.length - 1 && i > 0 ? incomingRef : undefined} className="absolute inset-0">
+        <div
+          key={item.key}
+          ref={i === stack.length - 1 && i > 0 ? incomingRef : undefined}
+          className="absolute inset-0"
+        >
           <ArtImage art={item.art} seed={seed} />
         </div>
       ))}
@@ -62,16 +66,17 @@ export function CrownArt({ art, seed }: { art: PreviewArt; seed: string }) {
 
 function StateLine({ resume }: { resume: PreviewResume }) {
   const epLabel =
-    resume.season != null && resume.episode != null
-      ? `S${resume.season} E${resume.episode}`
-      : null;
+    resume.season != null && resume.episode != null ? `S${resume.season} E${resume.episode}` : null;
   const status = resume.upNext
     ? "Up Next"
     : resume.external || resume.remainingMs == null
       ? "In progress"
       : formatRemaining(resume.remainingMs);
   return (
-    <div data-stagger="1" className="flex items-baseline pb-3 text-[13px] font-semibold leading-[1.3] tabular-nums">
+    <div
+      data-stagger="1"
+      className="flex items-baseline pb-3 text-[13px] font-semibold leading-[1.3] tabular-nums"
+    >
       {epLabel && <span className="text-ink">{epLabel}</span>}
       {epLabel && <span className="text-ink-subtle">{" · "}</span>}
       <span className="text-accent">{status}</span>

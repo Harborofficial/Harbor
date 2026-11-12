@@ -39,17 +39,21 @@ export function PublicMetaDbTab() {
   const defaultId = getPmdbDefaultListId();
   const [lists, setLists] = useState<PmdbList[]>([]);
   const [catalogReady, setCatalogReady] = useState(false);
-  const [selection, setSelection] = useState<{ session: typeof session; id: string | null } | null>(null);
+  const [selection, setSelection] = useState<{ session: typeof session; id: string | null } | null>(
+    null,
+  );
   const selectedId = selection?.session === session ? selection.id : defaultId;
   const selectedList = selectedId
     ? lists.find((list) => list.id === selectedId)
     : lists.find((list) => list.type === "watchlist");
   const isDefault = selectedId === defaultId || (!defaultId && selectedList?.type === "watchlist");
-  const defaultMissing = catalogReady && !!defaultId && !lists.some((list) => list.id === defaultId);
+  const defaultMissing =
+    catalogReady && !!defaultId && !lists.some((list) => list.id === defaultId);
   const [items, setItems] = useState<PmdbListItem[]>([]);
   const [owner, setOwner] = useState(session);
   const [loadedListId, setLoadedListId] = useState<string | null>();
-  const contentCurrent = owner === session && loadedListId === (selectedId || selectedList?.id || null);
+  const contentCurrent =
+    owner === session && loadedListId === (selectedId || selectedList?.id || null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
@@ -67,7 +71,9 @@ export function PublicMetaDbTab() {
         if (cancelled) return;
         setLists(next);
         setCatalogReady(true);
-        const list = selectedId ? next.find((list) => list.id === selectedId) : next.find((list) => list.type === "watchlist");
+        const list = selectedId
+          ? next.find((list) => list.id === selectedId)
+          : next.find((list) => list.type === "watchlist");
         if (selectedId && !list) throw new PmdbListError("missing");
         const entries = list ? await fetchPmdbListItems(list.id, guard) : [];
         if (cancelled) return;
@@ -124,10 +130,13 @@ export function PublicMetaDbTab() {
 
   const options = lists.map((list) => ({
     value: list.type === "watchlist" ? "" : list.id,
-    label: `${list.name || tr("Watchlist")}${(defaultId === list.id || (!defaultId && list.type === "watchlist")) ? ` · ${tr("Default")}` : ""}`,
+    label: `${list.name || tr("Watchlist")}${defaultId === list.id || (!defaultId && list.type === "watchlist") ? ` · ${tr("Default")}` : ""}`,
   }));
   if (!lists.some((list) => list.type === "watchlist"))
-    options.unshift({ value: "", label: `${tr("Watchlist")}${!defaultId ? ` · ${tr("Default")}` : ""}` });
+    options.unshift({
+      value: "",
+      label: `${tr("Watchlist")}${!defaultId ? ` · ${tr("Default")}` : ""}`,
+    });
   if (selectedId && !lists.some((list) => list.id === selectedId))
     options.push({ value: selectedId, label: tr("Unavailable list") });
 
@@ -137,14 +146,22 @@ export function PublicMetaDbTab() {
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-[18px] font-semibold text-ink">PublicMetaDB</h2>
           <Dropdown
-            value={selectedList?.type === "watchlist" ? "" : selectedId ?? ""}
+            value={selectedList?.type === "watchlist" ? "" : (selectedId ?? "")}
             options={options}
             ariaLabel={tr("PublicMetaDB list")}
-            onChange={(id) => { setSelection({ session, id: id || null }); setQuery(""); }}
+            onChange={(id) => {
+              setSelection({ session, id: id || null });
+              setQuery("");
+            }}
           />
           <button
             type="button"
-            disabled={status === "loading" || owner !== session || isDefault || (!!selectedId && !selectedList)}
+            disabled={
+              status === "loading" ||
+              owner !== session ||
+              isDefault ||
+              (!!selectedId && !selectedList)
+            }
             onClick={() => {
               try {
                 if (getSession() !== session) {
@@ -152,8 +169,9 @@ export function PublicMetaDbTab() {
                   return;
                 }
                 setPmdbDefaultListId(selectedList?.type === "watchlist" ? null : selectedId);
+              } catch {
+                setError("Couldn't save your default PublicMetaDB list.");
               }
-              catch { setError("Couldn't save your default PublicMetaDB list."); }
             }}
             className="min-h-11 rounded-lg px-3 text-[13px] text-ink hover:bg-raised disabled:opacity-50"
           >
@@ -174,11 +192,15 @@ export function PublicMetaDbTab() {
         </div>
         {defaultMissing && status !== "loading" && (
           <p className="text-[13px] text-danger">
-            {tr("Your default PublicMetaDB list is unavailable. Select a list and set it as default.")}
+            {tr(
+              "Your default PublicMetaDB list is unavailable. Select a list and set it as default.",
+            )}
           </p>
         )}
         <p className="text-[12px] text-ink-muted">
-          {tr('"Add to PMDB" saves to your default list. Browsing another list does not change it.')}
+          {tr(
+            '"Add to PMDB" saves to your default list. Browsing another list does not change it.',
+          )}
         </p>
         {entries.length > 0 && (
           <FilterBar
@@ -204,7 +226,9 @@ export function PublicMetaDbTab() {
           <GroupedGrid
             groups={sortedGroups(visible, settings.librarySort)}
             onRemoveLocal={(id) => void removeItem(id)}
-            removeLabel={tr("Remove from {list} on PMDB", { list: selectedList?.name || tr("Watchlist") })}
+            removeLabel={tr("Remove from {list} on PMDB", {
+              list: selectedList?.name || tr("Watchlist"),
+            })}
           />
         )}
       </div>

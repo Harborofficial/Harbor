@@ -93,7 +93,9 @@ export function SetupRecovery({
           Continue. It is also not an error: nothing has gone wrong here. */}
       <p
         className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 text-[14px] leading-relaxed transition-colors duration-200 ${
-          saved ? "border-success/40 bg-success/10 text-ink" : "border-edge bg-elevated text-ink-muted"
+          saved
+            ? "border-success/40 bg-success/10 text-ink"
+            : "border-edge bg-elevated text-ink-muted"
         }`}
       >
         {saved ? (

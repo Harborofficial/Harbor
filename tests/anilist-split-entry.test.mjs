@@ -10,7 +10,11 @@ import ts from "typescript";
 const STAGE_1 = 190327;
 const STAGE_2_3 = 210482;
 
-function harness({ firstStatus = "FINISHED", firstEpisodes = 1, firstEntryStatus = "CURRENT" } = {}) {
+function harness({
+  firstStatus = "FINISHED",
+  firstEpisodes = 1,
+  firstEntryStatus = "CURRENT",
+} = {}) {
   const profile = "a";
   let session = { userName: "a" };
   const storage = new Map();

@@ -18,10 +18,13 @@ const game: SportsGame = {
 
 test("a match does not supply streams when no playlist channels are connected", () => {
   const index = buildSportsChannelIndex([]);
-  assert.deepEqual(matchChannelsForGame(game, index, {
-    attachedIds: ["saved-channel-that-no-longer-exists"],
-    broadcastNames: ["ESPN"],
-  }), []);
+  assert.deepEqual(
+    matchChannelsForGame(game, index, {
+      attachedIds: ["saved-channel-that-no-longer-exists"],
+      broadcastNames: ["ESPN"],
+    }),
+    [],
+  );
 });
 
 test("an attached match channel retains the user's playlist URL", () => {

@@ -46,7 +46,8 @@ export default {
   "games.eve.avoid": "Tránh {name}",
   "games.eve.less": "Hiện ít điểm dừng hơn",
   "games.eve.allStops": "Hiện mọi điểm dừng",
-  "games.eve.activityNote": "Hoạt động được báo cáo là dữ liệu quá khứ và không bao gồm không gian lỗ sâu. Ưu tiên an ninh không đảm bảo lộ trình an toàn.",
+  "games.eve.activityNote":
+    "Hoạt động được báo cáo là dữ liệu quá khứ và không bao gồm không gian lỗ sâu. Ưu tiên an ninh không đảm bảo lộ trình an toàn.",
   "games.eve.noRoute": "Không tìm thấy lộ trình qua cổng sao.",
   "games.eve.incursions": "Xâm lược",
   "games.eve.refreshIncursions": "Làm mới cuộc xâm lược",
@@ -60,5 +61,5 @@ export default {
   "games.eve.influence": "Ảnh hưởng",
   "games.eve.systems": "Hệ sao · {count}",
   "games.eve.boss": "Có trùm",
-  "games.eve.routeThere": "Lộ trình đến đây"
+  "games.eve.routeThere": "Lộ trình đến đây",
 };

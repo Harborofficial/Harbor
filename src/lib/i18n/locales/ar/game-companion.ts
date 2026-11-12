@@ -19,7 +19,8 @@ export default {
   "games.wow.weekly.shown": "عدد الجولات في هذه القائمة: {count}",
   "games.wow.weekly.partial": "تعذر التحقق من بعض الجولات المسجلة.",
   "games.wow.weekly.empty": "لا توجد جولات مسجلة لهذه الفترة.",
-  "games.wow.weekly.scope": "يعرض Raider.IO أعلى 10 مفاتيح كحد أقصى من الموسم الحالي لكل فترة إعادة تعيين. قد يستغرق ظهور الجولات الجديدة بعض الوقت.",
+  "games.wow.weekly.scope":
+    "يعرض Raider.IO أعلى 10 مفاتيح كحد أقصى من الموسم الحالي لكل فترة إعادة تعيين. قد يستغرق ظهور الجولات الجديدة بعض الوقت.",
   "games.helldivers.title": "الحرب المجرية",
   "games.helldivers.intro": "اختر موقع هبوطك التالي.",
   "games.helldivers.refresh": "تحديث الحرب المجرية",
@@ -137,7 +138,8 @@ export default {
   "games.warframe.noMatches": "لا توجد شقوق حالية تطابق هذه المرشحات.",
   "games.warframe.more": "عرض المزيد",
   "games.warframe.snapshot": "اللقطة: {date}",
-  "games.warframe.scope": "جدول عالمي مشترك. يعتمد الوصول على تقدمك في المهام. أسماء المهمات مقدمة بالإنجليزية.",
+  "games.warframe.scope":
+    "جدول عالمي مشترك. يعتمد الوصول على تقدمك في المهام. أسماء المهمات مقدمة بالإنجليزية.",
   "games.warframe.world.cetus": "Plains of Eidolon",
   "games.warframe.world.vallis": "Orb Vallis",
   "games.warframe.world.cambion": "Cambion Drift",
@@ -178,7 +180,8 @@ export default {
   "games.rivals.heroRate": "معدل فوز {hero} ضد كل خصم",
   "games.rivals.with": "مع الزملاء",
   "games.rivals.duoRate": "معدل الفوز المشترك للثنائي",
-  "games.rivals.scope": "مباريات تنافسية مرصودة 6 ضد 6 من جميع مستويات المهارة. 200 مباراة على الأقل لكل بطل و100 لكل ثنائي. نتائج الثنائي لا تعني وجود قدرة تعاون ولا تتنبأ بمباراتك القادمة.",
+  "games.rivals.scope":
+    "مباريات تنافسية مرصودة 6 ضد 6 من جميع مستويات المهارة. 200 مباراة على الأقل لكل بطل و100 لكل ثنائي. نتائج الثنائي لا تعني وجود قدرة تعاون ولا تتنبأ بمباراتك القادمة.",
   "games.rivals.snapshot": "تاريخ البيانات: {date}",
   "games.rivals.noMatches": "لا يوجد أبطال يطابقون المرشحات.",
   "games.rivals.unavailable": "دليل الأبطال غير متاح. حاول التحديث.",
@@ -205,7 +208,8 @@ export default {
   "games.darktide.empty": "لا توجد مهام سارية في أحدث بيانات المصدر.",
   "games.darktide.more": "عرض المزيد من المهام",
   "games.darktide.checked": "آخر تحقق: {date}",
-  "games.darktide.scope": "بيانات مجتمعية. قد يختلف التوفر والمكافآت داخل اللعبة؛ هذه ليست لوحة مهام شخصيتك.",
+  "games.darktide.scope":
+    "بيانات مجتمعية. قد يختلف التوفر والمكافآت داخل اللعبة؛ هذه ليست لوحة مهام شخصيتك.",
   "games.darktide.remaining": "متبقي {count} د",
   "games.darktide.credits": "قسائم أوردو",
   "games.darktide.xp": "خبرة",
@@ -245,7 +249,8 @@ export default {
   "games.companion.showAll": "عرض جميع الأبطال ({count})",
   "games.companion.noMatches": "لا توجد نتائج مطابقة لبحثك.",
   "games.companion.through": "المباريات حتى {date}",
-  "games.companion.sampleNote": "عينة من المجتمع تشمل جميع الرتب؛ 100 مباراة على الأقل لكل بطل. ليست توقعًا.",
+  "games.companion.sampleNote":
+    "عينة من المجتمع تشمل جميع الرتب؛ 100 مباراة على الأقل لكل بطل. ليست توقعًا.",
   "games.companion.unavailable": "تعذر تحديث البيانات. أي بيانات معروضة تعود إلى آخر تحقق.",
   "games.companion.statsUnavailable": "إحصاءات الأبطال غير متاحة. يمكنك متابعة تصفح الأبطال.",
   "games.gw2.title": "خزنة الساحر",
@@ -257,7 +262,8 @@ export default {
   "games.gw2.partial": "بعض تفاصيل العناصر غير متاحة. لا تزال الأسعار مشمولة.",
   "games.gw2.guide": "دليل الخزنة",
   "games.gw2.checked": "آخر تحقق: {date}",
-  "games.gw2.scope": "يُحفظ في ملف Harbor هذا. يُحسب كل اختيار كعرض واحد؛ لا يتم التحقق من رصيدك أو حدود الشراء أو إمكانية الوصول إلى التوسعات. أكّد التوفر واشترِ داخل اللعبة.",
+  "games.gw2.scope":
+    "يُحفظ في ملف Harbor هذا. يُحسب كل اختيار كعرض واحد؛ لا يتم التحقق من رصيدك أو حدود الشراء أو إمكانية الوصول إلى التوسعات. أكّد التوفر واشترِ داخل اللعبة.",
   "games.gw2.total": "المجموع المخطط",
   "games.gw2.currency": "الإشادة النجمية",
   "games.gw2.selected": "تم اختيار {count} من العروض",
@@ -306,8 +312,10 @@ export default {
   "games.deadlockBuilds.copy": "نسخ معرّف التجهيز",
   "games.deadlockBuilds.use": "معرّف التجهيز:",
   "games.deadlockBuilds.copyFailed": "تعذّر النسخ. حدّد المعرّف لنسخه يدوياً.",
-  "games.deadlockBuilds.definitions": "تستخدم أسماء العناصر وتكاليفها أحدث بيانات اللعبة المعروفة. قد تختلف الأدلة القديمة؛ وقد تتضمن المجموعات بدائل.",
-  "games.deadlockBuilds.itemsFailed": "بعض تفاصيل العناصر غير متاحة. يظل دليل المؤلف ومعرّفات العناصر ظاهرين.",
+  "games.deadlockBuilds.definitions":
+    "تستخدم أسماء العناصر وتكاليفها أحدث بيانات اللعبة المعروفة. قد تختلف الأدلة القديمة؛ وقد تتضمن المجموعات بدائل.",
+  "games.deadlockBuilds.itemsFailed":
+    "بعض تفاصيل العناصر غير متاحة. يظل دليل المؤلف ومعرّفات العناصر ظاهرين.",
   "games.deadlockBuilds.noItems": "لا يحتوي هذا التجهيز على مجموعات عناصر.",
   "games.deadlockBuilds.group": "المجموعة {number}",
   "games.deadlockBuilds.optional": "اختياري",
@@ -329,7 +337,8 @@ export default {
   "games.rivals.guide.teamUp": "قدرات التعاون",
   "games.rivals.guide.base": "التأثير الأساسي",
   "games.rivals.guide.enhanced": "التأثير المعزّز",
-  "games.rivals.guide.reference": "مرجع البطل الرسمي · بالإنجليزية. قد تتغير القيم مع تحديثات التوازن.",
+  "games.rivals.guide.reference":
+    "مرجع البطل الرسمي · بالإنجليزية. قد تتغير القيم مع تحديثات التوازن.",
   "games.rivals.guide.failed": "تعذّر تحميل دليل البطل الرسمي.",
   "games.rivals.guide.partial": "بعض تفاصيل القدرات غير متاحة.",
   "games.rivals.guide.checked": "تم التحقق في {date}",

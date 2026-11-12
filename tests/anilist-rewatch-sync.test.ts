@@ -56,7 +56,10 @@ test("finishing a rewatch completes the entry and bumps the repeat counter", () 
   assert.match(sync, /if \(entryStatus === "REPEATING" && total > 0 && target >= total\) \{/);
   // The finale keeps emitting progress after we complete it; without the guard the
   // next tick would read COMPLETED and start the rewatch again.
-  assert.match(sync, /if \(completedEp != null && entryStatus === "COMPLETED" && ep >= completedEp\) return;/);
+  assert.match(
+    sync,
+    /if \(completedEp != null && entryStatus === "COMPLETED" && ep >= completedEp\) return;/,
+  );
 });
 
 test("rewatch syncs are flagged and the toast reads as a rewatch", () => {
@@ -72,7 +75,10 @@ test("rewatch syncs are flagged and the toast reads as a rewatch", () => {
 test("rewatch counting is gated by the Count rewatches setting", () => {
   assert.match(sync, /countRewatches = true,/);
   assert.match(sync, /if \(!countRewatches\) return;/);
-  const defaults = readFileSync(new URL("../src/lib/settings/defaults.ts", import.meta.url), "utf8");
+  const defaults = readFileSync(
+    new URL("../src/lib/settings/defaults.ts", import.meta.url),
+    "utf8",
+  );
   assert.match(defaults, /anilistCountRewatches: true,/, "on by default");
   const panel = readFileSync(
     new URL("../src/views/settings/anilist-panel.tsx", import.meta.url),

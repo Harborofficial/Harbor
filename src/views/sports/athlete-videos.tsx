@@ -65,15 +65,17 @@ export function AthleteVideos({
   const closeButton = useRef<HTMLButtonElement>(null);
   const closeVideo = () => {
     setSelected(null);
-    requestAnimationFrame(() => trigger.current?.focus({preventScroll:true}));
+    requestAnimationFrame(() => trigger.current?.focus({ preventScroll: true }));
   };
   useSectionBack(closeVideo, !!selected);
   useEffect(() => {
     if (selected) {
-      closeButton.current?.focus({preventScroll:true});
-      closeButton.current?.closest('.sh-athlete-video-player')?.scrollIntoView({block:'nearest'});
+      closeButton.current?.focus({ preventScroll: true });
+      closeButton.current
+        ?.closest(".sh-athlete-video-player")
+        ?.scrollIntoView({ block: "nearest" });
     }
-  },[selected]);
+  }, [selected]);
   const { ref, handlers } = useDragScroll<HTMLDivElement>();
   useEffect(() => {
     if (!section.current) return;
@@ -98,9 +100,11 @@ export function AthleteVideos({
     const clips: Video[] = [];
     const publish = (next: Video[]) => {
       if (controller.signal.aborted) return;
-      clips.push(...next.filter(video=>!clips.some(existing=>existing.id===video.id)));
+      clips.push(...next.filter((video) => !clips.some((existing) => existing.id === video.id)));
       clips.sort(
-        (a, b) => Number(!!b.youtube)-Number(!!a.youtube) || (Date.parse(b.published || "") || 0) - (Date.parse(a.published || "") || 0),
+        (a, b) =>
+          Number(!!b.youtube) - Number(!!a.youtube) ||
+          (Date.parse(b.published || "") || 0) - (Date.parse(a.published || "") || 0),
       );
       setVideos(clips.slice(0, 12));
     };
@@ -151,7 +155,11 @@ export function AthleteVideos({
           </div>
           <iframe
             key={selected.id}
-            src={selected.youtube ? `${selected.embed.replace('autoplay=0','autoplay=1')}&playsinline=1` : selected.embed}
+            src={
+              selected.youtube
+                ? `${selected.embed.replace("autoplay=0", "autoplay=1")}&playsinline=1`
+                : selected.embed
+            }
             title={selected.title}
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             allowFullScreen
@@ -194,11 +202,7 @@ export function AthleteVideos({
       )}
       {status !== "loading" && !videos.length && (
         <p className="sh-athlete-video-empty">
-          {t(
-            status === "error"
-              ? "Videos are unavailable right now."
-              : "No videos found.",
-          )}
+          {t(status === "error" ? "Videos are unavailable right now." : "No videos found.")}
           <button className="sh-text-button" onClick={() => setRetry((n) => n + 1)}>
             {t("Retry")}
           </button>

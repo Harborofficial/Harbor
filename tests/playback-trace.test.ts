@@ -39,14 +39,20 @@ test("a freeze is classified as a hold or a dropped-frame event", () => {
   assert.match(trace, /"decoder-frame-drop-count"/);
   const mpv = read("src/lib/player/mpv.ts");
   assert.match(mpv, /traceFrameDrops\(reason\);/);
-  assert.match(mpv, /if \(name === "eof-reached" && data === true\) \{[\s\S]*?traceFrameDrops\("eof"\)/);
+  assert.match(
+    mpv,
+    /if \(name === "eof-reached" && data === true\) \{[\s\S]*?traceFrameDrops\("eof"\)/,
+  );
 });
 
 test("a collapsed video surface is recorded once per transition", () => {
   const mpv = read("src/lib/player/mpv.ts");
   assert.match(mpv, /const collapsed = r\.cssWidth < 64 \|\| r\.cssHeight < 64;/);
   assert.match(mpv, /if \(collapsed !== lastCollapsed\)/);
-  assert.match(mpv, /`geom \$\{Math\.round\(r\.cssWidth\)\}x\$\{Math\.round\(r\.cssHeight\)\} collapsed=\$\{collapsed\}`/);
+  assert.match(
+    mpv,
+    /`geom \$\{Math\.round\(r\.cssWidth\)\}x\$\{Math\.round\(r\.cssHeight\)\} collapsed=\$\{collapsed\}`/,
+  );
 });
 
 test("paths that can pause without a click name themselves", () => {

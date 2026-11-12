@@ -65,10 +65,20 @@ function PlaylistGenreFilters({
   const overflow = !edges.start || !edges.end;
 
   return (
-    <div className="music-top-playlists-filter-nav" role="group" aria-label={t("music.explore.genres")}>
+    <div
+      className="music-top-playlists-filter-nav"
+      role="group"
+      aria-label={t("music.explore.genres")}
+    >
       {overflow && (
-        <button type="button" className="music-top-playlists-filter-arrow" onClick={() => move(-1)}
-          disabled={edges.start} aria-label={t("common.previous")} aria-controls={id}>
+        <button
+          type="button"
+          className="music-top-playlists-filter-arrow"
+          onClick={() => move(-1)}
+          disabled={edges.start}
+          aria-label={t("common.previous")}
+          aria-controls={id}
+        >
           <ChevronLeft className="dir-icon" size={18} aria-hidden />
         </button>
       )}
@@ -78,15 +88,26 @@ function PlaylistGenreFilters({
             {t("music.filter.all")}
           </button>
           {genres.map((genre) => (
-            <button key={genre.id} type="button" aria-pressed={selected === genre.id} onClick={() => onSelect(genre.id)}>
+            <button
+              key={genre.id}
+              type="button"
+              aria-pressed={selected === genre.id}
+              onClick={() => onSelect(genre.id)}
+            >
               {genre.name}
             </button>
           ))}
         </div>
       </div>
       {overflow && (
-        <button type="button" className="music-top-playlists-filter-arrow" onClick={() => move(1)}
-          disabled={edges.end} aria-label={t("common.next")} aria-controls={id}>
+        <button
+          type="button"
+          className="music-top-playlists-filter-arrow"
+          onClick={() => move(1)}
+          disabled={edges.end}
+          aria-label={t("common.next")}
+          aria-controls={id}
+        >
           <ChevronRight className="dir-icon" size={18} aria-hidden />
         </button>
       )}
@@ -125,7 +146,9 @@ export function MusicTopPlaylists({
   const [retry, setRetry] = useState(0);
   const playback = useMusicCatalogPlayback();
   const itemMenu = useMusicItemMenu({
-    onPlay: (item) => { void playback.play(item, items); },
+    onPlay: (item) => {
+      void playback.play(item, items);
+    },
     onOpen: (item) => onOpen(item, items),
   });
   const lanes = useRef<TopPlaylistLane[]>([]);
@@ -143,7 +166,9 @@ export function MusicTopPlaylists({
       .then((all) => {
         if (!alive) return;
         setGenres(
-          [...all].sort((left, right) => Number(Boolean(right.deezerId)) - Number(Boolean(left.deezerId))),
+          [...all].sort(
+            (left, right) => Number(Boolean(right.deezerId)) - Number(Boolean(left.deezerId)),
+          ),
         );
       })
       .catch(() => {});

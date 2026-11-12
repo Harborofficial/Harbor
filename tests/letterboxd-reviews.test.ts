@@ -205,7 +205,8 @@ test("a later review page that is blocked keeps page one and fills in from the f
     requests.push(url);
     if (url.endsWith("/imdb/tt0120791/"))
       return filmPage(review("a", "★★★★★", "Loved it"), review("z", "★★", "Film page only"));
-    if (url.endsWith("/by/added/")) return new Response(review("a", "★★★★★", "Loved it") + review("b", "★★★", "Fine"));
+    if (url.endsWith("/by/added/"))
+      return new Response(review("a", "★★★★★", "Loved it") + review("b", "★★★", "Fine"));
     return new Response("<title>Just a moment...</title>", { status: 403 });
   });
   const result = await client.fetchLetterboxdReviewsDirect("tt0120791", 1, "newest");
@@ -268,7 +269,10 @@ test("full text comes from the review body only, and only from Letterboxd full-t
     <div class="review body-text -prose"><p>First paragraph.</p><p>Second paragraph.</p></div>
     <footer><p>© Letterboxd</p></footer></body></html>`;
   assert.equal(client.letterboxdFullText(page), "First paragraph.\n\nSecond paragraph.");
-  assert.equal(client.letterboxdFullText("<p>Just the</p><p>fragment.</p>"), "Just the\n\nfragment.");
+  assert.equal(
+    client.letterboxdFullText("<p>Just the</p><p>fragment.</p>"),
+    "Just the\n\nfragment.",
+  );
   assert.equal(
     client.letterboxdFullText("<html><body><nav><p>Menu</p></nav><div>No body</div></body></html>"),
     null,

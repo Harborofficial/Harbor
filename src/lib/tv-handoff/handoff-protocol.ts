@@ -121,8 +121,7 @@ export function parseHandoffPayload(v: unknown): HandoffPayload | null {
   if (v.step === "stremio") {
     const authKey = str(v.authKey, AUTH_KEY_RE);
     if (!authKey) return null;
-    const label =
-      typeof v.label === "string" && v.label.length <= LABEL_MAX ? v.label : null;
+    const label = typeof v.label === "string" && v.label.length <= LABEL_MAX ? v.label : null;
     return { step: "stremio", authKey, label };
   }
   if (v.step === "harbor") {
@@ -176,9 +175,7 @@ export function parseHandoffEnvelope(raw: string): HandoffEnvelope | null {
 
 function parseStepList(v: unknown): HandoffStepId[] {
   if (!Array.isArray(v)) return [];
-  return v.filter((s): s is HandoffStepId =>
-    HANDOFF_STEPS.includes(s as HandoffStepId),
-  );
+  return v.filter((s): s is HandoffStepId => HANDOFF_STEPS.includes(s as HandoffStepId));
 }
 
 function parseOffer(v: unknown): HandoffOffer | null {

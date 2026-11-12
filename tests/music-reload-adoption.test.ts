@@ -70,10 +70,7 @@ test("a live playing engine outranks the checkpoint after a reload", () => {
 });
 
 test("a live paused engine adopts as paused at the engine's position", () => {
-  const adopted = nativePlaybackAdoption(
-    engine({ paused: true, positionSeconds: 90 }),
-    restored(),
-  );
+  const adopted = nativePlaybackAdoption(engine({ paused: true, positionSeconds: 90 }), restored());
   assert.ok(adopted);
   assert.equal(adopted.phase, "paused");
   assert.equal(adopted.currentTime, 90);

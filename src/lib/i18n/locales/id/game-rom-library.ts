@@ -7,5 +7,5 @@ export default {
   "games.emulation.addGames": "Tambah game",
   "games.emulation.importNote": "Pilih sistem, lalu folder gamenya. Subfolder juga disertakan.",
   "games.emulation.noMatches": "Coba sistem lain atau hapus filter.",
-  "games.emulation.clearFilters": "Hapus filter"
+  "games.emulation.clearFilters": "Hapus filter",
 };

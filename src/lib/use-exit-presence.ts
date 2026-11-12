@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-export function useExitPresence(open: boolean, exitMs: number): { mounted: boolean; closing: boolean } {
+export function useExitPresence(
+  open: boolean,
+  exitMs: number,
+): { mounted: boolean; closing: boolean } {
   const [mounted, setMounted] = useState(open);
   const [closing, setClosing] = useState(false);
   const mountedRef = useRef(open);

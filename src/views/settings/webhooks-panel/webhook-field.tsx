@@ -45,7 +45,9 @@ export function WebhookField({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="flex items-center gap-2">
           {logo}
-          <label htmlFor={fieldId} className={FIELD_LABEL}>{label}</label>
+          <label htmlFor={fieldId} className={FIELD_LABEL}>
+            {label}
+          </label>
         </span>
         <StatusBadge status={status} />
       </div>
@@ -106,7 +108,10 @@ export function SetupHelp({ label, children }: { label: string; children: ReactN
   return (
     <details className="group max-w-[70ch]">
       <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-[6px] text-[15px] font-medium text-ink-muted hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
-        <ChevronRight size={16} className="shrink-0 transition-transform group-open:rotate-90 rtl:rotate-180" />
+        <ChevronRight
+          size={16}
+          className="shrink-0 transition-transform group-open:rotate-90 rtl:rotate-180"
+        />
         {label}
       </summary>
       <div className={`${FIELD_HELP} pb-4 ps-6`}>{children}</div>

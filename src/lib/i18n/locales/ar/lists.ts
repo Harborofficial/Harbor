@@ -5,7 +5,7 @@ const lists: Record<string, string> = {
   "No lists yet": "لا توجد قوائم بعد",
   "No lists saved yet.": "لا توجد قوائم محفوظة بعد.",
   "Remove from list": "إزالة من القائمة",
-  "Remove list \"{name}\"?": "إزالة القائمة \"{name}\"؟",
+  'Remove list "{name}"?': 'إزالة القائمة "{name}"؟',
   "{source} list detected": "تم اكتشاف قائمة {source}",
   "We'll name it from the URL.": "سنسمّيها من الرابط.",
   "Keep typing, or paste the full list URL.": "تابع الكتابة، أو الصق رابط القائمة الكامل.",

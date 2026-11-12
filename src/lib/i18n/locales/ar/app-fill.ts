@@ -811,7 +811,8 @@ const appFill: Record<string, string> = {
   "This trailer plays on YouTube.": "يُعرض هذا المقطع الدعائي على YouTube.",
   "Trakt comments are not available for anime titles.": "تعليقات Trakt غير متوفرة لعناوين الأنمي.",
   "Could not identify this title on Trakt.": "تعذّر التعرف على هذا العنوان على Trakt.",
-  "Connect your Trakt account to leave comments and reviews.": "اربط حساب Trakt لكتابة التعليقات والمراجعات.",
+  "Connect your Trakt account to leave comments and reviews.":
+    "اربط حساب Trakt لكتابة التعليقات والمراجعات.",
   "Load more comments": "تحميل المزيد من التعليقات",
   tomorrow: "غدًا",
   "in {n}wks": "خلال {n} أسبوع",
@@ -1342,7 +1343,7 @@ const appFill: Record<string, string> = {
     "يجري إغلاق Harbor. سيُنهي Harbor Shipyard التثبيت ثم يعيد فتحه.",
   "Harbor Shipyard did not finish updating Harbor. Nothing was changed.":
     "لم يُكمل Harbor Shipyard تحديث Harbor. لم يتغيّر شيء.",
-  "Dismiss": "تجاهل",
+  Dismiss: "تجاهل",
 };
 
 export default appFill;

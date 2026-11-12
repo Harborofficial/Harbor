@@ -140,10 +140,12 @@ const catalog02: Record<string, string> = {
   "Budget exhausted, resets at midnight UTC.": "Budget esaurito, si azzera a mezzanotte UTC.",
   "Buffer fill": "Riempimento del buffer",
   "Reveal the dot on hover": "Mostra il punto al passaggio del mouse",
-  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.": "Il punto resta defilato e compare quando punti la barra. Disattivalo per tenerlo sempre visibile.",
+  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.":
+    "Il punto resta defilato e compare quando punti la barra. Disattivalo per tenerlo sempre visibile.",
   "Buffer fill brightness": "Luminosità del riempimento del buffer",
   Buffering: "Buffering",
-  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.": "Carica in buffer l'intero file in background durante la visione, anche in pausa, così i remux di grandi dimensioni vengono precaricati e puoi spostarti all'interno di un file in cache senza dover attendere un nuovo buffering. Funziona con gli stream debrid e P2P. Usa più spazio su disco e larghezza di banda; la cache viene svuotata quando cambi contenuto o chiudi.",
+  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.":
+    "Carica in buffer l'intero file in background durante la visione, anche in pausa, così i remux di grandi dimensioni vengono precaricati e puoi spostarti all'interno di un file in cache senza dover attendere un nuovo buffering. Funziona con gli stream debrid e P2P. Usa più spazio su disco e larghezza di banda; la cache viene svuotata quando cambi contenuto o chiudi.",
   "Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.":
     "Chi segnala un bug viene citato nelle note di rilascio se la segnalazione porta a una correzione pubblicata. Lascia vuoto per restare anonimo.",
   "Bug reports": "Segnalazioni di bug",
@@ -342,7 +344,8 @@ const catalog02: Record<string, string> = {
   Checking: "Controllo in corso",
   "Checking SVP installation...": "Verifica dell'installazione di SVP...",
   "Checking availability": "Verifica della disponibilità",
-  "Checking harborcommunity.site for a newer build.": "Ricerca di una build più recente su harborcommunity.site.",
+  "Checking harborcommunity.site for a newer build.":
+    "Ricerca di una build più recente su harborcommunity.site.",
   "Checking plots, cast, and scenes": "Verifica di trame, cast e scene",
   "Checking sources and audio": "Verifica di sorgenti e audio",
   "Checking the local SVP and VapourSynth installation...":
@@ -603,9 +606,11 @@ const catalog02: Record<string, string> = {
     "I commenti restano sfocati finché non li riveli, anche se non sono contrassegnati come spoiler.",
   "Comments are hidden": "I commenti sono nascosti",
   "Hosted elsewhere": "Ospitato altrove",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "Questi piani sono gestiti da terzi. Harbor non è affiliato e non riceve nulla da un’iscrizione. Prezzi e condizioni aggiornati sono sul loro sito.",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "Questi piani sono gestiti da terzi. Harbor non è affiliato e non riceve nulla da un’iscrizione. Prezzi e condizioni aggiornati sono sul loro sito.",
   "{name} can run on a hosted instance": "{name} può girare su un’istanza ospitata",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "È gestito da terzi. Harbor non è affiliato, non lo rivende e non riceve nulla se ti iscrivi. Prezzo e contenuti sono sul loro sito.",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "È gestito da terzi. Harbor non è affiliato, non lo rivende e non riceve nulla se ti iscrivi. Prezzo e contenuti sono sul loro sito.",
   "Show comments": "Mostra i commenti",
   "Hide comments": "Nascondi i commenti",
   "Comments may take a moment to appear on Trakt":
@@ -707,7 +712,8 @@ const catalog02: Record<string, string> = {
   "Connect your Trakt account": "Collega il tuo account Trakt",
   "Connect your Trakt account to scrobble playback, sync your watchlist, and pull personalized recommendations.":
     "Collega il tuo account Trakt per registrare automaticamente le riproduzioni, sincronizzare la tua Lista e ottenere consigli personalizzati.",
-  "Connect your Trakt account to leave comments and reviews.": "Collega il tuo account Trakt per lasciare commenti e recensioni.",
+  "Connect your Trakt account to leave comments and reviews.":
+    "Collega il tuo account Trakt per lasciare commenti e recensioni.",
   "Connect your provider.": "Collega il tuo provider.",
   "Connect {name} in Settings first": "Prima collega {name} nelle Impostazioni",
   Connected: "Collegato",
@@ -803,7 +809,8 @@ const catalog02: Record<string, string> = {
   "Copy Webhook URL": "Copia URL del webhook",
   "Copy code": "Copia codice",
   "Copy diagnostics": "Copia diagnostica",
-  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.": "Copia diagnostica acquisisce lo stato del motore e le impostazioni P2P in formato JSON, da incollare comodamente in una segnalazione di bug. La cartella del motore contiene la cache DHT (dht.json) e i dati dei trasferimenti attivi.",
+  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.":
+    "Copia diagnostica acquisisce lo stato del motore e le impostazioni P2P in formato JSON, da incollare comodamente in una segnalazione di bug. La cartella del motore contiene la cache DHT (dht.json) e i dati dei trasferimenti attivi.",
   "Copy error": "Errore di copia",
   "Copy example": "Copia esempio",
   "Copy filename": "Copia nome file",

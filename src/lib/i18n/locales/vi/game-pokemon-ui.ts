@@ -25,7 +25,8 @@ export default {
   "games.pokemon.videosHint": "Hướng dẫn và mẹo",
   "games.pokemon.bank": "Tệp lưu và Pokémon",
   "games.pokemon.bankHint": "Sửa tệp lưu và quản lý hộp",
-  "games.pokemon.bankIntro": "Mở tệp lưu từ giả lập để sửa đội hình, hoặc nhập từng Pokémon vào bộ sưu tập.",
+  "games.pokemon.bankIntro":
+    "Mở tệp lưu từ giả lập để sửa đội hình, hoặc nhập từng Pokémon vào bộ sưu tập.",
   "games.pokemon.guideSourceNote": "Đọc hướng dẫn gốc hoặc mở tại đây khi truy cập được nguồn.",
   "games.pokemon.readGuide": "Đọc trên Bulbapedia",
   "games.pokemon.readInside": "Đọc trong Harbor",
@@ -39,14 +40,17 @@ export default {
   "games.pokemon.saveStep2": "Đóng trò chơi, rồi tìm hoặc xuất bản lưu pin (.sav, .srm hoặc .dsv).",
   "games.pokemon.saveStep3": "Chọn Mở tệp lưu trò chơi ở trên để sửa trong Harbor.",
   "games.pokemon.findSave": "Tệp lưu ở đâu?",
-  "games.pokemon.saveLocations": "Tìm cạnh ROM hoặc trong thư mục lưu của giả lập. Nếu chỉ có trạng thái lưu, hãy nạp trong giả lập rồi lưu từ menu trò chơi.",
+  "games.pokemon.saveLocations":
+    "Tìm cạnh ROM hoặc trong thư mục lưu của giả lập. Nếu chỉ có trạng thái lưu, hãy nạp trong giả lập rồi lưu từ menu trò chơi.",
   "games.pokemon.noSave": "Chưa có tệp lưu?",
   "games.pokemon.communitySaves": "Duyệt tệp lưu cộng đồng",
-  "games.pokemon.communitySavesNote": "Project Pokémon · Chọn đúng trò chơi và đọc ghi chú của người chia sẻ.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · Chọn đúng trò chơi và đọc ghi chú của người chia sẻ.",
   "games.pokemon.pkhexNote": "Trình sửa tệp lưu, bản tải xuống và trợ giúp từ nhà phát triển.",
-  "games.pokemon.noSaveNeeded": "Bạn có thể nhập tệp Pokémon mà không cần tệp lưu trò chơi. Chỉ cần tệp lưu khi sửa đội hình hoặc hộp của trò chơi.",
+  "games.pokemon.noSaveNeeded":
+    "Bạn có thể nhập tệp Pokémon mà không cần tệp lưu trò chơi. Chỉ cần tệp lưu khi sửa đội hình hoặc hộp của trò chơi.",
   "games.pokemon.videoUnavailable": "Không tải được video tại đây.",
   "games.pokemon.youtubeSearch": "Tìm trên YouTube",
   "games.hub.downloadApply": "Tải bản vá",
-  "games.hub.manualPatch": "Dùng bản vá hoặc liên kết bạn đã có"
+  "games.hub.manualPatch": "Dùng bản vá hoặc liên kết bạn đã có",
 };

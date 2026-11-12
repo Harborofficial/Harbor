@@ -52,7 +52,12 @@ export function ColorsGrid({
         style={{ background: colors.canvas }}
       >
         {INK.map((l) => (
-          <ColorPopover key={l.key} label={t(l.sample)} value={colors[l.key]} onChange={(v) => set(l.key, v)}>
+          <ColorPopover
+            key={l.key}
+            label={t(l.sample)}
+            value={colors[l.key]}
+            onChange={(v) => set(l.key, v)}
+          >
             {(open) => (
               <span
                 className={`block truncate rounded-md px-1.5 py-2.5 transition-shadow ${l.cls} ${

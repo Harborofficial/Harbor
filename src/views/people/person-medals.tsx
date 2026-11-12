@@ -46,7 +46,9 @@ export function PersonMedals({
     const lead = bodies.slice(0, iconsOnly ? 4 : 5);
     const overflow = bodies.length - lead.length;
     return (
-      <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 ${iconsOnly ? "justify-end" : ""}`}>
+      <div
+        className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 ${iconsOnly ? "justify-end" : ""}`}
+      >
         {lead.map((a) => {
           const color = laurelColorFor(a.type);
           const noun = AWARD_NOUN[a.type] ?? a.type;
@@ -59,7 +61,9 @@ export function PersonMedals({
             >
               <AwardLogo type={a.type} size={iconsOnly ? 18 : 14} />
               {iconsOnly ? (
-                a.wins > 1 ? <span className="text-[10.5px] leading-none">{a.wins}</span> : null
+                a.wins > 1 ? (
+                  <span className="text-[10.5px] leading-none">{a.wins}</span>
+                ) : null
               ) : (
                 <span>{`${noun} ${a.wins}`}</span>
               )}
@@ -67,7 +71,9 @@ export function PersonMedals({
           );
         })}
         {overflow > 0 && (
-          <span className="shrink-0 whitespace-nowrap text-[11px] font-semibold text-ink-subtle">+{overflow}</span>
+          <span className="shrink-0 whitespace-nowrap text-[11px] font-semibold text-ink-subtle">
+            +{overflow}
+          </span>
         )}
         {variant === "expanded" && noms > 0 && (
           <span className="shrink-0 whitespace-nowrap text-[11.5px] tabular-nums text-ink-subtle">
@@ -82,7 +88,10 @@ export function PersonMedals({
     return (
       <span
         className="inline-flex items-center gap-1.5 whitespace-nowrap text-[12px] font-semibold text-accent"
-        title={t("{wins} major award wins, {noms} nominations", { wins: String(wins), noms: String(noms) })}
+        title={t("{wins} major award wins, {noms} nominations", {
+          wins: String(wins),
+          noms: String(noms),
+        })}
       >
         <AwardLogo type="oscar" size={14} />
         {variant === "expanded" ? t("{wins} wins", { wins: String(wins) }) : wins}

@@ -37,7 +37,13 @@ export function MarketRail({
       )}
       <Row shape="landscape" min={252} scrollKey={scrollKey}>
         {items.map((it, i) => (
-          <MarketCard key={it.id} item={it} kind={kind} rank={ranked ? i + 1 : undefined} onOpen={onOpen} />
+          <MarketCard
+            key={it.id}
+            item={it}
+            kind={kind}
+            rank={ranked ? i + 1 : undefined}
+            onOpen={onOpen}
+          />
         ))}
       </Row>
     </div>

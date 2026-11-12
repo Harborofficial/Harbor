@@ -25,15 +25,25 @@ const ANIZIP: Record<string, Record<string, string>> = {
   "kitsu:11380": { en: "March Comes In Like a Lion", ja: "3-gatsu no Lion" },
   tt6074794: { en: "3-gatsu no Lion meets BUMP OF CHICKEN" },
   "anilist:77": { en: "Native Owner Title", ja: "ネイティブ作品" },
+  "tmdb:62922": {
+    en: "Magic Repo Man: Dumped by My Party, I'll Cash In With a Cute Support Fairy",
+    ja: "Kashita Maryoku wa [Revo Barai] de Kyousei Choushuu",
+  },
 };
 
 type Overrides = {
   cwId?: string | null;
   imdbKitsu?: number | null;
   checkpointKitsu?: number | null;
+  tmdbKitsu?: number | null;
 };
 
-function load({ cwId = null, imdbKitsu = null, checkpointKitsu = null }: Overrides = {}) {
+function load({
+  cwId = null,
+  imdbKitsu = null,
+  checkpointKitsu = null,
+  tmdbKitsu = null,
+}: Overrides = {}) {
   const anizip = (key: string) => async () => ({
     titles: ANIZIP[key] ?? null,
   });
@@ -44,8 +54,14 @@ function load({ cwId = null, imdbKitsu = null, checkpointKitsu = null }: Overrid
       aniZipByAnilist: (id: number) => anizip(`anilist:${id}`)(),
       aniZipByAnidb: (id: number) => anizip(`anidb:${id}`)(),
       aniZipByImdb: (id: string) => anizip(id)(),
+      aniZipByTmdbTv: (id: number) => anizip(`tmdb:${id}`)(),
     },
-    "@/lib/anime-cw-ids": { getAnimeCanonicalId: () => cwId, getAnimeCwId: () => cwId },
+    "@/lib/anime-cw-ids": {
+      getAnimeCanonicalId: () => cwId,
+      getAnimeCwId: () => cwId,
+      notifyAnimeCwIds: () => {},
+    },
+    "@/lib/anime-title-key": { rememberAnimeTitle: () => false },
     "@/lib/cw-anime-identity": {
       cwAnimeIdentityKey: (_id: string, videoId?: string | null) =>
         videoId ? (checkpointKitsu == null ? null : `kitsu:${checkpointKitsu}`) : cwId,
@@ -54,6 +70,7 @@ function load({ cwId = null, imdbKitsu = null, checkpointKitsu = null }: Overrid
     "@/lib/providers/anime-mapping": {
       externalToKitsu: async () => null,
       imdbToKitsu: async () => imdbKitsu,
+      tmdbTvToKitsu: async () => tmdbKitsu,
     },
     "@/lib/providers/kitsu": {
       parseKitsuId: (id: string) => {
@@ -118,6 +135,14 @@ test("english and native still come from AniZip", async () => {
 test("a Cinemeta row resolves through the anime mapping its detail page recorded", async () => {
   const api = load({ cwId: "kitsu:12" });
   assert.equal(await api.resolvePreferredAnimeTitle("tt0388629", "romaji"), "One Piece");
+});
+
+test("a TMDB anime row resolves through AniZip instead of falling back to its stored title", async () => {
+  const api = load({ tmdbKitsu: 12 });
+  assert.equal(
+    await api.resolvePreferredAnimeTitle("tmdb:tv:62922", "english"),
+    "Magic Repo Man: Dumped by My Party, I'll Cash In With a Cute Support Fairy",
+  );
 });
 
 test("an unknown IMDb identity does not trust an ambiguous reverse lookup", async () => {

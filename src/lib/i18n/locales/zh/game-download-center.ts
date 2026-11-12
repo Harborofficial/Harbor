@@ -20,7 +20,8 @@ export default {
   "games.download.center.clearCompleted": "清除已完成项",
   "games.download.center.keepFiles": "从列表中隐藏。文件和游戏库中的游戏会保留。",
   "games.download.center.dismiss": "隐藏 {name}",
-  "games.download.center.retention": "已完成的下载会在24小时后或手动隐藏时移入历史记录。文件将保留。",
+  "games.download.center.retention":
+    "已完成的下载会在24小时后或手动隐藏时移入历史记录。文件将保留。",
   "games.download.center.showHistory": "显示完成历史（{count}）",
   "games.download.center.hideHistory": "隐藏完成历史",
   "games.download.center.contentInfo": "内容信息",
@@ -48,5 +49,5 @@ export default {
   "games.download.center.readyToExtract": "可以解压",
   "games.download.center.downloadComplete": "下载完成",
   "games.download.center.installNote": "文件已就绪。请解压文件或打开文件夹进行安装。",
-  "games.download.center.diskNote": "此下载的写入量，包括系统缓存。不包含安装和其他应用的活动。"
+  "games.download.center.diskNote": "此下载的写入量，包括系统缓存。不包含安装和其他应用的活动。",
 };

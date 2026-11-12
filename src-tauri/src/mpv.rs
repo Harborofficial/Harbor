@@ -1833,11 +1833,11 @@ const RESUME_RECOVERY_MIN_PAUSE: Duration = Duration::from_secs(10);
 #[cfg(windows)]
 const RESUME_RECOVERY_WINDOW: Duration = Duration::from_secs(90);
 #[cfg(windows)]
-const RESUME_RECOVERY_STALL: Duration = Duration::from_secs(4);
+const RESUME_RECOVERY_STALL: Duration = Duration::from_secs(6);
 #[cfg(windows)]
-const RESUME_RECOVERY_RETRY: Duration = Duration::from_secs(8);
+const RESUME_RECOVERY_SETTLE: Duration = Duration::from_secs(2);
 #[cfg(windows)]
-const RESUME_RECOVERY_GIVE_UP: Duration = Duration::from_secs(12);
+const RESUME_RECOVERY_GIVE_UP: Duration = Duration::from_secs(24);
 #[cfg(windows)]
 const RESUME_RECOVERY_AUDIO_REPLY: u64 = 0x4842_5200_0000_0001;
 #[cfg(windows)]
@@ -1864,7 +1864,8 @@ struct ResumeStallRecovery {
     armed_at: Option<std::time::Instant>,
     attempts: u8,
     last_attempt_at: Option<std::time::Instant>,
-    before_attempt: Option<(f64, f64)>,
+    samples: std::collections::VecDeque<(std::time::Instant, f64, f64)>,
+    sample_speed: Option<f64>,
     own_seek_pending: bool,
 }
 
@@ -1903,9 +1904,11 @@ impl ResumeStallRecovery {
             return None;
         }
         if !embedded || !playing {
+            self.samples.clear();
             return None;
         }
         let (Some(media), Some(audio)) = (snapshot.time_pos, snapshot.audio_pts) else {
+            self.samples.clear();
             return None;
         };
         let safe = snapshot.value("current-ao") == "wasapi"
@@ -1921,61 +1924,76 @@ impl ResumeStallRecovery {
                 .value("duration")
                 .parse::<f64>()
                 .is_ok_and(|duration| duration.is_finite() && duration > media + 20.0);
-        if !safe {
+        let speed = snapshot
+            .value("speed")
+            .parse::<f64>()
+            .ok()
+            .filter(|speed| speed.is_finite() && *speed > 0.0);
+        if !safe || speed.is_none() {
+            self.samples.clear();
             return None;
         }
-
-        if let (Some(at), Some((before_media, before_audio))) =
-            (self.last_attempt_at, self.before_attempt)
-        {
+        let speed = speed.unwrap();
+        if self.sample_speed != Some(speed) {
+            self.samples.clear();
+            self.sample_speed = Some(speed);
+        }
+        if let Some(at) = self.last_attempt_at {
             let elapsed = now.saturating_duration_since(at);
-            let delta_media = media - before_media;
-            let delta_audio = audio - before_audio;
-            // Recovery must advance both clocks at a meaningful fraction
-            // of elapsed wall time, not just produce an occasional jump.
-            if elapsed >= Duration::from_secs(1)
-                && delta_media >= elapsed.as_secs_f64() * 0.6
-                && delta_audio >= elapsed.as_secs_f64() * 0.6
-            {
-                let stage = self.attempts;
+            if elapsed >= RESUME_RECOVERY_GIVE_UP {
                 self.clear();
-                return Some(ResumeRecoveryDecision::Recovered(stage));
+                return Some(ResumeRecoveryDecision::Exhausted);
             }
-            if self.attempts == 2 {
-                if elapsed >= RESUME_RECOVERY_GIVE_UP {
-                    self.clear();
-                    return Some(ResumeRecoveryDecision::Exhausted);
-                }
+            // Do not charge output teardown/reinitialization to playback progress.
+            if elapsed < RESUME_RECOVERY_SETTLE {
+                self.samples.clear();
                 return None;
             }
-            if elapsed < RESUME_RECOVERY_RETRY {
-                return None;
-            }
-            // Once only: re-anchor the audio/video pipelines with an exact
-            // same-position seek, preserving the user's playback position.
-            self.attempts = 2;
-            self.last_attempt_at = Some(now);
-            self.before_attempt = Some((media, audio));
-            return Some(ResumeRecoveryDecision::Attempt(
-                ResumeRecoveryAction::ResyncSeek(media),
-            ));
         }
-
-        // Old timestamps after a long pause must not count as a fresh stall.
-        let both_stationary = snapshot.last_time_pos_change.is_some_and(|last| {
-            now.saturating_duration_since(last.max(armed_at)) >= RESUME_RECOVERY_STALL
-        }) && snapshot.last_audio_pts_change.is_some_and(|last| {
-            now.saturating_duration_since(last.max(armed_at)) >= RESUME_RECOVERY_STALL
-        });
-        if !both_stationary {
+        self.samples.push_back((now, media, audio));
+        while self.samples.len() > 1
+            && now.saturating_duration_since(self.samples[1].0) >= RESUME_RECOVERY_STALL
+        {
+            self.samples.pop_front();
+        }
+        // A fresh three-second window can prove recovery even when startup
+        // consumed much of the longer stall-detection window.
+        if self.attempts > 0 {
+            if let Some(&(at, before_media, before_audio)) = self
+                .samples
+                .iter()
+                .rev()
+                .find(|(at, _, _)| now.saturating_duration_since(*at) >= Duration::from_secs(3))
+            {
+                let expected = now.saturating_duration_since(at).as_secs_f64() * speed;
+                if media - before_media >= expected * 0.6 && audio - before_audio >= expected * 0.6
+                {
+                    let stage = self.attempts;
+                    self.clear();
+                    return Some(ResumeRecoveryDecision::Recovered(stage));
+                }
+            }
+        }
+        let &(at, before_media, before_audio) = self.samples.front()?;
+        let elapsed = now.saturating_duration_since(at);
+        if elapsed < RESUME_RECOVERY_STALL {
             return None;
         }
-        self.attempts = 1;
+        let expected = elapsed.as_secs_f64() * speed;
+        // Periodic tiny clock jumps (as in Static's logs) must not reset the
+        // detector. Require sustained poor progress, not exact stationarity.
+        if media - before_media >= expected * 0.25 && audio - before_audio >= expected * 0.25 {
+            return None;
+        }
+        let action = match self.attempts {
+            0 => ResumeRecoveryAction::AudioReload,
+            1 => ResumeRecoveryAction::ResyncSeek(media),
+            _ => return None,
+        };
+        self.attempts += 1;
         self.last_attempt_at = Some(now);
-        self.before_attempt = Some((media, audio));
-        Some(ResumeRecoveryDecision::Attempt(
-            ResumeRecoveryAction::AudioReload,
-        ))
+        self.samples.clear();
+        Some(ResumeRecoveryDecision::Attempt(action))
     }
 }
 
@@ -2398,7 +2416,7 @@ fn spawn_event_loop(
                             ResumeRecoveryDecision::Exhausted => {
                                 if let Some(log) = &log {
                                     let _ = log.try_send(format!(
-                                        "[harbor/resume] warn: recovery-result wall_ms={} status=exhausted attempts=2",
+                                        "[harbor/resume] warn: recovery-result wall_ms={} status=exhausted",
                                         resume_wall_ms(),
                                     ));
                                 }
@@ -5566,6 +5584,7 @@ mod resume_trace_tests {
         snapshot.update("time-pos", &PropertyData::Double(500.0), now);
         snapshot.update("audio-pts", &PropertyData::Double(500.0), now);
         snapshot.update("duration", &PropertyData::Double(2000.0), now);
+        snapshot.update("speed", &PropertyData::Double(1.0), now);
         snapshot.update("demuxer-cache-duration", &PropertyData::Double(300.0), now);
         snapshot.update("current-ao", &PropertyData::Str("wasapi"), now);
         snapshot.update("paused-for-cache", &PropertyData::Flag(false), now);
@@ -5605,133 +5624,226 @@ mod resume_trace_tests {
         );
     }
 
+    fn recovery_tick(
+        recovery: &mut ResumeStallRecovery,
+        snapshot: &mut ResumeObserved,
+        start: Instant,
+        second: u64,
+        position: f64,
+    ) -> Option<ResumeRecoveryDecision> {
+        let now = start + Duration::from_secs(second);
+        snapshot.update("time-pos", &PropertyData::Double(position), now);
+        snapshot.update("audio-pts", &PropertyData::Double(position), now);
+        recovery.assess(snapshot, now, true, true)
+    }
+
     #[test]
-    fn resumed_stall_recovery_is_bounded_to_two_async_actions() {
+    fn trickle_progress_triggers_bounded_recovery() {
         let now = Instant::now();
-        let snapshot = recovery_snapshot(now);
+        let mut snapshot = recovery_snapshot(now);
         let mut recovery = ResumeStallRecovery::default();
         recovery.arm(now, Duration::from_secs(77));
+        let mut actions = Vec::new();
+        for second in 0..=90 {
+            if let Some(decision) = recovery_tick(
+                &mut recovery,
+                &mut snapshot,
+                now,
+                second,
+                500.0 + (second / 3) as f64 * 0.1,
+            ) {
+                actions.push((second, decision));
+            }
+        }
+        assert_eq!(actions.len(), 3);
         assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(3), true, true),
-            None
+            actions[0],
+            (
+                6,
+                ResumeRecoveryDecision::Attempt(ResumeRecoveryAction::AudioReload)
+            )
         );
         assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
-            Some(ResumeRecoveryDecision::Attempt(
-                ResumeRecoveryAction::AudioReload
-            ))
+            actions[1],
+            (
+                14,
+                ResumeRecoveryDecision::Attempt(ResumeRecoveryAction::ResyncSeek(500.4))
+            )
+        );
+        assert_eq!(actions[2], (38, ResumeRecoveryDecision::Exhausted));
+    }
+
+    #[test]
+    fn delayed_successful_reload_does_not_seek() {
+        let now = Instant::now();
+        let mut snapshot = recovery_snapshot(now);
+        let mut recovery = ResumeStallRecovery::default();
+        recovery.arm(now, Duration::from_secs(77));
+        let mut actions = Vec::new();
+        for second in 0..=40 {
+            // Reload at 6s, normal playback only resumes at 11s.
+            if let Some(decision) = recovery_tick(
+                &mut recovery,
+                &mut snapshot,
+                now,
+                second,
+                500.0 + second.saturating_sub(11) as f64,
+            ) {
+                actions.push(decision);
+            }
+        }
+        assert_eq!(
+            actions,
+            vec![
+                ResumeRecoveryDecision::Attempt(ResumeRecoveryAction::AudioReload),
+                ResumeRecoveryDecision::Recovered(1)
+            ]
+        );
+    }
+
+    #[test]
+    fn recovery_respects_playback_speed_and_speed_changes() {
+        for speed in [0.25, 0.5, 1.0, 2.0] {
+            let now = Instant::now();
+            let mut snapshot = recovery_snapshot(now);
+            let mut recovery = ResumeStallRecovery::default();
+            recovery.arm(now, Duration::from_secs(77));
+            snapshot.update("speed", &PropertyData::Double(speed), now);
+            for second in 0..=20 {
+                assert_eq!(
+                    recovery_tick(
+                        &mut recovery,
+                        &mut snapshot,
+                        now,
+                        second,
+                        500.0 + second as f64 * speed
+                    ),
+                    None
+                );
+            }
+        }
+        let now = Instant::now();
+        let mut snapshot = recovery_snapshot(now);
+        let mut recovery = ResumeStallRecovery::default();
+        recovery.arm(now, Duration::from_secs(77));
+        for second in 0..6 {
+            assert_eq!(
+                recovery_tick(&mut recovery, &mut snapshot, now, second, 500.0),
+                None
+            );
+        }
+        snapshot.update(
+            "speed",
+            &PropertyData::Double(0.5),
+            now + Duration::from_secs(6),
         );
         assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(6), true, true),
-            None
-        );
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(13), true, true),
-            Some(ResumeRecoveryDecision::Attempt(
-                ResumeRecoveryAction::ResyncSeek(500.0)
-            ))
-        );
-        recovery.mark_recovery_seek_queued();
-        assert!(recovery.consume_recovery_seek());
-        assert!(!recovery.consume_recovery_seek());
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(20), true, true),
-            None
-        );
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(25), true, true),
-            Some(ResumeRecoveryDecision::Exhausted)
-        );
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(30), true, true),
+            recovery_tick(&mut recovery, &mut snapshot, now, 6, 500.0),
             None
         );
     }
 
     #[test]
-    fn playback_progress_after_audio_reload_stops_further_recovery() {
+    fn buffering_discards_stall_history_and_cancellation_discards_attempts() {
         let now = Instant::now();
         let mut snapshot = recovery_snapshot(now);
         let mut recovery = ResumeStallRecovery::default();
-        recovery.arm(now, Duration::from_secs(60));
+        recovery.arm(now, Duration::from_secs(77));
+        for second in 0..6 {
+            assert_eq!(
+                recovery_tick(&mut recovery, &mut snapshot, now, second, 500.0),
+                None
+            );
+        }
+        snapshot.update("paused-for-cache", &PropertyData::Flag(true), now);
         assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
+            recovery_tick(&mut recovery, &mut snapshot, now, 6, 500.0),
+            None
+        );
+        snapshot.update("paused-for-cache", &PropertyData::Flag(false), now);
+        for second in 7..13 {
+            assert_eq!(
+                recovery_tick(&mut recovery, &mut snapshot, now, second, 500.0),
+                None
+            );
+        }
+        assert_eq!(
+            recovery_tick(&mut recovery, &mut snapshot, now, 13, 500.0),
             Some(ResumeRecoveryDecision::Attempt(
                 ResumeRecoveryAction::AudioReload
             ))
         );
-        snapshot.update(
-            "time-pos",
-            &PropertyData::Double(502.0),
-            now + Duration::from_secs(7),
-        );
-        snapshot.update(
-            "audio-pts",
-            &PropertyData::Double(502.0),
-            now + Duration::from_secs(7),
-        );
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(7), true, true),
-            Some(ResumeRecoveryDecision::Recovered(1))
-        );
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(20), true, true),
-            None
-        );
+        // The event loop clears recovery on pause, user seek, and file changes.
+        recovery.clear();
+        for second in 14..40 {
+            assert_eq!(
+                recovery_tick(&mut recovery, &mut snapshot, now, second, 500.0),
+                None
+            );
+        }
+        recovery.mark_recovery_seek_queued();
+        assert!(recovery.consume_recovery_seek());
+        assert!(!recovery.consume_recovery_seek());
     }
 
     #[test]
     fn no_recovery_for_short_pauses_buffering_seeks_or_non_wasapi() {
+        for case in 0..10 {
+            let now = Instant::now();
+            let mut snapshot = recovery_snapshot(now);
+            let mut recovery = ResumeStallRecovery::default();
+            recovery.arm(now, Duration::from_secs(if case == 0 { 3 } else { 30 }));
+            match case {
+                3 => snapshot.update("paused-for-cache", &PropertyData::Flag(true), now),
+                4 => snapshot.update("seeking", &PropertyData::Flag(true), now),
+                5 => snapshot.update("current-ao", &PropertyData::Str("other"), now),
+                6 => snapshot.update("demuxer-cache-duration", &PropertyData::Double(2.0), now),
+                7 => snapshot.update("duration", &PropertyData::Double(510.0), now),
+                8 => snapshot.update("eof-reached", &PropertyData::Flag(true), now),
+                9 => snapshot.update("core-idle", &PropertyData::Flag(true), now),
+                _ => {}
+            }
+            for second in 0..=30 {
+                assert_eq!(
+                    recovery.assess(
+                        &snapshot,
+                        now + Duration::from_secs(second),
+                        case != 1,
+                        case != 2
+                    ),
+                    None,
+                    "guard {case}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn slow_speed_playback_recovers_after_the_second_action() {
         let now = Instant::now();
         let mut snapshot = recovery_snapshot(now);
+        snapshot.update("speed", &PropertyData::Double(0.25), now);
         let mut recovery = ResumeStallRecovery::default();
-        recovery.arm(now, Duration::from_secs(3));
+        recovery.arm(now, Duration::from_secs(77));
+        let mut actions = Vec::new();
+        for second in 0..=40 {
+            if let Some(decision) = recovery_tick(
+                &mut recovery,
+                &mut snapshot,
+                now,
+                second,
+                500.0 + second.saturating_sub(16) as f64 * 0.25,
+            ) {
+                actions.push(decision);
+            }
+        }
         assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
-            None
-        );
-        recovery.arm(now, Duration::from_secs(30));
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(5), false, true),
-            None
-        );
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(5), true, false),
-            None
-        );
-        snapshot.update("paused-for-cache", &PropertyData::Flag(true), now);
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
-            None
-        );
-        snapshot.update("paused-for-cache", &PropertyData::Flag(false), now);
-        snapshot.update("seeking", &PropertyData::Flag(true), now);
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
-            None
-        );
-        snapshot.update("seeking", &PropertyData::Flag(false), now);
-        snapshot.update("current-ao", &PropertyData::Str("other"), now);
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
-            None
-        );
-        snapshot.update("current-ao", &PropertyData::Str("wasapi"), now);
-        snapshot.update("demuxer-cache-duration", &PropertyData::Double(2.0), now);
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
-            None
-        );
-        snapshot.update("demuxer-cache-duration", &PropertyData::Double(300.0), now);
-        snapshot.update("duration", &PropertyData::Double(510.0), now);
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
-            None
-        );
-        recovery.clear();
-        assert_eq!(
-            recovery.assess(&snapshot, now + Duration::from_secs(10), true, true),
-            None
+            actions,
+            vec![
+                ResumeRecoveryDecision::Attempt(ResumeRecoveryAction::AudioReload),
+                ResumeRecoveryDecision::Attempt(ResumeRecoveryAction::ResyncSeek(500.0)),
+                ResumeRecoveryDecision::Recovered(2)
+            ]
         );
     }
 

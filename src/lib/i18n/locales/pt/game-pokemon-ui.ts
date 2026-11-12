@@ -25,8 +25,10 @@ export default {
   "games.pokemon.videosHint": "Detonados e dicas",
   "games.pokemon.bank": "Saves e Pokémon",
   "games.pokemon.bankHint": "Editar saves e organizar caixas",
-  "games.pokemon.bankIntro": "Abra um save do emulador para editar sua equipe ou importe Pokémon individuais para sua coleção.",
-  "games.pokemon.guideSourceNote": "Leia o guia original ou abra aqui quando a fonte estiver disponível.",
+  "games.pokemon.bankIntro":
+    "Abra um save do emulador para editar sua equipe ou importe Pokémon individuais para sua coleção.",
+  "games.pokemon.guideSourceNote":
+    "Leia o guia original ou abra aqui quando a fonte estiver disponível.",
   "games.pokemon.readGuide": "Ler na Bulbapedia",
   "games.pokemon.readInside": "Ler no Harbor",
   "games.pokemon.closeReader": "Fechar leitor",
@@ -34,19 +36,24 @@ export default {
   "games.pokemon.imageSaved": "Imagem de {name} salva",
   "games.pokemon.imageFailed": "Não foi possível baixar. Tente novamente.",
   "games.pokemon.saveStart": "Usando um emulador?",
-  "games.pokemon.emulatorSave": "Seu emulador cria um arquivo de save quando você salva pelo menu do próprio jogo.",
+  "games.pokemon.emulatorSave":
+    "Seu emulador cria um arquivo de save quando você salva pelo menu do próprio jogo.",
   "games.pokemon.saveStep1": "Abra o jogo e use Salvar no menu dele.",
-  "games.pokemon.saveStep2": "Feche o jogo e encontre ou exporte o save de bateria (.sav, .srm ou .dsv).",
+  "games.pokemon.saveStep2":
+    "Feche o jogo e encontre ou exporte o save de bateria (.sav, .srm ou .dsv).",
   "games.pokemon.saveStep3": "Escolha Abrir save acima para editá-lo no Harbor.",
   "games.pokemon.findSave": "Onde está meu save?",
-  "games.pokemon.saveLocations": "Procure ao lado da ROM ou na pasta de saves do emulador. Se tiver apenas um save state, carregue-o no emulador e depois salve pelo menu do jogo.",
+  "games.pokemon.saveLocations":
+    "Procure ao lado da ROM ou na pasta de saves do emulador. Se tiver apenas um save state, carregue-o no emulador e depois salve pelo menu do jogo.",
   "games.pokemon.noSave": "Ainda não tem save?",
   "games.pokemon.communitySaves": "Ver saves da comunidade",
-  "games.pokemon.communitySavesNote": "Project Pokémon · Escolha o jogo exato e confira as notas do autor.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · Escolha o jogo exato e confira as notas do autor.",
   "games.pokemon.pkhexNote": "Editor de saves, downloads e ajuda dos desenvolvedores.",
-  "games.pokemon.noSaveNeeded": "Você pode importar arquivos Pokémon sem um save. O save só é necessário para editar a equipe ou as caixas de um jogo.",
+  "games.pokemon.noSaveNeeded":
+    "Você pode importar arquivos Pokémon sem um save. O save só é necessário para editar a equipe ou as caixas de um jogo.",
   "games.pokemon.videoUnavailable": "Não foi possível carregar os vídeos aqui.",
   "games.pokemon.youtubeSearch": "Buscar no YouTube",
   "games.hub.downloadApply": "Baixar patch",
-  "games.hub.manualPatch": "Usar um patch ou link que você já tem"
+  "games.hub.manualPatch": "Usar um patch ou link que você já tem",
 };

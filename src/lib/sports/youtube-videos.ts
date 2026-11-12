@@ -818,7 +818,9 @@ const requestText = createYoutubeRequestPool(async (url, signal) => {
   const { safeFetchStream } = await import("@/lib/safe-fetch");
   signal.throwIfAborted();
   const response = await safeFetchStream(url, { signal });
-  const maximum = /^https:\/\/www\.youtube\.com\/(?:channel\/|results\?)/.test(url) ? 4_000_000 : 600_000;
+  const maximum = /^https:\/\/www\.youtube\.com\/(?:channel\/|results\?)/.test(url)
+    ? 4_000_000
+    : 600_000;
   if (!response.ok || Number(response.headers.get("content-length")) > maximum)
     throw new Error("Video feed unavailable");
   const reader = response.body?.getReader();

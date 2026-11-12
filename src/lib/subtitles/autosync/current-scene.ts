@@ -26,7 +26,8 @@ export async function boundedNativeProbe<T>(
  * A click handler may also supply an event object; only literal true opts in.
  */
 export function shouldReadIndependentSceneAudio(
-  preferBufferedAudio: unknown, url: string,
+  preferBufferedAudio: unknown,
+  url: string,
 ): boolean {
   return preferBufferedAudio !== true && supportsCurrentSceneRead(url);
 }
@@ -38,9 +39,14 @@ export function supportsCurrentSceneRead(url: string): boolean {
     const hostname = parsed.hostname.toLowerCase();
     // Internal stream services are often bound to mpv state and cannot be
     // replayed safely through an unrelated FFmpeg process.
-    return hostname !== "localhost" && !hostname.endsWith(".localhost") &&
-      !hostname.startsWith("127.") && hostname !== "0.0.0.0" &&
-      hostname !== "[::1]" && hostname !== "[::]";
+    return (
+      hostname !== "localhost" &&
+      !hostname.endsWith(".localhost") &&
+      !hostname.startsWith("127.") &&
+      hostname !== "0.0.0.0" &&
+      hostname !== "[::1]" &&
+      hostname !== "[::]"
+    );
   } catch {
     return false;
   }

@@ -219,6 +219,24 @@ test("the CW card re-resolves when the title language changes", () => {
   );
   assert.match(
     src,
-    /\},\s*\[\s*item\._id,\s*item\.state\?\.video_id,\s*item\.state\?\.season,\s*item\.state\?\.episode,\s*settings\.animeTitleLanguage,\s*animeIdsVersion,?\s*\]\);/,
+    /\},\s*\[\s*item\._id,\s*item\.state\?\.video_id,\s*item\.state\?\.season,\s*item\.state\?\.episode,\s*settings\.animeTitleLanguage,\s*animeIdsVersion,\s*kitsuVideo\?\.id,?\s*\]\);/,
+  );
+});
+
+test("the CW card opens the resolved anime entry, not the catalog base", () => {
+  const src = readFileSync("src/components/continue-card.tsx", "utf8");
+  assert.match(
+    src,
+    /const animeEntry = kitsuId != null \? `kitsu:\$\{kitsuId\}` : getAnimeCwId\(item\._id\)/,
+  );
+  assert.match(src, /id: detailId/);
+});
+
+test("the CW card resolves the exact Kitsu cour before choosing its title", () => {
+  const src = readFileSync("src/components/continue-card.tsx", "utf8");
+  assert.match(src, /const titleVideoId = kitsuVideo\?\.id \?\? item\.state\?\.video_id/);
+  assert.match(
+    src,
+    /!\/\^\(kitsu\|mal\|anilist\|anidb\):\/\.test\(item\._id\)[\s\S]*?resolveCwAnimeVideo\(item, ep\)/,
   );
 });

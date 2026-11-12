@@ -62,7 +62,9 @@ function pastCalendarDates(rawCalendar: unknown[], nowMs: number): number[] {
 async function fetchLeagueRaw(league: string, dates?: string): Promise<SportsGame[]> {
   const def = leagueByKey(league);
   if (!def) return [];
-  const res = await safeFetch(`${SITE_BASE}/${def.path}/scoreboard${dates ? `?dates=${dates}` : ""}`);
+  const res = await safeFetch(
+    `${SITE_BASE}/${def.path}/scoreboard${dates ? `?dates=${dates}` : ""}`,
+  );
   if (!res.ok) return [];
   const data = (await res.json()) as {
     events?: unknown[];
@@ -149,7 +151,11 @@ function rank(s: SportsGame["state"]): number {
 export function sortGames(games: SportsGame[]): SportsGame[] {
   return games
     .slice()
-    .sort((a, b) => rank(a.state) - rank(b.state) || (a.state === "post" ? b.startMs - a.startMs : a.startMs - b.startMs));
+    .sort(
+      (a, b) =>
+        rank(a.state) - rank(b.state) ||
+        (a.state === "post" ? b.startMs - a.startMs : a.startMs - b.startMs),
+    );
 }
 
 export function liveCount(games: SportsGame[]): number {

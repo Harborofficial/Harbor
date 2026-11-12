@@ -31,7 +31,8 @@ export default {
   "games.league.checked": "Checked {time}",
   "games.league.source": "View source",
   "games.league.aboutData": "About these stats",
-  "games.league.metaScope": "OP.GG supplies these lane rankings using its default sample. This feed does not specify the patch, region or rank bracket. Win rates use the reported wins and games; pick rates are rounded by the source. Rankings and champion builds use separate samples.",
+  "games.league.metaScope":
+    "OP.GG supplies these lane rankings using its default sample. This feed does not specify the patch, region or rank bracket. Win rates use the reported wins and games; pick rates are rounded by the source. Rankings and champion builds use separate samples.",
   "games.league.patch": "Patch {patch}",
   "games.league.more": "More champions",
   "games.league.empty": "No champions match your search.",
@@ -46,7 +47,8 @@ export default {
   "games.league.skins": "Skin gallery",
   "games.league.buildTitle": "A build to start from",
   "games.league.buildScope": "Ranked · All ranks · OP.GG default region",
-  "games.league.patchDifference": "Build stats are from {patch}; item and ability reference data is from {assets}.",
+  "games.league.patchDifference":
+    "Build stats are from {patch}; item and ability reference data is from {assets}.",
   "games.league.core": "Core items",
   "games.league.start": "Starting items",
   "games.league.boots": "Boots",
@@ -62,8 +64,10 @@ export default {
   "games.league.combosIntro": "Short demonstrations selected by OP.GG. Play when you’re ready.",
   "games.league.watchCombo": "Watch demonstration",
   "games.league.updated": "Source updated {date}",
-  "games.league.buildNote": "Each build has its own sample. Completed item builds favor games that lasted long enough to buy them; their win rates are not the champion’s overall win rate. Matchups may have small samples. Adapt to your team and opponent. Videos can predate the current patch.",
-  "games.league.buildEmpty": "No build is available for this role. Try another role, or explore the guides below.",
+  "games.league.buildNote":
+    "Each build has its own sample. Completed item builds favor games that lasted long enough to buy them; their win rates are not the champion’s overall win rate. Matchups may have small samples. Adapt to your team and opponent. Videos can predate the current patch.",
+  "games.league.buildEmpty":
+    "No build is available for this role. Try another role, or explore the guides below.",
   "games.league.iconsUnavailable": "Some item or rune details could not load.",
   "games.league.passive": "Passive",
   "games.league.cooldown": "Cooldown: {seconds}s",
@@ -72,14 +76,16 @@ export default {
   "games.league.story": "Champion story",
   "games.league.exploreMore": "Go deeper",
   "games.league.guides": "Video guides",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "Tier list",
   "games.league.tierScope": "Ranked solo/duo · Emerald+ · Global",
   "games.league.patchFilter": "Choose patch",
   "games.league.allRoles": "All roles",
   "games.league.banRate": "Ban rate",
   "games.league.matches": "Matches",
-  "games.league.tierNote": "Ranks are within each role. Champion builds open the latest available data.",
+  "games.league.tierNote":
+    "Ranks are within each role. Champion builds open the latest available data.",
   "games.official.publisherSource": "Official publisher download",
   "games.official.get": "Get {launcher}",
 };

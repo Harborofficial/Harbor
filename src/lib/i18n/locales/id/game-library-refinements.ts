@@ -7,6 +7,7 @@ export default {
   "games.playtime.days": "Hari",
   "games.playtime.seconds": "Detik",
   "games.playtime.preciseDuration": "{hours} j {minutes} m {seconds} d",
-  "games.playtime.decimalInvalid": "Gunakan angka nonnegatif tanpa pemisah ribuan, hingga total 1.000.000 jam.",
-  "games.playtime.decimalHint": "Nilai desimal didukung. Total dibulatkan ke detik terdekat."
+  "games.playtime.decimalInvalid":
+    "Gunakan angka nonnegatif tanpa pemisah ribuan, hingga total 1.000.000 jam.",
+  "games.playtime.decimalHint": "Nilai desimal didukung. Total dibulatkan ke detik terdekat.",
 };

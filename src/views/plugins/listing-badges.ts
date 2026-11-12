@@ -97,11 +97,7 @@ export function hasListingBadges(
   want: { languages: boolean; quality: boolean },
 ): boolean {
   const badges = listingBadges(meta, want);
-  return (
-    badges.languages.length > 0 ||
-    badges.quality.length > 0 ||
-    badges.resolutions.length > 0
-  );
+  return badges.languages.length > 0 || badges.quality.length > 0 || badges.resolutions.length > 0;
 }
 
 /** The whole line the provider sent, for a tooltip: what is badged is a reading of it, and the

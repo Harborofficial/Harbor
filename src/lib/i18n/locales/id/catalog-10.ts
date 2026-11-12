@@ -426,7 +426,8 @@ const catalog: Record<string, string> = {
   "The editor is a working copy of the player. Click any control on it to move, resize, restyle or hide that control.":
     "Editor adalah salinan kerja pemutar. Klik kontrol apa pun untuk memindahkan, mengubah ukuran atau gaya, maupun menyembunyikannya.",
   "The end time has to be after the start.": "Waktu selesai harus setelah waktu mulai.",
-  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.": "Mesin mendengarkan di port lokal dan bergabung dengan DHT untuk menemukan peer. Transfer aktif adalah stream yang sedang dibukanya.",
+  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.":
+    "Mesin mendengarkan di port lokal dan bergabung dengan DHT untuk menemukan peer. Transfer aktif adalah stream yang sedang dibukanya.",
   "The escape hatch for power users. One mpv option per line as key=value, exactly like mpv.conf. These apply last, so they override every dial above. Anything Harbor can't read is skipped, so a typo won't break playback. Restart playback to apply.":
     "Jalur khusus untuk pengguna mahir. Satu opsi mpv per baris dalam format key=value, persis seperti mpv.conf. Opsi ini diterapkan terakhir, jadi akan menimpa semua pengaturan di atas. Apa pun yang tidak dapat dibaca Harbor akan dilewati, jadi salah ketik tidak akan mengganggu pemutaran. Mulai ulang pemutaran untuk menerapkannya.",
   "The free tier is $0 for personal use. Just pick the first option, no payment needed.":
@@ -981,7 +982,8 @@ const catalog: Record<string, string> = {
   "Torrent name": "Nama torrent",
   "P2P streaming": "Streaming P2P",
   Torrents: "Torrent",
-  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.": "P2P dinonaktifkan. Stream yang belum di-cache tidak dapat diputar kecuali berasal dari layanan debrid atau tautan langsung. Untuk menggunakan P2P, nonaktifkan opsi ini.",
+  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.":
+    "P2P dinonaktifkan. Stream yang belum di-cache tidak dapat diputar kecuali berasal dari layanan debrid atau tautan langsung. Untuk menggunakan P2P, nonaktifkan opsi ini.",
   "Total Shots": "Total Tembakan",
   "Total Technical Fouls": "Total Pelanggaran Teknis",
   "Total Turnovers": "Total Turnover",

@@ -197,6 +197,7 @@ test("an embedded subtitle missing from an empty ready track list reports once w
   const errors: string[] = [];
   Object.assign(h.scope, {
     rememberedSession: { subtitle: playbackSubtitleChoice(embedded("1", "Intended translation")) },
+    snap: { ...h.scope.snap, firstFrameReady: false },
     emitListToast: (message: string) => errors.push(message),
   });
   h.run();

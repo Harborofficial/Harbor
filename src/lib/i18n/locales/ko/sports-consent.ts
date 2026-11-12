@@ -32,10 +32,13 @@ export default {
   "Show Sports": "스포츠 표시",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "탐색 메뉴에 스포츠를 표시합니다. 페이지가 로드되기 전에 스포츠 안내에 동의해야 합니다.",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "제공업체 없이 스포츠를 켜거나 Live TV, M3U 또는 Xtream 소스를 추가하세요.",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "제공업체 없이 스포츠를 켜거나 Live TV, M3U 또는 Xtream 소스를 추가하세요.",
   "Set up Live TV": "Live TV 설정",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "점수, 일정, 순위는 제공업체 없이 작동합니다. Harbor는 스트림을 제공하지 않으므로 경기를 보려면 직접 만든 Live TV, M3U 또는 Xtream 소스가 필요합니다.",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "점수, 일정, 순위는 공개 스포츠 데이터에서 오며 제공업체가 필요 없습니다. Harbor는 스트림을 제공하지 않습니다. 경기를 보려면 직접 만든 Live TV, M3U 또는 Xtream 소스가 필요합니다.",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "점수, 일정, 순위는 제공업체 없이 작동합니다. Harbor는 스트림을 제공하지 않으므로 경기를 보려면 직접 만든 Live TV, M3U 또는 Xtream 소스가 필요합니다.",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "점수, 일정, 순위는 공개 스포츠 데이터에서 오며 제공업체가 필요 없습니다. Harbor는 스트림을 제공하지 않습니다. 경기를 보려면 직접 만든 Live TV, M3U 또는 Xtream 소스가 필요합니다.",
   "Show Sports without a TV provider": "TV 제공업체 없이 스포츠 표시",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "스포츠를 켜는 것만으로 안내에 동의한 것은 아닙니다. 선택은 이 기기에 보관되며 계정에 동기화되지 않습니다.",
