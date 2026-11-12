@@ -365,6 +365,18 @@ const uiFallback: Record<string, string> = {
   "Choose whether the content advisory appears in full color or a restrained monochrome tone. Also affects the Content Advisory section on detail pages.":
     "Choose whether the content advisory appears in full color or a restrained monochrome tone. Also affects the Content Advisory section on detail pages.",
   "Showing {shown} of {total} notes": "Showing {shown} of {total} notes",
+  "Keep this section expanded by default on future titles":
+    "Keep this section expanded by default on future titles",
+  "Keep expanded": "Keep expanded",
+  "Loading Content Advisory…": "Loading Content Advisory…",
+  "Failed to load Content Advisory.": "Failed to load Content Advisory.",
+  "No detailed content advisory submitted for this title on IMDb.":
+    "No detailed content advisory submitted for this title on IMDb.",
+  "{votedFor} of {totalVotes} users rated {severity}":
+    "{votedFor} of {totalVotes} users rated {severity}",
+  "{count} spoiler entry hidden — SHOW": "{count} spoiler entry hidden — SHOW",
+  "No detailed notes submitted for this category.":
+    "No detailed notes submitted for this category.",
   "Content advisory theme": "Content advisory theme",
   Monochrome: "Monochrome",
   "#": "#",
