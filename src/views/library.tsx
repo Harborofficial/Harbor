@@ -14,7 +14,7 @@ import {
 import { UiIcon } from "@/components/ui-icon";
 import { Profiled } from "@/components/profiled";
 import { AnchoredMenu } from "@/components/anchored-menu";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import anilistLogo from "@/assets/anilist.png";
 import simklLogo from "@/assets/simkl.png";
@@ -41,10 +41,14 @@ import { MyGroupsTab } from "./library/my-groups-tab";
 import { FavoritesTab } from "./library/favorites-tab";
 import { TabBtn, type Tab } from "./library/shared";
 import {
+  hasHiddenAvailableTab,
   hiddenLibraryTabs,
   isLibraryTabShown,
   toggleHiddenLibraryTab,
 } from "./library/tab-visibility";
+import { pushBackHandler } from "@/lib/back-intercept";
+import { advanceFocus } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { SimklTab } from "./library/simkl-tab";
 import { PublicMetaDbTab } from "./library/publicmetadb-tab";
 import { TraktTab } from "./library/trakt-tab";
@@ -172,6 +176,7 @@ export function LibraryView({ active }: { active: boolean }) {
         <div {...contentDrag} data-context-page-background className="flex flex-col gap-7">
           {settings.libraryHero && <LibraryHero tabKey={tab} />}
           <Header
+            active={active}
             tab={tab}
             onTab={setTab}
             traktConnected={traktConnected}
@@ -230,6 +235,7 @@ function LibraryHero({ tabKey }: { tabKey: Tab }) {
 }
 
 function Header({
+  active,
   tab,
   onTab,
   traktConnected,
@@ -239,6 +245,7 @@ function Header({
   pmdbConnected,
   lbConnected,
 }: {
+  active: boolean;
   tab: Tab;
   onTab: (t: Tab) => void;
   traktConnected: boolean;
@@ -252,7 +259,48 @@ function Header({
   const { setView } = useView();
   const { settings, update } = useSettings();
   const tabsButtonRef = useRef<HTMLButtonElement>(null);
+  const tabsMenuRef = useRef<HTMLDivElement>(null);
+  const tabsMenuId = useId();
+  const tabsMenuLabelId = useId();
   const [tabsMenuOpen, setTabsMenuOpen] = useState(false);
+  const closeTabsMenu = useCallback((restoreFocus: boolean) => {
+    setTabsMenuOpen(false);
+    const trigger = tabsButtonRef.current;
+    if (restoreFocus && trigger) advanceFocus(trigger);
+  }, []);
+  const dismissTabsMenu = useCallback(
+    () => closeTabsMenu(!!tabsMenuRef.current?.contains(document.activeElement)),
+    [closeTabsMenu],
+  );
+  useEffect(() => {
+    if (!tabsMenuOpen) return;
+    // Same as Dropdown: the shell handles Back before window key listeners, so the
+    // open menu takes Back first and keyboard or controller Back cannot leave the page.
+    const removeBack = pushBackHandler(() => {
+      closeTabsMenu(true);
+      return true;
+    });
+    const onKey = (e: KeyboardEvent) => {
+      if (!isBackKey(e)) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      closeTabsMenu(true);
+    };
+    window.addEventListener("keydown", onKey, true);
+    const frame = requestAnimationFrame(() => {
+      const first = tabsMenuRef.current?.querySelector<HTMLElement>("button");
+      if (first) advanceFocus(first);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      removeBack();
+      window.removeEventListener("keydown", onKey, true);
+    };
+  }, [tabsMenuOpen, closeTabsMenu]);
+  // The Library view stays mounted, so a hotkey that changes view must not leave the menu open.
+  useEffect(() => {
+    if (!active) setTabsMenuOpen(false);
+  }, [active]);
   const hidden = useMemo(
     () => hiddenLibraryTabs(settings.libraryHiddenTabs),
     [settings.libraryHiddenTabs],
@@ -317,6 +365,10 @@ function Header({
         <img src={letterboxdLogo} alt="" className="h-3.5 w-3.5 rounded-[3px] object-contain" />
       ),
     });
+  const hasHiddenTabs = hasHiddenAvailableTab(
+    tabs.map((entry) => entry.id),
+    hidden,
+  );
   return (
     <header className="flex flex-col gap-5">
       <div className="flex items-end justify-between gap-6">
@@ -337,12 +389,12 @@ function Header({
           <button
             ref={tabsButtonRef}
             type="button"
-            onClick={() => setTabsMenuOpen((open) => !open)}
-            aria-haspopup="menu"
+            onClick={() => (tabsMenuOpen ? closeTabsMenu(false) : setTabsMenuOpen(true))}
             aria-expanded={tabsMenuOpen}
+            aria-controls={tabsMenuOpen ? tabsMenuId : undefined}
             title={t("Choose which tabs appear in your library")}
             className={`flex items-center gap-1.5 text-[13px] font-medium transition-colors ${
-              tabsMenuOpen || hidden.size > 0 ? "text-ink" : "text-ink-muted hover:text-ink"
+              tabsMenuOpen || hasHiddenTabs ? "text-ink" : "text-ink-muted hover:text-ink"
             }`}
           >
             <SlidersHorizontal size={15} strokeWidth={2} />
@@ -388,12 +440,21 @@ function Header({
       <AnchoredMenu
         anchorRef={tabsButtonRef}
         open={tabsMenuOpen}
-        onClose={() => setTabsMenuOpen(false)}
+        onClose={dismissTabsMenu}
         width={240}
       >
-        <div className="animate-menu-pop overflow-hidden rounded-md bg-elevated shadow-[0_18px_44px_-18px_rgba(0,0,0,0.85)]">
+        <div
+          ref={tabsMenuRef}
+          id={tabsMenuId}
+          role="group"
+          aria-labelledby={tabsMenuLabelId}
+          className="animate-menu-pop overflow-hidden rounded-md bg-elevated shadow-[0_18px_44px_-18px_rgba(0,0,0,0.85)]"
+        >
           <div className="px-3 pt-2.5 pb-1.5">
-            <span className="text-[10.5px] font-medium uppercase tracking-wider text-ink-subtle">
+            <span
+              id={tabsMenuLabelId}
+              className="text-[10.5px] font-medium uppercase tracking-wider text-ink-subtle"
+            >
               {t("Show tabs")}
             </span>
           </div>
@@ -406,8 +467,7 @@ function Header({
                   <button
                     key={entry.id}
                     type="button"
-                    role="menuitemcheckbox"
-                    aria-checked={shown}
+                    aria-pressed={shown}
                     onClick={() => toggleTab(entry.id)}
                     className="flex min-h-[40px] w-full items-center gap-2.5 px-3 py-2 text-start text-[13px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
                   >

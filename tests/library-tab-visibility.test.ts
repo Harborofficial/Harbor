@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import {
+  HIDEABLE_LIBRARY_TABS,
+  hasHiddenAvailableTab,
   hiddenLibraryTabs,
   isLibraryTabShown,
   toggleHiddenLibraryTab,
@@ -29,4 +31,12 @@ test("toggling hides and restores a tab in a stable order", () => {
 
 test("the Library tab cannot be hidden", () => {
   assert.deepEqual(toggleHiddenLibraryTab(hiddenLibraryTabs([]), "library"), []);
+  assert.equal(HIDEABLE_LIBRARY_TABS.includes("library" as never), false);
+});
+
+test("only hidden tabs that are currently available count as hidden", () => {
+  const hidden = hiddenLibraryTabs(["trakt"]);
+  assert.equal(hasHiddenAvailableTab(["library", "watchlist", "trakt"], hidden), true);
+  assert.equal(hasHiddenAvailableTab(["library", "watchlist"], hidden), false);
+  assert.equal(hasHiddenAvailableTab(["library"], hiddenLibraryTabs([])), false);
 });
