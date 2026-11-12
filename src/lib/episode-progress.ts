@@ -1,7 +1,7 @@
 import { manualWatchedState, createManualWatchedReader } from "@/lib/manual-watched";
 import { lastPlayedEpisode, readResumeEntry, createResumeReader } from "@/lib/resume";
 import { pmdbUsesAbsoluteOrder } from "@/lib/publicmetadb/watched-order";
-import { getWatchedThresholdRatio, getWatchedThresholdPct } from "@/lib/watched-threshold";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import { readCachedWatchProgress, resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
 
@@ -121,11 +121,9 @@ export function getEpisodeProgress(
     });
     if (nuvioItem) {
       const nuvioT =
-        nuvioItem.last_watched ||
-        (nuvioItem.updated_at ? Date.parse(nuvioItem.updated_at) : 0);
+        nuvioItem.last_watched || (nuvioItem.updated_at ? Date.parse(nuvioItem.updated_at) : 0);
       if (!entry || nuvioT > entry.t) {
-        const dur =
-          nuvioItem.duration_seconds || (runtimeMin ? runtimeMin * 60 : 0);
+        const dur = nuvioItem.duration_seconds || (runtimeMin ? runtimeMin * 60 : 0);
         entry = {
           ms: (nuvioItem.progress_seconds || 0) * 1000,
           t: nuvioT,
@@ -190,10 +188,7 @@ export function getEpisodeProgress(
 
   return {
     ratio: done ? 1 : ratio,
-    watched:
-      done ||
-      ratio >= getWatchedThresholdRatio() ||
-      Math.round(ratio * 100) >= getWatchedThresholdPct(),
+    watched: done || ratio >= getWatchedThresholdRatio(),
     startedAt,
   };
 }

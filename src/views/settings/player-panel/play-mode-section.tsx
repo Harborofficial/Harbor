@@ -18,7 +18,12 @@ import {
 import { SliderReset, fillStyle } from "@/components/slider";
 import seekPreviewBg from "@/assets/preview/seek-preview.png";
 import { PreviewImage } from "../preview-image";
-import { getWatchedThresholdPct } from "@/lib/watched-threshold";
+import {
+  DEFAULT_WATCHED_THRESHOLD_PCT,
+  MIN_WATCHED_THRESHOLD_PCT,
+  MAX_WATCHED_THRESHOLD_PCT,
+  getWatchedThresholdPct,
+} from "@/lib/watched-threshold";
 
 export function PlayModeChoice() {
   const { settings, update } = useSettings();
@@ -173,7 +178,12 @@ export function PlayModePanel() {
           wide
           label={t("Watched completion threshold")}
           desc={t(
-            "How far you must watch before an episode or movie is considered watched and scrobbled to Trakt, Nuvio, or Stremio. Sliding dictates the completion percentage (70% - 100%). Default is 85%.",
+            "How far you must watch before an episode or movie is considered watched and scrobbled to Trakt, Nuvio, or Stremio. Sliding dictates the completion percentage ({min}% - {max}%). Default is {def}%.",
+            {
+              min: MIN_WATCHED_THRESHOLD_PCT,
+              max: MAX_WATCHED_THRESHOLD_PCT,
+              def: DEFAULT_WATCHED_THRESHOLD_PCT,
+            },
           )}
         >
           <div className="flex w-full max-w-[520px] flex-col gap-3">
@@ -184,13 +194,13 @@ export function PlayModePanel() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-canvas/90 via-canvas/30 to-transparent" />
               <div className="absolute end-3 top-2.5 flex items-center gap-1.5 rounded-full bg-canvas/80 px-2.5 py-0.5 text-[11.5px] font-medium text-ink-muted backdrop-blur-md">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                <span className="h-1.5 w-1.5 rounded-full bg-accent" />
                 <span>{t("Marks watched at {n}%", { n: getWatchedThresholdPct(settings) })}</span>
               </div>
               <div className="absolute inset-x-4 bottom-3">
                 <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/20 backdrop-blur-md">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-400 transition-[width] duration-75"
+                    className="h-full rounded-full bg-accent transition-[width] duration-75"
                     style={{ width: `${getWatchedThresholdPct(settings)}%` }}
                   />
                 </div>
@@ -200,22 +210,27 @@ export function PlayModePanel() {
             <div className="flex h-11 w-full items-center gap-4">
               <input
                 type="range"
-                min={70}
-                max={100}
+                min={MIN_WATCHED_THRESHOLD_PCT}
+                max={MAX_WATCHED_THRESHOLD_PCT}
                 step={1}
                 value={getWatchedThresholdPct(settings)}
                 onChange={(e) => update({ watchedThresholdPct: Number(e.target.value) })}
                 aria-label={t("Watched completion threshold")}
                 className="harbor-slider h-11 min-w-0 flex-1"
-                style={fillStyle(getWatchedThresholdPct(settings), 70, 100, 1)}
+                style={fillStyle(
+                  getWatchedThresholdPct(settings),
+                  MIN_WATCHED_THRESHOLD_PCT,
+                  MAX_WATCHED_THRESHOLD_PCT,
+                  1,
+                )}
               />
               <span className="w-[64px] shrink-0 text-end text-[15.5px] tabular-nums text-ink-muted">
                 {`${getWatchedThresholdPct(settings)}%`}
               </span>
               <SliderReset
                 settingName={t("Watched completion threshold")}
-                show={getWatchedThresholdPct(settings) !== 85}
-                onReset={() => update({ watchedThresholdPct: 85 })}
+                show={getWatchedThresholdPct(settings) !== DEFAULT_WATCHED_THRESHOLD_PCT}
+                onReset={() => update({ watchedThresholdPct: DEFAULT_WATCHED_THRESHOLD_PCT })}
               />
             </div>
           </div>

@@ -663,9 +663,10 @@ export const ContinueCard = memo(function ContinueCard({
     const src = actual.src;
     if (src.homeServer) return false;
     const resumeEntry = readResumeEntry(meta.id, episode?.season, episode?.episode);
-    const useResume =
-      resumeEntry && (resumeEntry.t > actual.playedAt || resumeEntry.ms > actual.positionMs);
-    const resumeMs = useResume ? resumeEntry.ms : (resumeEntry?.ms ?? actual.positionMs);
+    const useResume = Boolean(
+      resumeEntry && (resumeEntry.t > actual.playedAt || resumeEntry.ms > actual.positionMs),
+    );
+    const resumeMs = useResume && resumeEntry ? resumeEntry.ms : actual.positionMs;
     if (actual.requiresSourceRefresh || src.streamRef?.infoHash) {
       assertCurrent();
       openPicker(meta, episode, {

@@ -7,8 +7,11 @@ Set-Location $repo
 # Free port 1420 if still bound by an orphaned Vite / Node dev server
 try {
     Get-NetTCPConnection -LocalPort 1420 -State Listen -ErrorAction SilentlyContinue | ForEach-Object {
-        Write-Host "Releasing port 1420 (PID $($_.OwningProcess))..." -ForegroundColor Yellow
-        Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue
+        $proc = Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue
+        if ($proc -and ($proc.ProcessName -match '^(node|vite)$' -or $proc.Path -match 'node\.exe')) {
+            Write-Host "Releasing port 1420 (PID $($_.OwningProcess) - $($proc.ProcessName))..." -ForegroundColor Yellow
+            Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue
+        }
     }
 } catch {}
 

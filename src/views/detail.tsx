@@ -2426,7 +2426,7 @@ export function DetailView({
           matched.episode >= 1
         ) {
           const dur = matched.duration_seconds || 1;
-          const isFinished = matched.progress_seconds > dur * 0.9;
+          const isFinished = matched.progress_seconds >= dur * getWatchedThresholdRatio();
           if (isFinished) {
             const subsequent = matches.find((m) => {
               if (

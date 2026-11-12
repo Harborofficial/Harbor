@@ -37,6 +37,7 @@ import { markSectionDirty } from "./profile-sync/scheduler";
 import { configureLayoutStore } from "./layout-sync/store";
 import { SYNCED_SETTINGS_FIELDS } from "./layout-sync/sections";
 import { startTrayMenuBridge, type TrayMenuBridge } from "./tray-menu-bridge";
+import { setCachedWatchedThreshold } from "./watched-threshold";
 
 export type {
   ContentCategory,
@@ -386,6 +387,10 @@ export function SettingsProvider({
         .catch((error) => console.warn("Stream blocker preference could not be applied", error));
     }
   }, [settings.blockTrackers, settingsReady]);
+
+  useEffect(() => {
+    setCachedWatchedThreshold(settings.watchedThresholdPct);
+  }, [settings.watchedThresholdPct]);
 
   useEffect(() => {
     void import("@/lib/snapshots").then(({ setSnapshotRetentionDays }) => {

@@ -96,6 +96,7 @@ export function reconcileNuvioWatchedFlags(
     next.add(id.toLowerCase());
   }
   const prevMatches = (id: string) => next.has(id) || next.has(id.toLowerCase());
+  if (previous.length === 0 && next.size === 0) return;
   if (
     previous.length > 0 &&
     previous.every(prevMatches) &&

@@ -8,6 +8,7 @@ import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
 import { detectAnimeForCw, useDetectedAnimeVersion } from "@/lib/anime-detect";
 import { setExternalCwSources, useExternalCw } from "@/lib/feed/external-cw";
 import { isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 import { animeCwIdsVersion, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
 import { dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
 import { publishResumeStates } from "@/lib/hover-preview/store";
@@ -49,6 +50,7 @@ export type BpAnimeCwBase = {
 function localItems(
   privateOnly: boolean,
   sources: { library: boolean; local: boolean },
+  thresholdRatio: number,
 ): LibraryItem[] {
   return listLocalCw(privateOnly)
     .filter((e) => localCwSourceEnabled(e, sources))
@@ -66,7 +68,7 @@ function localItems(
         season: e.season,
         episode: e.episode,
         video_id: e.videoId,
-        flaggedWatched: e.durationMs > 0 && e.positionMs / e.durationMs >= 0.9 ? 1 : 0,
+        flaggedWatched: e.durationMs > 0 && e.positionMs / e.durationMs >= thresholdRatio ? 1 : 0,
         lastWatched: new Date(e.t).toISOString(),
       },
       removed: false,
@@ -136,10 +138,11 @@ export function useBpAnimeCwBase(): BpAnimeCwBase {
     return loadAnimeAddonRows(authKey, setAddonRows);
   }, [authKey]);
 
+  const thresholdRatio = getWatchedThresholdRatio(settings);
   const localAnimeCw = useMemo<LibraryItem[]>(() => {
     void localCwVer;
-    return localItems(hideSharedCw, cwSources);
-  }, [localCwVer, hideSharedCw, activeProfile?.id, cwSources]);
+    return localItems(hideSharedCw, cwSources, thresholdRatio);
+  }, [localCwVer, hideSharedCw, activeProfile?.id, cwSources, thresholdRatio]);
 
   const pool = useMemo(
     () => [

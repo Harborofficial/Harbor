@@ -764,7 +764,7 @@ export function Home({
       return true;
     });
 
-    const nuvioLastSyncedAt = isNuvioProvider ? loadNuvioState().lastSyncedAt ?? 0 : 0;
+    const nuvioLastSyncedAt = isNuvioProvider ? (loadNuvioState().lastSyncedAt ?? 0) : 0;
     const cwBase = isNuvioProvider
       ? [
           ...externalAllowed,

@@ -44,6 +44,7 @@ export function useNuvioScrobble({
   const isPushingRef = useRef<boolean>(false);
   const pinnedProfileTargetRef = useRef<number | null>(null);
   const pendingPushRef = useRef<string | null>(null);
+  const undismissedRef = useRef<Set<string>>(new Set());
 
   const snapRef = useRef(snap);
   snapRef.current = snap;
@@ -92,9 +93,16 @@ export function useNuvioScrobble({
 
     const currentSrc = srcRef.current;
     const profileTarget = resolvePinnedProfileTarget();
-    if (metaId) {
+    if (metaId && !undismissedRef.current.has(metaId)) {
+      undismissedRef.current.add(metaId);
       undismissCw(metaId);
-      void undismissNextUpInNuvioCloud(profileTarget, metaId);
+      void undismissNextUpInNuvioCloud(profileTarget, metaId)
+        .then((ok) => {
+          if (!ok) undismissedRef.current.delete(metaId);
+        })
+        .catch(() => {
+          undismissedRef.current.delete(metaId);
+        });
     }
 
     isPushingRef.current = true;
@@ -174,6 +182,7 @@ export function useNuvioScrobble({
     watchedReportedRef.current = false;
     pinnedProfileTargetRef.current = null;
     pendingPushRef.current = null;
+    undismissedRef.current.clear();
   }, [metaId, effSeason, effEpisode]);
 
   // Active playback interval checking clock position directly (since snap.positionSec doesn't rerender every second)

@@ -1957,8 +1957,36 @@ async function reconcileNuvioWatchedOnce(
     }
   }
 
-  for (const p of readCachedWatchProgress(profileIndex)) {
+  const cachedProgress = applyPending(
+    readCachedWatchProgress(profileIndex),
+    profileIndex,
+    accountId,
+    "progress",
+    false,
+    {},
+  ).items;
+
+  for (const p of cachedProgress) {
     if (p.content_id && typeof p.season === "number" && typeof p.episode === "number") {
+      const variants = getNuvioContentIdVariants(p.content_id);
+      const pCoord = coordinate(p);
+      const pTime = pendingRowTime("progress", p);
+      const isDeletedInPending = Object.values(pending).some((c) => {
+        if (!c.deleted) return false;
+        const matchesContent = variants.some(
+          (v) => v.toLowerCase() === (c.row.content_id || "").toLowerCase(),
+        );
+        if (!matchesContent) return false;
+        const matchesEpisode =
+          (c.row.season == null && c.row.episode == null) ||
+          (c.row.season === p.season && c.row.episode === p.episode);
+        if (!matchesEpisode) return false;
+        if (c.except && c.except.includes(pCoord)) return false;
+        if (c.deletedAt != null && pTime > c.deletedAt) return false;
+        return true;
+      });
+      if (isDeletedInPending) continue;
+
       const dur = p.duration_seconds || 1;
       if (p.progress_seconds >= dur * getWatchedThresholdRatio()) {
         const clean = p.content_id.replace(/^(series|movie|tmdb):/, "").trim();

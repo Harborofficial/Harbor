@@ -28,6 +28,7 @@ import {
   sanitizeControllerCursorImage,
   sanitizeControllerCursorSize,
 } from "@/lib/gamepad/cursor";
+import { clampWatchedThresholdPct } from "@/lib/watched-threshold";
 
 const RETIRED_GEMINI = new Set([
   "gemini-2.0-flash",
@@ -432,6 +433,7 @@ export function parseStoredSettings(raw: string | null): {
     const settings: Settings = {
       ...DEFAULT,
       ...parsed,
+      watchedThresholdPct: clampWatchedThresholdPct(parsed.watchedThresholdPct),
       searchTmdbTopMatch: parsed.searchTmdbTopMatch !== false,
       metadataAddonOrder: Array.isArray(parsed.metadataAddonOrder)
         ? [

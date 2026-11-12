@@ -12,12 +12,12 @@ import { recordAnimePlayId } from "@/lib/anime-cw-ids";
 import type { PlayerSrc } from "@/lib/view";
 import { resumeLibraryGetOne } from "@/lib/player/resume-start";
 import { playerLoadIdentity } from "@/lib/player/load-identity";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 
 const ANIME_SCHEME = /^(kitsu|mal|anilist|anidb):/;
 
 const TICK_MS = 30000;
 const BASE_REFRESH_MS = 30000;
-import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 
 const MIN_POSITION_SEC = 6;
 

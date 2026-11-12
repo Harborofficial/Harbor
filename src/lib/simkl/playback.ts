@@ -6,6 +6,7 @@ import { loadSimklProgress } from "./list-status";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { readResumeEntry, saveResumeBatch } from "@/lib/resume";
 import type { LibraryItem } from "@/lib/stremio";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 
 type Ids = {
   imdb?: string;
@@ -192,7 +193,7 @@ function isValidSimklPlaybackItem(item: LibraryItem): boolean {
   const offset = item.state.timeOffset ?? 0;
   const dur = item.state.duration ?? 0;
   if (offset <= 0 || (item.state.flaggedWatched ?? 0) > 0) return false;
-  if (dur > 0 && offset / dur >= 0.9) return false;
+  if (dur > 0 && offset / dur >= getWatchedThresholdRatio()) return false;
   return true;
 }
 

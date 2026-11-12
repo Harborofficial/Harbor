@@ -6,6 +6,7 @@ import { lastPlayedEpisode } from "@/lib/resume";
 import { localCwEntry } from "@/lib/local-cw";
 import { episodeFromVideoId, type LibraryItem } from "@/lib/stremio";
 import { selectQueueEpisode } from "@/lib/queue-episode";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 
 type ProgressPoint = {
   id: string;
@@ -62,7 +63,7 @@ export async function resolveQueueEpisode({
         season: resume.season,
         episode: resume.episode,
         t: resume.t,
-        finished: (resume.pct ?? 0) >= 0.9,
+        finished: (resume.pct ?? 0) >= getWatchedThresholdRatio(),
       });
     }
 
@@ -78,7 +79,8 @@ export async function resolveQueueEpisode({
         season: local.season,
         episode: local.episode,
         t: local.t,
-        finished: local.durationMs > 0 && local.positionMs / local.durationMs >= 0.9,
+        finished:
+          local.durationMs > 0 && local.positionMs / local.durationMs >= getWatchedThresholdRatio(),
       });
     }
   }
@@ -103,7 +105,10 @@ export async function resolveQueueEpisode({
         season,
         episode,
         t: Number.isFinite(at) ? at : 0,
-        finished: duration > 0 ? offset / duration >= 0.9 : (state?.flaggedWatched ?? 0) > 0,
+        finished:
+          duration > 0
+            ? offset / duration >= getWatchedThresholdRatio()
+            : (state?.flaggedWatched ?? 0) > 0,
       });
     }
   }

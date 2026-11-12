@@ -527,10 +527,12 @@ export function buildNuvioPlaybackItems(
             : DURATION_MS.movie;
       let offsetMs = progressSec * 1000;
 
+      const fallbackTime = localMatch?.t
+        ? new Date(localMatch.t).toISOString()
+        : new Date(0).toISOString();
       const when =
-        r.updated_at ||
-        (r.last_watched ? new Date(r.last_watched).toISOString() : new Date(0).toISOString());
-      const remoteT = r.last_watched || 0;
+        r.updated_at || (r.last_watched ? new Date(r.last_watched).toISOString() : fallbackTime);
+      const remoteT = r.last_watched || (r.updated_at ? Date.parse(r.updated_at) : 0);
 
       // Prefer newer local playback offset if available
       const existing = readEpisodeResume(
@@ -617,12 +619,14 @@ export function buildNuvioPlaybackItems(
       let targetOffsetMs = latestOffsetMs;
       const targetSeason = latestSeason;
       const targetEpisode = latestEpisode;
+      const fallbackTime = localMatch?.t
+        ? new Date(localMatch.t).toISOString()
+        : new Date(0).toISOString();
       const when =
         latest.updated_at ||
-        (latest.last_watched
-          ? new Date(latest.last_watched).toISOString()
-          : new Date(0).toISOString());
-      const remoteT = latest.last_watched || 0;
+        (latest.last_watched ? new Date(latest.last_watched).toISOString() : fallbackTime);
+      const remoteT =
+        latest.last_watched || (latest.updated_at ? Date.parse(latest.updated_at) : 0);
 
       const existing = readEpisodeResume(
         aliasResolver.getAliases(contentId),
@@ -931,7 +935,7 @@ export function buildNuvioPlaybackItems(
               (loc.season > curSeason || (loc.season === curSeason && loc.episode > curEpisode))) ||
             (loc.season === curSeason &&
               loc.episode === curEpisode &&
-              locT > itemT &&
+              locT >= itemT &&
               loc.positionMs > 0)
           ) {
             existingItem.state.season = loc.season;

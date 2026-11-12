@@ -210,7 +210,7 @@ test("local-cw strictly isolates Nuvio profile slots, blocks cross-contamination
   const localCw = read("../src/lib/local-cw.ts");
   assert.match(
     localCw,
-    /if \(isNuvio\) \{\s*const eff = effectiveOwner\(ownerId\) \|\| `nuvio-\${getNuvioActiveSlot\(\)}`;\s*const nuvioEntry = \{ \.\.\.entry, external: "nuvio" as const \};\s*saveEntry\(storeKey\(false, eff\), nuvioEntry\);/,
+    /if \(isNuvio\) \{\s*const eff = effectiveOwner\(ownerId\) \|\| `nuvio-\${getNuvioActiveSlot\(\)}`;\s*const nuvioEntry = \{ \.\.\.entry, external: "nuvio" as const \};\s*(?:const changed = )?saveEntry\(storeKey\(false, eff\), nuvioEntry\);/,
   );
   assert.match(localCw, /if \(\(entry as any\)\.external === "nuvio"\) return;/);
   assert.match(localCw, /export function sanitizeStremioLocalCw/);

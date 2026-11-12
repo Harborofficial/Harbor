@@ -227,8 +227,12 @@ function isEpisodeAhead(
 // must keep the same card hidden when the source changes.
 function itemIds(item: LibraryItem): string[] {
   const ids = [item._id];
+  const seen = new Set<string>([item._id]);
   for (const id of item.altIds ?? []) {
-    if (typeof id === "string" && id && !ids.includes(id)) ids.push(id);
+    if (typeof id === "string" && id && !seen.has(id)) {
+      seen.add(id);
+      ids.push(id);
+    }
   }
   return ids;
 }
@@ -661,28 +665,43 @@ export function dismissCw(
   );
 }
 
+function extractDismissalKeyId(key: string): string {
+  if (key.startsWith("group|") || key.startsWith("group-source|")) {
+    const parts = key.split("|");
+    if (parts.length >= 3) {
+      try {
+        return decodeURIComponent(parts[2]);
+      } catch {
+        return parts[2];
+      }
+    }
+  } else if (key.includes("|")) {
+    const parts = key.split("|");
+    return parts[parts.length - 1];
+  }
+  return key;
+}
+
 export function undismissCw(id: string): void {
   loadDismissed();
   const cleanId = id.replace(/^(series|movie|tmdb):/, "").trim();
-  const lowerId = id.toLowerCase();
-  const lowerClean = cleanId.toLowerCase();
-  const encodedId = encodeURIComponent(id);
-  const encodedClean = encodeURIComponent(cleanId);
-  const encodedLowerClean = encodeURIComponent(lowerClean);
+  const targetLower = id.toLowerCase();
+  const targetCleanLower = cleanId.toLowerCase();
 
   let changed = false;
 
   const matchesId = (key: string): boolean => {
-    const k = key.toLowerCase();
+    const rawId = extractDismissalKeyId(key);
+    const keyLower = rawId.toLowerCase();
+    const keyCleanLower = rawId
+      .replace(/^(series|movie|tmdb):/, "")
+      .trim()
+      .toLowerCase();
     return (
-      key === id ||
-      key === cleanId ||
-      k === lowerId ||
-      k === lowerClean ||
-      k.includes(lowerClean) ||
-      key.includes(encodedId) ||
-      key.includes(encodedClean) ||
-      key.includes(encodedLowerClean)
+      keyLower === targetLower ||
+      keyCleanLower === targetCleanLower ||
+      keyLower === targetCleanLower ||
+      keyCleanLower === targetLower
     );
   };
 
