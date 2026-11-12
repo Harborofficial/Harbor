@@ -214,7 +214,9 @@ test("a league slug is the only proof of which title answered", () => {
 test("the val endpoint answering with LoL data throws rather than filling the rail", () => {
   const lolPayload = schedule(
     lolEvent(),
-    lolEvent({ match: { id: "113478100418307333", teams: [team("T1", "T1"), team("HLE", "HLE")] } }),
+    lolEvent({
+      match: { id: "113478100418307333", teams: [team("T1", "T1"), team("HLE", "HLE")] },
+    }),
   );
   assert.equal(
     failureOf(() => assertRiotTitle(lolPayload, "valorant")),

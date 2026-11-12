@@ -19,11 +19,12 @@ export default {
   "games.wow.runs.copy": "Copy talents",
   "games.wow.runs.copyFailed": "Could not copy. Try again.",
   "games.wow.runs.party": "Party composition",
-  "games.wow.runs.snapshots": "Published talents and equipment are provider snapshots. They may differ from those used during this run.",
+  "games.wow.runs.snapshots":
+    "Published talents and equipment are provider snapshots. They may differ from those used during this run.",
   "games.wow.runs.gear": "Equipment",
   "games.wow.runs.tank": "Tank",
   "games.wow.runs.healer": "Healer",
   "games.wow.runs.dps": "Damage",
   "games.wow.runs.snapshotAt": "Equipment snapshot: {date}",
-  "games.wow.runs.closeGear": "Close equipment"
+  "games.wow.runs.closeGear": "Close equipment",
 };

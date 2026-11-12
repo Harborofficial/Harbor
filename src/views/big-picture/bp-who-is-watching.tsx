@@ -15,11 +15,7 @@ import {
   bpWhoRows,
 } from "./bp-who-is-watching-logic";
 import { BP_WHO_CSS } from "./bp-who-is-watching-style";
-import {
-  runBpWhoRetry,
-  useBpWhoSyncCanRetry,
-  useBpWhoSyncPhase,
-} from "./bp-who-is-watching-sync";
+import { runBpWhoRetry, useBpWhoSyncCanRetry, useBpWhoSyncPhase } from "./bp-who-is-watching-sync";
 
 // Timings lifted from mobile-whos-watching, which is the proven version of this
 // choreography. The component is not imported: that one is a phone surface with
@@ -141,9 +137,7 @@ export function BpWhoIsWatching({ onClose }: { onClose: () => void }) {
     returnTo.current = null;
     if (!id) return;
     const timer = window.setTimeout(() => {
-      const el = document.querySelector<HTMLElement>(
-        `[data-bp-who-id="${CSS.escape(id)}"]`,
-      );
+      const el = document.querySelector<HTMLElement>(`[data-bp-who-id="${CSS.escape(id)}"]`);
       if (el) setBpFocus(el, { silent: true });
     }, 30);
     return () => window.clearTimeout(timer);

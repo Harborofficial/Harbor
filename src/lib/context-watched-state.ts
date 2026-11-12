@@ -151,9 +151,7 @@ export async function readContextWatchedSnapshot(
   const id = sourceId(input);
   const movie = input.meta.type === "movie";
   const mappedAnimeId =
-    typeof input.animeId === "string" && ANIME_CLOUD_ID.test(input.animeId)
-      ? input.animeId
-      : null;
+    typeof input.animeId === "string" && ANIME_CLOUD_ID.test(input.animeId) ? input.animeId : null;
   const trackerAnimeId = ANIME_CLOUD_ID.test(id) ? id : mappedAnimeId;
   const anime = !!trackerAnimeId || input.meta.type === "anime";
   const selected = input.episode;
@@ -222,7 +220,8 @@ export async function readContextWatchedSnapshot(
   };
   let videos = id === input.meta.id ? input.meta.videos : undefined;
   if (!movie && !selected && !input.episodeScope && !projection && !videos?.length) {
-    videos = (await fetchMeta("series", anime ? id : providerImdbId || id).catch(() => null))?.videos;
+    videos = (await fetchMeta("series", anime ? id : providerImdbId || id).catch(() => null))
+      ?.videos;
     assertCurrent();
   }
   const keys = movie

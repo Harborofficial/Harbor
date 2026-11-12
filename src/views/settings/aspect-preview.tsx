@@ -14,7 +14,12 @@ export function AspectPreview({ mode }: { mode: string }) {
   const shapes: Record<string, Shape> = {
     fit: { ...boxFor(2.39), note: t("Whole picture, black bars where it does not match") },
     fill: { w: "134%", h: "100%", note: t("Fills the screen, edges cropped away") },
-    stretch: { w: "100%", h: "100%", distort: true, note: t("Fills the screen, picture distorted") },
+    stretch: {
+      w: "100%",
+      h: "100%",
+      distort: true,
+      note: t("Fills the screen, picture distorted"),
+    },
     "16:9": { ...boxFor(16 / 9), note: t("Forced to 16:9") },
     "4:3": { ...boxFor(4 / 3), note: t("Forced to 4:3, bars down the sides") },
     "21:9": { ...boxFor(21 / 9), note: t("Forced to 21:9") },

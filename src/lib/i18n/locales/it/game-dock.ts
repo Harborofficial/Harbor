@@ -8,8 +8,10 @@ export default {
   "games.sidebar.customOrder": "Il mio ordine",
   "games.sidebar.arrange": "Organizza barra laterale",
   "games.sidebar.resetFilters": "Reimposta filtri",
-  "games.sidebar.arrangeNote": "Trascina o usa le frecce per riordinare. Fissa i tuoi giochi o nascondi voci da questa barra.",
-  "games.sidebar.saveFailed": "Impossibile salvare le preferenze. Le modifiche valgono per questa sessione.",
+  "games.sidebar.arrangeNote":
+    "Trascina o usa le frecce per riordinare. Fissa i tuoi giochi o nascondi voci da questa barra.",
+  "games.sidebar.saveFailed":
+    "Impossibile salvare le preferenze. Le modifiche valgono per questa sessione.",
   "games.sidebar.move": "Sposta {name}",
   "games.sidebar.up": "Sposta {name} in alto",
   "games.sidebar.down": "Sposta {name} in basso",
@@ -19,12 +21,15 @@ export default {
   "games.sidebar.hide": "Nascondi {name} dalla barra",
   "games.sidebar.pinned": "Fissati",
   "games.dock.welcomeTitle": "Mostrare la scheda giochi?",
-  "games.dock.welcomeNote": "Accedi ai giochi passando il cursore. Puoi disattivarla in qualsiasi momento in Impostazioni → Tema e aspetto → Interfaccia.",
+  "games.dock.welcomeNote":
+    "Accedi ai giochi passando il cursore. Puoi disattivarla in qualsiasi momento in Impostazioni → Tema e aspetto → Interfaccia.",
   "games.dock.welcomeEnable": "Mostra scheda giochi",
   "games.dock.welcomeDismiss": "Non ora",
   "games.dock.settingTitle": "Libreria rapida",
-  "games.dock.settingNote": "Mostra una scheda discreta sul bordo per accedere rapidamente alla tua libreria. Disattivato per impostazione predefinita.",
-  "games.dock.launchError": "Impossibile aprire il gioco. Controlla installazione e launcher, poi riprova.",
+  "games.dock.settingNote":
+    "Mostra una scheda discreta sul bordo per accedere rapidamente alla tua libreria. Disattivato per impostazione predefinita.",
+  "games.dock.launchError":
+    "Impossibile aprire il gioco. Controlla installazione e launcher, poi riprova.",
   "games.dock.launcher": "Launcher",
   "games.dock.client": "Apri in {launcher}",
   "games.dock.openClient": "Apri {name} in {launcher}",
@@ -75,5 +80,6 @@ export default {
   "games.badge.unavailable": "File non disponibili",
   "games.badge.notInstalled": "Non installato",
   "games.home.libraryFirstTitle": "Apri Giochi nella tua libreria",
-  "games.home.libraryFirstNote": "Parti dalla tua libreria invece di Esplora ogni volta che apri Giochi."
+  "games.home.libraryFirstNote":
+    "Parti dalla tua libreria invece di Esplora ogni volta che apri Giochi.",
 };

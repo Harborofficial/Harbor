@@ -4,8 +4,7 @@
 // app reads as two apps. Solid and achromatic on purpose: on a near black
 // canvas a white plate outranks a coloured one, and an outlined pill is the
 // cheap-looking option the owner called out.
-export const BP_ACTION_SOLID =
-  "rounded-[var(--bp-r-xs)] bg-[var(--bp-on)] font-semibold text-ink";
+export const BP_ACTION_SOLID = "rounded-[var(--bp-r-xs)] bg-[var(--bp-on)] font-semibold text-ink";
 
 // These stay CLASS STRINGS in TypeScript. Do not move them into bp-tokens.ts:
 // as sheet rules the [data-bp-tile] selectors there would win on specificity and

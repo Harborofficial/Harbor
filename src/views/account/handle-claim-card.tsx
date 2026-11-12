@@ -64,7 +64,9 @@ export function HandleClaimCard({ author }: { author: Author }) {
             <Lock size={16} />
           </span>
           <div className="flex min-w-0 flex-col">
-            <bdi dir="ltr" className={ROW_TITLE}>@{author.handle}</bdi>
+            <bdi dir="ltr" className={ROW_TITLE}>
+              @{author.handle}
+            </bdi>
             <span className={ROW_DESC}>
               {t("Locked until")} {formatDate(availableAt)}. {t("You can change your handle")}{" "}
               {t(COOLDOWN_LABEL)}.
@@ -176,7 +178,11 @@ function StatusLine({ status, onPick }: { status: HandleStatus; onPick: (s: stri
   const t = useT();
   if (status.state === "idle") return null;
   if (status.state === "checking")
-    return <span className="text-[14px] leading-[21px] text-ink-muted">{t("Checking availability")}</span>;
+    return (
+      <span className="text-[14px] leading-[21px] text-ink-muted">
+        {t("Checking availability")}
+      </span>
+    );
   if (status.state === "available")
     return (
       <span className="text-[14px] font-medium leading-[21px] text-accent">
@@ -190,11 +196,14 @@ function StatusLine({ status, onPick }: { status: HandleStatus; onPick: (s: stri
       </span>
     );
 
-  const reason = status.reason === `Handles are at least ${HANDLE_MIN} characters.`
-    ? t("Handles are at least {count} characters.", { count: HANDLE_MIN })
-    : status.reason === `Handles are at most ${HANDLE_MAX} characters.`
-      ? t("Handles are at most {count} characters.", { count: HANDLE_MAX })
-      : status.reason ? t(status.reason) : undefined;
+  const reason =
+    status.reason === `Handles are at least ${HANDLE_MIN} characters.`
+      ? t("Handles are at least {count} characters.", { count: HANDLE_MIN })
+      : status.reason === `Handles are at most ${HANDLE_MAX} characters.`
+        ? t("Handles are at most {count} characters.", { count: HANDLE_MAX })
+        : status.reason
+          ? t(status.reason)
+          : undefined;
   const label =
     status.state === "taken"
       ? (reason ?? t("That handle is taken."))

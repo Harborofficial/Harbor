@@ -40,11 +40,24 @@ export function useMusicSuggest(query: string, connector: string | null, enabled
           if (generation.current !== mine) return;
           setFound({ query: trimmed, results: res });
           // Only the visible artist suggestions need audience enrichment; the authority caches probes.
-          const visible = [...new Map(res.artists.slice(0, CAP.artists).map((artist) => [artistIdentityKey(artist.name), artist])).values()];
+          const visible = [
+            ...new Map(
+              res.artists
+                .slice(0, CAP.artists)
+                .map((artist) => [artistIdentityKey(artist.name), artist]),
+            ).values(),
+          ];
           for (const artist of visible) {
             if (peekArtistIdentity(artist.name).probed) continue;
-            void resolveArtist(artist.name, { hint: res.artists.filter((ref) => artistIdentityKey(ref.name) === artistIdentityKey(artist.name)) })
-              .catch(() => null).then(() => { if (generation.current === mine) setPass((value) => value + 1); });
+            void resolveArtist(artist.name, {
+              hint: res.artists.filter(
+                (ref) => artistIdentityKey(ref.name) === artistIdentityKey(artist.name),
+              ),
+            })
+              .catch(() => null)
+              .then(() => {
+                if (generation.current === mine) setPass((value) => value + 1);
+              });
           }
           const key = artistIdentityKey(trimmed);
           const named = res.artists.filter((a) => artistIdentityKey(a.name) === key);
@@ -57,7 +70,10 @@ export function useMusicSuggest(query: string, connector: string | null, enabled
         })
         .catch(() => {
           if (generation.current === mine) setFound(null);
-        }).finally(() => { if (generation.current === mine) setLoading(false); });
+        })
+        .finally(() => {
+          if (generation.current === mine) setLoading(false);
+        });
     }, DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
   }, [query, connector, enabled]);
@@ -194,7 +210,11 @@ export function MusicSearchSuggest({
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate text-[12.5px] text-ink">{titleOf(item)}</span>
-                  {item.kind === "artist" ? <MusicSearchAudience artist={item} /> : sub ? <span className="truncate text-[11px] text-ink-subtle">{sub}</span> : null}
+                  {item.kind === "artist" ? (
+                    <MusicSearchAudience artist={item} />
+                  ) : sub ? (
+                    <span className="truncate text-[11px] text-ink-subtle">{sub}</span>
+                  ) : null}
                 </span>
                 {item.kind === "track" && (
                   <MusicBillboardRank

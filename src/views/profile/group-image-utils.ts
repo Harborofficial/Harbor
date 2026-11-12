@@ -17,7 +17,9 @@ export async function fileToWebp(file: File, max: number): Promise<Blob> {
     const w = img.width * scale;
     const h = img.height * scale;
     ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), "image/webp", 0.9));
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/webp", 0.9),
+    );
     if (!blob) throw new Error("Could not process image.");
     return blob;
   } finally {

@@ -62,7 +62,7 @@ test("metrics use documented clocks and skip display-sync-only counter when inac
   ])
     assert.ok(section.includes('"' + name + '"'), name);
   assert.ok(!section.includes('"video-pts"'), "video-pts is not an mpv property");
-  assert.match(section, /if display_sync/);
+  assert.match(section, /snapshot\.value\("display-sync-active"\)/);
   assert.ok(section.includes("mistimed-frame-count"));
   assert.match(section, /na.*into/);
   assert.match(section, /ao=\{\} audio_hz=\{\} output_hz=\{\}/);
@@ -87,8 +87,8 @@ test("detects clock stalls only when actually playing, not paused or buffering",
   assert.match(section, /RESUME_POSITION_STALL: Duration = Duration::from_secs\(3\)/);
   assert.match(section, /fn observe\(/);
   assert.match(section, /if !playing \{/);
-  assert.match(eventLoop, /!mpv_keepalive\.get_property::<bool>\("paused-for-cache"\)/);
-  assert.match(eventLoop, /!mpv_keepalive\.get_property::<bool>\("seeking"\)/);
+  assert.match(eventLoop, /resume_observed\.flag\("paused-for-cache"\) == Some\(false\)/);
+  assert.match(eventLoop, /resume_observed\.flag\("seeking"\) == Some\(false\)/);
   assert.match(eventLoop, /clock-stall/);
   assert.match(eventLoop, /resume_trace\.position\.clear\(\)/);
 });
@@ -102,7 +102,7 @@ test("a separate low-cost watchdog detects event thread deadlocks", () => {
 });
 test("diagnostic lines contain only numbers flags and fixed enums, no sensitive IDs or state-changing mpv calls", () => {
   assert.doesNotMatch(section, /set_property\(|mpv_argv_command\(|loadfile|http:|https:/);
-  assert.match(section, /match mpv\.get_property::<String>\("current-ao"\)/);
-  assert.match(section, /match mpv\.get_property::<String>\("hwdec-current"\)/);
-  assert.match(section, /probe_ms=\{probe_ms\}/);
+  assert.match(section, /if name == "current-ao" => match \*s/);
+  assert.match(section, /if name == "hwdec-current" => match \*s/);
+  assert.match(section, /source=observed/);
 });

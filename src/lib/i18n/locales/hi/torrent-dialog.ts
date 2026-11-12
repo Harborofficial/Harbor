@@ -3,7 +3,8 @@ export default {
   "games.torrent.introClean": "सामग्री देखने के लिए magnet लिंक पेस्ट करें या टोरेंट फ़ाइल चुनें।",
   "games.torrent.filesLabel": "फ़ाइलें",
   "games.torrent.sizeLabel": "आकार",
-  "games.torrent.pieceNoteClean": "फ़ोल्डर की संरचना बनी रहेगी। साझा हिस्सों से कुछ अधूरी फ़ाइलें भी बन सकती हैं।",
+  "games.torrent.pieceNoteClean":
+    "फ़ोल्डर की संरचना बनी रहेगी। साझा हिस्सों से कुछ अधूरी फ़ाइलें भी बन सकती हैं।",
   "games.torrent.drive": "ड्राइव चुनें",
   "games.torrent.loadingDrives": "ड्राइव पढ़ी जा रही हैं…",
   "games.torrent.free": "{size} खाली",

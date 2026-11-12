@@ -10,13 +10,7 @@ import {
   type RankSource,
 } from "./harbor-rank";
 
-export type PeopleRankStatus =
-  | "loading"
-  | "ready"
-  | "empty"
-  | "error"
-  | "offline"
-  | "no-key";
+export type PeopleRankStatus = "loading" | "ready" | "empty" | "error" | "offline" | "no-key";
 
 export type PeopleRankState = {
   status: PeopleRankStatus;

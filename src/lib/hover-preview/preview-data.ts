@@ -106,7 +106,7 @@ function deriveRating(meta: Meta, isAnime: boolean): PreviewData["rating"] {
   if (isAnime) {
     return meta.imdbRating ? { kind: "mal", value: meta.imdbRating } : null;
   }
-  const imdbId = meta.id.startsWith("tt") ? meta.id : tmdbImdbCached(meta.id) ?? undefined;
+  const imdbId = meta.id.startsWith("tt") ? meta.id : (tmdbImdbCached(meta.id) ?? undefined);
   if (imdbId) {
     const harbor = harborImdbTitleCached(imdbId);
     if (typeof harbor === "number" && harbor > 0) return { kind: "imdb", value: harbor.toFixed(1) };
@@ -120,8 +120,8 @@ function deriveRating(meta: Meta, isAnime: boolean): PreviewData["rating"] {
 }
 
 function deriveContentRating(meta: Meta): string | null {
-  const imdbId = meta.id.startsWith("tt") ? meta.id : tmdbImdbCached(meta.id) ?? undefined;
-  return imdbId ? omdbScoresCached(imdbId)?.rated ?? null : null;
+  const imdbId = meta.id.startsWith("tt") ? meta.id : (tmdbImdbCached(meta.id) ?? undefined);
+  return imdbId ? (omdbScoresCached(imdbId)?.rated ?? null) : null;
 }
 
 export function assemblePreviewData(meta: Meta): PreviewAssembly {

@@ -41,17 +41,26 @@ function BpCastBody({ person, rank }: { person: CastEntry; rank?: number }) {
           <User size={26} className="text-ink-subtle" strokeWidth={1.7} />
         )}
         {rank != null && (
-          <span data-bp-cell-rank className="pointer-events-none absolute start-2 top-2 rounded-full bg-[var(--bp-void)]/85 px-2 py-0.5 text-[clamp(9.5px,1.2vh,13px)] font-bold tabular-nums text-ink ring-1 ring-[var(--bp-edge-2)]">
+          <span
+            data-bp-cell-rank
+            className="pointer-events-none absolute start-2 top-2 rounded-full bg-[var(--bp-void)]/85 px-2 py-0.5 text-[clamp(9.5px,1.2vh,13px)] font-bold tabular-nums text-ink ring-1 ring-[var(--bp-edge-2)]"
+          >
             {rank}
           </span>
         )}
       </span>
       <span className="flex w-full flex-col gap-0.5 p-[clamp(9px,0.9vw,15px)]">
-        <span data-bp-cell-name className="line-clamp-1 w-full text-[clamp(11.5px,1.55vh,17.5px)] font-semibold leading-tight text-ink">
+        <span
+          data-bp-cell-name
+          className="line-clamp-1 w-full text-[clamp(11.5px,1.55vh,17.5px)] font-semibold leading-tight text-ink"
+        >
           {person.name}
         </span>
         {person.character && (
-          <span data-bp-cell-sub className="line-clamp-1 w-full text-[clamp(10px,1.3vh,14.5px)] font-medium leading-tight text-ink-subtle">
+          <span
+            data-bp-cell-sub
+            className="line-clamp-1 w-full text-[clamp(10px,1.3vh,14.5px)] font-medium leading-tight text-ink-subtle"
+          >
             {person.character}
           </span>
         )}

@@ -76,6 +76,13 @@ import {
   selectPlaybackRetryScene,
 } from "@/lib/subtitles/autosync/scene-window";
 import { matchPlaybackSpeech } from "@/lib/subtitles/autosync/playback-asr";
+import {
+  moonshineMissingModelLanguage,
+  moonshineLanguageName,
+  onMoonshineModelMissing,
+  type MoonshineLanguage,
+  type MoonshineModelStatus,
+} from "@/lib/subtitles/autosync/moonshine-models";
 import { playbackTimelineFailure } from "@/lib/subtitles/autosync/playback-timeline-error";
 import { matchPlaybackVad } from "@/lib/subtitles/autosync/playback-vad";
 import { isLikelyDialogueCue } from "@/lib/subtitles/autosync/dialogue-matches";
@@ -116,6 +123,14 @@ export type AutoSyncHandle = {
   offer: PipelineOutcome | null;
   /** Why the last attempt was refused; shown so a failure isn't a mystery. */
   reason: string | null;
+  moonshineModelRequest?: {
+    language: MoonshineLanguage;
+    source: "audio-track" | "manual-override";
+    downloading: boolean;
+    error: string | null;
+  } | null;
+  downloadMoonshineModel?: () => Promise<void>;
+  dismissMoonshineModel?: () => void;
   /** Analyze a verified, buffered playback excerpt and offer a delay-only correction. */
   listen: () => void;
   applyOffer: () => void;
@@ -244,8 +259,25 @@ export function useAutoSync(params: {
   const [status, setStatus] = useState<AutoSyncStatus>("idle");
   const [offer, setOffer] = useState<PipelineOutcome | null>(null);
   const [reason, setReason] = useState<string | null>(null);
+  const [moonshineModelLanguage, setMoonshineModelLanguage] = useState<MoonshineLanguage | null>(
+    null,
+  );
+  const [moonshineDownloadError, setMoonshineDownloadError] = useState<string | null>(null);
+  const [moonshineDownloading, setMoonshineDownloading] = useState(false);
+  const moonshinePromptedRef = useRef(new Set<MoonshineLanguage>());
+  useEffect(
+    () =>
+      onMoonshineModelMissing((language) => {
+        if (statusRef.current !== "analyzing" && statusRef.current !== "listening") return;
+        if (moonshinePromptedRef.current.has(language)) return;
+        moonshinePromptedRef.current.add(language);
+        setMoonshineModelLanguage(language);
+        setMoonshineDownloadError(null);
+      }),
+    [],
+  );
   const [analysisRevision, setAnalysisRevision] = useState(0);
-  const playbackStageRef = useRef<"capture" | "verify" | "compare" | "whisper">("capture");
+  const playbackStageRef = useRef<"capture" | "verify" | "compare" | "moonshine">("capture");
   const statusRef = useRef(status);
   statusRef.current = status;
   const activeAnalysisDeadlineRef = useRef(ANALYSIS_DEADLINE_MS);
@@ -432,8 +464,8 @@ export function useAutoSync(params: {
             ? "Verifying the buffered audio's movie timestamps took too long. No correction was applied."
             : playbackStageRef.current === "compare"
               ? "Buffered audio was decoded, but comparing it with subtitle timing took too long. No correction was applied."
-              : playbackStageRef.current === "whisper"
-                ? "Whisper recognition of the buffered audio took too long. No correction was applied."
+              : playbackStageRef.current === "moonshine"
+                ? "Moonshine recognition of the buffered audio took too long. No correction was applied."
                 : "Buffered playback audio wasn't available in time. Try a dialogue-heavy scene or Manual offset.",
       );
       setStatus("error");
@@ -1702,6 +1734,8 @@ export function useAutoSync(params: {
       setOffer(null);
       embeddedPlaybackCuesRef.current = null;
       setReason(null);
+      setMoonshineModelLanguage(null);
+      setMoonshineDownloadError(null);
       setAnalysisRevision((revision) => revision + 1);
       setStatus("listening");
 
@@ -1904,9 +1938,10 @@ export function useAutoSync(params: {
           const directError: unknown = null;
           const directAttempted = false;
           let cacheAudioReady = false;
-          let whisperFailure: string | null = null;
-          let usedWhisper = false;
+          let moonshineFailure: string | null = null;
+          let usedMoonshine = false;
           let usedSilero = false;
+          const directMoonshine = settingsRef.current.subtitleAutoSyncEngine === "moonshine";
           let needsFreshAudio = false;
           let retryAfterStartSec: number | null = null;
           let lastPosition = getPlaybackPosition();
@@ -2034,68 +2069,69 @@ export function useAutoSync(params: {
               const comparisonSessionId = newAnalysisSessionId();
               activeSceneSessionId = comparisonSessionId;
               try {
-                result = await boundedNativeProbe(
-                  async () => {
-                    setReason("Detecting buffered dialogue with Silero");
-                    const detected = await matchPlaybackVad(
-                      {
-                        path: prepared.path.replace(/\\/g, "/"),
-                        cues: sourceCues
-                          .filter((cue) => isLikelyDialogueCue(cue.text))
-                          .map((cue) => [cue.start - startAt, cue.end - startAt]),
-                        sessionId: comparisonSessionId,
-                      },
-                      invoke,
-                      () => !aborted && isCurrentAutoSyncScope(scope),
-                      (diagnostic) => {
-                        void invoke("mpv_command", {
-                          cmd: [
-                            "print-text",
-                            `[harbor/subsync] silero-fit ${JSON.stringify({
-                              ...diagnostic,
-                              requestedStartSec: startAt,
-                              playbackSec: position,
-                              cueCount: sourceCues.length,
-                              currentDelaySec: snap.subDelaySec,
-                            })}`,
-                          ],
-                        }).catch(() => {});
-                      },
-                    );
-                    void invoke("mpv_command", {
-                      cmd: [
-                        "print-text",
-                        `[harbor/subsync] playback-silero=${detected === undefined ? "unsupported" : detected === null ? "no-match" : "matched"}`,
-                      ],
-                    }).catch(() => {});
-                    if (detected !== undefined) {
-                      usedSilero = detected !== null;
-                      return detected;
-                    }
-                    setReason("Comparing buffered speech with subtitle timing");
-                    return invoke<{ offsetSec: number; confidence: number } | null>(
-                      "sync_subtitle",
-                      {
-                        url: prepared.path.replace(/\\/g, "/"),
-                        headers: null,
-                        cues: sourceCues
-                          .filter((cue) => isLikelyDialogueCue(cue.text))
-                          .map((cue) => [cue.start - startAt, cue.end - startAt]),
-                        durationSec: clipSec,
-                        infoHash: null,
-                        confMin: null,
-                        mapSpec: "0:a:0",
-                        sessionId: comparisonSessionId,
-                        playbackClip: true,
-                        // The prepared WAV starts at zero; use Harbor's speech VAD.
-                        fromStart: false,
-                        reportFailures: true,
-                      },
-                    );
-                  },
-                  () => cancelNativeAnalysis(comparisonSessionId),
-                  30_000,
-                );
+                if (!directMoonshine)
+                  result = await boundedNativeProbe(
+                    async () => {
+                      setReason("Detecting buffered dialogue with Silero");
+                      const detected = await matchPlaybackVad(
+                        {
+                          path: prepared.path.replace(/\\/g, "/"),
+                          cues: sourceCues
+                            .filter((cue) => isLikelyDialogueCue(cue.text))
+                            .map((cue) => [cue.start - startAt, cue.end - startAt]),
+                          sessionId: comparisonSessionId,
+                        },
+                        invoke,
+                        () => !aborted && isCurrentAutoSyncScope(scope),
+                        (diagnostic) => {
+                          void invoke("mpv_command", {
+                            cmd: [
+                              "print-text",
+                              `[harbor/subsync] silero-fit ${JSON.stringify({
+                                ...diagnostic,
+                                requestedStartSec: startAt,
+                                playbackSec: position,
+                                cueCount: sourceCues.length,
+                                currentDelaySec: snap.subDelaySec,
+                              })}`,
+                            ],
+                          }).catch(() => {});
+                        },
+                      );
+                      void invoke("mpv_command", {
+                        cmd: [
+                          "print-text",
+                          `[harbor/subsync] playback-silero=${detected === undefined ? "unsupported" : detected === null ? "no-match" : "matched"}`,
+                        ],
+                      }).catch(() => {});
+                      if (detected !== undefined) {
+                        usedSilero = detected !== null;
+                        return detected;
+                      }
+                      setReason("Comparing buffered speech with subtitle timing");
+                      return invoke<{ offsetSec: number; confidence: number } | null>(
+                        "sync_subtitle",
+                        {
+                          url: prepared.path.replace(/\\/g, "/"),
+                          headers: null,
+                          cues: sourceCues
+                            .filter((cue) => isLikelyDialogueCue(cue.text))
+                            .map((cue) => [cue.start - startAt, cue.end - startAt]),
+                          durationSec: clipSec,
+                          infoHash: null,
+                          confMin: null,
+                          mapSpec: "0:a:0",
+                          sessionId: comparisonSessionId,
+                          playbackClip: true,
+                          // The prepared WAV starts at zero; use Harbor's speech VAD.
+                          fromStart: false,
+                          reportFailures: true,
+                        },
+                      );
+                    },
+                    () => cancelNativeAnalysis(comparisonSessionId),
+                    30_000,
+                  );
               } catch (error) {
                 cacheError = error;
               } finally {
@@ -2105,6 +2141,7 @@ export function useAutoSync(params: {
               if (aborted || !isCurrentAutoSyncScope(scope)) return;
               if (
                 !result &&
+                !directMoonshine &&
                 retryAfterStartSec === null &&
                 selectPlaybackRetryScene(bufferedScenes, focusSec, startAt)
               ) {
@@ -2134,32 +2171,51 @@ export function useAutoSync(params: {
                           subtitleLanguage: snap.subtitleTracks.find((track) => track.selected)
                             ?.lang,
                           enabled: settingsRef.current.subtitleAutoSyncAsr === true,
+                          modelLanguage: settingsRef.current.subtitleMoonshineLanguage,
                           crossLanguage: settingsRef.current.subtitleAutoSyncPivot === true,
                           sessionId: asrSessionId,
                         },
                         invoke,
                         (message) => {
                           if (aborted || !isCurrentAutoSyncScope(scope)) return;
-                          playbackStageRef.current = "whisper";
+                          playbackStageRef.current = "moonshine";
                           setReason(message);
                           void invoke("mpv_command", {
                             cmd: [
                               "print-text",
-                              `[harbor/subsync] playback-whisper=${message.startsWith("Recognizing") ? "started" : "transcribed"}`,
+                              `[harbor/subsync] playback-moonshine=${message.startsWith("Recognizing") ? "started" : "transcribed"}`,
                             ],
                           }).catch(() => {});
                         },
                         () => !aborted && isCurrentAutoSyncScope(scope),
+                        (diagnostic) => {
+                          void invoke("mpv_command", {
+                            cmd: [
+                              "print-text",
+                              `[harbor/subsync] moonshine-timing ${JSON.stringify(diagnostic)}`,
+                            ],
+                          }).catch(() => {});
+                        },
                       ),
                     () => cancelNativeAnalysis(asrSessionId),
                     90_000,
                   );
-                  usedWhisper = true;
+                  usedMoonshine = true;
                 } catch (error) {
-                  whisperFailure = String(error instanceof Error ? error.message : error);
-                  if (whisperFailure === "subsync-scene-timeout") {
-                    whisperFailure =
-                      "Whisper recognition of the buffered audio timed out. Try another dialogue scene.";
+                  const missingLanguage = moonshineMissingModelLanguage(error);
+                  if (missingLanguage) {
+                    if (!moonshinePromptedRef.current.has(missingLanguage)) {
+                      moonshinePromptedRef.current.add(missingLanguage);
+                      setMoonshineModelLanguage(missingLanguage);
+                      setMoonshineDownloadError(null);
+                    }
+                    moonshineFailure = `The ${moonshineLanguageName(missingLanguage)} Moonshine model is not installed. No model was downloaded. Silero remains available.`;
+                  } else {
+                    moonshineFailure = String(error instanceof Error ? error.message : error);
+                    if (moonshineFailure === "subsync-scene-timeout") {
+                      moonshineFailure =
+                        "Moonshine recognition of the buffered audio timed out. Try another dialogue scene.";
+                    }
                   }
                 } finally {
                   cancelNativeAnalysis(asrSessionId);
@@ -2207,7 +2263,7 @@ export function useAutoSync(params: {
               ],
             }).catch(() => {});
             throw new Error(
-              whisperFailure ??
+              moonshineFailure ??
                 liveSyncFailureReason({
                   cacheAudioReady,
                   cacheError,
@@ -2224,10 +2280,10 @@ export function useAutoSync(params: {
           if (Math.abs(result.offsetSec) > 60) {
             throw new Error("The estimated offset is too large to apply safely.");
           }
-          if (usedWhisper && result.offsetSec === 0) {
+          if (usedMoonshine && result.offsetSec === 0) {
             setOffer(null);
             setReason(
-              "Whisper speech timing indicates these subtitles are already aligned in the sampled scene. No timing change was made; other scenes are not verified.",
+              "Moonshine speech timing indicates these subtitles are already aligned in the sampled scene. No timing change was made; other scenes are not verified.",
             );
             setStatus("synced");
             return;
@@ -2250,8 +2306,8 @@ export function useAutoSync(params: {
             tiersRun: [],
           });
           setReason(
-            usedWhisper
-              ? "Whisper speech timing suggests this shift for the current scene. Confirm it before keeping it; other scenes are not verified."
+            usedMoonshine
+              ? "Moonshine speech timing suggests this shift for the current scene. Confirm it before keeping it; other scenes are not verified."
               : usedSilero
                 ? "Silero speech timing suggests this shift for the current scene. Confirm it before keeping it; other scenes are not verified."
                 : null,
@@ -2293,6 +2349,42 @@ export function useAutoSync(params: {
   // Retry follows the same source-aware path as the menu's Auto sync action.
   const retry = selected && !selected.external ? () => listen(true) : run;
 
+  // Download is strictly user initiated from the player prompt. Never infer a
+  // language pack to download from subtitle language or an uncertain guess.
+  const downloadMoonshineModel = useCallback(async () => {
+    const language = moonshineModelLanguage;
+    if (!language || moonshineDownloading) return;
+    const audioKey = audioSelectionKey(liveSnapRef.current);
+    setMoonshineDownloading(true);
+    setMoonshineDownloadError(null);
+    try {
+      const current = await invoke<MoonshineModelStatus>("moonshine_model_status", { language });
+      if (!current.supported || !current.runtimeInstalled) {
+        throw new Error(
+          "The experimental Moonshine runtime isn't available. Install it in Settings before downloading a model.",
+        );
+      }
+      if (!current.installed) {
+        await invoke("moonshine_model_download", { language });
+      }
+      const installed = await invoke<MoonshineModelStatus>("moonshine_model_status", { language });
+      if (!installed.installed)
+        throw new Error("Moonshine did not finish installing the selected model.");
+      setMoonshineModelLanguage(null);
+      // Do not restart analysis if the audio track changed during download.
+      if (audioKey === audioSelectionKey(liveSnapRef.current)) listen(true);
+    } catch (error) {
+      setMoonshineDownloadError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setMoonshineDownloading(false);
+    }
+  }, [moonshineModelLanguage, moonshineDownloading, listen]);
+
+  const dismissMoonshineModel = useCallback(() => {
+    setMoonshineModelLanguage(null);
+    setMoonshineDownloadError(null);
+  }, []);
+
   const scopeCurrent = isAutoSyncScopeCurrent(statusScopeRef.current, {
     mediaKey,
     trackId: selected?.id ?? null,
@@ -2303,6 +2395,20 @@ export function useAutoSync(params: {
     status: status === "idle" || scopeCurrent ? status : "idle",
     offer: scopeCurrent ? offer : null,
     reason: scopeCurrent ? reason : null,
+    moonshineModelRequest:
+      scopeCurrent && moonshineModelLanguage
+        ? {
+            language: moonshineModelLanguage,
+            source:
+              settings.subtitleMoonshineLanguage === "auto" || !settings.subtitleMoonshineLanguage
+                ? "audio-track"
+                : "manual-override",
+            downloading: moonshineDownloading,
+            error: moonshineDownloadError,
+          }
+        : null,
+    downloadMoonshineModel,
+    dismissMoonshineModel,
     listen: () => listen(true),
     applyOffer,
     revert,

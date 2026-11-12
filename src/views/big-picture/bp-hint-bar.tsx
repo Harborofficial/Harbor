@@ -176,7 +176,10 @@ export function BpHintBar({
                 {h.glyph}
               </span>
             )}
-            <span data-bp-hint-label className="text-[clamp(13.4px,1.5vh,18px)] font-medium text-ink-muted">
+            <span
+              data-bp-hint-label
+              className="text-[clamp(13.4px,1.5vh,18px)] font-medium text-ink-muted"
+            >
               {label[h.action]}
             </span>
           </span>

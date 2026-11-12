@@ -1,39 +1,50 @@
 export default {
-  "games.battlenet.changed": "Konto Battle.net zostało zmienione. Zaloguj się ponownie, aby zastąpić importy tego profilu.",
+  "games.battlenet.changed":
+    "Konto Battle.net zostało zmienione. Zaloguj się ponownie, aby zastąpić importy tego profilu.",
   "games.battlenet.connect": "Zaloguj się",
-  "games.battlenet.intro": "Zaloguj się do Battle.net, aby zaimportować gry. To połączenie należy do bieżącego profilu Harbor.",
+  "games.battlenet.intro":
+    "Zaloguj się do Battle.net, aby zaimportować gry. To połączenie należy do bieżącego profilu Harbor.",
   "games.battlenet.installed": "Pokaż zainstalowane gry",
   "games.battlenet.uninstalled": "Pokaż niezainstalowane gry z konta",
-  "games.battlenet.partial": "Nie udało się odświeżyć części danych konta. Wcześniej zaimportowane gry pozostają widoczne.",
+  "games.battlenet.partial":
+    "Nie udało się odświeżyć części danych konta. Wcześniej zaimportowane gry pozostają widoczne.",
   "games.battlenet.unresolved": "Nie udało się ustalić dokładnej edycji niektórych gier z konta.",
-  "games.battlenet.expired": "Sesja Battle.net wygasła. Zaloguj się ponownie; zaimportowane gry pozostają zapisane.",
+  "games.battlenet.expired":
+    "Sesja Battle.net wygasła. Zaloguj się ponownie; zaimportowane gry pozostają zapisane.",
   "games.battlenet.timeout": "Battle.net nie odpowiedział na czas. Spróbuj ponownie.",
   "games.battlenet.busy": "Operacja na koncie Battle.net już trwa.",
-  "games.battlenet.update": "Uruchom ponownie zaktualizowaną aplikację Harbor, aby połączyć Battle.net.",
-  "games.battlenet.error": "Nie udało się zaktualizować Battle.net. Ostatnio zaimportowana biblioteka pozostaje zapisana.",
+  "games.battlenet.update":
+    "Uruchom ponownie zaktualizowaną aplikację Harbor, aby połączyć Battle.net.",
+  "games.battlenet.error":
+    "Nie udało się zaktualizować Battle.net. Ostatnio zaimportowana biblioteka pozostaje zapisana.",
   "games.battlenet.disconnect": "Odłącz Battle.net",
-  "games.battlenet.removeNote": "Usuń importy z konta w tym profilu. Zainstalowane pliki i inne profile zostaną zachowane.",
+  "games.battlenet.removeNote":
+    "Usuń importy z konta w tym profilu. Zainstalowane pliki i inne profile zostaną zachowane.",
   "games.battlenet.signing": "Dokończ logowanie w oknie Battle.net.",
   "games.battlenet.cached": "Gry na koncie: {count} · Ostatnia aktualizacja: {date}",
 
   "games.launcherSession.waiting": "Oczekiwanie na grę",
   "games.launcherSession.unconfirmed": "Sprawdzanie stanu gry",
   "games.launcherSession.notStarted": "Gra się nie uruchomiła",
-  "games.launcherSession.error": "Nie udało się zapisać aktywności w grze. Otwórz ponownie Harbor, aby spróbować jeszcze raz.",
+  "games.launcherSession.error":
+    "Nie udało się zapisać aktywności w grze. Otwórz ponownie Harbor, aby spróbować jeszcze raz.",
 
   "games.steamImport.importedTitle": "Importowane gry",
   "games.steamImport.excluded": "Pominięto zgodnie z ustawieniami importu",
   "games.steamImport.ignoreSettings": "Ignorowane ID Steam ({count})",
   "games.steamImport.ignoreLabel": "ID Steam do pominięcia",
-  "games.steamImport.ignoreNote": "Pomijaj te ID przy ręcznym imporcie. Istniejące wpisy i pliki pozostają na miejscu. Wyczyść pole, aby przestać je ignorować.",
+  "games.steamImport.ignoreNote":
+    "Pomijaj te ID przy ręcznym imporcie. Istniejące wpisy i pliki pozostają na miejscu. Wyczyść pole, aby przestać je ignorować.",
   "games.steamImport.ignoreSave": "Zapisz ignorowane ID",
   "games.steamImport.ignoreSaved": "Zapisano ignorowane ID.",
   "games.steamImport.title": "Importuj gry Steam",
-  "games.steamImport.note": "Zapisz wpisy gier w tym profilu Harbor. Własność i instalacja są sprawdzane osobno.",
+  "games.steamImport.note":
+    "Zapisz wpisy gier w tym profilu Harbor. Własność i instalacja są sprawdzane osobno.",
   "games.steamImport.input": "Identyfikatory aplikacji Steam lub adresy sklepu",
   "games.steamImport.profile": "Wybierz profil Depressurizer",
   "games.steamImport.count": "Wybrano {selected} · Wpisów: {total}",
-  "games.steamImport.unavailableNote": "Niedostępne wpisy nie są zaznaczone. Zaznacz wpis, aby zachować jego ID i wczytać szczegóły później.",
+  "games.steamImport.unavailableNote":
+    "Niedostępne wpisy nie są zaznaczone. Zaznacz wpis, aby zachować jego ID i wczytać szczegóły później.",
   "games.steamImport.unknown": "Aplikacja Steam {id}",
   "games.steamImport.ready": "Znaleziono szczegóły Steam",
   "games.steamImport.profileName": "Nazwa z profilu",
@@ -43,10 +54,14 @@ export default {
   "games.steamImport.invalid": "Nieprawidłowy ID lub adres",
   "games.steamImport.duplicate": "Powtórzony wpis",
   "games.steamImport.nonSteam": "Skrót spoza Steam · pominięto",
-  "games.steamImport.limit": "Profil obsługuje do 5000 importowanych gier. Pliki muszą być mniejsze niż 4 MB.",
-  "games.steamImport.inputError": "Podaj prawidłowe ID Steam lub adresy sklepu albo wybierz prawidłowy profil Depressurizer.",
-  "games.steamImport.writeError": "Nie udało się zapisać importu. Istniejące wpisy nie uległy zmianie. Spróbuj ponownie.",
-  "games.steamImport.readError": "Nie udało się odczytać importowanych gier. Spróbuj ponownie przed zmianami.",
+  "games.steamImport.limit":
+    "Profil obsługuje do 5000 importowanych gier. Pliki muszą być mniejsze niż 4 MB.",
+  "games.steamImport.inputError":
+    "Podaj prawidłowe ID Steam lub adresy sklepu albo wybierz prawidłowy profil Depressurizer.",
+  "games.steamImport.writeError":
+    "Nie udało się zapisać importu. Istniejące wpisy nie uległy zmianie. Spróbuj ponownie.",
+  "games.steamImport.readError":
+    "Nie udało się odczytać importowanych gier. Spróbuj ponownie przed zmianami.",
   "games.steamImport.done": "Dodano do biblioteki: {count}",
   "games.steamImport.stop": "Zatrzymaj sprawdzanie",
   "games.steamImport.restart": "Zacznij od nowa",
@@ -65,7 +80,8 @@ export default {
   "games.libraryStatus.finished": "Ukończona",
   "games.libraryStatus.onHold": "Wstrzymana",
   "games.libraryStatus.stopped": "Porzucona",
-  "games.libraryStatus.note": "Wybór dla tej kopii jest zapisywany w tym profilu Harbor. Czas gry i osiągnięcia nigdy go nie zmieniają.",
+  "games.libraryStatus.note":
+    "Wybór dla tej kopii jest zapisywany w tym profilu Harbor. Czas gry i osiągnięcia nigdy go nie zmieniają.",
 
   "games.unified.playtime": "Czas gry",
   "games.unified.playtime.all": "Dowolny czas gry",
@@ -78,8 +94,10 @@ export default {
   "games.unified.playtime.steam": "{time} na Steam",
   "games.unified.playtime.zeroSteam": "Brak czasu gry zarejestrowanego na Steam",
   "games.unified.playtime.zeroHarbor": "Brak czasu gry zarejestrowanego w Harbor",
-  "games.unified.playtime.unknownHint": "Czas gry konta Steam jest niedostępny lub to źródło go nie udostępnia.",
-  "games.unified.playtime.note": "Używa sum ze Steam i czasu zarejestrowanego w Harbor, w tym Twoich korekt. Niedostępne czasy są traktowane osobno.",
+  "games.unified.playtime.unknownHint":
+    "Czas gry konta Steam jest niedostępny lub to źródło go nie udostępnia.",
+  "games.unified.playtime.note":
+    "Używa sum ze Steam i czasu zarejestrowanego w Harbor, w tym Twoich korekt. Niedostępne czasy są traktowane osobno.",
   "games.unified.note": "Twoja biblioteka Steam, gry PC i zaimportowane ROM-y w jednym widoku.",
   "games.unified.allSources": "Wszystkie źródła",
   "games.unified.availability": "Dostępność",
@@ -94,15 +112,19 @@ export default {
   "games.unified.state.setup": "Wymaga konfiguracji",
   "games.unified.state.unknown": "Nie sprawdzono instalacji",
   "games.unified.refresh": "Odśwież lokalne biblioteki",
-  "games.unified.scanNote": "Nie udało się sprawdzić niektórych bibliotek. Ich gry pozostają tutaj ze stanem nieznanym lub niedostępnym.",
-  "games.unified.partial": "Nie udało się sprawdzić niektórych folderów; część instalacji mogła nie zostać rozpoznana.",
+  "games.unified.scanNote":
+    "Nie udało się sprawdzić niektórych bibliotek. Ich gry pozostają tutaj ze stanem nieznanym lub niedostępnym.",
+  "games.unified.partial":
+    "Nie udało się sprawdzić niektórych folderów; część instalacji mogła nie zostać rozpoznana.",
   "games.unified.empty": "Zbierz swoje gry w jednym miejscu",
-  "games.unified.emptyNote": "Połącz Steam, dodaj grę PC lub zaimportuj folder z ROM-ami, aby zobaczyć tutaj swoje gry.",
+  "games.unified.emptyNote":
+    "Połącz Steam, dodaj grę PC lub zaimportuj folder z ROM-ami, aby zobaczyć tutaj swoje gry.",
   "games.unified.pcGames": "Zarządzaj grami PC",
   "games.unified.roms": "Zarządzaj ROM-ami",
   "games.unified.steam": "Zarządzaj Steam",
   "games.unified.results": "{count} z {total} gier",
-  "games.unified.browser": "Lokalne uruchamianie i instalowanie jest dostępne w aplikacji komputerowej.",
+  "games.unified.browser":
+    "Lokalne uruchamianie i instalowanie jest dostępne w aplikacji komputerowej.",
   "games.unified.manage": "Zarządzaj: {name}",
   "games.unified.lastPlayed": "Ostatnia rozgrywka: {date}",
   "games.unified.clear": "Wyczyść filtry biblioteki",
@@ -117,5 +139,5 @@ export default {
   "games.libraryNews.failed": "Nie udało się wczytać nowości z gier.",
   "games.libraryNews.hide": "Ukryj nowości z gier",
   "games.libraryNews.show": "Pokaż nowości z gier",
-  "games.libraryNews.pending": "Sprawdzanie nowości z gier…"
+  "games.libraryNews.pending": "Sprawdzanie nowości z gier…",
 };

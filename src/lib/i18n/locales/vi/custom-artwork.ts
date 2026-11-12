@@ -15,7 +15,9 @@ export default {
   "artwork.resetLaunch": "Đặt lại logo khởi động",
   "artwork.local": "Lưu trên thiết bị này. Khi giảm chuyển động, hình ảnh tĩnh sẽ được sử dụng.",
   "artwork.error.large": "Chọn tệp nhỏ hơn: tối đa 8 MB và 4096 × 4096 pixel.",
-  "artwork.error.external": "Hoạt ảnh này dùng nội dung bên ngoài. Hãy xuất với hình ảnh được nhúng.",
+  "artwork.error.external":
+    "Hoạt ảnh này dùng nội dung bên ngoài. Hãy xuất với hình ảnh được nhúng.",
   "artwork.error.storage": "Không thể lưu tệp trên thiết bị này. Lựa chọn trước đó không thay đổi.",
-  "artwork.error.invalid": "Không thể đọc tệp. Chọn Lottie (.json hoặc .lottie), GIF, PNG, JPEG hoặc WebP."
+  "artwork.error.invalid":
+    "Không thể đọc tệp. Chọn Lottie (.json hoặc .lottie), GIF, PNG, JPEG hoặc WebP.",
 };

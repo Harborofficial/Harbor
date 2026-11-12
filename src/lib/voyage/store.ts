@@ -65,10 +65,18 @@ function subscribe(cb: () => void) {
 }
 
 export function useVoyage(): VoyageState {
-  return useSyncExternalStore(subscribe, () => state, () => state);
+  return useSyncExternalStore(
+    subscribe,
+    () => state,
+    () => state,
+  );
 }
 export function useVoyageOpen(): boolean {
-  return useSyncExternalStore(subscribe, () => open, () => open);
+  return useSyncExternalStore(
+    subscribe,
+    () => open,
+    () => open,
+  );
 }
 
 export function openVoyage() {

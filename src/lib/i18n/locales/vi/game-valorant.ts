@@ -34,20 +34,24 @@ export default {
   "games.valorant.sampleNote": "Đặc vụ có dưới 200 lượt xuất hiện được xếp cuối.",
   "games.valorant.empty": "Không có kết quả phù hợp với bộ lọc.",
   "games.valorant.checked": "Đã kiểm tra: {date}",
-  "games.valorant.metaScope": "Dữ liệu xếp hạng OP.GG cho bản cập nhật đã chọn. Tỷ lệ chọn là tỷ trọng lượt xuất hiện của đặc vụ. Kết quả phản ánh mẫu dữ liệu của nguồn, không phải toàn bộ người chơi.",
-  "games.valorant.referenceScope": "Hình ảnh và thông tin trò chơi qua Valorant-API. Dữ liệu có thể cập nhật chậm hơn trò chơi. Harbor không được Riot Games bảo trợ.",
+  "games.valorant.metaScope":
+    "Dữ liệu xếp hạng OP.GG cho bản cập nhật đã chọn. Tỷ lệ chọn là tỷ trọng lượt xuất hiện của đặc vụ. Kết quả phản ánh mẫu dữ liệu của nguồn, không phải toàn bộ người chơi.",
+  "games.valorant.referenceScope":
+    "Hình ảnh và thông tin trò chơi qua Valorant-API. Dữ liệu có thể cập nhật chậm hơn trò chơi. Harbor không được Riot Games bảo trợ.",
   "games.valorant.samples": "{count} lượt xuất hiện",
   "games.valorant.smallSample": "Mẫu nhỏ",
   "games.valorant.abilities": "Kỹ năng",
   "games.valorant.watchAbility": "Xem kỹ năng",
   "games.valorant.videoError": "Không thể phát video minh họa này.",
   "games.valorant.mapMeta": "Meta đặc vụ trên bản đồ này",
-  "games.valorant.mapScope": "Thông tin bản đồ, bao gồm cả những bản đồ ngoài vòng xoay xếp hạng hiện tại. Tên bản đồ và vị trí bằng tiếng Anh.",
+  "games.valorant.mapScope":
+    "Thông tin bản đồ, bao gồm cả những bản đồ ngoài vòng xoay xếp hạng hiện tại. Tên bản đồ và vị trí bằng tiếng Anh.",
   "games.valorant.callouts": "Tên vị trí",
   "games.valorant.compareWeapon": "So sánh với",
   "games.valorant.weapon": "Vũ khí",
   "games.valorant.distance": "Khoảng cách",
-  "games.valorant.damageScope": "Giá trị cơ bản của chế độ bắn chính trước giáp, xuyên thấu hoặc kỹ năng. Súng shotgun hiển thị sát thương mỗi viên đạn con.",
+  "games.valorant.damageScope":
+    "Giá trị cơ bản của chế độ bắn chính trước giáp, xuyên thấu hoặc kỹ năng. Súng shotgun hiển thị sát thương mỗi viên đạn con.",
   "games.valorant.weaponStats": "Thông số vũ khí",
   "games.valorant.cost": "Creds",
   "games.valorant.magazine": "Băng đạn",
@@ -55,5 +59,5 @@ export default {
   "games.valorant.reload": "Nạp đạn · giây",
   "games.valorant.head": "Sát thương đầu",
   "games.valorant.body": "Sát thương thân",
-  "games.valorant.legs": "Sát thương chân"
+  "games.valorant.legs": "Sát thương chân",
 };

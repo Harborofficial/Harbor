@@ -33,10 +33,10 @@ async function wikidataBrand(
 ): Promise<{ logo: string; description: string }> {
   const qid = QID.exec(url)?.[1];
   if (!qid) return { logo: "", description: "" };
-  const response = await safeFetch(
-    `https://www.wikidata.org/wiki/Special:EntityData/${qid}.json`,
-    { signal, headers: { Accept: "application/json" } },
-  );
+  const response = await safeFetch(`https://www.wikidata.org/wiki/Special:EntityData/${qid}.json`, {
+    signal,
+    headers: { Accept: "application/json" },
+  });
   if (!response.ok) return { logo: "", description: "" };
   const entity = obj(obj(obj(await response.json()).entities)[qid]);
   const claims = obj(entity.claims);

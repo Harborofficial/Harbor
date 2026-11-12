@@ -4,7 +4,11 @@ import { episodeSpanContains } from "@/lib/episode-span";
 import { engineP2pEligible } from "@/lib/torrent/stremio-stream";
 import { isLocalUrl } from "@/lib/player/local-url";
 import type { DownloadItem } from "@/lib/download/downloads-store";
-import { findPreferredSourceMatch, streamMatchesPreferredSource, type PlaybackEntry } from "@/lib/playback-history";
+import {
+  findPreferredSourceMatch,
+  streamMatchesPreferredSource,
+  type PlaybackEntry,
+} from "@/lib/playback-history";
 
 /** Use the file's saved release identity or the last online release when playing
  * offline. A local pathname is never itself a streaming source. */
@@ -19,8 +23,7 @@ export function preDownloadSourceForPlayback(
   if (isLocalUrl(playingUrl) && hasReusableEpisodeSource(saved?.sourceRef))
     return saved?.sourceRef ?? null;
   if (hasReusableEpisodeSource(remembered)) return remembered;
-  if (isLocalUrl(playingUrl) && saved?.torrentInfoHash)
-    return { infoHash: saved.torrentInfoHash };
+  if (isLocalUrl(playingUrl) && saved?.torrentInfoHash) return { infoHash: saved.torrentInfoHash };
   return null;
 }
 
@@ -38,25 +41,34 @@ export function matchingPreDownloadStream(
 ): ScoredStream | null {
   if (!hasReusableEpisodeSource(ref) || !ref) return null;
   const source: PlaybackEntry = {
-    infoHash: ref.infoHash, addonId: ref.addonId, resolution: ref.resolution,
-    releaseGroup: ref.releaseGroup, source: ref.source,
-    audioLanguages: ref.audioLanguages, bingeGroup: ref.bingeGroup, savedAt: 0,
+    infoHash: ref.infoHash,
+    addonId: ref.addonId,
+    resolution: ref.resolution,
+    releaseGroup: ref.releaseGroup,
+    source: ref.source,
+    audioLanguages: ref.audioLanguages,
+    bingeGroup: ref.bingeGroup,
+    savedAt: 0,
   };
   return findPreferredSourceMatch(
-    eligiblePreDownloadStreams(streams, episode), source, streamMatchesPreferredSource,
+    eligiblePreDownloadStreams(streams, episode),
+    source,
+    streamMatchesPreferredSource,
   );
 }
 
 /** Only used when an offline episode has no remembered online release at all. */
 export function bestAvailablePreDownloadStream(
-  streams: readonly ScoredStream[], episode: PlayEpisode,
+  streams: readonly ScoredStream[],
+  episode: PlayEpisode,
 ): ScoredStream | null {
   // The picker is already scored, filtered, and ordered for the requested episode.
   return eligiblePreDownloadStreams(streams, episode)[0] ?? null;
 }
 
 function eligiblePreDownloadStreams(
-  streams: readonly ScoredStream[], episode: PlayEpisode,
+  streams: readonly ScoredStream[],
+  episode: PlayEpisode,
 ): ScoredStream[] {
   return streams.filter((stream) => {
     if (stream.externalUrl && !stream.url) return false;

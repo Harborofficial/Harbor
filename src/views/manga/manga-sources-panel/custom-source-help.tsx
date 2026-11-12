@@ -4,7 +4,9 @@ import { useT } from "@/lib/i18n";
 
 function C({ children }: { children: ReactNode }) {
   return (
-    <code className="rounded bg-canvas px-1 py-0.5 font-mono text-[11.5px] text-ink">{children}</code>
+    <code className="rounded bg-canvas px-1 py-0.5 font-mono text-[11.5px] text-ink">
+      {children}
+    </code>
   );
 }
 
@@ -34,7 +36,9 @@ export function CustomSourceHelp() {
           </li>
           <li>
             <b>popularPath</b> / <b>searchPath</b>:{" "}
-            {t("the browse and search URLs, with the paging number and search word swapped for tokens (below).")}{" "}
+            {t(
+              "the browse and search URLs, with the paging number and search word swapped for tokens (below).",
+            )}{" "}
             <b>name</b> {t("and")} <b>iconUrl</b> {t("are optional.")}
           </li>
         </ul>
@@ -50,7 +54,8 @@ export function CustomSourceHelp() {
             {t("grabs lazy-loaded images.")}
           </li>
           <li>
-            <C>{"img@data-src|img@src"}</C> {t("tries each in order and uses the first with a value.")}
+            <C>{"img@data-src|img@src"}</C>{" "}
+            {t("tries each in order and uses the first with a value.")}
           </li>
           <li>
             {t("An empty selector before")} <C>@</C>, {t("like")} <C>@href</C>,{" "}
@@ -112,8 +117,8 @@ export function CustomSourceHelp() {
               "if the series page shows only the latest few chapters and the full list lives on another URL, this rewrites the series URL to it.",
             )}{" "}
             <C>match</C> {t("is a regex for the part to change")}, <C>replace</C>{" "}
-            {t("is what to swap in. The example turns")}{" "}
-            <C>.../series/ID/Name</C> {t("into")} <C>.../series/ID/all-chapters</C>.
+            {t("is what to swap in. The example turns")} <C>.../series/ID/Name</C> {t("into")}{" "}
+            <C>.../series/ID/all-chapters</C>.
           </li>
           <li>
             <b>pages.pathSuffix</b>:{" "}

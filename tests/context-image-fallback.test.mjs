@@ -16,7 +16,7 @@ function setup(status) {
         assert.equal(timeout, 20000);
         assert.equal(maxBytes, 32 * 1024 * 1024);
         return new Response(png, { headers: { "content-type": "image/png" } });
-      }
+      },
     },
     "@tauri-apps/plugin-http": {
       fetch: async () => {
@@ -24,8 +24,8 @@ function setup(status) {
         return status === 200
           ? new Response(png, { headers: { "content-type": "image/png" } })
           : new Response("bad request", { status });
-      }
-    }
+      },
+    },
   };
   const code = ts.transpileModule(
     readFileSync(new URL("../src/lib/context-image.ts", import.meta.url), "utf8"),

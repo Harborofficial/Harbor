@@ -3,17 +3,22 @@ export default {
   "games.searchUi.rows": "Visualização em linhas",
   "games.searchUi.aiPlaceholder": "Descreva um jogo, um clima ou o que gostaria de jogar…",
   "games.searchUi.guide": "Pesquise pelo título e refine os resultados com filtros.",
-  "games.searchUi.aiGuide": "Descreva o que procura. O Harbor verifica as sugestões da IA no catálogo Steam.",
+  "games.searchUi.aiGuide":
+    "Descreva o que procura. O Harbor verifica as sugestões da IA no catálogo Steam.",
   "games.searchUi.web": "Contexto da web",
   "games.searchUi.settings": "Configurações de IA",
   "games.searchUi.setup": "Conecte seu provedor de IA",
-  "games.searchUi.setupNote": "Use a mesma conta OpenRouter ou Groq e o mesmo modelo que já usa no Harbor.",
-  "games.searchUi.aiHint": "Pressione Enter quando quiser. Seus filtros também se aplicam aos resultados da IA.",
+  "games.searchUi.setupNote":
+    "Use a mesma conta OpenRouter ou Groq e o mesmo modelo que já usa no Harbor.",
+  "games.searchUi.aiHint":
+    "Pressione Enter quando quiser. Seus filtros também se aplicam aos resultados da IA.",
   "games.searchUi.thinking": "Buscando jogos e verificando no Steam…",
   "games.searchUi.verified": "{count} resultados Steam · Sugestões de IA",
-  "games.searchUi.noAiResults": "Nenhum resultado Steam verificado com esses filtros. Tente outra descrição ou menos filtros.",
+  "games.searchUi.noAiResults":
+    "Nenhum resultado Steam verificado com esses filtros. Tente outra descrição ou menos filtros.",
   "games.searchUi.random": "Jogo aleatório",
-  "games.searchUi.randomHint": "Escolha um jogo aleatório que corresponda à pesquisa e aos filtros.",
+  "games.searchUi.randomHint":
+    "Escolha um jogo aleatório que corresponda à pesquisa e aos filtros.",
   "games.searchUi.picking": "Escolhendo…",
   "games.searchUi.previewHint": "Selecione o jogo para saber mais",
   "games.searchUi.recents": "Pesquisas recentes",
@@ -21,5 +26,5 @@ export default {
   "games.searchUi.sources": "Steam + IGDB · Jogos para PC, consoles e ROM hacks.",
   "games.searchUi.steamScope": "Estes filtros ou esta ordenação usam dados do Steam.",
   "games.searchUi.allCatalogs": "Pesquisar em todos os catálogos",
-  "games.searchUi.partial": "Alguns resultados estão indisponíveis: {providers}."
+  "games.searchUi.partial": "Alguns resultados estão indisponíveis: {providers}.",
 };

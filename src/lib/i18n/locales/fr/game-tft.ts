@@ -19,8 +19,10 @@ export default {
   "games.tft.save": "Enregistrer",
   "games.tft.savedTeams": "Équipes enregistrées",
   "games.tft.delete": "Supprimer l’équipe enregistrée",
-  "games.tft.note": "Chaque champion compte une fois. Les objets et effets spéciaux peuvent modifier les types ou les places dans l’équipe.",
-  "games.tft.saveFailed": "Impossible d’enregistrer sur cet appareil. Votre équipe actuelle reste affichée.",
+  "games.tft.note":
+    "Chaque champion compte une fois. Les objets et effets spéciaux peuvent modifier les types ou les places dans l’équipe.",
+  "games.tft.saveFailed":
+    "Impossible d’enregistrer sur cet appareil. Votre équipe actuelle reste affichée.",
   "games.tft.missing": "Certains champions enregistrés ne sont plus dans ce set.",
   "games.tft.imported": "Équipe importée.",
   "games.tft.full": "Un code contient jusqu’à 10 champions différents.",
@@ -54,5 +56,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "Régénération des PV",
   "games.tft.stat.set14AmpIcon": "Amplification des dégâts",
   "games.tft.stat.TFTManaRegen": "Régénération de mana",
-  "games.tft.stat.scaleSV": "Omnivampirisme"
+  "games.tft.stat.scaleSV": "Omnivampirisme",
 };

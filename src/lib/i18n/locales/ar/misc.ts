@@ -201,9 +201,11 @@ const misc: Record<string, string> = {
   "Reveal comments": "إظهار التعليقات",
   "Comments are hidden": "التعليقات مخفية",
   "Hosted elsewhere": "مستضاف لدى جهة أخرى",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "تدير هذه الخطط جهة خارجية. Harbor غير مرتبط بها ولا يتلقى شيئًا من أي اشتراك. الأسعار والشروط الحالية على موقعهم.",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "تدير هذه الخطط جهة خارجية. Harbor غير مرتبط بها ولا يتلقى شيئًا من أي اشتراك. الأسعار والشروط الحالية على موقعهم.",
   "{name} can run on a hosted instance": "يمكن تشغيل {name} على نسخة مستضافة",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "تدير هذا جهة خارجية. Harbor ليس مرتبطًا بها ولا يعيد بيعه ولا يتلقى شيئًا إن اشتركت. السعر وما يشمله مذكور على موقعهم.",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "تدير هذا جهة خارجية. Harbor ليس مرتبطًا بها ولا يعيد بيعه ولا يتلقى شيئًا إن اشتركت. السعر وما يشمله مذكور على موقعهم.",
   "Show comments": "إظهار التعليقات",
   "Hide comments": "إخفاء التعليقات",
   "You haven't commented yet": "لم تعلق بعد",

@@ -57,7 +57,11 @@ function themeCandidates(sorted: Chapter[], durationSec: number, taken: SkipSegm
 }
 
 /** Falls back to shape when a release leaves its opening or ending untitled. */
-function unnamedThemes(sorted: Chapter[], durationSec: number, named: SkipSegment[]): SkipSegment[] {
+function unnamedThemes(
+  sorted: Chapter[],
+  durationSec: number,
+  named: SkipSegment[],
+): SkipSegment[] {
   if (durationSec <= 0 || durationSec > EPISODE_MAX_SEC) return [];
   const out: SkipSegment[] = [];
   const candidates = themeCandidates(sorted, durationSec, named);

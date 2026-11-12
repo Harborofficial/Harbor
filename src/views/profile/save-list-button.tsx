@@ -52,7 +52,13 @@ export function SaveListButton({
       ) : (
         <Plus size={14} strokeWidth={2.4} />
       )}
-      {done ? t("Saved") : state === "full" ? t("List full") : state === "error" ? t("Try again") : t("Save to my lists")}
+      {done
+        ? t("Saved")
+        : state === "full"
+          ? t("List full")
+          : state === "error"
+            ? t("Try again")
+            : t("Save to my lists")}
     </button>
   );
 }

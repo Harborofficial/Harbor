@@ -24,10 +24,7 @@ export function peekBpEnrich(id: string | undefined): TmdbDetail | null {
   return id ? (cache.get(id) ?? null) : null;
 }
 
-export async function warmBpEnrich(
-  tmdbKey: string,
-  meta: Meta | null,
-): Promise<TmdbDetail | null> {
+export async function warmBpEnrich(tmdbKey: string, meta: Meta | null): Promise<TmdbDetail | null> {
   const id = meta?.id;
   if (!tmdbKey || !meta || !id) return null;
   if (cache.has(id)) return cache.get(id) ?? null;

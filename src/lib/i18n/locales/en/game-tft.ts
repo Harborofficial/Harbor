@@ -19,7 +19,8 @@ export default {
   "games.tft.save": "Save team",
   "games.tft.savedTeams": "Saved teams",
   "games.tft.delete": "Delete saved team",
-  "games.tft.note": "Counts use each champion once. Items and special effects can change traits or board space.",
+  "games.tft.note":
+    "Counts use each champion once. Items and special effects can change traits or board space.",
   "games.tft.saveFailed": "Couldn’t save on this device. Your current team is still here.",
   "games.tft.missing": "Some saved champions are no longer in this set.",
   "games.tft.imported": "Team imported.",
@@ -54,5 +55,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "Health regen",
   "games.tft.stat.set14AmpIcon": "Damage amp",
   "games.tft.stat.TFTManaRegen": "Mana regen",
-  "games.tft.stat.scaleSV": "Omnivamp"
+  "games.tft.stat.scaleSV": "Omnivamp",
 };

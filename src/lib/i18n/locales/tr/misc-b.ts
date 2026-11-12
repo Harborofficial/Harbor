@@ -387,7 +387,8 @@ const miscB: Record<string, string> = {
   "Live preview": "Canlı önizleme",
   "Live preview is on. Done and Save both keep what you've picked as your Custom theme. Reset reverts the editor to the saved palette.":
     "Canlı önizleme açık. Bitti ve Kaydet seçeneklerinin ikisi de seçtiklerinizi Özel temanız olarak korur. Sıfırla, düzenleyiciyi kayıtlı renk paletine döndürür.",
-  "Live state of Harbor's own P2P engine on this machine.": "Harbor'ın bu makinedeki kendi P2P motorunun anlık durumu.",
+  "Live state of Harbor's own P2P engine on this machine.":
+    "Harbor'ın bu makinedeki kendi P2P motorunun anlık durumu.",
   "Live web": "Canlı web",
   "Ln {line}, Col {col}": "Sat {line}, Süt {col}",
   "Load effect": "Yükleme efekti",
@@ -759,7 +760,8 @@ const miscB: Record<string, string> = {
   "Nothing here yet!": "Burada henüz bir şey yok!",
   "Nothing here yet.": "Burada henüz bir şey yok.",
   "Nothing in {genre} right now.": "Şu anda {genre} kategorisinde bir şey yok.",
-  "Nothing left to confirm while P2P is disabled.": "P2P devre dışıyken onaylanacak bir şey kalmadı.",
+  "Nothing left to confirm while P2P is disabled.":
+    "P2P devre dışıyken onaylanacak bir şey kalmadı.",
   "Nothing left to post after removing links.":
     "Bağlantılar kaldırılınca gönderilecek içerik kalmadı.",
   "Nothing matched this filter. Try another category or change your region in Settings.":
@@ -906,7 +908,8 @@ const miscB: Record<string, string> = {
   "Opening MyAnimeList...": "MyAnimeList açılıyor...",
   "Opens Stremio in your browser. Works with email, Facebook, and Apple accounts.":
     "Stremio'yu tarayıcınızda açar. E-posta, Facebook ve Apple hesaplarıyla çalışır.",
-  "Opens the folder holding the DHT cache and active transfer data.": "DHT önbelleğini ve etkin aktarım verilerini içeren klasörü açar.",
+  "Opens the folder holding the DHT cache and active transfer data.":
+    "DHT önbelleğini ve etkin aktarım verilerini içeren klasörü açar.",
   "Opens the free signup page": "Ücretsiz kayıt sayfasını açar",
   "Opens your API settings page": "API ayarları sayfanızı açar",
   "Optional. Add one to turn on automatic subtitle sync.":
@@ -1007,7 +1010,8 @@ const miscB: Record<string, string> = {
   "Pay the total in smaller amounts over time":
     "Toplam tutarı zaman içinde daha küçük meblağlarla ödersiniz",
   Peacock: "Peacock",
-  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.": "P2P yayını oynatılırken eşleri, hızı ve ilerlemeyi oynatıcıda gösterir. Çıkış düğmesini engellemeden sol üstte yer alır.",
+  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.":
+    "P2P yayını oynatılırken eşleri, hızı ve ilerlemeyi oynatıcıda gösterir. Çıkış düğmesini engellemeden sol üstte yer alır.",
   "Peers, speed and progress while a torrent streams. Sits clear of the exit button, top left.":
     "Torrent yayını sırasında eş sayısını, hızı ve ilerlemeyi gösterir. Sol üstte, çıkış düğmesini kapatmayacak şekilde durur.",
   "Pens currently in demand": "Şu anda en çok rağbet gören yazarlar",

@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
-import { useSharedCrew, useAdaptationFamily, type SharedCrewFilm } from "@/lib/providers/wikidata-graph";
+import {
+  useSharedCrew,
+  useAdaptationFamily,
+  type SharedCrewFilm,
+} from "@/lib/providers/wikidata-graph";
 
 export type GraphReason = { label: string; detail?: string; rank: number };
 

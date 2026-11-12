@@ -79,7 +79,11 @@ export async function searchSportsEvents(
 
   const byName = rows(`${DB}/searchevents.php?e=${encodeURIComponent(trimmed)}`, "event", signal);
   const byTeam = (async () => {
-    const teams = await rows(`${DB}/searchteams.php?t=${encodeURIComponent(trimmed)}`, "teams", signal);
+    const teams = await rows(
+      `${DB}/searchteams.php?t=${encodeURIComponent(trimmed)}`,
+      "teams",
+      signal,
+    );
     const team = teams.find((entry) => {
       const name = normalizeSportsSearch(entry.strTeam ?? "");
       const alt = normalizeSportsSearch(entry.strTeamAlternate ?? "");

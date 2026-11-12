@@ -3,7 +3,6 @@ import type { AnimationItem } from "lottie-web";
 
 const CANVAS = "#223bba";
 
-
 export function CatBoatOverlay({
   reduce,
   visible,

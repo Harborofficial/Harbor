@@ -12,9 +12,7 @@ import type { Meta } from "@/lib/cinemeta";
 import { topMovies, topSeries } from "@/lib/cinemeta";
 import { watchlistAllIds } from "@/lib/watchlist";
 
-type TrendingItem =
-  | (RawMovie & { media_type: "movie" })
-  | (RawSeries & { media_type: "tv" });
+type TrendingItem = (RawMovie & { media_type: "movie" }) | (RawSeries & { media_type: "tv" });
 
 const RECENT_KEY = "harbor.surprise.recent.v1";
 const RECENT_TTL_MS = 14 * 24 * 60 * 60 * 1000;
@@ -30,7 +28,8 @@ function readRecent(): RecentEntry[] {
     if (!Array.isArray(arr)) return [];
     const now = Date.now();
     return (arr as RecentEntry[]).filter(
-      (e) => e && typeof e.id === "string" && typeof e.at === "number" && now - e.at < RECENT_TTL_MS,
+      (e) =>
+        e && typeof e.id === "string" && typeof e.at === "number" && now - e.at < RECENT_TTL_MS,
     );
   } catch {
     return [];
@@ -39,7 +38,10 @@ function readRecent(): RecentEntry[] {
 
 function pushRecent(id: string): void {
   try {
-    const next: RecentEntry[] = [{ id, at: Date.now() }, ...readRecent().filter((e) => e.id !== id)];
+    const next: RecentEntry[] = [
+      { id, at: Date.now() },
+      ...readRecent().filter((e) => e.id !== id),
+    ];
     if (next.length > RECENT_CAP) next.length = RECENT_CAP;
     localStorage.setItem(RECENT_KEY, JSON.stringify(next));
   } catch {
@@ -120,17 +122,17 @@ export async function surpriseMe(
     const sources: Promise<TrendingItem[]>[] = [
       fetchTmdb(tmdbKey, "trending/all/week").then((r) => r),
       fetchTmdb(tmdbKey, "trending/all/day").then((r) => r),
-      fetchTmdb(tmdbKey, "movie/top_rated", { page: String(1 + Math.floor(Math.random() * 5)) }).then((r) =>
-        tagMedia(r, "movie"),
+      fetchTmdb(tmdbKey, "movie/top_rated", {
+        page: String(1 + Math.floor(Math.random() * 5)),
+      }).then((r) => tagMedia(r, "movie")),
+      fetchTmdb(tmdbKey, "tv/top_rated", { page: String(1 + Math.floor(Math.random() * 5)) }).then(
+        (r) => tagMedia(r, "tv"),
       ),
-      fetchTmdb(tmdbKey, "tv/top_rated", { page: String(1 + Math.floor(Math.random() * 5)) }).then((r) =>
-        tagMedia(r, "tv"),
+      fetchTmdb(tmdbKey, "movie/popular", { page: String(1 + Math.floor(Math.random() * 4)) }).then(
+        (r) => tagMedia(r, "movie"),
       ),
-      fetchTmdb(tmdbKey, "movie/popular", { page: String(1 + Math.floor(Math.random() * 4)) }).then((r) =>
-        tagMedia(r, "movie"),
-      ),
-      fetchTmdb(tmdbKey, "tv/popular", { page: String(1 + Math.floor(Math.random() * 4)) }).then((r) =>
-        tagMedia(r, "tv"),
+      fetchTmdb(tmdbKey, "tv/popular", { page: String(1 + Math.floor(Math.random() * 4)) }).then(
+        (r) => tagMedia(r, "tv"),
       ),
     ];
     if (affinity.length > 0) {
@@ -192,8 +194,7 @@ export async function surpriseMe(
         const english = await get<RawMovie | RawSeries>(tmdbKey, `${kind}/${pick.id}`, {
           language: "en-US",
         });
-        englishName =
-          (english && ("title" in english ? english.title : english.name)) || undefined;
+        englishName = (english && ("title" in english ? english.title : english.name)) || undefined;
       }
       const meta =
         pick.media_type === "tv"

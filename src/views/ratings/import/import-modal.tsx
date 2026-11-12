@@ -291,7 +291,9 @@ function FilePick({
           {file ? file.name : t("Drop your export here, or click to browse")}
         </span>
         {file && (
-          <span className="text-[11.5px] text-ink-subtle">{t("Click to choose a different file")}</span>
+          <span className="text-[11.5px] text-ink-subtle">
+            {t("Click to choose a different file")}
+          </span>
         )}
       </button>
       <input

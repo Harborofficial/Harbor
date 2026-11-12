@@ -16,11 +16,13 @@ export default {
   "games.metadata.type.pack": "パック",
   "games.metadata.type.update": "アップデート",
   "games.metadata.note": "ゲームの画像と詳細を選択します。ランチャーとファイルは変わりません。",
-  "games.metadata.conflict": "別のウィンドウで選択が変更されました。閉じてから開き直し、最新の選択を確認してください。",
+  "games.metadata.conflict":
+    "別のウィンドウで選択が変更されました。閉じてから開き直し、最新の選択を確認してください。",
   "games.match.title": "画像と詳細を検索",
   "games.match.use": "このゲームを使用",
   "games.match.remove": "関連付けを解除",
   "games.match.source": "画像と詳細の提供：IGDB",
-  "games.match.note": "ファイルに一致する版を選んでください。元のファイルとファイル名は保持されます。",
-  "games.match.empty": "地域やリビジョンの表記を除いたタイトルで検索してください。"
+  "games.match.note":
+    "ファイルに一致する版を選んでください。元のファイルとファイル名は保持されます。",
+  "games.match.empty": "地域やリビジョンの表記を除いたタイトルで検索してください。",
 };

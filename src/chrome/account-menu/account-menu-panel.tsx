@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
-import { getSecondaryPrivileges } from "@/lib/settings/defaults";
+import { getSecondaryPrivileges } from "@/lib/profiles/privileges";
 import { ProfileAvatar, SubtitleText } from "./account-menu-parts";
 import type { AccountMenuController } from "./use-account-menu";
 import { loadNuvioState } from "@/lib/nuvio/nuvio-client";

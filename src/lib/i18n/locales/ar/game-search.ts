@@ -3,15 +3,19 @@ export default {
   "games.searchUi.rows": "عرض الصفوف",
   "games.searchUi.aiPlaceholder": "صف لعبة أو أجواءً أو ما تود لعبه…",
   "games.searchUi.guide": "ابحث بالعنوان ثم ضيّق النتائج باستخدام المرشحات.",
-  "games.searchUi.aiGuide": "صف ما تبحث عنه. يتحقق Harbor من اقتراحات الذكاء الاصطناعي في كتالوج Steam.",
+  "games.searchUi.aiGuide":
+    "صف ما تبحث عنه. يتحقق Harbor من اقتراحات الذكاء الاصطناعي في كتالوج Steam.",
   "games.searchUi.web": "سياق الويب",
   "games.searchUi.settings": "إعدادات الذكاء الاصطناعي",
   "games.searchUi.setup": "اربط مزوّد الذكاء الاصطناعي",
-  "games.searchUi.setupNote": "استخدم حساب OpenRouter أو Groq والنموذج نفسيهما اللذين تستخدمهما في Harbor.",
-  "games.searchUi.aiHint": "اضغط Enter عندما تكون مستعدًا. تنطبق مرشحاتك أيضًا على نتائج الذكاء الاصطناعي.",
+  "games.searchUi.setupNote":
+    "استخدم حساب OpenRouter أو Groq والنموذج نفسيهما اللذين تستخدمهما في Harbor.",
+  "games.searchUi.aiHint":
+    "اضغط Enter عندما تكون مستعدًا. تنطبق مرشحاتك أيضًا على نتائج الذكاء الاصطناعي.",
   "games.searchUi.thinking": "جارٍ العثور على ألعاب والتحقق من Steam…",
   "games.searchUi.verified": "{count} نتيجة في Steam · اقتراحات الذكاء الاصطناعي",
-  "games.searchUi.noAiResults": "لا توجد نتائج مؤكدة في Steam بهذه المرشحات. جرّب وصفًا مختلفًا أو مرشحات أقل.",
+  "games.searchUi.noAiResults":
+    "لا توجد نتائج مؤكدة في Steam بهذه المرشحات. جرّب وصفًا مختلفًا أو مرشحات أقل.",
   "games.searchUi.random": "لعبة عشوائية",
   "games.searchUi.randomHint": "اختر لعبة عشوائية تطابق هذا البحث ومرشحاته.",
   "games.searchUi.picking": "جارٍ الاختيار…",
@@ -21,5 +25,5 @@ export default {
   "games.searchUi.sources": "Steam + IGDB · ألعاب الكمبيوتر وأجهزة الألعاب وتعديلات ROM.",
   "games.searchUi.steamScope": "تستخدم هذه الفلاتر أو طريقة الترتيب بيانات Steam.",
   "games.searchUi.allCatalogs": "البحث في جميع الكتالوجات",
-  "games.searchUi.partial": "بعض النتائج غير متاحة: {providers}."
+  "games.searchUi.partial": "بعض النتائج غير متاحة: {providers}.",
 };

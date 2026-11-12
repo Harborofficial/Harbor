@@ -166,6 +166,9 @@ if (-not $SkipPlugins) {
   }
 }
 
+Step 'Moonshine runtime'
+Invoke-Tool 'powershell' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'scripts/build-moonshine-worker.ps1')
+
 Step 'Package and build Shipyard'
 $saved = @{}
 foreach ($name in @(

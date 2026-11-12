@@ -26,7 +26,8 @@ export default {
   "games.modHub.entryNote": "Jelajahi mod dan kelola konten terpasang.",
   "games.modHub.switchGame": "Ganti game",
   "games.modHub.creatorDownload": "Unduh dari kreator",
-  "games.modHub.legacyNote": "Unduhan The Sims 2 dan The Sims 3 tersedia di halaman kreator. Pengelolaan mod lokal saat ini mendukung The Sims 4.",
+  "games.modHub.legacyNote":
+    "Unduhan The Sims 2 dan The Sims 3 tersedia di halaman kreator. Pengelolaan mod lokal saat ini mendukung The Sims 4.",
   "games.modHub.bodyShop": "Body Shop",
   "games.modHub.patterns": "Pola",
   "games.modHub.sets": "Set bertema",
@@ -42,5 +43,5 @@ export default {
   "games.modHub.creator": "Kreator",
   "games.modHub.viewOnSource": "Halaman kreator",
   "games.modHub.filesPending": "Memuat berkas proyek…",
-  "games.modHub.picked": "Pilihan MTS"
+  "games.modHub.picked": "Pilihan MTS",
 };

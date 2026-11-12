@@ -19,10 +19,20 @@ export function snippetHeardKeys(profile = activeProfileId()): Set<string> {
 }
 
 /** Seen/skipped cards retire from future previews without counting as full-song plays or taste. */
-export function recordSnippetsSeen(tracks: readonly MusicTrack[], profile = activeProfileId()): void {
+export function recordSnippetsSeen(
+  tracks: readonly MusicTrack[],
+  profile = activeProfileId(),
+): void {
   const previous = cachedLocalJson<PreviewHistory>(store(profile)) ?? {};
-  const keys = tracks.map(musicTrackIdentity).filter(key => !Object.hasOwn(previous, key));
+  const keys = tracks.map(musicTrackIdentity).filter((key) => !Object.hasOwn(previous, key));
   if (!keys.length) return;
-  const rows = { ...previous, ...Object.fromEntries(keys.map(key => [key, Date.now()])) };
-  writeLocalJson(store(profile), Object.fromEntries(Object.entries(rows).sort((a, b) => b[1] - a[1]).slice(0, 5000)));
+  const rows = { ...previous, ...Object.fromEntries(keys.map((key) => [key, Date.now()])) };
+  writeLocalJson(
+    store(profile),
+    Object.fromEntries(
+      Object.entries(rows)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5000),
+    ),
+  );
 }

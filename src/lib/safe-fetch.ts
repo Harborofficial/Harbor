@@ -509,20 +509,21 @@ function directAttempt(host: string, input: string, init?: RequestInit): Promise
   );
 }
 
-function tauriStringFetch(input: string, init?: RequestInit): Promise<Response> {
+function tauriStringFetch(input: string, init?: RequestInit, timeoutMs = 30000): Promise<Response> {
+  const deadlineMs = timeoutMs + 5_000;
   const directHost = hasSensitiveRequestHeaders(init?.headers) ? null : directHostFor(input);
   if (directHost) {
     countCrossing("direct", input);
-    return withDeadline(directAttempt(directHost, input, init), init?.signal);
+    return withDeadline(directAttempt(directHost, input, init), init?.signal, deadlineMs);
   }
   const exec = isIdempotent(init?.method)
-    ? tauriHarborFetch(input, init).catch((e: unknown) => {
+    ? tauriHarborFetch(input, init, undefined, timeoutMs).catch((e: unknown) => {
         if (isCancellation(e)) throw e;
         if (!shouldFallbackToPluginHttp(e, init)) throw e;
         return pluginHttpFetch(input, init);
       })
-    : tauriHarborFetch(input, init);
-  return withDeadline(exec, init?.signal);
+    : tauriHarborFetch(input, init, undefined, timeoutMs);
+  return withDeadline(exec, init?.signal, deadlineMs);
 }
 
 function webStringFetch(input: string, init?: RequestInit): Promise<Response> {
@@ -530,7 +531,11 @@ function webStringFetch(input: string, init?: RequestInit): Promise<Response> {
   return fetch(rewritten.url, rewritten.init);
 }
 
-export const safeFetch: typeof fetch = (input, init) => {
+function safeFetchInternal(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  timeoutMs = 30000,
+): Promise<Response> {
   const target = urlOf(input);
   if (isBlockedUrl(target)) {
     noteBlocked();
@@ -541,10 +546,10 @@ export const safeFetch: typeof fetch = (input, init) => {
     return Promise.reject(new TrackerBlockedError(host));
   }
   if (isTauri) {
-    if (typeof input === "string") return tauriStringFetch(input, init);
-    if (input instanceof URL) return tauriStringFetch(input.href, init);
+    if (typeof input === "string") return tauriStringFetch(input, init, timeoutMs);
+    if (input instanceof URL) return tauriStringFetch(input.href, init, timeoutMs);
     return materializeRequest(input, init).then((request) =>
-      tauriStringFetch(request.url, request.init),
+      tauriStringFetch(request.url, request.init, timeoutMs),
     );
   }
   if (typeof input === "string") return webStringFetch(input, init);
@@ -552,9 +557,24 @@ export const safeFetch: typeof fetch = (input, init) => {
   return materializeRequest(input, init).then((request) =>
     webStringFetch(request.url, request.init),
   );
-};
+}
 
-export function safeFetchLocal(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+export const safeFetch: typeof fetch = (input, init) => safeFetchInternal(input, init);
+
+/** Same policy and bridge as safeFetch, with a caller-owned native deadline. */
+export function safeFetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit | undefined,
+  timeoutMs: number,
+): Promise<Response> {
+  return safeFetchInternal(input, init, timeoutMs);
+}
+
+export function safeFetchLocal(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  timeoutMs = 30000,
+): Promise<Response> {
   const target = urlOf(input);
   if (isBlockedUrl(target)) {
     noteBlocked();
@@ -567,13 +587,13 @@ export function safeFetchLocal(input: RequestInfo | URL, init?: RequestInit): Pr
   if (isTauri) {
     const fetchPart =
       typeof input === "string"
-        ? tauriHarborFetch(input, init, undefined, 30000, undefined, true)
+        ? tauriHarborFetch(input, init, undefined, timeoutMs, undefined, true)
         : input instanceof URL
-          ? tauriHarborFetch(input.href, init, undefined, 30000, undefined, true)
+          ? tauriHarborFetch(input.href, init, undefined, timeoutMs, undefined, true)
           : materializeRequest(input, init).then((request) =>
-              tauriHarborFetch(request.url, request.init, undefined, 30000, undefined, true),
+              tauriHarborFetch(request.url, request.init, undefined, timeoutMs, undefined, true),
             );
-    return withDeadline(fetchPart, init?.signal);
+    return withDeadline(fetchPart, init?.signal, timeoutMs + 5_000);
   }
   if (typeof input === "string") return webStringFetch(input, init);
   if (input instanceof URL) return webStringFetch(input.href, init);

@@ -3,7 +3,8 @@ export default {
   "games.dota.title": "Tendenze degli eroi",
   "games.dota.intro": "Trova il tuo prossimo eroe.",
   "games.dota.refresh": "Aggiorna tendenze",
-  "games.dota.unavailable": "Aggiornamento non riuscito. I dati già caricati potrebbero restare visibili.",
+  "games.dota.unavailable":
+    "Aggiornamento non riuscito. I dati già caricati potrebbero restare visibili.",
   "games.dota.partial": "Alcuni dati non sono disponibili.",
   "games.dota.checked": "Verificato: {date}",
   "games.dota.search": "Cerca un eroe",
@@ -18,7 +19,8 @@ export default {
   "games.dota.attribute.agi": "Agilità",
   "games.dota.attribute.int": "Intelligenza",
   "games.dota.attribute.all": "Universale",
-  "games.dota.trendsScope": "Campione OpenDota: sette giorni UTC, oggi incluso. Il rango è la media della partita; Turbo e partite professionali sono separati.",
+  "games.dota.trendsScope":
+    "Campione OpenDota: sette giorni UTC, oggi incluso. Il rango è la media della partita; Turbo e partite professionali sono separati.",
   "games.dota.wins": "vittorie",
   "games.dota.picks": "{count} scelte",
   "games.dota.noSample": "Nessun dato",
@@ -26,7 +28,8 @@ export default {
   "games.dota.moreHeroes": "Altri eroi",
   "games.dota.matchups": "Scontri professionali",
   "games.dota.refreshMatchups": "Aggiorna scontri",
-  "games.dota.matchupsScope": "Vittorie di {hero} contro ciascun avversario nelle partite professionali registrate dell’ultimo anno. Include patch precedenti; indipendente dal filtro di rango.",
+  "games.dota.matchupsScope":
+    "Vittorie di {hero} contro ciascun avversario nelle partite professionali registrate dell’ultimo anno. Include patch precedenti; indipendente dal filtro di rango.",
   "games.dota.opponent": "Cerca un avversario",
   "games.dota.minimum": "Partite minime",
   "games.dota.minGames": "{count}+ partite",
@@ -48,5 +51,5 @@ export default {
   "games.dota.sample.5": "Leggenda",
   "games.dota.sample.6": "Antico",
   "games.dota.sample.7": "Divino",
-  "games.dota.sample.8": "Immortale"
+  "games.dota.sample.8": "Immortale",
 };

@@ -29,6 +29,7 @@ function mockAniZip(options: {
   let fetches = 0;
   const aliases = options.aliases ?? [];
   const api = load("src/lib/providers/anizip.ts", {
+    "@/lib/metadata-policy": { addonOnlyMetadata: () => false, useTmdbTopMatch: () => true },
     "@/lib/safe-fetch": {
       safeFetch: async () => {
         fetches++;
@@ -146,7 +147,7 @@ test("an explicit refresh bypasses a persisted AniZip 404", async () => {
   assert.equal(fetches(), 0, "the persisted 404 is served without a request");
   assert.equal(storedReads, 1);
 
-  const refreshed = await api.aniZipByKitsu(42, 0);
+  const refreshed = await api.aniZipByKitsu(42, false, 0);
   assert.equal(refreshed?.mappings?.kitsu_id, 42);
   assert.equal(fetches(), 1, "an explicit refresh forces the provider request");
 });
@@ -161,7 +162,7 @@ test("animeMappingByKitsu forwards an explicit refresh to its mapping lookups", 
         return null;
       },
       aniZipByImdb: async () => null,
-      aniZipByKitsu: async (_id: number, maxAge?: number) => {
+      aniZipByKitsu: async (_id: number, _identity: boolean, maxAge?: number) => {
         calls.push(["kitsu", maxAge]);
         return null;
       },

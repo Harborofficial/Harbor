@@ -18,12 +18,15 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "Permainan kreator",
   "games.roms.watchVideo": "Tonton video",
   "games.roms.noVideos": "Belum ada video untuk game ini.",
-  "games.roms.libraryNote": "Bawa game milikmu. Impor berkas, pilih emulator, dan satukan koleksimu.",
+  "games.roms.libraryNote":
+    "Bawa game milikmu. Impor berkas, pilih emulator, dan satukan koleksimu.",
   "games.roms.openLibrary": "Buka pustaka",
   "games.roms.downloadCharts": "ROM hack paling banyak diunduh",
-  "games.roms.downloadChartsNote": "Total unduhan patch di Romhack Plaza. Buka proyek untuk melihat pembuat, versi, dan persyaratannya.",
+  "games.roms.downloadChartsNote":
+    "Total unduhan patch di Romhack Plaza. Buka proyek untuk melihat pembuat, versi, dan persyaratannya.",
   "games.roms.downloadCount": "{count} unduhan",
-  "games.roms.chartUnavailable": "Peringkat unduhan sedang tidak tersedia. Kamu tetap bisa menjelajahi Romhack Plaza.",
+  "games.roms.chartUnavailable":
+    "Peringkat unduhan sedang tidak tersedia. Kamu tetap bisa menjelajahi Romhack Plaza.",
   "games.roms.allPlatforms": "Semua platform",
   "games.roms.moreReleases": "Tampilkan lebih banyak rilis",
   "games.roms.fewerReleases": "Tampilkan lebih sedikit rilis",
@@ -59,14 +62,16 @@ const gameRoms: Record<string, string> = {
   "games.roms.noCollection": "Belum ada game dalam koleksi ini untuk konsol yang dipilih.",
   "games.roms.community": "Dibuat oleh komunitas",
   "games.roms.hacksTitle": "Game yang familier. Petualangan yang berbeda.",
-  "games.roms.hacksNote": "Temukan ROM hack, cari game aslinya, lalu siapkan salinan yang sudah dipatch untuk dimainkan.",
+  "games.roms.hacksNote":
+    "Temukan ROM hack, cari game aslinya, lalu siapkan salinan yang sudah dipatch untuk dimainkan.",
   "games.roms.catalogNote": "Jelajahi katalog berdasarkan konsol, genre, era rilis, dan seri.",
   "games.roms.genre": "Genre",
   "games.roms.allGenres": "Semua genre",
   "games.roms.era": "Era rilis",
   "games.roms.reset": "Atur ulang filter",
   "games.roms.empty": "Coba judul lain atau perluas filter untuk konsol ini.",
-  "games.roms.source": "Metadata game dan hubungan antarjudul berasal dari IGDB. Impor file lokal Anda untuk memainkan game yang didukung di Harbor.",
+  "games.roms.source":
+    "Metadata game dan hubungan antarjudul berasal dari IGDB. Impor file lokal Anda untuk memainkan game yang didukung di Harbor.",
   "games.roms.playerScore": "Penilaian pemain IGDB · {count} penilaian",
   "games.roms.combinedScore": "Penilaian gabungan IGDB · {count} penilaian",
   "games.roms.sort.discussed": "Paling banyak dinilai",

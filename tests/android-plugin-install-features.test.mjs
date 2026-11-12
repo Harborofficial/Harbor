@@ -4,7 +4,10 @@ import test from "node:test";
 import ts from "typescript";
 
 function load(name, dependencies) {
-  const source = readFileSync(new URL(`../src/lib/streams/plugins/${name}.ts`, import.meta.url), "utf8");
+  const source = readFileSync(
+    new URL(`../src/lib/streams/plugins/${name}.ts`, import.meta.url),
+    "utf8",
+  );
   const compiled = ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;

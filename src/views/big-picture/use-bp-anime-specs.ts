@@ -79,7 +79,8 @@ export function useBpAnimeSpecs(): BpAnimeSpecs {
               ...cur,
               metas: [...cur.metas, ...fresh],
               page: next,
-              hasMore: more.length >= ROW_MIN_VISIBLE && cur.metas.length + fresh.length < MAX_ITEMS,
+              hasMore:
+                more.length >= ROW_MIN_VISIBLE && cur.metas.length + fresh.length < MAX_ITEMS,
             },
           };
         });

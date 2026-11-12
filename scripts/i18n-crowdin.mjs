@@ -32,7 +32,8 @@ async function languages() {
 
 function sortedObject(map) {
   const out = {};
-  for (const key of [...map.keys()].sort((a, b) => a.localeCompare(b, "en"))) out[key] = map.get(key);
+  for (const key of [...map.keys()].sort((a, b) => a.localeCompare(b, "en")))
+    out[key] = map.get(key);
   return out;
 }
 
@@ -49,12 +50,18 @@ async function exportCatalogs() {
     perLang.set(lang, table);
     for (const key of table.keys()) if (!source.has(key)) source.set(key, key);
   }
-  await writeFile(join(OUT_DIR, `${SOURCE_LANG}.json`), JSON.stringify(sortedObject(source), null, 2) + "\n");
+  await writeFile(
+    join(OUT_DIR, `${SOURCE_LANG}.json`),
+    JSON.stringify(sortedObject(source), null, 2) + "\n",
+  );
   let total = 0;
   for (const [lang, table] of perLang) {
     const filtered = new Map([...table].filter(([key]) => source.has(key)));
     total += filtered.size;
-    await writeFile(join(OUT_DIR, `${lang}.json`), JSON.stringify(sortedObject(filtered), null, 2) + "\n");
+    await writeFile(
+      join(OUT_DIR, `${lang}.json`),
+      JSON.stringify(sortedObject(filtered), null, 2) + "\n",
+    );
   }
   console.log(`source: ${source.size} keys -> i18n/${SOURCE_LANG}.json`);
   console.log(`translations: ${perLang.size} languages, ${total} strings -> i18n/<lang>.json`);
@@ -68,13 +75,17 @@ function tsCatalog(name, entries) {
 }
 
 async function importCatalogs() {
-  const files = (await readdir(OUT_DIR)).filter((f) => f.endsWith(".json") && f !== `${SOURCE_LANG}.json`);
+  const files = (await readdir(OUT_DIR)).filter(
+    (f) => f.endsWith(".json") && f !== `${SOURCE_LANG}.json`,
+  );
   const known = new Set(await languages());
   const added = [];
   for (const file of files) {
     const lang = file.slice(0, -5);
     const entries = JSON.parse(await readFile(join(OUT_DIR, file), "utf8"));
-    const filled = Object.fromEntries(Object.entries(entries).filter(([key, value]) => value && value !== key));
+    const filled = Object.fromEntries(
+      Object.entries(entries).filter(([key, value]) => value && value !== key),
+    );
     if (Object.keys(filled).length === 0) continue;
     await mkdir(join(LOCALES_DIR, lang), { recursive: true });
     await writeFile(join(LOCALES_DIR, lang, `${GENERATED}.ts`), tsCatalog(GENERATED, filled));
@@ -93,14 +104,21 @@ async function importCatalogs() {
         /^(import uiFallback from "\.\/ui-fallback";\n)/m,
         `$1import ${GENERATED} from "./${lang}/${GENERATED}";\n`,
       );
-      barrel = barrel.replace(/\n\};\n\nexport default/, `\n  ...${GENERATED},\n};\n\nexport default`);
+      barrel = barrel.replace(
+        /\n\};\n\nexport default/,
+        `\n  ...${GENERATED},\n};\n\nexport default`,
+      );
       await writeFile(barrelPath, barrel);
     }
-    console.log(`${lang}: ${Object.keys(filled).length} strings -> locales/${lang}/${GENERATED}.ts`);
+    console.log(
+      `${lang}: ${Object.keys(filled).length} strings -> locales/${lang}/${GENERATED}.ts`,
+    );
   }
   if (added.length) {
     console.log(`\nnew languages: ${added.join(", ")}`);
-    console.log("register each in src/lib/i18n/languages.ts (code, label, nativeLabel, greeting, rtl) and the UiLanguage union.");
+    console.log(
+      "register each in src/lib/i18n/languages.ts (code, label, nativeLabel, greeting, rtl) and the UiLanguage union.",
+    );
   }
 }
 

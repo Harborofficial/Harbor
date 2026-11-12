@@ -280,7 +280,8 @@ const catalogVZ: Record<string, string> = {
     "अगला एपिसोड अपने-आप चलाते समय Harbor की सबसे ऊँची रैंक वाली स्ट्रीम के बजाय उसी रिलीज़/स्रोत का इस्तेमाल करें जिसे आप अभी देख रहे थे। वह स्रोत उपलब्ध न होने पर सबसे अच्छी स्ट्रीम इस्तेमाल की जाती है।",
   "When in fullscreen, Esc leaves fullscreen instead of closing the player. Press Esc again to close. Turn off to make Esc always close.":
     "फ़ुलस्क्रीन में Esc दबाने पर प्लेयर बंद करने के बजाय फ़ुलस्क्रीन से बाहर निकलें। बंद करने के लिए फिर से Esc दबाएँ। Esc से हमेशा बंद करने के लिए इसे बंद करें।",
-  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.": "यह बंद होने पर, स्ट्रीम बंद करते या बदलते ही P2P ट्रांसफ़र रुक जाता है, इसलिए बैकग्राउंड में डाउनलोड जारी नहीं रहता। स्ट्रीम से बाहर निकलने के बाद भी डाउनलोड जारी रखने के लिए इसे चालू करें; उन डाउनलोड को डाउनलोड टैब से मैनेज या पॉज़ करें।",
+  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.":
+    "यह बंद होने पर, स्ट्रीम बंद करते या बदलते ही P2P ट्रांसफ़र रुक जाता है, इसलिए बैकग्राउंड में डाउनलोड जारी नहीं रहता। स्ट्रीम से बाहर निकलने के बाद भी डाउनलोड जारी रखने के लिए इसे चालू करें; उन डाउनलोड को डाउनलोड टैब से मैनेज या पॉज़ करें।",
   "When on, a connected controller moves focus around Harbor and drives the player. Turn it off to ignore all controllers.":
     "चालू होने पर, कनेक्टेड कंट्रोलर Harbor में फ़ोकस को इधर-उधर ले जाता है और प्लेयर को नियंत्रित करता है। सभी कंट्रोलर को अनदेखा करने के लिए इसे बंद करें।",
   "When people share a collection it shows up here. Build one you love and share it, that is how it starts.":

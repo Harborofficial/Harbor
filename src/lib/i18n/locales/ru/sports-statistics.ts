@@ -1,8 +1,8 @@
 export default {
   "Match stats": "Статистика матча",
-  "Timeline": "Хронология",
+  Timeline: "Хронология",
   "Head to head": "Личные встречи",
-  "Standings": "Турнирная таблица",
+  Standings: "Турнирная таблица",
   "Loading team results…": "Загрузка результатов команды…",
   "No completed matches were returned for this team.":
     "Для этой команды не получено завершённых матчей.",

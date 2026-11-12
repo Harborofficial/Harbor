@@ -32,8 +32,10 @@ const MAX_POSTER = 600;
 const MIN_YEAR = 1800;
 
 const HTTPS_URL = /^https:\/\/[^\s<>"']+$/;
-const AUTH_MESSAGE = "MyAnimeList rejected the request. Reconnect your MyAnimeList account in Settings.";
-const NO_SESSION_MESSAGE = "No MyAnimeList account connected. Connect MyAnimeList in Settings first.";
+const AUTH_MESSAGE =
+  "MyAnimeList rejected the request. Reconnect your MyAnimeList account in Settings.";
+const NO_SESSION_MESSAGE =
+  "No MyAnimeList account connected. Connect MyAnimeList in Settings first.";
 
 const FIELDS: Record<ListKind, string> = {
   anime: "list_status,start_season,start_date",
@@ -177,7 +179,9 @@ async function collect(
     if (rows.length === 0 || !data.paging?.next) return;
     await wait(PAGE_GAP_MS, signal);
   }
-  throw new Error(`MyAnimeList kept paging past ${MAX_PAGES} pages of your ${kind} list. Import stopped.`);
+  throw new Error(
+    `MyAnimeList kept paging past ${MAX_PAGES} pages of your ${kind} list. Import stopped.`,
+  );
 }
 
 function available(): boolean {

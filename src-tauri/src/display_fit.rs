@@ -1,5 +1,7 @@
-use tauri::{LogicalSize, Manager, PhysicalPosition, WebviewWindow};
-#[cfg(not(target_os = "macos"))]
+use tauri::{LogicalSize, PhysicalPosition, WebviewWindow};
+#[cfg(not(windows))]
+use tauri::Manager;
+#[cfg(all(not(target_os = "macos"), not(windows)))]
 use tauri_plugin_window_state::AppHandleExt;
 
 const CONFIG_MIN_W: f64 = 960.0;
@@ -20,7 +22,7 @@ fn clamp_origin(current: f64, visible_start: f64, visible_len: f64, window_len: 
 /// after the maximize guard on Windows, during creation elsewhere) and only
 /// ever persists a state that differs from `WindowState::default()`, so when
 /// this returns true the restore already happened and fitting must not run.
-#[cfg(not(target_os = "macos"))]
+#[cfg(all(not(target_os = "macos"), not(windows)))]
 fn has_saved_window_state(app: &tauri::AppHandle) -> bool {
     let Ok(dir) = app.path().app_config_dir() else {
         return false;
@@ -216,6 +218,7 @@ pub fn fit_to_monitor(window: &WebviewWindow) {
     }
 }
 
+#[cfg(not(windows))]
 pub fn install(app: &tauri::AppHandle) {
     let Some(window) = app.get_webview_window("main") else {
         return;

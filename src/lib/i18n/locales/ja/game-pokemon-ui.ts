@@ -25,7 +25,8 @@ export default {
   "games.pokemon.videosHint": "攻略動画とヒント",
   "games.pokemon.bank": "セーブとポケモン",
   "games.pokemon.bankHint": "セーブの編集とボックス管理",
-  "games.pokemon.bankIntro": "エミュレーターのセーブを開いて手持ちを編集するか、個別のポケモンをコレクションに取り込めます。",
+  "games.pokemon.bankIntro":
+    "エミュレーターのセーブを開いて手持ちを編集するか、個別のポケモンをコレクションに取り込めます。",
   "games.pokemon.guideSourceNote": "元の攻略サイトで読むか、接続できる場合はここで開けます。",
   "games.pokemon.readGuide": "Bulbapediaで読む",
   "games.pokemon.readInside": "Harborで読む",
@@ -34,19 +35,24 @@ export default {
   "games.pokemon.imageSaved": "{name}の画像を保存しました",
   "games.pokemon.imageFailed": "ダウンロードできませんでした。再試行してください。",
   "games.pokemon.saveStart": "エミュレーターをお使いですか？",
-  "games.pokemon.emulatorSave": "ゲーム内のメニューでセーブすると、エミュレーターがセーブファイルを作成します。",
+  "games.pokemon.emulatorSave":
+    "ゲーム内のメニューでセーブすると、エミュレーターがセーブファイルを作成します。",
   "games.pokemon.saveStep1": "ゲームを開き、ゲーム内のメニューでセーブします。",
-  "games.pokemon.saveStep2": "ゲームを閉じ、バッテリーセーブ（.sav、.srm、.dsv）を探すか書き出します。",
+  "games.pokemon.saveStep2":
+    "ゲームを閉じ、バッテリーセーブ（.sav、.srm、.dsv）を探すか書き出します。",
   "games.pokemon.saveStep3": "上の「セーブを開く」からHarborで編集します。",
   "games.pokemon.findSave": "セーブはどこにありますか？",
-  "games.pokemon.saveLocations": "ROMと同じ場所か、エミュレーターのセーブフォルダーを確認してください。ステートセーブしかない場合は、それをエミュレーターで読み込み、ゲーム内のメニューからセーブします。",
+  "games.pokemon.saveLocations":
+    "ROMと同じ場所か、エミュレーターのセーブフォルダーを確認してください。ステートセーブしかない場合は、それをエミュレーターで読み込み、ゲーム内のメニューからセーブします。",
   "games.pokemon.noSave": "まだセーブがありませんか？",
   "games.pokemon.communitySaves": "共有セーブを探す",
-  "games.pokemon.communitySavesNote": "Project Pokémon · 対象のゲームと投稿者の説明を確認してください。",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · 対象のゲームと投稿者の説明を確認してください。",
   "games.pokemon.pkhexNote": "開発元のセーブエディター、ダウンロード、ヘルプ。",
-  "games.pokemon.noSaveNeeded": "個別のポケモンファイルはセーブなしで取り込めます。ゲームの手持ちやボックスを編集する場合のみセーブが必要です。",
+  "games.pokemon.noSaveNeeded":
+    "個別のポケモンファイルはセーブなしで取り込めます。ゲームの手持ちやボックスを編集する場合のみセーブが必要です。",
   "games.pokemon.videoUnavailable": "ここでは動画を読み込めませんでした。",
   "games.pokemon.youtubeSearch": "YouTubeで検索",
   "games.hub.downloadApply": "パッチをダウンロード",
-  "games.hub.manualPatch": "手元のパッチやリンクを使う"
+  "games.hub.manualPatch": "手元のパッチやリンクを使う",
 };

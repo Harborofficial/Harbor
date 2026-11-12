@@ -1,5 +1,18 @@
 import { createPortal } from "react-dom";
-import { AlertTriangle, BookOpen, Check, ChevronDown, ChevronUp, Gamepad2, KeyRound, Loader2, Music2, RotateCw, SearchX, X } from "lucide-react";
+import {
+  AlertTriangle,
+  BookOpen,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Gamepad2,
+  KeyRound,
+  Loader2,
+  Music2,
+  RotateCw,
+  SearchX,
+  X,
+} from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Poster } from "@/components/poster";

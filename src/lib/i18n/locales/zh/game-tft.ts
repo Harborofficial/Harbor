@@ -54,5 +54,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "生命回复",
   "games.tft.stat.set14AmpIcon": "伤害增幅",
   "games.tft.stat.TFTManaRegen": "法力回复",
-  "games.tft.stat.scaleSV": "全能吸血"
+  "games.tft.stat.scaleSV": "全能吸血",
 };

@@ -9,8 +9,10 @@ export default {
   "games.pick.heading0": "Lagi ingin main apa?",
   "games.pick.heading1": "Beberapa game favorit sangat membantu.",
   "games.pick.heading2": "Sesuatu yang layak dimainkan.",
-  "games.pick.note0": "Pilih suasana yang kamu inginkan. Kecocokan tepat ditampilkan lebih dulu, lalu alternatif terdekat. Mode bermain dan filter lainnya tetap berlaku.",
-  "games.pick.note1": "Pilih hingga lima favorit. Kami melihat ciri khasnya bersama aktivitas terbarumu.",
+  "games.pick.note0":
+    "Pilih suasana yang kamu inginkan. Kecocokan tepat ditampilkan lebih dulu, lalu alternatif terdekat. Mode bermain dan filter lainnya tetap berlaku.",
+  "games.pick.note1":
+    "Pilih hingga lima favorit. Kami melihat ciri khasnya bersama aktivitas terbarumu.",
   "games.pick.note2": "Pilihan berdasarkan keinginanmu, minat yang sama, dan ulasan pemain.",
   "games.pick.company": "Main dengan siapa?",
   "games.pick.refine": "Perinci pencarian",
@@ -33,25 +35,30 @@ export default {
   "games.pick.searchError": "Sebagian hasil gagal dimuat. Coba pencarian lain.",
   "games.pick.noSearch": "Game tidak ditemukan. Coba judul yang lebih pendek.",
   "games.pick.favorites": "Favoritmu",
-  "games.pick.optional": "Opsional, tetapi membantu. Mulai dari game yang selalu ingin kamu mainkan lagi.",
+  "games.pick.optional":
+    "Opsional, tetapi membantu. Mulai dari game yang selalu ingin kamu mainkan lagi.",
   "games.pick.remove": "Hapus {name} dari favorit",
   "games.pick.addFavorite": "Gunakan {name} sebagai favorit",
   "games.pick.history": "Gunakan aktivitas koleksiku",
-  "games.pick.historyNote": "Game terbaru, paling sering dimainkan, baru ditambahkan, dan disimpan. Favorit lebih diutamakan.",
+  "games.pick.historyNote":
+    "Game terbaru, paling sering dimainkan, baru ditambahkan, dan disimpan. Favorit lebih diutamakan.",
   "games.pick.signal.recent": "Baru dimainkan",
   "games.pick.signal.mostPlayed": "Paling sering dimainkan",
   "games.pick.signal.added": "Baru ditambahkan",
   "games.pick.signal.saved": "Disimpan",
   "games.pick.hours": "j",
-  "games.pick.noHistory": "Belum ada aktivitas. Pilih favorit atau hubungkan Steam di pengaturan Game.",
+  "games.pick.noHistory":
+    "Belum ada aktivitas. Pilih favorit atau hubungkan Steam di pengaturan Game.",
   "games.pick.manualOnly": "Hanya favorit dan filter pilihanmu yang menentukan rekomendasi ini.",
-  "games.pick.addedNote": "“Baru ditambahkan” berarti pertama kali terlihat di Harbor setelah impor awal, bukan tanggal pembelian.",
+  "games.pick.addedNote":
+    "“Baru ditambahkan” berarti pertama kali terlihat di Harbor setelah impor awal, bukan tanggal pembelian.",
   "games.pick.because": "Karena kamu suka {name}",
   "games.pick.matches": "Sesuai pilihanmu",
   "games.pick.steamCatalog": "Katalog Steam",
   "games.pick.edit": "Ubah pilihan",
   "games.pick.finding": "Mencari game berikutnya…",
-  "games.pick.partial": "Sebagian data game gagal dimuat. Rekomendasi ini memakai informasi yang tersedia.",
+  "games.pick.partial":
+    "Sebagian data game gagal dimuat. Rekomendasi ini memakai informasi yang tersedia.",
   "games.pick.cached": "Termasuk data katalog yang disimpan pada {date}.",
   "games.pick.startHere": "Mulai di sini",
   "games.pick.notForMe": "Bukan untukku",
@@ -59,11 +66,14 @@ export default {
   "games.pick.undo": "Urungkan",
   "games.pick.resetHidden": "Tampilkan lagi game yang disembunyikan",
   "games.pick.more": "Cari rekomendasi lainnya",
-  "games.pick.rankingNote": "Diurutkan berdasarkan tag Steam yang sama, aktivitas, kekuatan ulasan, dan variasi. Skor adalah ulasan positif Steam. Harga dan ketersediaan mengikuti katalog AS.",
+  "games.pick.rankingNote":
+    "Diurutkan berdasarkan tag Steam yang sama, aktivitas, kekuatan ulasan, dan variasi. Skor adalah ulasan positif Steam. Harga dan ketersediaan mengikuti katalog AS.",
   "games.pick.error": "Game berikutnya bisa menunggu sebentar.",
-  "games.pick.errorNote": "Katalog game tidak dapat dihubungi. Pilihanmu tersimpan; coba lagi nanti.",
+  "games.pick.errorNote":
+    "Katalog game tidak dapat dihubungi. Pilihanmu tersimpan; coba lagi nanti.",
   "games.pick.noMatches": "Belum ada game yang ditemukan dengan persyaratan ini.",
-  "games.pick.noMatchesNote": "Perluas pilihan platform, harga, atau pustaka. Pilihan suasanamu sudah mencakup alternatif terdekat.",
+  "games.pick.noMatchesNote":
+    "Perluas pilihan platform, harga, atau pustaka. Pilihan suasanamu sudah mencakup alternatif terdekat.",
   "games.pick.saveError": "Pilihan berlaku untuk sesi ini, tetapi gagal disimpan di perangkat.",
   "games.pick.selected": "{count} tag dipilih",
   "games.pick.favoriteCount": "{count} dari 5 favorit",
@@ -74,7 +84,8 @@ export default {
   "games.pick.reviews": "{count} ulasan",
   "games.pick.unrated": "Skor ulasan tidak tersedia",
   "games.pick.owned": "Di koleksimu",
-  "games.pick.closest": "Alternatif terdekat disertakan. Mode bermain dan filter lainnya tetap berlaku.",
+  "games.pick.closest":
+    "Alternatif terdekat disertakan. Mode bermain dan filter lainnya tetap berlaku.",
   "games.pick.closeMatch": "Cocok dengan {count} dari {total} tag suasana",
-  "games.pick.missing": "Tanpa tag: {tags}"
+  "games.pick.missing": "Tanpa tag: {tags}",
 };

@@ -198,7 +198,9 @@ function RelayUrlModal({
       open={open}
       onClose={onClose}
       title={t("Use an existing relay")}
-      sub={t("Only enter URLs for relays you operate or trust. A relay only carries Watch Together sync messages (play, pause, seek). Nothing else passes through it.")}
+      sub={t(
+        "Only enter URLs for relays you operate or trust. A relay only carries Watch Together sync messages (play, pause, seek). Nothing else passes through it.",
+      )}
       actions={<ModalButton onClick={onCommit}>{t("Save")}</ModalButton>}
     >
       <div className="flex flex-col gap-2.5">
@@ -265,7 +267,8 @@ export function TogetherRelayPanel({
       setUrlOpen(false);
     }
   };
-  const isManaged = settings.togetherCfDeployed && !!settings.togetherCfToken && !!settings.togetherCfAccountId;
+  const isManaged =
+    settings.togetherCfDeployed && !!settings.togetherCfToken && !!settings.togetherCfAccountId;
 
   const copy = async () => {
     if (!settings.togetherRelayUrl) return;
@@ -338,8 +341,12 @@ export function TogetherRelayPanel({
             <SettingRow
               icon={<Power size={18} strokeWidth={1.9} />}
               label={t("Deploy a relay")}
-              desc={t("Harbor creates a Cloudflare Worker on your own free account and saves the URL.")}
-              tip={t("Runs on Cloudflare's free Workers tier. Takes about two minutes, and you can stop it from here later.")}
+              desc={t(
+                "Harbor creates a Cloudflare Worker on your own free account and saves the URL.",
+              )}
+              tip={t(
+                "Runs on Cloudflare's free Workers tier. Takes about two minutes, and you can stop it from here later.",
+              )}
             >
               <button onClick={onOpenDeploy} className={ROW_ACTION_PRIMARY}>
                 <Power size={16} strokeWidth={1.9} />
@@ -350,7 +357,9 @@ export function TogetherRelayPanel({
             <SettingRow
               icon={<Power size={18} strokeWidth={1.9} />}
               label={t("Deploy a relay (desktop only)")}
-              lockReason={t("Relay deployment requires the Cloudflare API, which is unavailable to browser clients. Use the desktop build to deploy a Worker, then enter the resulting URL below.")}
+              lockReason={t(
+                "Relay deployment requires the Cloudflare API, which is unavailable to browser clients. Use the desktop build to deploy a Worker, then enter the resulting URL below.",
+              )}
             />
           )}
 
@@ -406,7 +415,11 @@ export function TogetherRelayPanel({
               desc={<span className="block break-all font-mono">{settings.togetherRelayUrl}</span>}
             >
               <button onClick={copy} className={ROW_ACTION}>
-                {copied ? <Check size={16} strokeWidth={2.2} /> : <Copy size={16} strokeWidth={1.8} />}
+                {copied ? (
+                  <Check size={16} strokeWidth={2.2} />
+                ) : (
+                  <Copy size={16} strokeWidth={1.8} />
+                )}
                 {copied ? t("Copied") : t("Copy")}
               </button>
             </SettingRow>
@@ -451,7 +464,11 @@ export function TogetherRelayPanel({
               >
                 {needsRedeploy && (
                   <button onClick={redeploy} className={ROW_ACTION}>
-                    {isManaged ? <Power size={16} strokeWidth={2} /> : <BookOpen size={16} strokeWidth={1.9} />}
+                    {isManaged ? (
+                      <Power size={16} strokeWidth={2} />
+                    ) : (
+                      <BookOpen size={16} strokeWidth={1.9} />
+                    )}
                     {isManaged ? t("Redeploy") : t("Redeploy instructions")}
                   </button>
                 )}
@@ -512,7 +529,9 @@ export function TogetherRelayPanel({
                 icon={<Download size={18} strokeWidth={1.9} />}
                 label={t("Backup credentials")}
                 desc={t("Saves the relay URL and your Cloudflare token to a file.")}
-                tip={t("Cloudflare shows API tokens only once. Save a copy now or you'll lose the ability to stop or redeploy this relay from Harbor.")}
+                tip={t(
+                  "Cloudflare shows API tokens only once. Save a copy now or you'll lose the ability to stop or redeploy this relay from Harbor.",
+                )}
               >
                 <button onClick={exportBackup} className={ROW_ACTION}>
                   <Download size={16} strokeWidth={1.9} />
@@ -533,8 +552,12 @@ export function TogetherRelayPanel({
               <SettingRow
                 icon={<Trash2 size={18} strokeWidth={1.9} />}
                 label={t("Stop relay")}
-                desc={t("Deletes the Worker from your Cloudflare account. Rooms in progress end immediately.")}
-                warn={stopError ?? t("This cannot be undone. You would need to deploy a new relay.")}
+                desc={t(
+                  "Deletes the Worker from your Cloudflare account. Rooms in progress end immediately.",
+                )}
+                warn={
+                  stopError ?? t("This cannot be undone. You would need to deploy a new relay.")
+                }
               >
                 <button onClick={stop} disabled={stopping} className={ROW_ACTION_DANGER}>
                   {stopping ? (

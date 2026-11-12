@@ -140,8 +140,10 @@ const rails: Record<string, string> = {
     "الإعجاب السلبي يخفي هذا العنوان من المميّزة. الإعجاب الإيجابي يساعد في إظهار اختيارات مشابهة.",
   "Your addons": "إضافاتك",
   "What each addon is actually serving up right now.": "ما تقدّمه كل إضافة في هذه اللحظة.",
-  "This addon provides streams only. It has no catalog to browse, but it still works behind every title you open.": "هذه الإضافة توفّر مصادر تشغيل فقط. لا تحتوي على كتالوج للتصفّح، لكنها تعمل خلف كل عنوان تفتحه.",
-  "This catalog came back empty. Try another one, or check the addon in Settings.": "عاد هذا الكتالوج فارغًا. جرّب كتالوجًا آخر أو تحقّق من الإضافة في الإعدادات.",
+  "This addon provides streams only. It has no catalog to browse, but it still works behind every title you open.":
+    "هذه الإضافة توفّر مصادر تشغيل فقط. لا تحتوي على كتالوج للتصفّح، لكنها تعمل خلف كل عنوان تفتحه.",
+  "This catalog came back empty. Try another one, or check the addon in Settings.":
+    "عاد هذا الكتالوج فارغًا. جرّب كتالوجًا آخر أو تحقّق من الإضافة في الإعدادات.",
 };
 
 export default rails;

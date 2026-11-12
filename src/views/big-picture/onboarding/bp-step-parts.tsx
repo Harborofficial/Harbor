@@ -26,8 +26,7 @@ export const BP_ROW_FLUSH = { paddingInline: 0, marginInline: 0 } as const;
 
 const RING_ROOM = "p-[10px]";
 
-const SCROLL =
-  `flex min-h-0 flex-1 flex-col gap-[clamp(9px,1.2vh,18px)] ${RING_ROOM} overflow-x-hidden overflow-y-auto overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`;
+const SCROLL = `flex min-h-0 flex-1 flex-col gap-[clamp(9px,1.2vh,18px)] ${RING_ROOM} overflow-x-hidden overflow-y-auto overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`;
 
 // Never a mask-image here. mask-repeat defaults to repeat, so the tile above
 // the box is the gradient's transparent tail and it erased any focus ring that
@@ -42,13 +41,7 @@ const FADE_TAIL = 52;
  * keydown listener, which the focus contract forbids, the column grows one real
  * focus target, and only in the case that would otherwise be unreachable.
  */
-export function BpDecisionScroll({
-  children,
-  bottom,
-}: {
-  children: ReactNode;
-  bottom?: boolean;
-}) {
+export function BpDecisionScroll({ children, bottom }: { children: ReactNode; bottom?: boolean }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const t = useBpT();
   const [stranded, setStranded] = useState(false);
@@ -99,7 +92,6 @@ export function BpDecisionScroll({
         style={{ paddingBottom: overflows ? FADE_TAIL : undefined }}
       >
         {children}
-
       </div>
       {stranded && (
         <BpOnboardAux>
@@ -185,18 +177,14 @@ export function BpDecisionRow({ children }: { children: ReactNode }) {
 }
 
 /** The face a satisfied step wears. States the identity, never the secret. */
-export function BpStepConfirmed({
-  title,
-  detail,
-}: {
-  title: string;
-  detail?: string;
-}) {
+export function BpStepConfirmed({ title, detail }: { title: string; detail?: string }) {
   return (
     <div className="flex items-center gap-[clamp(14px,1.5vw,28px)] rounded-[var(--bp-r-md)] border border-[var(--bp-edge)] bg-[var(--bp-panel)] px-[clamp(18px,1.7vw,34px)] py-[clamp(16px,2vh,30px)]">
       <BpTick on />
       <span className="flex min-w-0 flex-1 flex-col gap-[clamp(2px,0.35vh,6px)]">
-        <span className="truncate text-[clamp(15px,2.2vh,27px)] font-semibold text-ink">{title}</span>
+        <span className="truncate text-[clamp(15px,2.2vh,27px)] font-semibold text-ink">
+          {title}
+        </span>
         {detail && (
           <span className="truncate text-[clamp(12.5px,1.7vh,19px)] font-medium text-ink-subtle">
             {detail}
@@ -213,7 +201,9 @@ export function BpTick({ on }: { on: boolean }) {
       aria-hidden
       className="flex h-[clamp(30px,3.6vh,50px)] w-[clamp(30px,3.6vh,50px)] shrink-0 items-center justify-center rounded-full"
       style={{
-        background: on ? "color-mix(in oklab, var(--bp-live) 22%, transparent)" : "var(--bp-panel-2)",
+        background: on
+          ? "color-mix(in oklab, var(--bp-live) 22%, transparent)"
+          : "var(--bp-panel-2)",
       }}
     >
       {on && (

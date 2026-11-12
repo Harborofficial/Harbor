@@ -33,7 +33,12 @@ const EpisodeCard = memo(function EpisodeCard({
         type="button"
         onClick={() =>
           openMeta(
-            { id: ep.seriesId, type: "series", name: ep.seriesName, poster: ep.poster ?? undefined },
+            {
+              id: ep.seriesId,
+              type: "series",
+              name: ep.seriesName,
+              poster: ep.poster ?? undefined,
+            },
             { episodeHint: { season: ep.season, episode: ep.episode } },
           )
         }

@@ -82,7 +82,8 @@ const catalog04: Record<string, string> = {
   "Fast Hands": "빠른 손놀림",
   "Fast Mouth": "속사포 입담",
   "Fast · recommended for chapters": "빠름 · 챕터에 권장",
-  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.": "이미 Usenet을 구독 중이라면 P2P보다 빠르고 조용합니다. 애드온 페이지에서 구성한 후 반환된 매니페스트 URL을 붙여 넣으세요.",
+  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.":
+    "이미 Usenet을 구독 중이라면 P2P보다 빠르고 조용합니다. 애드온 페이지에서 구성한 후 반환된 매니페스트 URL을 붙여 넣으세요.",
   "Favicon must be an https URL.": "파비콘은 https URL이어야 합니다.",
   Favorite: "즐겨찾기",
   "Favorite Anime": "좋아하는 애니메이션",
@@ -119,7 +120,8 @@ const catalog04: Record<string, string> = {
   Feishin: "Feishin",
   "Fetches DuckDuckGo results and feeds top hits into the model prompt.":
     "DuckDuckGo 결과를 가져와 상위 검색 결과를 모델 프롬프트에 전달합니다.",
-  "Fetches a small public test file over P2P, then reports UDP and HTTPS egress, DHT bootstrap and tracker reachability step by step.": "소형 공개 테스트 파일을 P2P로 가져온 후 UDP 및 HTTPS 송신, DHT 부트스트랩, 트래커 연결 가능 여부를 단계별로 보고합니다.",
+  "Fetches a small public test file over P2P, then reports UDP and HTTPS egress, DHT bootstrap and tracker reachability step by step.":
+    "소형 공개 테스트 파일을 P2P로 가져온 후 UDP 및 HTTPS 송신, DHT 부트스트랩, 트래커 연결 가능 여부를 단계별로 보고합니다.",
   "Fetching library index…": "라이브러리 색인 가져오는 중…",
   "Fetching {n} items…": "항목 {n}개 가져오는 중…",
   "Fetching {n} items…#few": "항목 {n}개 가져오는 중…#few",
@@ -615,7 +617,8 @@ const catalog04: Record<string, string> = {
   "Hand-tuned colors. Edit them in the section above.":
     "세밀하게 조정한 색상입니다. 위 섹션에서 편집하세요.",
   Handle: "핸들",
-  "Handles P2P playback and transcoding for this machine.": "이 기기에서 P2P 재생과 트랜스코딩을 처리합니다.",
+  "Handles P2P playback and transcoding for this machine.":
+    "이 기기에서 P2P 재생과 트랜스코딩을 처리합니다.",
   "Hang tight, won't be a sec.": "잠시만 기다려 주세요. 금방 끝납니다.",
   "Hangout Comedy": "행아웃 코미디",
   "Harbor Rank scores a whole career, not a single hit. Four things move a rank: how good the work is on average, how much of it earned wide acclaim, the major awards it won, and how often the person carried the work as a lead. Each pillar is weighted, added up, then adjusted for the breadth and recency of the body of work. Every number that feeds a score is shown on the card, so you can always see why.":
@@ -728,7 +731,8 @@ const catalog04: Record<string, string> = {
   "Harbor never hosts your books or source files.":
     "Harbor는 사용자의 도서나 소스 파일을 호스팅하지 않습니다.",
   "Harbor never hosts your books.": "Harbor는 책을 호스팅하지 않습니다.",
-  "Harbor normally starts its P2P engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a P2P stream. Takes effect next launch.": "Harbor는 일반적으로 첫 P2P 스트림에 더 빨리 연결할 수 있도록 실행 시 P2P 엔진을 시작합니다. 이 경우 아무것도 시청하지 않을 때도 DHT 노드가 실행되며 네트워크와 통신합니다. 종량제 또는 제한된 연결을 사용한다면 이 옵션을 켜세요. 그러면 실제로 P2P 스트림을 처음 재생할 때 엔진이 시작됩니다. 다음 실행부터 적용됩니다.",
+  "Harbor normally starts its P2P engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a P2P stream. Takes effect next launch.":
+    "Harbor는 일반적으로 첫 P2P 스트림에 더 빨리 연결할 수 있도록 실행 시 P2P 엔진을 시작합니다. 이 경우 아무것도 시청하지 않을 때도 DHT 노드가 실행되며 네트워크와 통신합니다. 종량제 또는 제한된 연결을 사용한다면 이 옵션을 켜세요. 그러면 실제로 P2P 스트림을 처음 재생할 때 엔진이 시작됩니다. 다음 실행부터 적용됩니다.",
   "Harbor on other devices": "다른 기기의 Harbor",
   "Harbor on other devices (web app)": "다른 기기의 Harbor(웹 앱)",
   "Harbor on the server display": "서버 디스플레이의 Harbor",
@@ -792,7 +796,8 @@ const catalog04: Record<string, string> = {
     "Harbor는 영어로 개발되었습니다. 다국어 지원은 일부만 제공되므로 Harbor 자체 필터가 놓친 항목은 대개 애드온에서 찾을 수 있습니다. 다른 언어를 사용하며 도움을 주고 싶다면 소스 코드가 공개되어 있습니다.",
   "Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.":
     "Harbor가 끝까지 본 콘텐츠를 Simkl에서 시청 완료로 표시하고 시청 예정 목록을 동기화합니다.",
-  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.": "Harbor에서 P2P 엔진을 시작하거나 트래커에 접속하거나 DHT를 실행하지 않습니다. 디브리드와 직접 링크만 사용하려면 선택하세요. P2P 스트리밍을 다시 사용하려면 끄세요.",
+  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.":
+    "Harbor에서 P2P 엔진을 시작하거나 트래커에 접속하거나 DHT를 실행하지 않습니다. 디브리드와 직접 링크만 사용하려면 선택하세요. P2P 스트리밍을 다시 사용하려면 끄세요.",
   "Harbor will scrobble your playback to Trakt and sync your watchlist.":
     "Harbor가 재생 내역을 Trakt에 스크로블하고 관심 목록을 동기화합니다.",
   "Harbor would not be possible without Stremio. It is the foundation everything here is built on.":

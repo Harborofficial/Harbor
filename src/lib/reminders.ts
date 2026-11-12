@@ -123,7 +123,11 @@ export function clearUnseenReminders(): void {
 }
 
 export function useUnseenReminderCount(): number {
-  return useSyncExternalStore(subscribe, () => unseen.length, () => 0);
+  return useSyncExternalStore(
+    subscribe,
+    () => unseen.length,
+    () => 0,
+  );
 }
 
 export function useReminder(metaId: string | undefined): ReminderEntry | undefined {

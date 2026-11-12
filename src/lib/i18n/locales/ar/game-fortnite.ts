@@ -34,5 +34,5 @@ export default {
   "games.fortnite.genre.party-mini-games": "حفلات وألعاب صغيرة",
   "games.fortnite.genre.music-rhythm": "موسيقى وإيقاع",
   "games.fortnite.genre.horror": "رعب",
-  "games.fortnite.genre.deathrun-platformer": "تحديات الموت والمنصات"
+  "games.fortnite.genre.deathrun-platformer": "تحديات الموت والمنصات",
 };

@@ -88,8 +88,7 @@ export function EmptyState({
               : source === "anime"
                 ? t(animeDub ? "No dubbed episodes this month" : "Nothing airing this month")
                 : t("Nothing this month");
-  const filterKind =
-    filter === "movie" ? t("movies") : filter === "tv" ? t("TV") : t("anime");
+  const filterKind = filter === "movie" ? t("movies") : filter === "tv" ? t("TV") : t("anime");
   const body =
     source === "library"
       ? t(
@@ -108,9 +107,7 @@ export function EmptyState({
                 "Your Simkl plan-to-watch list has no episodes airing this month. Switch to All upcoming to browse everything.",
               )
             : source === "simkl-anticipated"
-              ? t(
-                  "Simkl lists no new shows or anime premiering this month. Try a different month.",
-                )
+              ? t("Simkl lists no new shows or anime premiering this month. Try a different month.")
               : source === "anime"
                 ? t(
                     animeDub
@@ -118,14 +115,14 @@ export function EmptyState({
                       : "AniList has no anime episodes scheduled to air this month. Try a different month.",
                   )
                 : watchlistOnly
-            ? t(
-                "Nothing from your library lands this month. Toggle Watchlist off to see all releases.",
-              )
-            : filter === "all"
-              ? t("TMDB has no notable releases for this month and region.")
-              : t("No {kind} releases this month. Try a different filter.", {
-                  kind: filterKind,
-                });
+                  ? t(
+                      "Nothing from your library lands this month. Toggle Watchlist off to see all releases.",
+                    )
+                  : filter === "all"
+                    ? t("TMDB has no notable releases for this month and region.")
+                    : t("No {kind} releases this month. Try a different filter.", {
+                        kind: filterKind,
+                      });
   return <EmptyShell heading={heading} body={body} />;
 }
 

@@ -1,3 +1,4 @@
+import { addonBaseUrl } from "@/lib/addon-url";
 import { userAddons, type Addon, type AddonCatalogCursor, type CatalogDef } from "@/lib/addons";
 import { fetchManifestAt, filterEnabled, loadInstalled } from "@/lib/addon-store";
 import { applyOrderToItems, hostOf, loadDisplayOrder } from "@/lib/addons-store/reorder";
@@ -23,7 +24,7 @@ const HYDRATE_AT_ONCE = 4;
 const HYDRATE_MAX = 8;
 
 export function bpAddonBase(transportUrl: string): string {
-  return transportUrl.replace(/\/manifest\.json$/, "");
+  return addonBaseUrl(transportUrl);
 }
 
 export function bpUsableCatalogs(manifest: Addon["manifest"] | undefined): CatalogDef[] {

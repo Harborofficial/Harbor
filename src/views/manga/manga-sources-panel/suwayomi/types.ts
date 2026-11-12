@@ -22,5 +22,10 @@ export function serverHost(baseUrl: string): string {
 }
 
 export function initials(name: string): string {
-  return name.replace(/[^a-z0-9]/gi, "").slice(0, 2).toUpperCase() || "?";
+  return (
+    name
+      .replace(/[^a-z0-9]/gi, "")
+      .slice(0, 2)
+      .toUpperCase() || "?"
+  );
 }

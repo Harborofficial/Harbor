@@ -165,7 +165,11 @@ export function Showcase({
   const t = useT();
   const [busy, setBusy] = useState(false);
   const [picking, setPicking] = useState(false);
-  const media = useProfileTitle(item?.kind === "theme" ? undefined : item?.metaId, item?.title, item?.posterUrl);
+  const media = useProfileTitle(
+    item?.kind === "theme" ? undefined : item?.metaId,
+    item?.title,
+    item?.posterUrl,
+  );
 
   useEffect(() => {
     if (isOwner) seedShowcaseMetaId(item?.metaId);

@@ -38,9 +38,10 @@ async function resolveShowId(q: SubSearchQuery, ctx: ProviderCtx): Promise<strin
     return null;
   }
   if (!res.ok) return null;
-  const data = (await res.json().catch(() => null)) as
-    | { shows?: Array<{ id?: string }>; id?: string }
-    | null;
+  const data = (await res.json().catch(() => null)) as {
+    shows?: Array<{ id?: string }>;
+    id?: string;
+  } | null;
   return data?.id ?? data?.shows?.[0]?.id ?? null;
 }
 
@@ -60,7 +61,9 @@ export const gestdownSource: SubSource = {
       const url = `${BASE}/subtitles/get/${showId}/${q.season}/${q.episode}/${encodeURIComponent(code)}`;
       let res: Response;
       try {
-        res = await safeFetch(url, { headers: { "User-Agent": ctx.userAgent, Accept: "application/json" } });
+        res = await safeFetch(url, {
+          headers: { "User-Agent": ctx.userAgent, Accept: "application/json" },
+        });
       } catch {
         continue;
       }

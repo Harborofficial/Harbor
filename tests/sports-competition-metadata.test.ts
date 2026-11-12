@@ -88,24 +88,45 @@ const results = [
 
 test("classification identities preserve real athlete IDs separately from row and team IDs", () => {
   const image = "https://r2.thesportsdb.com/images/media/player/cutout/published.png";
-  const parsed = parseCompetitionResults([
-    { ...results[0], idPlayer: "314", strThumb: image },
-    { ...results[1], idPlayer: "159" },
-    { ...results[2], idPlayer: "" },
-  ], game.id);
+  const parsed = parseCompetitionResults(
+    [
+      { ...results[0], idPlayer: "314", strThumb: image },
+      { ...results[1], idPlayer: "159" },
+      { ...results[2], idPlayer: "" },
+    ],
+    game.id,
+  );
   assert.equal(parsed[0].id, "position:1");
-  assert.deepEqual(parsed[0].athletes?.map((person) => person.id), ["314", "159"]);
+  assert.deepEqual(
+    parsed[0].athletes?.map((person) => person.id),
+    ["314", "159"],
+  );
   assert.equal(parsed[0].athletes?.[0].image, image);
-  assert.equal(parsed[1].athletes?.[0].id, "", "An absent athlete ID is never filled from idResult");
+  assert.equal(
+    parsed[1].athletes?.[0].id,
+    "",
+    "An absent athlete ID is never filled from idResult",
+  );
   assert.equal(parsed[1].athletes?.[0].source, "thesportsdb");
   const report = parseCompetitionResultText(
     "1\tChaz Mostert / Fabian Coulthard\t3:36:02\n2\tUnknown entrant\t3:38:00\n3\tAnother entry\t3:40:00",
   );
   const merged = mergeCompetitionEntrants(report, parsed);
   assert.equal(merged.length, 3);
-  assert.deepEqual(merged[0].athletes?.map((person) => person.id), ["314", "159"]);
-  assert.equal(merged[1].athletes, undefined, "Matching a finishing position cannot establish a person");
-  assert.equal(report[0].athletes, undefined, "The unstructured report remains non-interactive on its own");
+  assert.deepEqual(
+    merged[0].athletes?.map((person) => person.id),
+    ["314", "159"],
+  );
+  assert.equal(
+    merged[1].athletes,
+    undefined,
+    "Matching a finishing position cannot establish a person",
+  );
+  assert.equal(
+    report[0].athletes,
+    undefined,
+    "The unstructured report remains non-interactive on its own",
+  );
 });
 
 test("ESPN field identity uses only explicit athlete records, never team or competitor row IDs", () => {
@@ -115,14 +136,34 @@ test("ESPN field identity uses only explicit athlete records, never team or comp
   assert.equal(side.athleteId, "9478");
   assert.equal(side.athleteSource, "espn");
   assert.equal(side.athleteImage, portrait);
-  assert.equal(toSide({ id: "row-1", type: "athlete", athlete: { displayName: person.displayName } }, "golf").athleteId, "");
-  assert.equal(toSide({ type: "team", team: { id: "9478", displayName: "Golf team" } }, "golf").athleteSource, undefined);
-  const detail = parseEspnCompetition({ ...game, id: "event", context: undefined }, {
-    events: [{ id: "event", competitions: [{ id: "race", competitors: [
-      { id: "row-1", type: "athlete", athlete: person },
-      { id: "row-2", type: "team", team: { id: "7", displayName: "National team" } },
-    ] }] }],
-  });
+  assert.equal(
+    toSide({ id: "row-1", type: "athlete", athlete: { displayName: person.displayName } }, "golf")
+      .athleteId,
+    "",
+  );
+  assert.equal(
+    toSide({ type: "team", team: { id: "9478", displayName: "Golf team" } }, "golf").athleteSource,
+    undefined,
+  );
+  const detail = parseEspnCompetition(
+    { ...game, id: "event", context: undefined },
+    {
+      events: [
+        {
+          id: "event",
+          competitions: [
+            {
+              id: "race",
+              competitors: [
+                { id: "row-1", type: "athlete", athlete: person },
+                { id: "row-2", type: "team", team: { id: "7", displayName: "National team" } },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  );
   assert.equal(detail.entrants[0].id, "row-1");
   assert.equal(detail.entrants[0].athletes?.[0].id, "9478");
   assert.equal(detail.entrants[1].athletes, undefined);

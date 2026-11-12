@@ -264,7 +264,9 @@ export function ThemeUploadFlow({ onClose }: { onClose: () => void }) {
                 />
               </div>
             </div>
-            {error && <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-danger">{error}</p>}
+            {error && (
+              <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-danger">{error}</p>
+            )}
           </div>
         </div>
       )}
@@ -395,9 +397,7 @@ function ThemeStep({
                   <div key={i} className="flex-1" style={{ background: c }} />
                 ))}
               </div>
-              <span className={`truncate px-3.5 py-2.5 ${ROW_TITLE}`}>
-                {t.name}
-              </span>
+              <span className={`truncate px-3.5 py-2.5 ${ROW_TITLE}`}>{t.name}</span>
             </button>
           );
         })}
@@ -512,7 +512,9 @@ function Benefit({
       </span>
       <div className="flex flex-col gap-0.5">
         <span className={ROW_TITLE}>{title}</span>
-        <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">{children}</span>
+        <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
+          {children}
+        </span>
       </div>
     </li>
   );
@@ -546,7 +548,9 @@ function SuccessView({
         </p>
       </div>
       <div className="flex items-center gap-2 rounded-md bg-surface p-2 ps-3">
-        <span className="max-w-[280px] truncate text-[15.5px] leading-[22px] text-ink-muted">{share}</span>
+        <span className="max-w-[280px] truncate text-[15.5px] leading-[22px] text-ink-muted">
+          {share}
+        </span>
         <button
           onClick={onCopy}
           className="flex h-11 items-center gap-1.5 rounded-md bg-elevated px-3.5 text-[15.5px] font-semibold text-ink-muted transition-colors hover:text-ink"

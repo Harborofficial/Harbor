@@ -54,7 +54,13 @@ function radio(candidates: any[], related: any[]) {
       normalizeTitle: (value: string) => value.toLowerCase(),
     },
     "./sources": { searchMusic: async () => [] },
-    "./player": { getMusicState: () => ({ recents: [], likedTracks: [] }) },
+    "./player": {
+      getMusicState: () => ({ recents: [], likedTracks: [] }),
+      setMusicQueue: () => {},
+      subscribeMusic: () => () => {},
+    },
+    "./source-consent": { musicSourceAllowed: () => true },
+    "./track-identity": { musicTrackIdentity: (entry: any) => `${entry.connectorId}:${entry.id}` },
     "./catalog": {
       stationTracks: async (station: any) => {
         calls.push({ station });

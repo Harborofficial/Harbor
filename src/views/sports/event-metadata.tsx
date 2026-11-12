@@ -38,8 +38,7 @@ export function EventMetadata({ game, league }: { game: SportsGame; league: Leag
       });
     return () => controller.abort();
   }, [game.id, league.key, retry]);
-  const current =
-    data?.game.id === game.id && data.game.league === game.league ? data : undefined;
+  const current = data?.game.id === game.id && data.game.league === game.league ? data : undefined;
   const event = current?.game || game;
   const artwork = event.artwork || current?.banner || current?.square || event.poster;
   const classification = useMemo(

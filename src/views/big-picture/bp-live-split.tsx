@@ -67,10 +67,7 @@ export function BpLiveSplit({
         className="absolute inset-0 h-full w-full object-cover"
         style={{ filter: PANEL_FILTER, clipPath: clipPanelA(rtl) }}
       />
-      <div
-        className="absolute inset-0"
-        style={{ background: SEAM_INK, clipPath: clipSeam(rtl) }}
-      />
+      <div className="absolute inset-0" style={{ background: SEAM_INK, clipPath: clipSeam(rtl) }} />
       {rgb && <div className="absolute inset-0" style={{ background: splitWash(rgb, rtl) }} />}
     </>
   );
@@ -80,15 +77,7 @@ export function BpLiveSplit({
 // only element allowed to cross the seam. It arrives after the panels commit so
 // the depth assembles instead of landing pre-built, and it sits above the
 // envelope's own scrims so nothing dims the one object carrying the front plane.
-export function BpLiveBridge({
-  src,
-  rtl,
-  solo,
-}: {
-  src: string;
-  rtl: boolean;
-  solo: boolean;
-}) {
+export function BpLiveBridge({ src, rtl, solo }: { src: string; rtl: boolean; solo: boolean }) {
   const url = useProxiedImageSrc(src);
   const [lit, setLit] = useState(false);
 

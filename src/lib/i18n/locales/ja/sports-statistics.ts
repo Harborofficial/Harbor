@@ -1,8 +1,8 @@
 export default {
   "Match stats": "試合スタッツ",
-  "Timeline": "試合経過",
+  Timeline: "試合経過",
   "Head to head": "対戦成績",
-  "Standings": "順位表",
+  Standings: "順位表",
   "Loading team results…": "チームの結果を読み込み中…",
   "No completed matches were returned for this team.":
     "このチームの終了済みの試合は返されませんでした。",

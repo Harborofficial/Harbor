@@ -14,17 +14,19 @@ export default {
   "games.tarkov.listedStart": "Bắt đầu đã ghi:",
   "games.tarkov.noSeason": "Chưa có mùa đang diễn ra",
   "games.tarkov.noSeasonDetail": "Nguồn chưa liệt kê mùa hiện tại hoặc sắp tới.",
-  "games.tarkov.scheduleNote": "Ngày do tarkov.dev cập nhật và có thể thay đổi. Đây không phải thông báo wipe chính thức.",
+  "games.tarkov.scheduleNote":
+    "Ngày do tarkov.dev cập nhật và có thể thay đổi. Đây không phải thông báo wipe chính thức.",
   "games.tarkov.seasonSource": "Ngày các mùa · tarkov.dev",
   "games.tarkov.checked": "Đã kiểm tra: {time}",
   "games.tarkov.fullWipe": "Wipe toàn bộ gần nhất trong nguồn",
   "games.tarkov.historyFailed": "Không thể tải lịch sử wipe.",
   "games.tarkov.elapsed": "{days} ngày",
   "games.tarkov.noHistory": "Chưa có wipe trước đây.",
-  "games.tarkov.modeNote": "Tiến trình theo mùa và wipe toàn bộ tài khoản được tách riêng. Lịch sử này không mô tả việc đặt lại nhân vật PvP hoặc PvE lâu dài.",
+  "games.tarkov.modeNote":
+    "Tiến trình theo mùa và wipe toàn bộ tài khoản được tách riêng. Lịch sử này không mô tả việc đặt lại nhân vật PvP hoặc PvE lâu dài.",
   "games.tarkov.historySource": "Ngày wipe · tarkov.dev",
   "games.tarkov.history": "Lịch sử wipe toàn bộ",
   "games.tarkov.patch": "Bản vá",
   "games.tarkov.date": "Ngày bắt đầu (UTC)",
-  "games.tarkov.duration": "Đến lần wipe toàn bộ tiếp theo"
+  "games.tarkov.duration": "Đến lần wipe toàn bộ tiếp theo",
 };

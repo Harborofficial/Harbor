@@ -102,6 +102,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.recordings": "रिकॉर्डिंग",
   "music.artist.limited": "यह स्रोत एक चयन देता है; इसमें पूरा कैटलॉग शामिल नहीं हो सकता।",
   "music.rockHall.title": "रॉक एंड रोल हॉल ऑफ़ फ़ेम",
-  "music.rockHall.subtitle": "1986 से हर क्लास, विकिपीडिया से सीधे"
+  "music.rockHall.subtitle": "1986 से हर क्लास, विकिपीडिया से सीधे",
 };
 export default musicTaste;

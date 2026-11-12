@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Loader2, Puzzle, RefreshCw } from "../icons";
 import { useT } from "@/lib/i18n";
-import { pluginKinds, usePluginKindsVersion, type KindAdapter, type PluginKind, type PluginView } from "@/lib/plugins";
+import {
+  pluginKinds,
+  usePluginKindsVersion,
+  type KindAdapter,
+  type PluginKind,
+  type PluginView,
+} from "@/lib/plugins";
 import { useSettings } from "@/lib/settings";
 import { SettingGroup, SettingRow } from "../kit";
 import { Section, ToggleRow } from "../shared";
@@ -9,14 +15,26 @@ import { SButton } from "../ui";
 import { kindLabel } from "./copy";
 import { PluginRow } from "./plugin-row";
 
-type Group = { key: string; repoName: string; kind: PluginKind; adapter: KindAdapter; plugins: PluginView[] };
+type Group = {
+  key: string;
+  repoName: string;
+  kind: PluginKind;
+  adapter: KindAdapter;
+  plugins: PluginView[];
+};
 
 function groupByRepo(): Group[] {
   const map = new Map<string, Group>();
   for (const adapter of pluginKinds()) {
     for (const p of adapter.plugins()) {
       const key = `${adapter.kind}|${p.repoUrl}`;
-      const g = map.get(key) ?? { key, repoName: p.repoName, kind: adapter.kind, adapter, plugins: [] };
+      const g = map.get(key) ?? {
+        key,
+        repoName: p.repoName,
+        kind: adapter.kind,
+        adapter,
+        plugins: [],
+      };
       g.plugins.push(p);
       map.set(key, g);
     }
@@ -127,7 +145,9 @@ export function InstalledTab({ onAddRepository }: { onAddRepository: () => void 
       <Section
         title={t("Installed plugins")}
         subtitle={
-          settings.pluginsEnabled ? undefined : t("Plugins are paused. Turn on Use plugins above to run them.")
+          settings.pluginsEnabled
+            ? undefined
+            : t("Plugins are paused. Turn on Use plugins above to run them.")
         }
       >
         {stoodDown.length > 0 && settings.pluginsEnabled && (

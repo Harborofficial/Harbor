@@ -52,11 +52,14 @@ export default {
   "games.guides.date.all": "कभी भी",
   "games.guides.viewers": "{count} देख रहे हैं",
   "games.guides.views": "{count} व्यू",
-  "games.guides.import.callofdutywarzone": "मान Warzone की संबंधित सेटिंग्स में कॉपी करें। DPI माउस सॉफ़्टवेयर में सेट करें।",
-  "games.guides.import.css": "सेटिंग्स Counter-Strike: Source में कॉपी करें। ये तारीख सहित समुदाय के पुराने रिकॉर्ड से हैं।",
+  "games.guides.import.callofdutywarzone":
+    "मान Warzone की संबंधित सेटिंग्स में कॉपी करें। DPI माउस सॉफ़्टवेयर में सेट करें।",
+  "games.guides.import.css":
+    "सेटिंग्स Counter-Strike: Source में कॉपी करें। ये तारीख सहित समुदाय के पुराने रिकॉर्ड से हैं।",
   "games.guides.import.cod": "इन मानों का उपयोग गेम के संबंधित संस्करण में करें। DPI माउस सॉफ़्टवेयर में सेट करें।",
   "games.guides.noCrosshair": "इस स्रोत में सटीक प्रीव्यू के लिए क्रॉसहेयर की पर्याप्त जानकारी नहीं है।",
-  "games.guides.previewNote": "प्रकाशित मानों का स्थिर प्रीव्यू। रिज़ॉल्यूशन, हलचल और रिकॉइल से गेम में नतीजा बदल सकता है।",
+  "games.guides.previewNote":
+    "प्रकाशित मानों का स्थिर प्रीव्यू। रिज़ॉल्यूशन, हलचल और रिकॉइल से गेम में नतीजा बदल सकता है।",
   "games.guides.previewBackground": "प्रीव्यू की हल्की पृष्ठभूमि बदलें",
   "games.guides.crosshairPreview": "क्रॉसहेयर प्रीव्यू",
   "games.guides.noPlayers": "कोई खिलाड़ी नहीं मिला। दूसरा नाम आज़माएँ।",
@@ -73,12 +76,16 @@ export default {
   "games.guides.sourceErrorTitle": "फिर कोशिश करें",
   "games.guides.more": "और लोड करें",
   "games.guides.moreKick": "Kick पर और देखें",
-  "games.guides.configNote": "खिलाड़ियों और क्रिएटर्स की प्रकाशित सेटिंग्स। स्रोत, तारीख और सेटअप देखने के लिए प्रोफ़ाइल चुनें।",
+  "games.guides.configNote":
+    "खिलाड़ियों और क्रिएटर्स की प्रकाशित सेटिंग्स। स्रोत, तारीख और सेटअप देखने के लिए प्रोफ़ाइल चुनें।",
   "games.guides.players": "सभी खिलाड़ी",
   "games.guides.useConfig": "ये सेटिंग इस्तेमाल करें",
-  "games.guides.import.cs2": "कमांड को CS2 के डेवलपर कंसोल में पेस्ट करें। क्रॉसहेयर कोड सेटिंग → गेम → क्रॉसहेयर से इंपोर्ट करें। लागू करने से पहले मान जाँच लें।",
-  "games.guides.import.valorant": "क्रॉसहेयर कोड कॉपी करें, फिर VALORANT में सेटिंग → क्रॉसहेयर → प्रोफ़ाइल कोड इंपोर्ट करें खोलें। बाकी मान संबंधित सेटिंग में दर्ज करें।",
-  "games.guides.import.rainbowsixsiege": "सेटिंग कॉपी करके Siege की माउस और डिस्प्ले सेटिंग में मान दर्ज करें। DPI माउस के सॉफ़्टवेयर में सेट होता है।",
+  "games.guides.import.cs2":
+    "कमांड को CS2 के डेवलपर कंसोल में पेस्ट करें। क्रॉसहेयर कोड सेटिंग → गेम → क्रॉसहेयर से इंपोर्ट करें। लागू करने से पहले मान जाँच लें।",
+  "games.guides.import.valorant":
+    "क्रॉसहेयर कोड कॉपी करें, फिर VALORANT में सेटिंग → क्रॉसहेयर → प्रोफ़ाइल कोड इंपोर्ट करें खोलें। बाकी मान संबंधित सेटिंग में दर्ज करें।",
+  "games.guides.import.rainbowsixsiege":
+    "सेटिंग कॉपी करके Siege की माउस और डिस्प्ले सेटिंग में मान दर्ज करें। DPI माउस के सॉफ़्टवेयर में सेट होता है।",
   "games.guides.copyCrosshair": "क्रॉसहेयर कॉपी करें",
   "games.guides.copyCommands": "कमांड कॉपी करें",
   "games.guides.copySettings": "सेटिंग कॉपी करें",
@@ -109,11 +116,11 @@ export default {
   "games.guides.previous": "पिछला",
   "games.guides.next": "अगला",
   "games.guides.original": "मूल खोलें",
-  "games.guides.playerNote": "प्लेबैक YouTube से है। अगर निर्माता एम्बेड करने की अनुमति नहीं देता, तो मूल वीडियो खोलें।",
+  "games.guides.playerNote":
+    "प्लेबैक YouTube से है। अगर निर्माता एम्बेड करने की अनुमति नहीं देता, तो मूल वीडियो खोलें।",
   "games.guides.readerError": "यह गाइड यहाँ नहीं पढ़ी जा सकी। फिर कोशिश करें या मूल खोलें।",
   "games.guides.contents": "इस गाइड में",
-  "games.guides.credits": "लेखक और लाइसेंस"
-,
+  "games.guides.credits": "लेखक और लाइसेंस",
   "games.guides.copy": "कॉपी करें",
   "games.guides.previewMap": "क्रॉसहेयर के पीछे मैप का स्क्रीनशॉट दिखाएँ",
   "games.guides.skins": "स्किन",
@@ -123,5 +130,5 @@ export default {
   "games.guides.teammates": "टीम के साथी",
   "games.guides.specs": "स्पेसिफ़िकेशन",
   "games.guides.exportAll": "सब कुछ एक्सपोर्ट करें",
-  "games.guides.copyValue": "{label} कॉपी करें"
+  "games.guides.copyValue": "{label} कॉपी करें",
 } satisfies Record<string, string>;

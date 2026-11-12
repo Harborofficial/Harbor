@@ -46,5 +46,5 @@ const specs: Record<number, readonly [number, number, number]> = {
 };
 export function wowSpecPosition(id: number, classId: number) {
   const value = specs[id];
-  return value?.[0] === classId ? [value[1], value[2]] as const : null;
+  return value?.[0] === classId ? ([value[1], value[2]] as const) : null;
 }

@@ -7,12 +7,7 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, ToggleRow } from "./shared";
 import anilistLogo from "@/assets/anilist.png";
-import {
-  ModalButton,
-  ROW_ACTION_DANGER,
-  SettingGroup,
-  SettingsModal,
-} from "./kit";
+import { ModalButton, ROW_ACTION_DANGER, SettingGroup, SettingsModal } from "./kit";
 import { TrackerIdentity } from "./tracker-identity";
 import { SyncIndicatorSetting } from "./sync-indicator-setting";
 
@@ -31,7 +26,9 @@ export function AnilistPanel() {
           <TrackerConnect
             service="AniList"
             logo={anilistLogo}
-            description={t("Browse your anime lists in Harbor and update your episode progress as you watch. Sign in to AniList to connect.")}
+            description={t(
+              "Browse your anime lists in Harbor and update your episode progress as you watch. Sign in to AniList to connect.",
+            )}
             onConnect={() => setModalOpen(true)}
             website="https://anilist.co"
           />
@@ -39,7 +36,9 @@ export function AnilistPanel() {
       ) : (
         <Section
           title={t("Your AniList account")}
-          subtitle={t("Harbor shows your AniList lists on the Anime page and keeps your progress in sync.")}
+          subtitle={t(
+            "Harbor shows your AniList lists on the Anime page and keeps your progress in sync.",
+          )}
         >
           <TrackerIdentity
             logo={anilistLogo}
@@ -55,14 +54,18 @@ export function AnilistPanel() {
 
           <SettingGroup label={t("Tracking what you watch")}>
             <ToggleRow
-              label={t("Sync watch progress")}
-              sub={t("Finishing an anime episode updates your AniList progress. Forward only: it never lowers a count you already have.")}
+              label={t("Sync watch progress with AniList")}
+              sub={t(
+                "Finishing an anime episode updates your AniList progress. Forward only: it never lowers a count you already have.",
+              )}
               value={settings.anilistAutoSync}
               onChange={(v) => update({ anilistAutoSync: v })}
             />
             <ToggleRow
               label={t("Count AniList rewatches")}
-              sub={t("Watching an anime you already finished marks it as Rewatching and counts the rewatch, instead of resetting your progress.")}
+              sub={t(
+                "Watching an anime you already finished marks it as Rewatching and counts the rewatch, instead of resetting your progress.",
+              )}
               value={settings.anilistCountRewatches}
               onChange={(v) => update({ anilistCountRewatches: v })}
               lockReason={
@@ -87,7 +90,9 @@ export function AnilistPanel() {
             />
             <ToggleRow
               label={t("Blur comments by default")}
-              sub={t("Comments on anime pages are blurred until you reveal them, even if they are not tagged as spoilers.")}
+              sub={t(
+                "Comments on anime pages are blurred until you reveal them, even if they are not tagged as spoilers.",
+              )}
               value={!!settings.anilistBlurComments}
               onChange={(on) => update({ anilistBlurComments: on })}
               lockReason={commentsOn ? undefined : t("Turn on AniList comments first.")}
@@ -118,20 +123,25 @@ export function AnilistPanel() {
             }
           >
             <p className={`max-w-[66ch] ${ROW_DESC}`}>
-              {t("Disconnect AniList? Your lists will stop showing on the Anime page until you reconnect.")}
+              {t(
+                "Disconnect AniList? Your lists will stop showing on the Anime page until you reconnect.",
+              )}
             </p>
           </SettingsModal>
         </Section>
       )}
 
-      {isConnected && <SyncIndicatorSetting />}
+      {isConnected && <SyncIndicatorSetting tracker="anilist" />}
 
       {modalOpen && <AnilistConnectModal onClose={() => setModalOpen(false)} />}
     </>
   );
 }
 
-function sessionAge(t: (key: string, vars?: Record<string, string | number>) => string, createdAt?: number): string {
+function sessionAge(
+  t: (key: string, vars?: Record<string, string | number>) => string,
+  createdAt?: number,
+): string {
   if (!createdAt) return "";
   const days = Math.floor((Date.now() - createdAt) / 86400000);
   if (days < 1) return t("today");

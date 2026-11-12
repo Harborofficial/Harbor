@@ -3,15 +3,19 @@ export default {
   "games.searchUi.rows": "Satır görünümü",
   "games.searchUi.aiPlaceholder": "Bir oyunu, atmosferi veya oynamak istediğini anlat…",
   "games.searchUi.guide": "Ada göre ara, ardından filtrelerle sonuçları daralt.",
-  "games.searchUi.aiGuide": "Ne aradığını anlat. Harbor, yapay zekâ önerilerini Steam kataloğunda doğrular.",
+  "games.searchUi.aiGuide":
+    "Ne aradığını anlat. Harbor, yapay zekâ önerilerini Steam kataloğunda doğrular.",
   "games.searchUi.web": "Web bağlamı",
   "games.searchUi.settings": "Yapay zekâ ayarları",
   "games.searchUi.setup": "Yapay zekâ sağlayıcını bağla",
-  "games.searchUi.setupNote": "Harbor’da kullandığın OpenRouter veya Groq hesabını ve modelini kullan.",
-  "games.searchUi.aiHint": "Hazır olduğunda Enter’a bas. Filtrelerin yapay zekâ sonuçlarına da uygulanır.",
+  "games.searchUi.setupNote":
+    "Harbor’da kullandığın OpenRouter veya Groq hesabını ve modelini kullan.",
+  "games.searchUi.aiHint":
+    "Hazır olduğunda Enter’a bas. Filtrelerin yapay zekâ sonuçlarına da uygulanır.",
   "games.searchUi.thinking": "Oyunlar aranıyor ve Steam kontrol ediliyor…",
   "games.searchUi.verified": "{count} Steam eşleşmesi · Yapay zekâ önerileri",
-  "games.searchUi.noAiResults": "Bu filtrelerle doğrulanmış Steam eşleşmesi yok. Farklı bir açıklama veya daha az filtre dene.",
+  "games.searchUi.noAiResults":
+    "Bu filtrelerle doğrulanmış Steam eşleşmesi yok. Farklı bir açıklama veya daha az filtre dene.",
   "games.searchUi.random": "Rastgele oyun",
   "games.searchUi.randomHint": "Bu aramaya ve filtrelere uyan rastgele bir oyun seç.",
   "games.searchUi.picking": "Seçiliyor…",
@@ -21,5 +25,5 @@ export default {
   "games.searchUi.sources": "Steam + IGDB · PC ve konsol oyunları ile ROM modları.",
   "games.searchUi.steamScope": "Bu filtreler veya sıralama Steam verilerini kullanır.",
   "games.searchUi.allCatalogs": "Tüm kataloglarda ara",
-  "games.searchUi.partial": "Bazı sonuçlara erişilemiyor: {providers}."
+  "games.searchUi.partial": "Bazı sonuçlara erişilemiyor: {providers}.",
 };

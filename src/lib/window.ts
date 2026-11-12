@@ -48,7 +48,10 @@ export async function focusWindow(): Promise<void> {
 }
 
 export const setWindowFullscreen = async (fs: boolean) => {
-  await win?.setFullscreen(fs).catch(() => {});
+  if (!win) return;
+  // Native placement persistence must ignore OS fullscreen resize events.
+  await invoke("window_geometry_pause", { recordBefore: fs }).catch(() => {});
+  await win.setFullscreen(fs).catch(() => {});
 };
 
 export const readWindowFullscreen = async (): Promise<boolean> =>

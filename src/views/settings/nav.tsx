@@ -1146,7 +1146,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Player controls in Big Picture",
     section: "hotkeys",
     tab: "behaviour",
-    anchorTitle: "Big Picture",
+    anchorTitle: "Navigation",
     keywords: [
       "big picture player",
       "ten foot player",
@@ -3337,7 +3337,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Synced addons",
     section: "account",
-    tab: "stremio",
+    tab: "nuvio",
     anchorTitle: "Synced addons",
     keywords: ["synced addons", "addons", "stremio addons", "installed addons"],
   },
@@ -3485,8 +3485,9 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Picture in picture style",
-    section: "basics",
-    anchorTitle: "Picture in picture style",
+    section: "player",
+    tab: "play",
+    anchorTitle: "Picture in picture",
     keywords: [
       "pip",
       "picture in picture",
@@ -5678,7 +5679,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Embed mpv inside Harbor window",
     section: "player",
     tab: "engine",
-    anchorTitle: "Engine",
+    anchorTitle: "mpv window",
     keywords: [
       "embedded mpv",
       "separate window",
@@ -5691,7 +5692,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Separate window display",
     section: "player",
     tab: "engine",
-    anchorTitle: "Engine",
+    anchorTitle: "mpv window",
     keywords: [
       "separate window monitor",
       "mpv display",
@@ -5705,7 +5706,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Cover the taskbar",
     section: "player",
     tab: "engine",
-    anchorTitle: "Engine",
+    anchorTitle: "mpv window",
     keywords: [
       "taskbar",
       "full screen",
@@ -6645,9 +6646,9 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Close player",
-    section: "hotkeys",
-    tab: "keys",
-    anchorTitle: "Player",
+    section: "player",
+    tab: "upnext",
+    anchorTitle: "More like this at the end",
     keywords: ["escape", "exit playback", "quit player", "back out"],
   },
   {
@@ -10121,7 +10122,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "subtitles",
     tab: "sync",
     anchorTitle: "Subtitle auto-sync",
-    keywords: ["speech recognition", "asr", "smart resync", "audio derived sync", "whisper"],
+    keywords: ["speech recognition", "asr", "smart resync", "audio derived sync", "moonshine"],
   },
   {
     label: "Match subtitles across languages (experimental)",
@@ -10237,9 +10238,8 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Show the Big Picture button",
-    section: "hotkeys",
-    tab: "behaviour",
-    anchorTitle: "Big Picture",
+    section: "bigPicture",
+    anchorTitle: "Interface",
     keywords: ["big picture button", "tv mode button", "hide big picture", "ten foot"],
   },
   {

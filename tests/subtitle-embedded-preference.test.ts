@@ -73,7 +73,11 @@ test("a better language match keeps external candidates selectable", () => {
 test("no eligible embedded track leaves external selection open", () => {
   assert.equal(desiredSubtitleIsEmbedded([], ["en"], true), false);
   assert.equal(
-    desiredSubtitleIsEmbedded([{ id: "1", lang: "en", external: false, forced: true }], ["en"], true),
+    desiredSubtitleIsEmbedded(
+      [{ id: "1", lang: "en", external: false, forced: true }],
+      ["en"],
+      true,
+    ),
     false,
   );
 });

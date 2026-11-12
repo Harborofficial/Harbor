@@ -8,7 +8,12 @@ import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { useSettings, type StreamPriorityEntry } from "@/lib/settings";
 import { addonKey, declaresStream } from "@/lib/streams/addon-priority";
-import { OrganizeList, SectionCard, SkeletonRows, type OrganizeEntry } from "@/views/addons/organize/section-card";
+import {
+  OrganizeList,
+  SectionCard,
+  SkeletonRows,
+  type OrganizeEntry,
+} from "@/views/addons/organize/section-card";
 import { useDragList } from "@/views/addons/organize/use-drag-list";
 import { useAddons } from "@/views/play-picker/use-addons";
 
@@ -46,7 +51,14 @@ export function StreamPriorityCard() {
       out.push(
         live
           ? entryOf(live)
-          : { key: p.key, name: p.name, host: t("Not installed"), addonId: p.key, logo: null, muted: true },
+          : {
+              key: p.key,
+              name: p.name,
+              host: t("Not installed"),
+              addonId: p.key,
+              logo: null,
+              muted: true,
+            },
       );
     }
     for (const a of streamAddons) {
@@ -89,7 +101,9 @@ export function StreamPriorityCard() {
     <SectionCard
       flat
       title={t("Stream priority")}
-      sub={t("Results from addons higher in this list come first. If one finds nothing, the next fills in.")}
+      sub={t(
+        "Results from addons higher in this list come first. If one finds nothing, the next fills in.",
+      )}
       count={entries.length}
       action={
         <div className="flex items-center gap-2">

@@ -30,7 +30,7 @@ export function AnilistSyncToast() {
     };
   }, []);
 
-  if (!event || !settings.syncIndicator) return null;
+  if (!event || !settings.anilistSyncIndicator) return null;
   const ok = event.kind === "ok";
   const watching = event.kind === "watching";
   const good = ok || watching;

@@ -249,7 +249,8 @@ const residual: Record<string, string> = {
   "Report sent": "Rapor gönderildi",
   "Reset to original": "Orijinal hâline döndür",
   "Resolving manifest": "Manifest çözümleniyor",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Real-Debrid ile aynı salt okunur kullanım biçimine sahiptir. Ayrıca önbelleğe alınmamış kaynakları oynatma seçicisinden kuyruğa eklemenizi sağlar.",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Real-Debrid ile aynı salt okunur kullanım biçimine sahiptir. Ayrıca önbelleğe alınmamış kaynakları oynatma seçicisinden kuyruğa eklemenizi sağlar.",
   "Saved to your library.": "Kütüphanenize kaydedildi.",
   "Say a title, actor, or genre": "Bir içerik adı, oyuncu veya tür söyleyin",
   "Scanning your network...": "Ağınız taranıyor...",
@@ -323,7 +324,8 @@ const residual: Record<string, string> = {
     'Proje anahtarını değil, "personal" anahtarını kullanın.',
   "Use the v3 key, not the read access token.":
     "Okuma erişimi tokenını değil, v3 anahtarını kullanın.",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "Önbelleği kontrol etmek ve bağlantı kısıtlamalarını kaldırmak için kullanılır. Harbor hesabınıza kendi kendine asla bir şey eklemez veya kaldırmaz.",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "Önbelleği kontrol etmek ve bağlantı kısıtlamalarını kaldırmak için kullanılır. Harbor hesabınıza kendi kendine asla bir şey eklemez veya kaldırmaz.",
   "Uses the directdl endpoint, which skips queueing for anything already cached.":
     "Önbellekte bulunan içerikleri kuyruğa eklemeyi atlayan directdl uç noktasını kullanır.",
   "Uses up to 150 MB": "En fazla 150 MB kullanır",

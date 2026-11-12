@@ -21,13 +21,7 @@ import { useBpGuideNav } from "./use-bp-guide-nav";
 
 type LaneFor = (channel: IptvChannel, windowStart: number, windowEnd: number) => BpGuideCell[];
 
-function BpGuideNowLine({
-  viewStartMs,
-  metrics,
-}: {
-  viewStartMs: number;
-  metrics: GuideMetrics;
-}) {
+function BpGuideNowLine({ viewStartMs, metrics }: { viewStartMs: number; metrics: GuideMetrics }) {
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {

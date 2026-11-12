@@ -61,13 +61,39 @@ export function providerTabFor(modelId: string): AiProviderTab {
 export const DEFAULT_AI_MODEL = "google/gemma-4-26b-a4b-it:free";
 
 export const AI_MODELS: AiModel[] = [
-  { id: "google/gemma-4-26b-a4b-it:free", label: "Gemma 4 26B", provider: "gemini", free: true, recommended: true },
+  {
+    id: "google/gemma-4-26b-a4b-it:free",
+    label: "Gemma 4 26B",
+    provider: "gemini",
+    free: true,
+    recommended: true,
+  },
   { id: "openai/gpt-oss-20b:free", label: "GPT-OSS 20B", provider: "openai", free: true },
-  { id: "nvidia/nemotron-3-super-120b-a12b:free", label: "Nemotron 3 Super 120B", provider: "nvidia", free: true },
-  { id: "nvidia/nemotron-3-nano-30b-a3b:free", label: "Nemotron 3 Nano 30B", provider: "nvidia", free: true },
-  { id: "google/gemini-3.1-flash-lite", label: "Gemini 3.1 Flash Lite", provider: "gemini", recommended: true },
+  {
+    id: "nvidia/nemotron-3-super-120b-a12b:free",
+    label: "Nemotron 3 Super 120B",
+    provider: "nvidia",
+    free: true,
+  },
+  {
+    id: "nvidia/nemotron-3-nano-30b-a3b:free",
+    label: "Nemotron 3 Nano 30B",
+    provider: "nvidia",
+    free: true,
+  },
+  {
+    id: "google/gemini-3.1-flash-lite",
+    label: "Gemini 3.1 Flash Lite",
+    provider: "gemini",
+    recommended: true,
+  },
   { id: "google/gemini-3.5-flash", label: "Gemini 3.5 Flash", provider: "gemini" },
-  { id: "anthropic/claude-haiku-4.5", label: "Claude Haiku 4.5", provider: "anthropic", recommended: true },
+  {
+    id: "anthropic/claude-haiku-4.5",
+    label: "Claude Haiku 4.5",
+    provider: "anthropic",
+    recommended: true,
+  },
   { id: "anthropic/claude-sonnet-5", label: "Claude Sonnet 5", provider: "anthropic" },
   { id: "openai/gpt-4o-mini", label: "GPT-4o mini", provider: "openai" },
   { id: "openai/gpt-5.6-sol", label: "GPT-5.6 Sol", provider: "openai" },
@@ -80,14 +106,59 @@ export const AI_MODELS: AiModel[] = [
 ];
 
 export const GROQ_MODELS: AiModel[] = [
-  { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile", provider: "groq", family: "meta", free: true, recommended: true },
-  { id: "meta-llama/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B", provider: "groq", family: "meta", free: true, recommended: true },
-  { id: "meta-llama/llama-4-maverick-17b-128e-instruct", label: "Llama 4 Maverick 17B", provider: "groq", family: "meta", free: true },
-  { id: "moonshotai/kimi-k2-instruct", label: "Kimi K2 Instruct", provider: "groq", family: "moonshot", free: true },
-  { id: "openai/gpt-oss-120b", label: "GPT-OSS 120B", provider: "groq", family: "openai", free: true, recommended: true },
-  { id: "openai/gpt-oss-20b", label: "GPT-OSS 20B", provider: "groq", family: "openai", free: true },
+  {
+    id: "llama-3.3-70b-versatile",
+    label: "Llama 3.3 70B Versatile",
+    provider: "groq",
+    family: "meta",
+    free: true,
+    recommended: true,
+  },
+  {
+    id: "meta-llama/llama-4-scout-17b-16e-instruct",
+    label: "Llama 4 Scout 17B",
+    provider: "groq",
+    family: "meta",
+    free: true,
+    recommended: true,
+  },
+  {
+    id: "meta-llama/llama-4-maverick-17b-128e-instruct",
+    label: "Llama 4 Maverick 17B",
+    provider: "groq",
+    family: "meta",
+    free: true,
+  },
+  {
+    id: "moonshotai/kimi-k2-instruct",
+    label: "Kimi K2 Instruct",
+    provider: "groq",
+    family: "moonshot",
+    free: true,
+  },
+  {
+    id: "openai/gpt-oss-120b",
+    label: "GPT-OSS 120B",
+    provider: "groq",
+    family: "openai",
+    free: true,
+    recommended: true,
+  },
+  {
+    id: "openai/gpt-oss-20b",
+    label: "GPT-OSS 20B",
+    provider: "groq",
+    family: "openai",
+    free: true,
+  },
   { id: "qwen/qwen3-32b", label: "Qwen 3 32B", provider: "groq", family: "qwen", free: true },
-  { id: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant", provider: "groq", family: "meta", free: true },
+  {
+    id: "llama-3.1-8b-instant",
+    label: "Llama 3.1 8B Instant",
+    provider: "groq",
+    family: "meta",
+    free: true,
+  },
 ];
 
 const MODEL_MIGRATIONS: Record<string, string> = {

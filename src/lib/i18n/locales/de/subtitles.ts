@@ -5,6 +5,8 @@ const subtitles: Record<string, string> = {
     "Formatierte Untertitel (ASS) behalten ihre Farben, ihre Größe und die Position von Einblendungen, verwenden aber deine Schriftart.",
   "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.":
     "Harbor sendet seine Untertitel an dein mpv. Wähle einen im Untertitelmenü von mpv aus.",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "Formatierte Untertitel (ASS) behalten ihre Farben, ihre Größe und die Position von Einblendungen, verwenden aber deine Schriftart.",
 };
 
 export default subtitles;

@@ -13,7 +13,10 @@ test("finished and rewatching titles sync as a rewatch instead of being skipped"
     /if \(listStatus && \(listStatus\.status === "completed" \|\| listStatus\.is_rewatching\)\) return;/,
     "a finished entry must not bail out — that is what made rewatching impossible to record",
   );
-  assert.match(sync, /if \(listStatus && \(listStatus\.status === "completed" \|\| listStatus\.is_rewatching\)\) \{/);
+  assert.match(
+    sync,
+    /if \(listStatus && \(listStatus\.status === "completed" \|\| listStatus\.is_rewatching\)\) \{/,
+  );
   assert.match(
     sync,
     /is_rewatching: "true",/,
@@ -62,9 +65,15 @@ test("the rewatch toast reads as a rewatch", () => {
 test("rewatch counting is gated by the Count rewatches setting", () => {
   assert.match(sync, /countRewatches = true,/);
   assert.match(sync, /if \(!countRewatches\) return;/);
-  const defaults = readFileSync(new URL("../src/lib/settings/defaults.ts", import.meta.url), "utf8");
+  const defaults = readFileSync(
+    new URL("../src/lib/settings/defaults.ts", import.meta.url),
+    "utf8",
+  );
   assert.match(defaults, /malCountRewatches: true,/, "on by default");
-  const panel = readFileSync(new URL("../src/views/settings/mal-panel.tsx", import.meta.url), "utf8");
+  const panel = readFileSync(
+    new URL("../src/views/settings/mal-panel.tsx", import.meta.url),
+    "utf8",
+  );
   assert.match(panel, /settings\.malCountRewatches/);
   assert.match(panel, /newId="mal:count-rewatches"/, "the new setting carries the NEW badge");
   assert.match(

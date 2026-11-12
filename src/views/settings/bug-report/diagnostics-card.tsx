@@ -90,21 +90,32 @@ export function DiagnosticsCard({ diag }: { diag: Diagnostics | null }) {
             <Pair k="Trakt" v={diag.flags.hasTrakt ? t("yes") : t("no")} />
             <Pair k="Stremio" v={diag.flags.hasStremio ? t("signed in") : t("guest")} />
             <Pair k={t("Debrid keys")} v={String(diag.flags.debridCount)} />
-            <Pair k={t("Addons")} v={diag.flags.addonCount === null ? t("Unavailable") : String(diag.flags.addonCount)} />
+            <Pair
+              k={t("Addons")}
+              v={diag.flags.addonCount === null ? t("Unavailable") : String(diag.flags.addonCount)}
+            />
             <Pair k={t("IPTV lists")} v={String(diag.flags.iptvCount)} />
             <Pair k={t("Recent errors")} v={String(diag.recentErrors.length)} />
           </dl>
           <details className="mt-5 border-t border-edge-soft pt-4">
-            <summary className="cursor-pointer text-[15px] font-medium text-ink">{t("Browser details")}</summary>
+            <summary className="cursor-pointer text-[15px] font-medium text-ink">
+              {t("Browser details")}
+            </summary>
             <p className="mt-3 break-words text-[13px] leading-5 text-ink-muted">{diag.ua}</p>
           </details>
           {diag.recentErrors.length > 0 && (
             <details className="mt-5 border-t border-edge-soft pt-4">
-              <summary className="cursor-pointer text-[15px] font-medium text-ink">{t("Review error messages")}</summary>
+              <summary className="cursor-pointer text-[15px] font-medium text-ink">
+                {t("Review error messages")}
+              </summary>
               <div className="mt-3 flex flex-col gap-3">
                 {diag.recentErrors.map((error, index) => (
-                  <pre key={`${error.ts}-${index}`} className="whitespace-pre-wrap break-words rounded-lg bg-canvas p-3 font-mono text-[12px] leading-5 text-ink-muted">
-                    {error.src && `${error.src}\n`}{error.msg}
+                  <pre
+                    key={`${error.ts}-${index}`}
+                    className="whitespace-pre-wrap break-words rounded-lg bg-canvas p-3 font-mono text-[12px] leading-5 text-ink-muted"
+                  >
+                    {error.src && `${error.src}\n`}
+                    {error.msg}
                   </pre>
                 ))}
               </div>

@@ -71,7 +71,12 @@ export function SyncControl({
     onClose();
   };
 
-  const label = autoSync?.status === "matched-embedded" ? tr("Matched embedded subtitles") : applied ? tr("Synced: on") : tr("Auto sync");
+  const label =
+    autoSync?.status === "matched-embedded"
+      ? tr("Matched embedded subtitles")
+      : applied
+        ? tr("Synced: on")
+        : tr("Auto sync");
 
   return (
     <div ref={wrapRef} className="relative flex items-center">

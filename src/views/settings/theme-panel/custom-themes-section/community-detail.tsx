@@ -148,9 +148,7 @@ export function CommunityDetail({ theme, onClose }: { theme: StoreTheme; onClose
                   >
                     <Star
                       size={20}
-                      className={
-                        n <= shownRating ? "fill-accent text-accent" : "text-ink-subtle"
-                      }
+                      className={n <= shownRating ? "fill-accent text-accent" : "text-ink-subtle"}
                     />
                   </button>
                 ))}

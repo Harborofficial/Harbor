@@ -6,14 +6,20 @@ import ts from "typescript";
 const compiled = new Map();
 function evaluate(file, resolve, document, window) {
   if (!compiled.has(file)) {
-    compiled.set(file, ts.transpileModule(
-      readFileSync(new URL("../src/lib/" + file, import.meta.url), "utf8"),
-      { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } },
-    ).outputText);
+    compiled.set(
+      file,
+      ts.transpileModule(readFileSync(new URL("../src/lib/" + file, import.meta.url), "utf8"), {
+        compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+      }).outputText,
+    );
   }
   const module = { exports: {} };
   new Function("require", "module", "exports", "document", "window", compiled.get(file))(
-    resolve, module, module.exports, document, window,
+    resolve,
+    module,
+    module.exports,
+    document,
+    window,
   );
   return module.exports;
 }
@@ -30,19 +36,38 @@ class FakeNode {
   paused = true;
   plays = 0;
   playResults = [];
-  appendChild(child) { child.parentElement = this; }
-  setAttribute(name, value) { this.attrs.set(name, value); }
-  getAttribute(name) { return this.attrs.get(name) ?? null; }
-  removeAttribute(name) { this.attrs.delete(name); }
-  set src(value) { this.attrs.set("src", value); this.readyState = 0; }
+  appendChild(child) {
+    child.parentElement = this;
+  }
+  setAttribute(name, value) {
+    this.attrs.set(name, value);
+  }
+  getAttribute(name) {
+    return this.attrs.get(name) ?? null;
+  }
+  removeAttribute(name) {
+    this.attrs.delete(name);
+  }
+  set src(value) {
+    this.attrs.set("src", value);
+    this.readyState = 0;
+  }
   addEventListener(name, fn) {
     if (!this.listeners.has(name)) this.listeners.set(name, new Set());
     this.listeners.get(name).add(fn);
   }
-  removeEventListener(name, fn) { this.listeners.get(name)?.delete(fn); }
-  dispatch(name) { for (const fn of [...(this.listeners.get(name) ?? [])]) fn(); }
-  pause() { this.paused = true; }
-  load() { this.readyState = 0; }
+  removeEventListener(name, fn) {
+    this.listeners.get(name)?.delete(fn);
+  }
+  dispatch(name) {
+    for (const fn of [...(this.listeners.get(name) ?? [])]) fn();
+  }
+  pause() {
+    this.paused = true;
+  }
+  load() {
+    this.readyState = 0;
+  }
   play() {
     this.plays += 1;
     this.paused = false;
@@ -55,12 +80,26 @@ function environment() {
   const timers = new Map();
   const document = { body: new FakeNode(), createElement: () => new FakeNode() };
   const window = {
-    setTimeout(fn, delay) { timers.set(++nextTimer, { fn, delay }); return nextTimer; },
-    clearTimeout(id) { timers.delete(id); },
+    setTimeout(fn, delay) {
+      timers.set(++nextTimer, { fn, delay });
+      return nextTimer;
+    },
+    clearTimeout(id) {
+      timers.delete(id);
+    },
   };
-  const pool = evaluate("trailer-video.ts", () => { throw new Error("Unexpected import"); }, document, window);
+  const pool = evaluate(
+    "trailer-video.ts",
+    () => {
+      throw new Error("Unexpected import");
+    },
+    document,
+    window,
+  );
   return {
-    document, window, pool,
+    document,
+    window,
+    pool,
     assignSource() {
       for (const [id, timer] of [...timers]) {
         if (timer.delay !== 120) continue;
@@ -83,32 +122,44 @@ function renderer(env) {
   const react = {
     useRef(value) {
       const index = cursor++;
-      return slots[index] ??= { current: value };
+      return (slots[index] ??= { current: value });
     },
     useState(value) {
       const index = cursor++;
-      const slot = slots[index] ??= { value };
-      return [slot.value, next => {
-        if (Object.is(next, slot.value)) return;
-        slot.value = next;
-        dirty = true;
-      }];
+      const slot = (slots[index] ??= { value });
+      return [
+        slot.value,
+        (next) => {
+          if (Object.is(next, slot.value)) return;
+          slot.value = next;
+          dirty = true;
+        },
+      ];
     },
     useEffect(run, deps) {
       const index = cursor++;
-      const slot = slots[index] ??= {};
+      const slot = (slots[index] ??= {});
       if (slot.deps && deps.every((value, i) => Object.is(value, slot.deps[i]))) return;
       slot.deps = deps;
       pending.push({ slot, run });
     },
   };
-  const { useTrailerVideo } = evaluate("use-trailer-video.ts", name => {
-    if (name === "react") return react;
-    if (name === "@/lib/trailer-video") return env.pool;
-    throw new Error("Unexpected import: " + name);
-  }, env.document, env.window);
+  const { useTrailerVideo } = evaluate(
+    "use-trailer-video.ts",
+    (name) => {
+      if (name === "react") return react;
+      if (name === "@/lib/trailer-video") return env.pool;
+      throw new Error("Unexpected import: " + name);
+    },
+    env.document,
+    env.window,
+  );
   const api = {
-    render(next) { props = next; dirty = true; return api.flush(); },
+    render(next) {
+      props = next;
+      dirty = true;
+      return api.flush();
+    },
     flush() {
       let passes = 0;
       while (dirty) {
@@ -127,7 +178,14 @@ function renderer(env) {
   return api;
 }
 
-const defaults = { src: "trailer-a", active: true, playing: true, muted: false, className: "video", loop: true };
+const defaults = {
+  src: "trailer-a",
+  active: true,
+  playing: true,
+  muted: false,
+  className: "video",
+  loop: true,
+};
 function start(env, view, options = {}) {
   let result = view.render({ ...defaults, ...options });
   env.assignSource();
@@ -214,7 +272,12 @@ for (const name of ["AbortError", "NotAllowedError"]) {
     const env = environment();
     const view = renderer(env);
     let fallback = 0;
-    const result = view.render({ ...defaults, onAutoplayMuted: () => { fallback += 1; } });
+    const result = view.render({
+      ...defaults,
+      onAutoplayMuted: () => {
+        fallback += 1;
+      },
+    });
     env.assignSource();
     const node = result.video.current;
     node.playResults.push(() => Promise.reject({ name }));
@@ -233,11 +296,21 @@ test("a late playback rejection cannot mute or retry after another owner takes o
   const home = renderer(env);
   let rejectPlay;
   let fallback = 0;
-  const options = { ...defaults, onAutoplayMuted: () => { fallback += 1; } };
+  const options = {
+    ...defaults,
+    onAutoplayMuted: () => {
+      fallback += 1;
+    },
+  };
   const result = home.render(options);
   env.assignSource();
   const node = result.video.current;
-  node.playResults.push(() => new Promise((resolve, reject) => { rejectPlay = reject; }));
+  node.playResults.push(
+    () =>
+      new Promise((resolve, reject) => {
+        rejectPlay = reject;
+      }),
+  );
   node.readyState = 4;
   node.dispatch("canplay");
   home.flush();
@@ -256,11 +329,21 @@ test("a late playback rejection is ignored after pausing the same owner", async 
   const view = renderer(env);
   let rejectPlay;
   let fallback = 0;
-  const options = { ...defaults, onAutoplayMuted: () => { fallback += 1; } };
+  const options = {
+    ...defaults,
+    onAutoplayMuted: () => {
+      fallback += 1;
+    },
+  };
   const result = view.render(options);
   env.assignSource();
   const node = result.video.current;
-  node.playResults.push(() => new Promise((resolve, reject) => { rejectPlay = reject; }));
+  node.playResults.push(
+    () =>
+      new Promise((resolve, reject) => {
+        rejectPlay = reject;
+      }),
+  );
   node.readyState = 4;
   node.dispatch("canplay");
   view.flush();
@@ -272,7 +355,6 @@ test("a late playback rejection is ignored after pausing the same owner", async 
   assert.equal(node.paused, true);
   assert.equal(node.plays, 1);
 });
-
 
 test("scroll volume updates do not restart playback", () => {
   const env = environment();

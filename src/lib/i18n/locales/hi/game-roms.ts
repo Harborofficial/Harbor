@@ -21,7 +21,8 @@ const gameRoms: Record<string, string> = {
   "games.roms.libraryNote": "अपने गेम लाएँ। फ़ाइलें इम्पोर्ट करें, एमुलेटर चुनें और अपना संग्रह एक जगह रखें।",
   "games.roms.openLibrary": "लाइब्रेरी खोलें",
   "games.roms.downloadCharts": "सबसे अधिक डाउनलोड किए गए ROM हैक",
-  "games.roms.downloadChartsNote": "Romhack Plaza पर अब तक के पैच डाउनलोड। क्रिएटर, संस्करण और आवश्यकताओं के लिए प्रोजेक्ट खोलें।",
+  "games.roms.downloadChartsNote":
+    "Romhack Plaza पर अब तक के पैच डाउनलोड। क्रिएटर, संस्करण और आवश्यकताओं के लिए प्रोजेक्ट खोलें।",
   "games.roms.downloadCount": "{count} डाउनलोड",
   "games.roms.chartUnavailable": "डाउनलोड सूची अभी उपलब्ध नहीं है। आप फिर भी Romhack Plaza देख सकते हैं।",
   "games.roms.allPlatforms": "सभी प्लेटफ़ॉर्म",
@@ -59,14 +60,16 @@ const gameRoms: Record<string, string> = {
   "games.roms.noCollection": "चुने गए कंसोल पर इस संग्रह से मेल खाने वाला कोई गेम अभी नहीं है।",
   "games.roms.community": "समुदाय ने बनाया",
   "games.roms.hacksTitle": "जाना-पहचाना गेम। एक नया रोमांच।",
-  "games.roms.hacksNote": "ROM हैक खोजें, जानें कि वे किस मूल गेम पर आधारित हैं, और अपनी पैच की हुई कॉपी खेलने के लिए तैयार करें।",
+  "games.roms.hacksNote":
+    "ROM हैक खोजें, जानें कि वे किस मूल गेम पर आधारित हैं, और अपनी पैच की हुई कॉपी खेलने के लिए तैयार करें।",
   "games.roms.catalogNote": "कंसोल, शैली, रिलीज़ के दौर और सीरीज़ के अनुसार कैटलॉग देखें।",
   "games.roms.genre": "शैली",
   "games.roms.allGenres": "सभी शैलियाँ",
   "games.roms.era": "रिलीज़ का दौर",
   "games.roms.reset": "फ़िल्टर रीसेट करें",
   "games.roms.empty": "कोई दूसरा शीर्षक आज़माएँ या इस कंसोल के फ़िल्टर का दायरा बढ़ाएँ।",
-  "games.roms.source": "गेम की जानकारी और उनके आपसी संबंध IGDB से। Harbor में समर्थित गेम खेलने के लिए अपनी स्थानीय फ़ाइलें आयात करें।",
+  "games.roms.source":
+    "गेम की जानकारी और उनके आपसी संबंध IGDB से। Harbor में समर्थित गेम खेलने के लिए अपनी स्थानीय फ़ाइलें आयात करें।",
   "games.roms.playerScore": "IGDB खिलाड़ी रेटिंग · {count} रेटिंग",
   "games.roms.combinedScore": "IGDB संयुक्त रेटिंग · {count} रेटिंग",
   "games.roms.sort.discussed": "सबसे ज़्यादा रेटिंग",

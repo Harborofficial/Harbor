@@ -35,7 +35,12 @@ function loadNegatives(): Set<string> {
   try {
     const raw = localStorage.getItem(NEGATIVE_KEY);
     const c = raw ? (JSON.parse(raw) as { t?: number; ids?: string[] } | null) : null;
-    if (c && typeof c.t === "number" && Date.now() - c.t < NEGATIVE_TTL_MS && Array.isArray(c.ids)) {
+    if (
+      c &&
+      typeof c.t === "number" &&
+      Date.now() - c.t < NEGATIVE_TTL_MS &&
+      Array.isArray(c.ids)
+    ) {
       negativesSince = c.t;
       return new Set(c.ids);
     }
@@ -129,7 +134,7 @@ export function warmAnimeResolution(m: Meta): void {
 
 export function detectAnimeForMetas(metas: Array<{ id: string; type?: string }>): void {
   const items = metas
-    .filter((m) => /^tt\d+$/.test(m.id))
+    .filter((m) => /^tt\d+$/.test(m.id) || /^tmdb:tv:\d+$/.test(m.id))
     .map((m) => ({ _id: m.id, type: m.type === "movie" ? "movie" : "series" }));
   if (items.length > 0) void detectAnimeForCw(items);
 }
@@ -155,7 +160,11 @@ function primaryCountry(m: { country?: string }): string {
   return (m.country ?? "").split(",")[0].trim().toLowerCase();
 }
 
-function isJapaneseAnime(m: { genres?: string[]; country?: string; originalLanguage?: string }): boolean {
+function isJapaneseAnime(m: {
+  genres?: string[];
+  country?: string;
+  originalLanguage?: string;
+}): boolean {
   if ((m.genres ?? []).some((g) => g.toLowerCase() === "anime")) return true;
   if (!hasAnimationGenre(m)) return false;
   const c = primaryCountry(m);
@@ -198,23 +207,35 @@ function settled(id: string): boolean {
 async function checkOne(it: DetectItem): Promise<void> {
   const id = it._id;
   try {
-    const m = (await fetchMeta(it.type === "movie" ? "movie" : "series", id)) as
-      | { genres?: string[]; country?: string }
-      | null;
     checked.add(id);
-    let anime = !!m && isJapaneseAnime(m);
-    const originUnknown = !m || !primaryCountry(m);
-    // Donghua and other mapped animation can have a known non-Japanese origin.
-    // Require an exact anime mapping rather than treating all animation as anime.
-    const needsMapping = !m || hasAnimationGenre(m) || (originUnknown && (m.genres ?? []).length === 0);
-    if (!anime && needsMapping) {
-      anime = (await imdbToKitsu(id).catch(() => null)) != null;
+    const tmdb = /^tmdb:tv:(\d+)$/.exec(id);
+    let anime = false;
+    let hasMeta = false;
+    if (tmdb) {
+      // Cinemeta only resolves IMDb ids; a TMDB row is anime exactly when its
+      // TV id maps to a Kitsu entry.
+      anime = (await tmdbTvToKitsu(Number(tmdb[1])).catch(() => null)) != null;
+    } else {
+      const m = (await fetchMeta(it.type === "movie" ? "movie" : "series", id)) as {
+        genres?: string[];
+        country?: string;
+      } | null;
+      hasMeta = !!m;
+      anime = !!m && isJapaneseAnime(m);
+      const originUnknown = !m || !primaryCountry(m);
+      // Donghua and other mapped animation can have a known non-Japanese origin.
+      // Require an exact anime mapping rather than treating all animation as anime.
+      const needsMapping =
+        !m || hasAnimationGenre(m) || (originUnknown && (m.genres ?? []).length === 0);
+      if (!anime && needsMapping) {
+        anime = (await imdbToKitsu(id).catch(() => null)) != null;
+      }
     }
     if (anime) {
       detected.add(id);
       persist();
       bump();
-    } else if (m) {
+    } else if (hasMeta) {
       negatives.add(id);
       persistNegatives();
     }
@@ -272,7 +293,7 @@ export async function detectAnimeForCw(items: Array<{ _id: string; type: string 
   const seen = new Set<string>();
   for (const it of items) {
     const id = it._id;
-    if (!/^tt\d+$/.test(id)) continue;
+    if (!/^tt\d+$/.test(id) && !/^tmdb:tv:\d+$/.test(id)) continue;
     if (seen.has(id) || settled(id)) continue;
     seen.add(id);
     const running = inflight.get(id);

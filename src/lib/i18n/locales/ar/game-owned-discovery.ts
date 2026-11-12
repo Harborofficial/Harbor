@@ -10,12 +10,14 @@ export default {
   "games.calendar.search": "البحث في الألعاب المحفوظة",
   "games.calendar.platform": "منصة الإصدار",
   "games.calendar.allPlatforms": "كل المنصات",
-  "games.calendar.dates": "قد تتغير المواعيد التي يعلنها الناشرون. مواعيد Steam مأخوذة من المتجر الأمريكي، وتُظهر سجلات IGDB المنصة والمنطقة.",
+  "games.calendar.dates":
+    "قد تتغير المواعيد التي يعلنها الناشرون. مواعيد Steam مأخوذة من المتجر الأمريكي، وتُظهر سجلات IGDB المنصة والمنطقة.",
   "games.calendar.noDays": "لا يوجد يوم إصدار محدد في {month} لأي لعبة جرى التحقق منها.",
   "games.calendar.windows": "فترات الإصدار",
   "games.calendar.windowsNote": "تشمل هذه الخطط الشهر المعروض، لكنها لا تحدد يومًا بعينه.",
   "games.calendar.undated": "لا يوجد موعد مؤكد",
-  "games.calendar.undatedNote": "لا تُدرج في التقويم المواعيد غير المعلنة أو غير المتاحة أو التي لم يُتحقق منها بعد.",
+  "games.calendar.undatedNote":
+    "لا تُدرج في التقويم المواعيد غير المعلنة أو غير المتاحة أو التي لم يُتحقق منها بعد.",
   "games.calendar.cancelled": "عدد سجلات الإصدارات الملغاة المستبعدة: {count}.",
   "games.calendar.unchecked": "لم يُتحقق من الموعد بعد",
   "games.watchlist.note": "تابع إصدارات ألعابك المفضلة.",
@@ -34,7 +36,8 @@ export default {
   "games.watchlist.coverage": "تم التحقق من {count} من أصل {total} لعبة",
   "games.watchlist.refresh": "تحديث تواريخ الإصدار",
   "games.watchlist.unavailable": "تاريخ الإصدار غير متاح",
-  "games.watchlist.partial": "تعذّر التحقق من بعض تواريخ الإصدار. تُعرض المعلومات المحفوظة عند توفرها.",
+  "games.watchlist.partial":
+    "تعذّر التحقق من بعض تواريخ الإصدار. تُعرض المعلومات المحفوظة عند توفرها.",
   "games.watchlist.noMatch": "لا توجد ألعاب مفضلة تطابق هذه الفلاتر.",
   "games.watchlist.dateNote": "التواريخ من Steam وIGDB. قد تتغير خطط الإصدار.",
   "games.watchlist.remove": "إزالة {name} من المفضلة",
@@ -55,8 +58,10 @@ export default {
   "games.owned.clear": "مسح فلاتر المكتبة",
   "games.owned.scanning": "جارٍ التحقق من الألعاب المثبتة محليًا…",
   "games.owned.scanUnavailable": "حالة التثبيت المحلي غير متاحة. حدّث للتحقق من هذا الجهاز.",
-  "games.owned.partial": "تعذّر التحقق من بعض مجلدات Steam. قد لا يتم التعرف على جميع الألعاب المثبتة.",
+  "games.owned.partial":
+    "تعذّر التحقق من بعض مجلدات Steam. قد لا يتم التعرف على جميع الألعاب المثبتة.",
   "games.owned.results": "{count} من {total} لعبة",
-  "games.owned.playtimeNote": "يأتي سجل اللعب من آخر مزامنة مع Steam. عدم وجود وقت لعب مسجل لا يوضح ما إذا كانت اللعبة قد أُكملت.",
-  "games.owned.resetAvailability": "عرض الألعاب بكل حالات التثبيت"
+  "games.owned.playtimeNote":
+    "يأتي سجل اللعب من آخر مزامنة مع Steam. عدم وجود وقت لعب مسجل لا يوضح ما إذا كانت اللعبة قد أُكملت.",
+  "games.owned.resetAvailability": "عرض الألعاب بكل حالات التثبيت",
 };

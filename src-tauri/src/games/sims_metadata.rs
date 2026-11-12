@@ -270,6 +270,6 @@ pub fn inspect(
     work.done();
     Ok(report)
 }
-#[cfg(test)]
+#[cfg(all(test, windows))]
 #[path = "sims_metadata_tests.rs"]
 mod tests;

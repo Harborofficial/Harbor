@@ -1,5 +1,11 @@
 import { trackViewportBottom } from "@/lib/viewport-bottom";
-import { musicDockCanAutoHide, musicDockHasInteraction, MUSIC_DOCK_AUTO_HIDE_MS, MUSIC_DOCK_REVEAL_ZONE_PX, useMusicDockAutoHide } from "@/lib/music/dock-auto-hide";
+import {
+  musicDockCanAutoHide,
+  musicDockHasInteraction,
+  MUSIC_DOCK_AUTO_HIDE_MS,
+  MUSIC_DOCK_REVEAL_ZONE_PX,
+  useMusicDockAutoHide,
+} from "@/lib/music/dock-auto-hide";
 import { isMusicLiked } from "@/lib/music/liked";
 import { pushBackHandler } from "@/lib/back-intercept";
 import { useModalExit } from "@/components/modal-shell";
@@ -111,7 +117,10 @@ function useDockInset(
       }
       // Games swaps navigation in one reserved column. Themes without a main
       // sidebar keep their normal full-width player, including on leaving Games.
-      const gamesRail = gamesActive && rail ? root.querySelector<HTMLElement>(".games-workspace .games-library-sidebar") : null;
+      const gamesRail =
+        gamesActive && rail
+          ? root.querySelector<HTMLElement>(".games-workspace .games-library-sidebar")
+          : null;
       const measured = gamesRail ?? rail;
       if (observed === measured) return;
       observed = measured;
@@ -378,7 +387,10 @@ export function MusicDock() {
       root.dataset.musicDockActive = "on";
       const fallback = collapsed ? TAB_HEIGHT : DOCK_HEIGHT;
       const publish = (height: number) => {
-        root.style.setProperty("--harbor-music-dock", `${autoHidden ? 0 : Math.max(0, Math.round(height))}px`);
+        root.style.setProperty(
+          "--harbor-music-dock",
+          `${autoHidden ? 0 : Math.max(0, Math.round(height))}px`,
+        );
         // Minimised, the tab floats over the page instead of shortening it.
         root.style.setProperty(
           "--harbor-dock-gap",
@@ -393,7 +405,8 @@ export function MusicDock() {
         publish(node.getBoundingClientRect().height || fallback);
         const observer = new ResizeObserver((entries) => {
           // The panel boundary includes the dock's top border, not just its content box.
-          const measured = entries[0]?.borderBoxSize?.[0]?.blockSize ?? node.getBoundingClientRect().height;
+          const measured =
+            entries[0]?.borderBoxSize?.[0]?.blockSize ?? node.getBoundingClientRect().height;
           publish(measured || fallback);
         });
         observer.observe(node);
@@ -607,574 +620,584 @@ export function MusicDock() {
         />
       )}
       <aside
-      key="music-dock-bar"
-      ref={dockRef}
-      data-music-dock
-      data-auto-hidden={autoHidden || undefined}
-      data-expanded={expanded || undefined}
-      data-entering={!dockEntered || undefined}
-      onAnimationEnd={(event) => {
-        if (event.target === event.currentTarget && event.animationName === "music-dock-bar-in")
-          setDockEntered(true);
-      }}
-      data-closing={collapseExit.closing || undefined}
-      data-art-colors={artworkColor ? "on" : undefined}
-      onPointerEnter={(event) => {
-        dockPointer.current = { x: event.clientX, y: event.clientY };
-        showAutoHiddenDock();
-      }}
-      onPointerMove={(event) => {
-        dockPointer.current = { x: event.clientX, y: event.clientY };
-      }}
-      onPointerLeave={() => {
-        dockPointer.current = null;
-        scheduleAutoHide();
-      }}
-      onFocusCapture={showAutoHiddenDock}
-      onBlurCapture={() => {
-        window.setTimeout(scheduleAutoHide, 0);
-      }}
-      role={expanded ? "dialog" : undefined}
-
-      aria-label={t(expanded ? "music.now.title" : "music.player")}
-      style={
-        {
-          insetInlineStart: inset,
-          insetInlineEnd: 0,
-          height: DOCK_HEIGHT,
-          bottom: "var(--harbor-viewport-bottom, 0px)",
-          ...(artworkColor
-            ? { "--music-art-accent": artworkColor.color, "--music-art-ink": artworkColor.ink }
-            : {}),
-        } as CSSProperties
-      }
-      className="music-dock-auto-hide @container fixed bottom-0 z-[120] border-t border-edge bg-canvas text-ink"
-    >
-      {appearance.gifVisualizer && appearance.gifId ? (
-        !expanded && <MusicGifVisualizer track={current} playing={player.phase === "playing"} />
-      ) : appearance.mikuVisualizer && (
-        <MusicMikuVisualizer track={current} playing={player.phase === "playing"} concealed={expanded} />
-      )}
-      {expanded && (
-        <MusicNowPlaying
-          inset={inset}
-          dockRef={dockRef}
-          closing={nowExit.closing}
-          onClose={nowExit.close}
-          onExplore={(kind, artist, track) => {
-            armExpandRestore();
-            setExpanded(false);
-            setView("music");
-            requestMusicExplore({
-              kind,
-              track: track ?? display,
-              album: track ? undefined : recording?.album,
-              artist,
-            });
-          }}
-          onAudio={openAudio}
-          onSpeakers={openSpeakers}
-          onSource={changeSource}
-          onQueue={openQueue}
-        />
-      )}
-      <div
-        className="music-dock-seek"
-        data-dragging={dragging || undefined}
+        key="music-dock-bar"
+        ref={dockRef}
+        data-music-dock
+        data-auto-hidden={autoHidden || undefined}
+        data-expanded={expanded || undefined}
+        data-entering={!dockEntered || undefined}
+        onAnimationEnd={(event) => {
+          if (event.target === event.currentTarget && event.animationName === "music-dock-bar-in")
+            setDockEntered(true);
+        }}
+        data-closing={collapseExit.closing || undefined}
+        data-art-colors={artworkColor ? "on" : undefined}
+        onPointerEnter={(event) => {
+          dockPointer.current = { x: event.clientX, y: event.clientY };
+          showAutoHiddenDock();
+        }}
         onPointerMove={(event) => {
-          approachThumb(event, position / duration);
-          const rect = event.currentTarget.getBoundingClientRect();
-          setHoverFrac(
-            rect.width ? Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) : 0,
-          );
+          dockPointer.current = { x: event.clientX, y: event.clientY };
         }}
-        onPointerLeave={(event) => {
-          event.currentTarget.style.removeProperty("--dock-thumb-approach");
-          setHoverFrac(null);
+        onPointerLeave={() => {
+          dockPointer.current = null;
+          scheduleAutoHide();
         }}
-      >
-        <span className="music-dock-seek-track" aria-hidden="true">
-          {hoverFrac !== null && !resolving && (
-            <span className="music-dock-seek-preview" style={{ width: `${hoverFrac * 100}%` }} />
-          )}
-          <span className="music-dock-seek-fill" style={{ width: percent }} />
-          {dockSettings.musicSeekThumb &&
-            (dockSettings.musicSeekThumbHover === false || hoverFrac !== null || dragging) && (
-            <span
-              className="music-dock-seek-thumb"
-              style={{ insetInlineStart: `clamp(12px, ${percent}, calc(100% - 12px))` }}
-            />
-          )}
-        </span>
-        {hoverFrac !== null && !resolving && (
-          <span
-            className="music-dock-seek-tip"
-            aria-hidden="true"
-            style={{ insetInlineStart: `clamp(22px, ${hoverFrac * 100}%, calc(100% - 22px))` }}
-          >
-            {timeLabel(hoverFrac * duration)}
-          </span>
-        )}
-        <input
-          type="range"
-          min={0}
-          max={duration}
-          step={1}
-          value={position}
-          disabled={resolving}
-          aria-label={t("music.position")}
-          aria-valuetext={`${timeLabel(position)} / ${timeLabel(duration)}`}
-          onPointerDown={(event) => {
-            if (event.button !== 0 || resolving) return;
-            draggingRef.current = true;
-            setDragging(true);
-            event.currentTarget.setPointerCapture(event.pointerId);
-          }}
-          onPointerUp={onPointerUp}
-          onPointerCancel={cancelScrub}
-          onLostPointerCapture={() => {
-            if (draggingRef.current) cancelScrub();
-          }}
-          onBlur={(event) => commitScrub(Number(event.currentTarget.value))}
-          onChange={(event) => {
-            const value = Number(event.currentTarget.value);
-            setScrub(value);
-            if (!draggingRef.current) seekMusic(value);
-          }}
-          className="absolute inset-0 h-full w-full cursor-pointer appearance-none bg-transparent opacity-0 disabled:cursor-default"
-        />
-      </div>
+        onFocusCapture={showAutoHiddenDock}
+        onBlurCapture={() => {
+          window.setTimeout(scheduleAutoHide, 0);
+        }}
+        role={expanded ? "dialog" : undefined}
 
-      <div className="grid h-full grid-cols-[1fr_auto_auto] items-center gap-1 px-3 pt-2 pb-2 @[700px]:gap-2 @[700px]:px-5 @[900px]:grid-cols-[1fr_auto_1fr]">
-        <div className="flex items-center gap-2 @[900px]:pe-4">
-          <button
-            type="button"
-            data-music-dock-hide
-            className={`music-dock-hide ${ICON_BUTTON}`}
-            aria-label={t("music.dock.hide")}
-            data-music-tooltip=""
-            onClick={() => {
-              setQueueOpen(false);
+        aria-label={t(expanded ? "music.now.title" : "music.player")}
+        style={
+          {
+            insetInlineStart: inset,
+            insetInlineEnd: 0,
+            height: DOCK_HEIGHT,
+            bottom: "var(--harbor-viewport-bottom, 0px)",
+            ...(artworkColor
+              ? { "--music-art-accent": artworkColor.color, "--music-art-ink": artworkColor.ink }
+              : {}),
+          } as CSSProperties
+        }
+        className="music-dock-auto-hide @container fixed bottom-0 z-[120] border-t border-edge bg-canvas text-ink"
+      >
+        {appearance.gifVisualizer && appearance.gifId
+          ? !expanded && <MusicGifVisualizer track={current} playing={player.phase === "playing"} />
+          : appearance.mikuVisualizer && (
+              <MusicMikuVisualizer
+                track={current}
+                playing={player.phase === "playing"}
+                concealed={expanded}
+              />
+            )}
+        {expanded && (
+          <MusicNowPlaying
+            inset={inset}
+            dockRef={dockRef}
+            closing={nowExit.closing}
+            onClose={nowExit.close}
+            onExplore={(kind, artist, track) => {
+              armExpandRestore();
               setExpanded(false);
-              collapseExit.close();
+              setView("music");
+              requestMusicExplore({
+                kind,
+                track: track ?? display,
+                album: track ? undefined : recording?.album,
+                artist,
+              });
             }}
-          >
-            <MusicGlyph name="collapse" size={19} aria-hidden="true" />
-          </button>
-          <div className="music-dock-track flex min-w-0 flex-1 items-center gap-3 text-start">
+            onAudio={openAudio}
+            onSpeakers={openSpeakers}
+            onSource={changeSource}
+            onQueue={openQueue}
+          />
+        )}
+        <div
+          className="music-dock-seek"
+          data-dragging={dragging || undefined}
+          onPointerMove={(event) => {
+            approachThumb(event, position / duration);
+            const rect = event.currentTarget.getBoundingClientRect();
+            setHoverFrac(
+              rect.width ? Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) : 0,
+            );
+          }}
+          onPointerLeave={(event) => {
+            event.currentTarget.style.removeProperty("--dock-thumb-approach");
+            setHoverFrac(null);
+          }}
+        >
+          <span className="music-dock-seek-track" aria-hidden="true">
+            {hoverFrac !== null && !resolving && (
+              <span className="music-dock-seek-preview" style={{ width: `${hoverFrac * 100}%` }} />
+            )}
+            <span className="music-dock-seek-fill" style={{ width: percent }} />
+            {dockSettings.musicSeekThumb &&
+              (dockSettings.musicSeekThumbHover === false || hoverFrac !== null || dragging) && (
+                <span
+                  className="music-dock-seek-thumb"
+                  style={{ insetInlineStart: `clamp(12px, ${percent}, calc(100% - 12px))` }}
+                />
+              )}
+          </span>
+          {hoverFrac !== null && !resolving && (
+            <span
+              className="music-dock-seek-tip"
+              aria-hidden="true"
+              style={{ insetInlineStart: `clamp(22px, ${hoverFrac * 100}%, calc(100% - 22px))` }}
+            >
+              {timeLabel(hoverFrac * duration)}
+            </span>
+          )}
+          <input
+            type="range"
+            min={0}
+            max={duration}
+            step={1}
+            value={position}
+            disabled={resolving}
+            aria-label={t("music.position")}
+            aria-valuetext={`${timeLabel(position)} / ${timeLabel(duration)}`}
+            onPointerDown={(event) => {
+              if (event.button !== 0 || resolving) return;
+              draggingRef.current = true;
+              setDragging(true);
+              event.currentTarget.setPointerCapture(event.pointerId);
+            }}
+            onPointerUp={onPointerUp}
+            onPointerCancel={cancelScrub}
+            onLostPointerCapture={() => {
+              if (draggingRef.current) cancelScrub();
+            }}
+            onBlur={(event) => commitScrub(Number(event.currentTarget.value))}
+            onChange={(event) => {
+              const value = Number(event.currentTarget.value);
+              setScrub(value);
+              if (!draggingRef.current) seekMusic(value);
+            }}
+            className="absolute inset-0 h-full w-full cursor-pointer appearance-none bg-transparent opacity-0 disabled:cursor-default"
+          />
+        </div>
+
+        <div className="grid h-full grid-cols-[1fr_auto_auto] items-center gap-1 px-3 pt-2 pb-2 @[700px]:gap-2 @[700px]:px-5 @[900px]:grid-cols-[1fr_auto_1fr]">
+          <div className="flex items-center gap-2 @[900px]:pe-4">
             <button
-              data-music-dock-art
-              data-music-tooltip=""
               type="button"
-              aria-expanded={expanded}
-              aria-label={t(expanded ? "music.now.collapse" : "music.now.expand")}
+              data-music-dock-hide
+              className={`music-dock-hide ${ICON_BUTTON}`}
+              aria-label={t("music.dock.hide")}
+              data-music-tooltip=""
               onClick={() => {
                 setQueueOpen(false);
-                setExpanded((open) => !open);
+                setExpanded(false);
+                collapseExit.close();
               }}
-              onContextMenu={artMenu.onContextMenu}
-              className="block size-11 shrink-0 overflow-hidden rounded-md bg-elevated"
             >
-              <Poster
-                src={display.artwork}
-                seed={`track:${current.connectorId ?? ""}:${current.sourceId ?? current.id}`}
-                ratio="square"
-                className="w-full [--poster-radius:0px]"
-              />
+              <MusicGlyph name="collapse" size={19} aria-hidden="true" />
             </button>
-            <div className="flex min-w-0 max-w-[28ch] flex-col">
+            <div className="music-dock-track flex min-w-0 flex-1 items-center gap-3 text-start">
               <button
+                data-music-dock-art
+                data-music-tooltip=""
                 type="button"
+                aria-expanded={expanded}
+                aria-label={t(expanded ? "music.now.collapse" : "music.now.expand")}
                 onClick={() => {
-                  setExpanded(false);
-                  setView("music");
-                  const target = musicTitleTarget(getMusicPlaybackOrigin());
-                  if (target.kind === "playlist")
-                    requestMusicPlaylist(target.playlistId, display.id);
-                  else if (target.kind === "similar")
-                    requestMusicExplore({ kind: "similar", track: display });
-                  else
-                    requestMusicExplore({ kind: "album", track: display, album: recording?.album });
+                  setQueueOpen(false);
+                  setExpanded((open) => !open);
                 }}
-                className="truncate text-start text-[13px] font-semibold text-ink"
-                title={display.title}
+                onContextMenu={artMenu.onContextMenu}
+                className="block size-11 shrink-0 overflow-hidden rounded-md bg-elevated"
               >
-                {display.title}
+                <Poster
+                  src={display.artwork}
+                  seed={`track:${current.connectorId ?? ""}:${current.sourceId ?? current.id}`}
+                  ratio="square"
+                  className="w-full [--poster-radius:0px]"
+                />
               </button>
-              <MusicArtistLink
-                name={
-                  artistCreditParts(current.artist).length > 1 ? current.artist : display.artist
-                }
+              <div className="flex min-w-0 max-w-[28ch] flex-col">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExpanded(false);
+                    setView("music");
+                    const target = musicTitleTarget(getMusicPlaybackOrigin());
+                    if (target.kind === "playlist")
+                      requestMusicPlaylist(target.playlistId, display.id);
+                    else if (target.kind === "similar")
+                      requestMusicExplore({ kind: "similar", track: display });
+                    else
+                      requestMusicExplore({
+                        kind: "album",
+                        track: display,
+                        album: recording?.album,
+                      });
+                  }}
+                  className="truncate text-start text-[13px] font-semibold text-ink"
+                  title={display.title}
+                >
+                  {display.title}
+                </button>
+                <MusicArtistLink
+                  name={
+                    artistCreditParts(current.artist).length > 1 ? current.artist : display.artist
+                  }
+                  track={current}
+                  className="text-[12px] text-ink-subtle"
+                  onArtist={(name) => {
+                    setExpanded(false);
+                    setView("music");
+                    requestMusicExplore({ kind: "artist", track: { ...display, artist: name } });
+                  }}
+                />
+              </div>
+              <MusicLikeButton
+                key={`${current.connectorId}:${current.sourceId ?? current.id}`}
+                dock
+                liked={liked}
+                onToggle={() => toggleMusicLiked()}
+                size={18}
+                className={`${dockParts.like ? "" : "hidden"} ${ICON_BUTTON}`}
+              />
+              <MusicDockVisualizer
                 track={current}
-                className="text-[12px] text-ink-subtle"
-                onArtist={(name) => {
-                  setExpanded(false);
-                  setView("music");
-                  requestMusicExplore({ kind: "artist", track: { ...display, artist: name } });
-                }}
+                enabled={appearance.dockVisualizer}
+                playing={playing}
               />
             </div>
-            <MusicLikeButton
-              key={`${current.connectorId}:${current.sourceId ?? current.id}`}
-              dock
-              liked={liked}
-              onToggle={() => toggleMusicLiked()}
-              size={18}
-              className={`${dockParts.like ? "" : "hidden"} ${ICON_BUTTON}`}
-            />
-            <MusicDockVisualizer
-              track={current}
-              enabled={appearance.dockVisualizer}
-              playing={playing}
-            />
           </div>
-        </div>
 
-        <div className="flex items-center justify-center gap-0.5">
-          <button
-            type="button"
-            onClick={toggleMusicShuffle}
-            aria-pressed={transport.shuffle}
-            data-music-tooltip=""
-            aria-label={t("music.transport.shuffle")}
-            className={`${dockParts.shuffle ? "hidden @[600px]:grid" : "hidden"} ${transport.shuffle ? ICON_BUTTON_ON : ICON_BUTTON}`}
-          >
-            <MusicGlyph name="shuffle" size={18} aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={() => previousMusic()}
-            aria-label={t("music.previous")}
-            className={ICON_BUTTON}
-          >
-            <MusicGlyph name="previous" size={18} aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={toggleMusicPlayback}
-            disabled={resolving}
-            aria-label={playing ? t("music.pause") : t("music.play")}
-            className="music-dock-play grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink text-canvas transition-opacity duration-200 ease-out disabled:opacity-55"
-          >
-            {resolving ? (
-              <MusicGlyph name="loading" size={20} className="animate-spin" aria-hidden="true" />
-            ) : playing ? (
-              <MusicGlyph name="pause" size={20} aria-hidden="true" />
-            ) : (
-              <MusicGlyph name="play" size={20} aria-hidden="true" />
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={() => nextMusic()}
-            aria-label={t("music.next")}
-            className={ICON_BUTTON}
-          >
-            <MusicGlyph name="next" size={18} aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={cycleMusicRepeat}
-            aria-pressed={transport.repeat !== "off"}
-            aria-label={repeatLabel}
-            data-music-tooltip=""
-            className={`${dockParts.repeat ? "hidden @[600px]:grid" : "hidden"} ${transport.repeat === "off" ? ICON_BUTTON : ICON_BUTTON_ON}`}
-          >
-            {transport.repeat === "one" ? (
-              <MusicGlyph name="repeat-one" size={18} aria-hidden="true" />
-            ) : (
-              <MusicGlyph name="repeat" size={18} aria-hidden="true" />
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={openQueue}
-            aria-expanded={queueOpen}
-            aria-label={t("music.transport.openQueue")}
-            data-music-tooltip=""
-            className={`${speaker.active ? "hidden @[700px]:grid" : ""} @[1050px]:hidden ${queueOpen ? ICON_BUTTON_ON : ICON_BUTTON}`}
-          >
-            <MusicGlyph name="queue" size={18} aria-hidden="true" />
-          </button>
-          {speaker.active && speaker.device && (
+          <div className="flex items-center justify-center gap-0.5">
             <button
               type="button"
-              onClick={openSpeakers}
-              aria-label={`${t("music.cast.title")} · ${speaker.device.name}`}
+              onClick={toggleMusicShuffle}
+              aria-pressed={transport.shuffle}
               data-music-tooltip=""
-              className={`@[700px]:hidden ${ICON_BUTTON_ON}`}
+              aria-label={t("music.transport.shuffle")}
+              className={`${dockParts.shuffle ? "hidden @[600px]:grid" : "hidden"} ${transport.shuffle ? ICON_BUTTON_ON : ICON_BUTTON}`}
             >
-              <span className="music-dock-device size-8">
-                <CastIcon device={speaker.device} size={32} />
-              </span>
+              <MusicGlyph name="shuffle" size={18} aria-hidden="true" />
             </button>
-          )}
-        </div>
-
-        <div className="flex items-center justify-end gap-1">
-        <div className="hidden items-center justify-end gap-1 @[700px]:flex">
-          {dockParts.quality && !isMusicVideoActive() && (
-            <span className="hidden shrink-0 @[1320px]:inline-flex">
-              <MusicQualityBadge track={current} />
-            </span>
-          )}
-          {dockParts.source && (
             <button
-              ref={sourceButton}
-              data-dock-wide="1"
               type="button"
-              onClick={changeSource}
-              aria-haspopup="dialog"
-              aria-expanded={sourceOpen}
-              aria-label={t("music.source.another")}
-              data-music-tooltip=""
+              onClick={() => previousMusic()}
+              aria-label={t("music.previous")}
               className={ICON_BUTTON}
             >
-              <MusicServiceLogo source={current.connectorId ?? ""} itemId={current.id} size={20} />
+              <MusicGlyph name="previous" size={18} aria-hidden="true" />
             </button>
-          )}
-          {dockParts.time && (
-            <span
-              style={MUSIC_TIME_FONT}
-              className="hidden shrink-0 ps-1 pe-1 text-[15px] font-semibold tabular-nums text-ink @[820px]:block"
-            >
-              {timeLabel(position)}
-              <span className="mx-1 text-ink-subtle">/</span>
-              <span className="text-ink-subtle">{timeLabel(duration)}</span>
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={openQueue}
-            aria-expanded={queueOpen}
-            aria-label={t("music.transport.openQueue")}
-            data-music-tooltip=""
-            className={`${dockParts.queue ? "hidden @[1050px]:grid" : "hidden"} ${queueOpen ? ICON_BUTTON_ON : ICON_BUTTON}`}
-          >
-            <MusicGlyph name="queue" size={18} aria-hidden="true" />
-          </button>
-          <span className="music-dock-vol-wrap">
-          <button
-            type="button"
-            onClick={() => setMusicVolume(player.volume > 0 ? 0 : audibleVolume.current)}
-            disabled={speaker.active}
-            aria-label={t(player.volume > 0 ? "music.mute" : "music.unmute")}
-            aria-pressed={player.volume === 0}
-            className={ICON_BUTTON}
-          >
-            {player.volume === 0 ? (
-              <MusicGlyph name="volume-mute" size={18} aria-hidden="true" />
-            ) : (
-              <MusicGlyph name="volume-high" size={18} aria-hidden="true" />
-            )}
-          </button>
-          <span className="music-dock-vol-pop">
-          <span
-            ref={attachVolumeWheel}
-            className={`music-dock-volume h-11 w-20 shrink-0 items-center ${dockParts.volume ? "flex" : "hidden"}`}
-            data-rescale={ceilingShift || undefined}
-            data-music-tooltip={`${t("music.volume")} · ${Math.round(player.volume * 100)}%`}
-            onPointerMove={(event) =>
-              approachThumb(event, player.volume / volumeCeiling)
-            }
-            onPointerLeave={(event) =>
-              event.currentTarget.style.removeProperty("--dock-thumb-approach")
-            }
-          >
-            <span className="music-dock-vol-rail" aria-hidden="true">
-              <span
-                className="music-dock-vol-fill"
-                style={{
-                  width: `calc(${Math.max(
-                    0,
-                    Math.min(1, player.volume / volumeCeiling),
-                  )} * (100% - 12px) + 12px)`,
-                }}
-              />
-            </span>
-            <Slider
-              value={player.volume}
-              min={0}
-              max={volumeCeiling}
-              step={0.02}
-              onChange={setMusicVolume}
-              disabled={speaker.active}
-              ariaLabel={t("music.volume")}
-              className="block w-full"
-            />
-          </span>
-          </span>
-          </span>
-          {(dockParts.cast || speaker.active) && (
             <button
               type="button"
-              data-dock-wide="1"
-              onClick={openSpeakers}
-              aria-label={
-                speaker.active && speaker.device
-                  ? `${t("music.cast.title")} · ${speaker.device.name}`
-                  : t("music.cast.title")
-              }
-              data-music-tooltip=""
-              className={speaker.active ? ICON_BUTTON_ON : ICON_BUTTON}
+              onClick={toggleMusicPlayback}
+              disabled={resolving}
+              aria-label={playing ? t("music.pause") : t("music.play")}
+              className="music-dock-play grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink text-canvas transition-opacity duration-200 ease-out disabled:opacity-55"
             >
-              {speaker.active && speaker.device ? (
+              {resolving ? (
+                <MusicGlyph name="loading" size={20} className="animate-spin" aria-hidden="true" />
+              ) : playing ? (
+                <MusicGlyph name="pause" size={20} aria-hidden="true" />
+              ) : (
+                <MusicGlyph name="play" size={20} aria-hidden="true" />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => nextMusic()}
+              aria-label={t("music.next")}
+              className={ICON_BUTTON}
+            >
+              <MusicGlyph name="next" size={18} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={cycleMusicRepeat}
+              aria-pressed={transport.repeat !== "off"}
+              aria-label={repeatLabel}
+              data-music-tooltip=""
+              className={`${dockParts.repeat ? "hidden @[600px]:grid" : "hidden"} ${transport.repeat === "off" ? ICON_BUTTON : ICON_BUTTON_ON}`}
+            >
+              {transport.repeat === "one" ? (
+                <MusicGlyph name="repeat-one" size={18} aria-hidden="true" />
+              ) : (
+                <MusicGlyph name="repeat" size={18} aria-hidden="true" />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={openQueue}
+              aria-expanded={queueOpen}
+              aria-label={t("music.transport.openQueue")}
+              data-music-tooltip=""
+              className={`${speaker.active ? "hidden @[700px]:grid" : ""} @[1050px]:hidden ${queueOpen ? ICON_BUTTON_ON : ICON_BUTTON}`}
+            >
+              <MusicGlyph name="queue" size={18} aria-hidden="true" />
+            </button>
+            {speaker.active && speaker.device && (
+              <button
+                type="button"
+                onClick={openSpeakers}
+                aria-label={`${t("music.cast.title")} · ${speaker.device.name}`}
+                data-music-tooltip=""
+                className={`@[700px]:hidden ${ICON_BUTTON_ON}`}
+              >
                 <span className="music-dock-device size-8">
                   <CastIcon device={speaker.device} size={32} />
                 </span>
-              ) : (
-                <MusicGlyph name="speaker" size={18} aria-hidden="true" />
-              )}
-            </button>
-          )}
-          {dockParts.audio && (
-            <button
-              type="button"
-              data-dock-wide="1"
-              onClick={openAudio}
-              aria-label={t("music.audio.title")}
-              data-music-tooltip=""
-              className={ICON_BUTTON}
-            >
-              <MusicGlyph name="audio-settings" size={18} aria-hidden="true" />
-            </button>
-          )}
-        </div>
-        {current && (
-          <MusicDockOverflow
-            actions={overflowActions()}
-            title={display?.title ?? current.title}
-            className={`@[1150px]:hidden ${ICON_BUTTON}`}
-          />
-        )}
-        <button
-          type="button"
-          data-music-dock-close
-          disabled={closing}
-          aria-label={t("music.player.close")}
-          data-music-tooltip=""
-          className={ICON_BUTTON}
-          onClick={() => {
-            setClosing(true);
-            void closeMusicPlayer()
-              .then(() => {
-                setSourceOpen(false);
-                setQueueOpen(false);
-                setExpanded(false);
-              })
-              .catch(() => {})
-              .finally(() => setClosing(false));
-          }}
-        >
-          <MusicGlyph name="close" size={18} aria-hidden="true" />
-        </button>
-        </div>
-      </div>
+              </button>
+            )}
+          </div>
 
-      {player.error && (
-        <div
-          role="alert"
-          style={{ insetInlineStart: 16 }}
-          className="music-dock-alert absolute bottom-full mb-2 flex w-[min(560px,92vw)] flex-col gap-2.5 rounded-lg bg-elevated px-4 py-3 text-[13px]"
-        >
-          <div className="flex min-w-0 items-start gap-2.5">
-            {!player.error.startsWith("music.cast.") && current?.connectorId && (
-              <MusicServiceLogo
-                source={current.connectorId}
-                size={18}
-                className="mt-[1px] shrink-0"
+          <div className="flex items-center justify-end gap-1">
+            <div className="hidden items-center justify-end gap-1 @[700px]:flex">
+              {dockParts.quality && !isMusicVideoActive() && (
+                <span className="hidden shrink-0 @[1320px]:inline-flex">
+                  <MusicQualityBadge track={current} />
+                </span>
+              )}
+              {dockParts.source && (
+                <button
+                  ref={sourceButton}
+                  data-dock-wide="1"
+                  type="button"
+                  onClick={changeSource}
+                  aria-haspopup="dialog"
+                  aria-expanded={sourceOpen}
+                  aria-label={t("music.source.another")}
+                  data-music-tooltip=""
+                  className={ICON_BUTTON}
+                >
+                  <MusicServiceLogo
+                    source={current.connectorId ?? ""}
+                    itemId={current.id}
+                    size={20}
+                  />
+                </button>
+              )}
+              {dockParts.time && (
+                <span
+                  style={MUSIC_TIME_FONT}
+                  className="hidden shrink-0 ps-1 pe-1 text-[15px] font-semibold tabular-nums text-ink @[820px]:block"
+                >
+                  {timeLabel(position)}
+                  <span className="mx-1 text-ink-subtle">/</span>
+                  <span className="text-ink-subtle">{timeLabel(duration)}</span>
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={openQueue}
+                aria-expanded={queueOpen}
+                aria-label={t("music.transport.openQueue")}
+                data-music-tooltip=""
+                className={`${dockParts.queue ? "hidden @[1050px]:grid" : "hidden"} ${queueOpen ? ICON_BUTTON_ON : ICON_BUTTON}`}
+              >
+                <MusicGlyph name="queue" size={18} aria-hidden="true" />
+              </button>
+              <span className="music-dock-vol-wrap">
+                <button
+                  type="button"
+                  onClick={() => setMusicVolume(player.volume > 0 ? 0 : audibleVolume.current)}
+                  disabled={speaker.active}
+                  aria-label={t(player.volume > 0 ? "music.mute" : "music.unmute")}
+                  aria-pressed={player.volume === 0}
+                  className={ICON_BUTTON}
+                >
+                  {player.volume === 0 ? (
+                    <MusicGlyph name="volume-mute" size={18} aria-hidden="true" />
+                  ) : (
+                    <MusicGlyph name="volume-high" size={18} aria-hidden="true" />
+                  )}
+                </button>
+                <span className="music-dock-vol-pop">
+                  <span
+                    ref={attachVolumeWheel}
+                    className={`music-dock-volume h-11 w-20 shrink-0 items-center ${dockParts.volume ? "flex" : "hidden"}`}
+                    data-rescale={ceilingShift || undefined}
+                    data-music-tooltip={`${t("music.volume")} · ${Math.round(player.volume * 100)}%`}
+                    onPointerMove={(event) => approachThumb(event, player.volume / volumeCeiling)}
+                    onPointerLeave={(event) =>
+                      event.currentTarget.style.removeProperty("--dock-thumb-approach")
+                    }
+                  >
+                    <span className="music-dock-vol-rail" aria-hidden="true">
+                      <span
+                        className="music-dock-vol-fill"
+                        style={{
+                          width: `calc(${Math.max(
+                            0,
+                            Math.min(1, player.volume / volumeCeiling),
+                          )} * (100% - 12px) + 12px)`,
+                        }}
+                      />
+                    </span>
+                    <Slider
+                      value={player.volume}
+                      min={0}
+                      max={volumeCeiling}
+                      step={0.02}
+                      onChange={setMusicVolume}
+                      disabled={speaker.active}
+                      ariaLabel={t("music.volume")}
+                      className="block w-full"
+                    />
+                  </span>
+                </span>
+              </span>
+              {(dockParts.cast || speaker.active) && (
+                <button
+                  type="button"
+                  data-dock-wide="1"
+                  onClick={openSpeakers}
+                  aria-label={
+                    speaker.active && speaker.device
+                      ? `${t("music.cast.title")} · ${speaker.device.name}`
+                      : t("music.cast.title")
+                  }
+                  data-music-tooltip=""
+                  className={speaker.active ? ICON_BUTTON_ON : ICON_BUTTON}
+                >
+                  {speaker.active && speaker.device ? (
+                    <span className="music-dock-device size-8">
+                      <CastIcon device={speaker.device} size={32} />
+                    </span>
+                  ) : (
+                    <MusicGlyph name="speaker" size={18} aria-hidden="true" />
+                  )}
+                </button>
+              )}
+              {dockParts.audio && (
+                <button
+                  type="button"
+                  data-dock-wide="1"
+                  onClick={openAudio}
+                  aria-label={t("music.audio.title")}
+                  data-music-tooltip=""
+                  className={ICON_BUTTON}
+                >
+                  <MusicGlyph name="audio-settings" size={18} aria-hidden="true" />
+                </button>
+              )}
+            </div>
+            {current && (
+              <MusicDockOverflow
+                actions={overflowActions()}
+                title={display?.title ?? current.title}
+                className={`@[1150px]:hidden ${ICON_BUTTON}`}
               />
             )}
-            <span className="min-w-0 flex-1 leading-snug text-ink">
-              {player.error.startsWith("music.cast.")
-                ? t(player.error)
-                : t("music.recovery.failed", { source: musicSourceName(current) })}
-            </span>
             <button
               type="button"
-              onClick={clearMusicError}
-              aria-label={t("music.error.dismiss")}
-              className="-me-1 -mt-1 grid size-8 shrink-0 place-items-center rounded-full text-ink-subtle transition-colors duration-200 ease-out hover:bg-raised hover:text-ink"
+              data-music-dock-close
+              disabled={closing}
+              aria-label={t("music.player.close")}
+              data-music-tooltip=""
+              className={ICON_BUTTON}
+              onClick={() => {
+                setClosing(true);
+                void closeMusicPlayer()
+                  .then(() => {
+                    setSourceOpen(false);
+                    setQueueOpen(false);
+                    setExpanded(false);
+                  })
+                  .catch(() => {})
+                  .finally(() => setClosing(false));
+              }}
             >
-              <MusicGlyph name="close" size={15} aria-hidden="true" />
+              <MusicGlyph name="close" size={18} aria-hidden="true" />
             </button>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-          {player.error.startsWith("music.cast.") && (
-            <button
-              type="button"
-              onClick={openSpeakers}
-              className="rounded-md bg-raised px-3 py-2 font-semibold text-ink"
-            >
-              {t("music.cast.title")}
-            </button>
-          )}
-          {skipIn !== null && (
-            <>
-              <span className="me-auto text-ink-muted">
-                {t("music.recovery.skipping", { seconds: skipIn })}
+        </div>
+
+        {player.error && (
+          <div
+            role="alert"
+            style={{ insetInlineStart: 16 }}
+            className="music-dock-alert absolute bottom-full mb-2 flex w-[min(560px,92vw)] flex-col gap-2.5 rounded-lg bg-elevated px-4 py-3 text-[13px]"
+          >
+            <div className="flex min-w-0 items-start gap-2.5">
+              {!player.error.startsWith("music.cast.") && current?.connectorId && (
+                <MusicServiceLogo
+                  source={current.connectorId}
+                  size={18}
+                  className="mt-[1px] shrink-0"
+                />
+              )}
+              <span className="min-w-0 flex-1 leading-snug text-ink">
+                {player.error.startsWith("music.cast.")
+                  ? t(player.error)
+                  : t("music.recovery.failed", { source: musicSourceName(current) })}
               </span>
               <button
                 type="button"
-                onClick={() => setStayed(stuckKey)}
+                onClick={clearMusicError}
+                aria-label={t("music.error.dismiss")}
+                className="-me-1 -mt-1 grid size-8 shrink-0 place-items-center rounded-full text-ink-subtle transition-colors duration-200 ease-out hover:bg-raised hover:text-ink"
+              >
+                <MusicGlyph name="close" size={15} aria-hidden="true" />
+              </button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {player.error.startsWith("music.cast.") && (
+                <button
+                  type="button"
+                  onClick={openSpeakers}
+                  className="rounded-md bg-raised px-3 py-2 font-semibold text-ink"
+                >
+                  {t("music.cast.title")}
+                </button>
+              )}
+              {skipIn !== null && (
+                <>
+                  <span className="me-auto text-ink-muted">
+                    {t("music.recovery.skipping", { seconds: skipIn })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setStayed(stuckKey)}
+                    className="rounded-md bg-raised px-3 py-2 font-semibold text-ink"
+                  >
+                    {t("music.recovery.stay")}
+                  </button>
+                </>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setStayed(stuckKey);
+                  void playMusic(current, player.queue).catch(() => {});
+                }}
                 className="rounded-md bg-raised px-3 py-2 font-semibold text-ink"
               >
-                {t("music.recovery.stay")}
+                {t("common.retry")}
               </button>
-            </>
-          )}
-          <button
-            type="button"
-            onClick={() => {
-              setStayed(stuckKey);
-              void playMusic(current, player.queue).catch(() => {});
-            }}
-            className="rounded-md bg-raised px-3 py-2 font-semibold text-ink"
-          >
-            {t("common.retry")}
-          </button>
-          <button
-            type="button"
-            onClick={changeSource}
-            className="rounded-md bg-ink px-3 py-2 font-semibold text-canvas"
-          >
-            {t("music.source.another")}
-          </button>
+              <button
+                type="button"
+                onClick={changeSource}
+                className="rounded-md bg-ink px-3 py-2 font-semibold text-canvas"
+              >
+                {t("music.source.another")}
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {artMenu.menu}
-      <MusicDockTooltip dockRef={dockRef} />
-      <MusicQueue
-        open={queueOpen}
-        onClose={() => setQueueOpen(false)}
-        onArtist={(track) => {
-          setExpanded(false);
-          setView("music");
-          requestMusicExplore({ kind: "artist", track });
-        }}
-      />
-      {sourceOpen && (
-        <MusicSourcePicker
-          anchor={sourceButton}
-          key={`${current.connectorId}:${current.id}`}
-          request={{
-            track: current,
-            queue: player.queue,
-            forceChoice: true,
-            failure: player.error ?? undefined,
-            failedTrack: current,
-          }}
-          onClose={closeSource}
-          onStarting={closeSource}
-          onConnect={() => {
+        {artMenu.menu}
+        <MusicDockTooltip dockRef={dockRef} />
+        <MusicQueue
+          open={queueOpen}
+          onClose={() => setQueueOpen(false)}
+          onArtist={(track) => {
             setExpanded(false);
             setView("music");
-            requestMusicConnection("spotify");
+            requestMusicExplore({ kind: "artist", track });
           }}
         />
-      )}
+        {sourceOpen && (
+          <MusicSourcePicker
+            anchor={sourceButton}
+            key={`${current.connectorId}:${current.id}`}
+            request={{
+              track: current,
+              queue: player.queue,
+              forceChoice: true,
+              failure: player.error ?? undefined,
+              failedTrack: current,
+            }}
+            onClose={closeSource}
+            onStarting={closeSource}
+            onConnect={() => {
+              setExpanded(false);
+              setView("music");
+              requestMusicConnection("spotify");
+            }}
+          />
+        )}
       </aside>
     </>
   );

@@ -27,9 +27,7 @@ function validAttribution(source: unknown, value: unknown): boolean {
       return (
         url.hostname === "commons.wikimedia.org" && /^\/wiki\/File(?::|%3A)/i.test(url.pathname)
       );
-    return (
-      source === "ESPN" && ["www.espn.com", "site.web.api.espn.com"].includes(url.hostname)
-    );
+    return source === "ESPN" && ["www.espn.com", "site.web.api.espn.com"].includes(url.hostname);
   } catch {
     return false;
   }
@@ -106,9 +104,7 @@ export function publishedPortraitUrl(value: unknown): string {
       return url.href;
     if (
       ["r2.thesportsdb.com", "www.thesportsdb.com"].includes(url.hostname) &&
-      /^\/images\/media\/player\/(?:thumb|cutout)\/[^/]+\.(?:png|jpe?g|webp)$/i.test(
-        url.pathname,
-      )
+      /^\/images\/media\/player\/(?:thumb|cutout)\/[^/]+\.(?:png|jpe?g|webp)$/i.test(url.pathname)
     )
       return url.href;
     if (
@@ -201,8 +197,7 @@ const SPORT_WORDS: Record<string, RegExp> = {
     /\b(?:skiers?|skiing|snowboarders?|skaters?|curlers?|bobsledders?|lugers?|biathletes?|biathlon)\b/i,
   Motorsport: /\b(?:racing drivers?|drivers?|riders?|motorcycle racers?)\b/i,
   Boxing: /\bboxers?\b/i,
-  Fighting:
-    /\b(?:mixed martial artists?|fighters?|wrestlers?|judokas?|karatekas?|taekwondo)\b/i,
+  Fighting: /\b(?:mixed martial artists?|fighters?|wrestlers?|judokas?|karatekas?|taekwondo)\b/i,
   Snooker: /\bsnooker\b/i,
   Darts: /\bdarts\b/i,
   Badminton: /\bbadminton\b/i,
@@ -305,8 +300,7 @@ export function createAthletePortraitResolver(options: {
         if (
           typeof entry.at !== "number" ||
           (value &&
-            (!publishedPortraitUrl(value.url) ||
-              !validAttribution(value.source, value.sourceUrl)))
+            (!publishedPortraitUrl(value.url) || !validAttribution(value.source, value.sourceUrl)))
         )
           continue;
         const hit = { at: entry.at, value, sourcesVersion: entry.sourcesVersion } as Cached;
@@ -411,9 +405,7 @@ export function createAthletePortraitResolver(options: {
     }
     controller.signal.throwIfAborted();
     const sport = SPORT_WORDS[portraitSport(request)];
-    return sport
-      ? commonsAthletePortrait(request, sport, (url) => read(url, controller))
-      : null;
+    return sport ? commonsAthletePortrait(request, sport, (url) => read(url, controller)) : null;
   };
   const pump = () => {
     while (active < concurrency && queue.length) {
@@ -548,8 +540,7 @@ export function athletePortraits() {
         typeof window === "undefined"
           ? undefined
           : {
-              getItem: async (key) =>
-                (await import("./artwork-storage")).readArtworkMetadata(key),
+              getItem: async (key) => (await import("./artwork-storage")).readArtworkMetadata(key),
               setItem: async (key, value) =>
                 (await import("./artwork-storage")).writeArtworkMetadata(key, value),
             },

@@ -169,9 +169,11 @@ const misc: Record<string, string> = {
   "Reveal comments": "Показать комментарии",
   "Comments are hidden": "Комментарии скрыты",
   "Hosted elsewhere": "Хостинг со стороны",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "Эти тарифы ведёт сторонняя компания. Harbor не связан с ней и ничего не получает за подписку. Актуальные цены и условия — на их сайте.",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "Эти тарифы ведёт сторонняя компания. Harbor не связан с ней и ничего не получает за подписку. Актуальные цены и условия — на их сайте.",
   "{name} can run on a hosted instance": "{name} может работать на хостинге",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "Этим управляет сторонняя компания. Harbor не связан с ней, не перепродаёт её и ничего не получает. Цены и состав указаны на их сайте.",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "Этим управляет сторонняя компания. Harbor не связан с ней, не перепродаёт её и ничего не получает. Цены и состав указаны на их сайте.",
   "Show comments": "Показать комментарии",
   "Hide comments": "Скрыть комментарии",
   "You haven't commented yet": "Вы ещё не оставили комментарий",

@@ -22,7 +22,8 @@ export default {
   "games.eve.avoiding": "Kaçınılanlar",
   "games.eve.allow": "{name} sistemine izin ver",
   "games.eve.clear": "Tümünü temizle",
-  "games.eve.stargates": "Yalnızca yıldız geçidi rotaları. Solucan delikleri ve atlama köprüleri dahil değildir.",
+  "games.eve.stargates":
+    "Yalnızca yıldız geçidi rotaları. Solucan delikleri ve atlama köprüleri dahil değildir.",
   "games.eve.saveFailed": "Bu rota bu cihazda kaydedilemedi.",
   "games.eve.routeFailed": "Rota yüklenemedi. Tekrar dene.",
   "games.eve.ready": "Hedefini seç, ardından rota oluştur.",
@@ -46,7 +47,8 @@ export default {
   "games.eve.avoid": "{name} sisteminden kaçın",
   "games.eve.less": "Daha az durak göster",
   "games.eve.allStops": "Tüm durakları göster",
-  "games.eve.activityNote": "Bildirilen etkinlik geçmişe aittir ve solucan deliği uzayını kapsamaz. Güvenlik tercihi, güvenli bir rotayı garanti etmez.",
+  "games.eve.activityNote":
+    "Bildirilen etkinlik geçmişe aittir ve solucan deliği uzayını kapsamaz. Güvenlik tercihi, güvenli bir rotayı garanti etmez.",
   "games.eve.noRoute": "Yıldız geçidi rotası bulunamadı.",
   "games.eve.incursions": "İstilalar",
   "games.eve.refreshIncursions": "İstilaları yenile",
@@ -60,5 +62,5 @@ export default {
   "games.eve.influence": "Etki",
   "games.eve.systems": "Sistem · {count}",
   "games.eve.boss": "Boss mevcut",
-  "games.eve.routeThere": "Buraya rota oluştur"
+  "games.eve.routeThere": "Buraya rota oluştur",
 };

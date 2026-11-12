@@ -6,7 +6,7 @@ import { useT } from "@/lib/i18n";
 import { ROW_TITLE } from "../shared";
 
 import { useSettings } from "@/lib/settings";
-import { getSecondaryPrivileges } from "@/lib/settings/defaults";
+import { getSecondaryPrivileges } from "@/lib/profiles/privileges";
 import { isStremioActivePrimary, activeProfileIsPrimary } from "@/lib/active-profile-id";
 
 const QUAL =

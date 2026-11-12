@@ -18,7 +18,8 @@ export default {
   "games.dota.attribute.agi": "Zręczność",
   "games.dota.attribute.int": "Inteligencja",
   "games.dota.attribute.all": "Uniwersalny",
-  "games.dota.trendsScope": "Próba OpenDota: siedem dni UTC, w tym dzisiaj. Ranga to średnia meczu; Turbo i mecze profesjonalne są osobno.",
+  "games.dota.trendsScope":
+    "Próba OpenDota: siedem dni UTC, w tym dzisiaj. Ranga to średnia meczu; Turbo i mecze profesjonalne są osobno.",
   "games.dota.wins": "zwycięstw",
   "games.dota.picks": "{count} wyborów",
   "games.dota.noSample": "Brak próby",
@@ -26,7 +27,8 @@ export default {
   "games.dota.moreHeroes": "Więcej bohaterów",
   "games.dota.matchups": "Starcia profesjonalne",
   "games.dota.refreshMatchups": "Odśwież starcia",
-  "games.dota.matchupsScope": "Zwycięstwa bohatera {hero} z każdym rywalem w zarejestrowanych meczach profesjonalnych z ostatniego roku. Obejmuje starsze aktualizacje; niezależne od filtra rangi.",
+  "games.dota.matchupsScope":
+    "Zwycięstwa bohatera {hero} z każdym rywalem w zarejestrowanych meczach profesjonalnych z ostatniego roku. Obejmuje starsze aktualizacje; niezależne od filtra rangi.",
   "games.dota.opponent": "Znajdź przeciwnika",
   "games.dota.minimum": "Minimum meczów",
   "games.dota.minGames": "{count}+ meczów",
@@ -48,5 +50,5 @@ export default {
   "games.dota.sample.5": "Legenda",
   "games.dota.sample.6": "Pradawny",
   "games.dota.sample.7": "Boski",
-  "games.dota.sample.8": "Nieśmiertelny"
+  "games.dota.sample.8": "Nieśmiertelny",
 };

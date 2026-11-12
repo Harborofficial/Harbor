@@ -29,7 +29,9 @@ export function AnimePanel() {
     return (
       <Section
         title={t("Desktop only")}
-        subtitle={t("Smooth motion runs on the bundled mpv engine in the Harbor desktop app. It has no effect in the browser.")}
+        subtitle={t(
+          "Smooth motion runs on the bundled mpv engine in the Harbor desktop app. It has no effect in the browser.",
+        )}
       >
         <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
           <Info size={18} className="mt-[2px] shrink-0 text-ink-subtle" />
@@ -47,23 +49,25 @@ export function AnimePanel() {
     <div key={tab} className="harbor-cascade flex flex-col gap-10">
       {tab === "smooth" && (
         <>
-      <Section
-        title={t("Smooth motion")}
-      >
-        <ToggleRow
-          label={t("Motion smoothing")}
-          sub={t("Smooths camera movement using Harbor's player. Works best when your screen refreshes faster than the video's frame rate.")}
-          value={settings.playerMotionInterp}
-          onChange={(v) => update({ playerMotionInterp: v })}
-          lockReason={
-            svpDriving
-              ? t("SVP is handling motion smoothing. Turn it off on the SVP page to use Harbor's smoothing instead.")
-              : undefined
-          }
-        />
+          <Section title={t("Smooth motion")}>
+            <ToggleRow
+              label={t("Motion smoothing")}
+              sub={t(
+                "Smooths camera movement using Harbor's player. Works best when your screen refreshes faster than the video's frame rate.",
+              )}
+              value={settings.playerMotionInterp}
+              onChange={(v) => update({ playerMotionInterp: v })}
+              lockReason={
+                svpDriving
+                  ? t(
+                      "SVP is handling motion smoothing. Turn it off on the SVP page to use Harbor's smoothing instead.",
+                    )
+                  : undefined
+              }
+            />
 
-        <MotionCompare />
-      </Section>
+            <MotionCompare />
+          </Section>
         </>
       )}
       {tab === "svp" && <SvpSection />}

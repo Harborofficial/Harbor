@@ -228,7 +228,9 @@ function DrawPanel({ tournament }: { tournament: TennisTournament }) {
                 key={`${w.name}-${i}`}
                 className="flex items-center gap-2 rounded-full bg-elevated px-3 py-1.5 text-[12.5px] text-ink"
               >
-                {w.image && <img src={w.image} alt="" className="h-6 w-6 rounded-full object-cover" />}
+                {w.image && (
+                  <img src={w.image} alt="" className="h-6 w-6 rounded-full object-cover" />
+                )}
                 {w.name}
                 {w.draw && <span className="text-ink-subtle">{w.draw}</span>}
               </span>

@@ -178,8 +178,7 @@ async function fetchPerson(key: string, personId: number): Promise<PersonDetail 
   let name = localized;
   const rawCast: any[] = raw.combined_credits?.cast ?? [];
   const rawCrew: any[] = raw.combined_credits?.crew ?? [];
-  const needsEnglishName =
-    !!langBase && langBase !== "en" && !!original && localized === original;
+  const needsEnglishName = !!langBase && langBase !== "en" && !!original && localized === original;
   const needsEnglishCredits =
     settings.translateTitles &&
     [...rawCast, ...rawCrew].some((credit) =>

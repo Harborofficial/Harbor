@@ -250,20 +250,25 @@ export function SourceMagnetDebrid({
                 name: link.title,
                 game: link.game,
                 expectedBytes: results[0].expectedBytes ?? undefined,
-                torboxOrigin: chosen==="tb" ? {torrentId:job.id,fileId:chosenFiles[0].id} : undefined,
+                torboxOrigin:
+                  chosen === "tb" ? { torrentId: job.id, fileId: chosenFiles[0].id } : undefined,
               },
               results[0].name,
             )
           : await downloads.startBatch(
-              results.map((file,index) => ({
+              results.map((file, index) => ({
                 url: file.url,
                 filename: file.name,
                 name: file.name,
                 game: link.game,
                 expectedBytes: file.expectedBytes ?? undefined,
-                torboxOrigin: chosen==="tb" ? {
-                  torrentId:job.id,fileId:chosenFiles[index].id,
-                } : undefined,
+                torboxOrigin:
+                  chosen === "tb"
+                    ? {
+                        torrentId: job.id,
+                        fileId: chosenFiles[index].id,
+                      }
+                    : undefined,
               })),
             );
       if (started && alive.current && revision === generation.current) onDone();

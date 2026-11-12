@@ -35,7 +35,9 @@ export function createListenMixFollower(io: ListenMixIo): ListenMixFollower {
       if (!mix || saved === null) return chain;
       if (listenMixMatches(io.read(), mix)) return chain;
       touched = true;
-      return queue(() => (listenMixMatches(io.read(), mix) ? null : writeListenMix(io.read(), mix)));
+      return queue(() =>
+        listenMixMatches(io.read(), mix) ? null : writeListenMix(io.read(), mix),
+      );
     },
     end() {
       const restore = saved;

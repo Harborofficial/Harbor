@@ -2,12 +2,14 @@ export default {
   "games.minecraft.discovery.viewAll": "Lihat semua",
   "games.minecraft.discovery.searchCurseForge": "Cari di CurseForge",
   "games.minecraft.discovery.downloads": "Unduhan",
-  "games.minecraft.discovery.curseForgeBlocked": "CurseForge belum mengizinkan Harbor memuat katalog ini. Coba lagi atau buka sumbernya.",
+  "games.minecraft.discovery.curseForgeBlocked":
+    "CurseForge belum mengizinkan Harbor memuat katalog ini. Coba lagi atau buka sumbernya.",
   "games.minecraft.discovery.unavailable": "Direktori ini gagal dimuat. Coba lagi.",
   "games.minecraft.discovery.openSource": "Buka situs sumber",
   "games.minecraft.discovery.loadMore": "Muat lagi",
   "games.minecraft.discovery.servers": "Server",
-  "games.minecraft.discovery.serverNote": "Direktori independen. Harbor tidak berafiliasi dengan situs atau server ini. Angka dilaporkan oleh masing-masing direktori.",
+  "games.minecraft.discovery.serverNote":
+    "Direktori independen. Harbor tidak berafiliasi dengan situs atau server ini. Angka dilaporkan oleh masing-masing direktori.",
   "games.minecraft.discovery.searchServers": "Cari server yang dimuat",
   "games.minecraft.discovery.directory": "Direktori",
   "games.minecraft.discovery.mode": "Mode permainan",
@@ -15,7 +17,8 @@ export default {
   "games.minecraft.discovery.directoryRank": "Peringkat direktori",
   "games.minecraft.discovery.playersLoaded": "Pemain · server yang dimuat",
   "games.minecraft.discovery.loaded": "{count} server dimuat",
-  "games.minecraft.discovery.noLoadedMatches": "Tidak ada hasil pada server yang dimuat. Muat lagi atau ubah pencarian.",
+  "games.minecraft.discovery.noLoadedMatches":
+    "Tidak ada hasil pada server yang dimuat. Muat lagi atau ubah pencarian.",
   "games.minecraft.discovery.copy": "Salin {address}",
   "games.minecraft.discovery.copied": "Alamat disalin",
   "games.minecraft.discovery.copyError": "Gagal menyalin. Pilih alamat untuk menyalinnya.",
@@ -37,24 +40,32 @@ export default {
   "games.minecraft.lifecycle.version": "Versi ekspor",
   "games.minecraft.lifecycle.worlds": "Sertakan dunia",
   "games.minecraft.lifecycle.settings": "Sertakan kontrol dan daftar server",
-  "games.minecraft.lifecycle.exportNote": "Buat berkas .mrpack portabel berisi mod dan konfigurasi.",
-  "games.minecraft.lifecycle.privateNote": "Data akun Harbor, berkas runtime, dan log tidak disertakan. Periksa konfigurasi mod sebelum berbagi.",
+  "games.minecraft.lifecycle.exportNote":
+    "Buat berkas .mrpack portabel berisi mod dan konfigurasi.",
+  "games.minecraft.lifecycle.privateNote":
+    "Data akun Harbor, berkas runtime, dan log tidak disertakan. Periksa konfigurasi mod sebelum berbagi.",
   "games.minecraft.lifecycle.included": "Berkas disertakan",
   "games.minecraft.lifecycle.referenced": "Referensi unduhan",
-  "games.minecraft.lifecycle.referenceNote": "Berkas penyedia yang terverifikasi diunduh saat impor. Berkas yang diubah dan berkas lokal disertakan dalam arsip.",
+  "games.minecraft.lifecycle.referenceNote":
+    "Berkas penyedia yang terverifikasi diunduh saat impor. Berkas yang diubah dan berkas lokal disertakan dalam arsip.",
   "games.minecraft.lifecycle.edit": "Edit pilihan",
-  "games.minecraft.lifecycle.storageNote": "Versi sebelumnya yang disimpan saat pembaruan. Pulihkan salinan terbaru dari Versi paket.",
+  "games.minecraft.lifecycle.storageNote":
+    "Versi sebelumnya yang disimpan saat pembaruan. Pulihkan salinan terbaru dari Versi paket.",
   "games.minecraft.lifecycle.latest": "Titik pemulihan saat ini",
   "games.minecraft.lifecycle.reviewCopy": "Tinjau {version}",
   "games.minecraft.lifecycle.review": "Tinjau berkas",
   "games.minecraft.lifecycle.empty": "Belum ada salinan pemulihan.",
   "games.minecraft.lifecycle.unreadable": "{count} salinan yang tidak terbaca akan dibiarkan utuh.",
-  "games.minecraft.lifecycle.removeNote": "Tinjau instans dan salinan pemulihannya sebelum memindahkannya ke tempat sampah.",
+  "games.minecraft.lifecycle.removeNote":
+    "Tinjau instans dan salinan pemulihannya sebelum memindahkannya ke tempat sampah.",
   "games.minecraft.lifecycle.worldCount": "Dunia: {count}",
-  "games.minecraft.lifecycle.latestNote": "Menghapus salinan ini menghapus titik pemulihan saat ini. Instans aktif tidak berubah.",
+  "games.minecraft.lifecycle.latestNote":
+    "Menghapus salinan ini menghapus titik pemulihan saat ini. Instans aktif tidak berubah.",
   "games.minecraft.lifecycle.copiesIncluded": "Mencakup {count} salinan pemulihan.",
-  "games.minecraft.lifecycle.trashNote": "Pindahkan berkas ini ke tempat sampah sistem. Ruang disk tersedia kembali setelah tempat sampah dikosongkan.",
-  "games.minecraft.lifecycle.undoNote": "Pulihkan folder asli dari tempat sampah sistem untuk membatalkan.",
+  "games.minecraft.lifecycle.trashNote":
+    "Pindahkan berkas ini ke tempat sampah sistem. Ruang disk tersedia kembali setelah tempat sampah dikosongkan.",
+  "games.minecraft.lifecycle.undoNote":
+    "Pulihkan folder asli dari tempat sampah sistem untuk membatalkan.",
   "games.minecraft.lifecycle.trash": "Pindahkan ke tempat sampah",
   "games.minecraft.lifecycle.save": "Simpan modpack",
   "games.minecraft.lifecycle.exported": "Modpack diekspor",
@@ -65,15 +76,18 @@ export default {
   "games.minecraft.lifecycle.choosing": "Pilih lokasi penyimpanan…",
   "games.minecraft.lifecycle.exporting": "Mengekspor modpack…",
   "games.minecraft.lifecycle.removing": "Memindahkan berkas ke tempat sampah…",
-  "games.minecraft.lifecycle.trashError": "Tidak semua folder dapat dipindahkan ke tempat sampah. Muat ulang untuk melihat kondisi saat ini.",
+  "games.minecraft.lifecycle.trashError":
+    "Tidak semua folder dapat dipindahkan ke tempat sampah. Muat ulang untuk melihat kondisi saat ini.",
   "games.minecraft.lifecycle.pathError": "Pilih berkas .mrpack di luar pustaka instans.",
   "games.minecraft.lifecycle.existsError": "Berkas sudah ada. Pilih nama baru.",
   "games.minecraft.lifecycle.limitError": "Ekspor melebihi batas arsip 256 MB. Coba tanpa dunia.",
 
-  "games.minecraft.update.compatibilityError": "Mod ini tidak kompatibel dengan versi Minecraft dan pemuat yang dipilih. Instans saat ini tidak berubah.",
+  "games.minecraft.update.compatibilityError":
+    "Mod ini tidak kompatibel dengan versi Minecraft dan pemuat yang dipilih. Instans saat ini tidak berubah.",
   "games.minecraft.update.title": "Versi paket",
   "games.minecraft.update.complete": "Versi paket siap",
-  "games.minecraft.update.completeNote": "Dunia dan pengaturan pribadi tetap tersimpan. Periksa penyiapan game sebelum bermain.",
+  "games.minecraft.update.completeNote":
+    "Dunia dan pengaturan pribadi tetap tersimpan. Periksa penyiapan game sebelum bermain.",
   "games.minecraft.update.installed": "Terpasang",
   "games.minecraft.update.loading": "Memuat versi paket…",
   "games.minecraft.update.version": "Versi paket",
@@ -82,13 +96,17 @@ export default {
   "games.minecraft.update.localNote": "Pilih file .mrpack lokal untuk meninjau pembaruan.",
   "games.minecraft.update.chooseFile": "Pilih file .mrpack",
   "games.minecraft.update.restoreVersion": "Pulihkan {version}",
-  "games.minecraft.update.reviewNote": "Tinjau setiap perubahan sebelum menerapkannya. Harbor menyimpan salinan terpisah dari instans sebelumnya.",
+  "games.minecraft.update.reviewNote":
+    "Tinjau setiap perubahan sebelum menerapkannya. Harbor menyimpan salinan terpisah dari instans sebelumnya.",
   "games.minecraft.update.changeVersion": "Ganti versi",
   "games.minecraft.update.download": "Unduhan",
   "games.minecraft.update.recoveryCopy": "Salinan pemulihan",
-  "games.minecraft.update.loaderConflict": "Mod tambahan tidak dapat dipindahkan ke pemuat berbeda. Hapus sebelum mengganti pemuat.",
-  "games.minecraft.update.conflictNote": "Beberapa file paket bertumpang tindih dengan mod yang diubah atau dikelola terpisah. Selesaikan konflik sebelum menerapkan.",
-  "games.minecraft.update.environmentNote": "Versi Minecraft atau pemuat akan berubah. Periksa penyiapan game setelahnya.",
+  "games.minecraft.update.loaderConflict":
+    "Mod tambahan tidak dapat dipindahkan ke pemuat berbeda. Hapus sebelum mengganti pemuat.",
+  "games.minecraft.update.conflictNote":
+    "Beberapa file paket bertumpang tindih dengan mod yang diubah atau dikelola terpisah. Selesaikan konflik sebelum menerapkan.",
+  "games.minecraft.update.environmentNote":
+    "Versi Minecraft atau pemuat akan berubah. Periksa penyiapan game setelahnya.",
   "games.minecraft.update.fileGroups": "File paket",
   "games.minecraft.update.changes": "Perubahan",
   "games.minecraft.update.preserved": "Dipertahankan",
@@ -100,7 +118,8 @@ export default {
   "games.minecraft.update.action.conflict": "Konflik",
   "games.minecraft.update.noChanges": "Tidak ada file dalam tampilan ini.",
   "games.minecraft.update.extraMods": "{count} mod tambahan dipertahankan",
-  "games.minecraft.update.preserveNote": "Dunia yang ada, pengaturan pribadi, dan konfigurasi yang diedit tetap utuh. Pemulihan versi juga mempertahankan progres dunia saat ini.",
+  "games.minecraft.update.preserveNote":
+    "Dunia yang ada, pengaturan pribadi, dan konfigurasi yang diedit tetap utuh. Pemulihan versi juga mempertahankan progres dunia saat ini.",
   "games.minecraft.update.chooseOriginal": "Pilih .mrpack asli",
   "games.minecraft.update.originalSelected": "Paket asli dipilih",
   "games.minecraft.update.footer": "Instans saat ini tetap tersedia sampai perubahan siap.",
@@ -111,11 +130,14 @@ export default {
   "games.minecraft.update.phase.copy": "Membuat salinan pemulihan…",
   "games.minecraft.update.phase.commit": "Menyelesaikan perubahan versi…",
   "games.minecraft.update.running": "Tutup instans Minecraft ini sebelum mengganti versi paket.",
-  "games.minecraft.update.recoveryError": "File pemulihan tidak dapat diverifikasi. Folder yang ada tetap dipertahankan.",
+  "games.minecraft.update.recoveryError":
+    "File pemulihan tidak dapat diverifikasi. Folder yang ada tetap dipertahankan.",
   "games.minecraft.update.sourceError": "Pilih versi dari modpack yang sama.",
-  "games.minecraft.update.originalError": "Instalasi lokal lama ini memerlukan file .mrpack asli untuk mengenali file paket.",
+  "games.minecraft.update.originalError":
+    "Instalasi lokal lama ini memerlukan file .mrpack asli untuk mengenali file paket.",
   "games.minecraft.update.previousError": "Tidak ada versi paket sebelumnya.",
-  "games.minecraft.update.spaceError": "Ruang yang cukup untuk salinan dan file baru tidak dapat dipastikan. Periksa drive lalu coba lagi.",
+  "games.minecraft.update.spaceError":
+    "Ruang yang cukup untuk salinan dan file baru tidak dapat dipastikan. Periksa drive lalu coba lagi.",
   "games.minecraft.creation.style": "Gaya bermain",
   "games.minecraft.creation.vanillaNote": "Pengalaman Minecraft asli.",
   "games.minecraft.creation.fabricNote": "Buat susunan mod sendiri.",
@@ -123,19 +145,28 @@ export default {
   "games.minecraft.creation.loading": "Mencari versi {loader} yang kompatibel…",
   "games.minecraft.creation.version": "Versi {loader} Loader",
   "games.minecraft.creation.preview": "Pratinjau",
-  "games.minecraft.creation.unavailable": "{loader} tidak tersedia untuk Minecraft {version}. Pilih versi lain atau Vanilla.",
-  "games.minecraft.creation.note": "Membuat folder game terpisah. Berkas game dan Java disiapkan di pengaturan game.",
+  "games.minecraft.creation.unavailable":
+    "{loader} tidak tersedia untuk Minecraft {version}. Pilih versi lain atau Vanilla.",
+  "games.minecraft.creation.note":
+    "Membuat folder game terpisah. Berkas game dan Java disiapkan di pengaturan game.",
   "games.minecraft.creation.creating": "Membuat instans Anda…",
-  "games.minecraft.creation.versionError": "Versi loader ini tidak tersedia untuk versi Minecraft yang dipilih. Muat ulang pilihan dan coba lagi.",
+  "games.minecraft.creation.versionError":
+    "Versi loader ini tidak tersedia untuk versi Minecraft yang dipilih. Muat ulang pilihan dan coba lagi.",
   "games.minecraft.content.title": "Kelola mod",
-  "games.minecraft.content.compatible": "Mod Fabric untuk Minecraft {version}. Tinjau perubahan sebelum memasang.",
+  "games.minecraft.content.compatible":
+    "Mod Fabric untuk Minecraft {version}. Tinjau perubahan sebelum memasang.",
   "games.minecraft.content.search": "Cari mod",
   "games.minecraft.content.packFiles": "Berkas paket dan lainnya",
-  "games.minecraft.content.packFilesNote": "Disertakan dalam paket atau ditambahkan di luar pengelola ini. Berkas ini hanya bisa dibaca di sini.",
-  "games.minecraft.content.empty": "Tambahkan mod yang kompatibel dari Jelajahi. Mod akan dipasang di instans ini.",
-  "games.minecraft.content.ready": "Mod siap di {name}. Tutup panel ini dan buka pengaturan game untuk bermain.",
-  "games.minecraft.content.reviewNote": "Perubahan berlaku untuk instans ini. Dunia dan konfigurasi tetap tersimpan.",
-  "games.minecraft.content.running": "Tutup instans Minecraft ini sebelum mengubah mod, lalu coba lagi.",
+  "games.minecraft.content.packFilesNote":
+    "Disertakan dalam paket atau ditambahkan di luar pengelola ini. Berkas ini hanya bisa dibaca di sini.",
+  "games.minecraft.content.empty":
+    "Tambahkan mod yang kompatibel dari Jelajahi. Mod akan dipasang di instans ini.",
+  "games.minecraft.content.ready":
+    "Mod siap di {name}. Tutup panel ini dan buka pengaturan game untuk bermain.",
+  "games.minecraft.content.reviewNote":
+    "Perubahan berlaku untuk instans ini. Dunia dan konfigurasi tetap tersimpan.",
+  "games.minecraft.content.running":
+    "Tutup instans Minecraft ini sebelum mengubah mod, lalu coba lagi.",
   "games.minecraft.launch.play": "Mainkan",
   "games.minecraft.launch.account": "Akun Minecraft",
   "games.minecraft.launch.accountNote": "Main dengan akun ini.",
@@ -153,11 +184,14 @@ export default {
   "games.minecraft.launch.failed": "Game berhenti dengan kode {code}.",
   "games.minecraft.launch.log": "Log game",
   "games.minecraft.launch.noLog": "Log untuk sesi ini tidak tersedia.",
-  "games.minecraft.launch.filesError": "Beberapa berkas game hilang atau berubah. Verifikasi berkas, lalu coba lagi.",
+  "games.minecraft.launch.filesError":
+    "Beberapa berkas game hilang atau berubah. Verifikasi berkas, lalu coba lagi.",
   "games.minecraft.launch.argumentsError": "Konfigurasi peluncuran versi ini belum didukung.",
   "games.minecraft.launch.startError": "Minecraft tidak dapat dimulai. Periksa Java dan coba lagi.",
-  "games.minecraft.launch.stateError": "Game yang berjalan tidak dapat diperiksa. Coba lagi sebelum meluncurkan.",
-  "games.minecraft.launch.limitError": "Tutup instans Minecraft yang berjalan sebelum memulai yang lain.",
+  "games.minecraft.launch.stateError":
+    "Game yang berjalan tidak dapat diperiksa. Coba lagi sebelum meluncurkan.",
+  "games.minecraft.launch.limitError":
+    "Tutup instans Minecraft yang berjalan sebelum memulai yang lain.",
   "games.minecraft.java.title": "Java untuk instans ini",
   "games.minecraft.java.note": "Versi Minecraft ini memerlukan Java {version}.",
   "games.minecraft.java.managed": "Instal dengan Harbor",
@@ -177,10 +211,12 @@ export default {
   "games.minecraft.java.choose": "Pilih berkas eksekusi Java",
   "games.minecraft.java.versionError": "Pilih Java {version} untuk sistem Anda.",
   "games.minecraft.java.invalidError": "Instalasi Java ini tidak dapat diverifikasi.",
-  "games.minecraft.java.metadataError": "Unduhan Java yang kompatibel tidak dapat diverifikasi. Coba lagi.",
+  "games.minecraft.java.metadataError":
+    "Unduhan Java yang kompatibel tidak dapat diverifikasi. Coba lagi.",
   "games.minecraft.java.managedNote": "Harbor menyimpan versi ini di pustaka Minecraft Anda.",
   "games.minecraft.runtime.setup": "Siapkan game",
-  "games.minecraft.runtime.note": "Instal berkas game resmi untuk instans ini. Dunia dan mod Anda tetap tersimpan.",
+  "games.minecraft.runtime.note":
+    "Instal berkas game resmi untuk instans ini. Dunia dan mod Anda tetap tersimpan.",
   "games.minecraft.runtime.gameFiles": "Berkas Minecraft",
   "games.minecraft.runtime.fileCount": "{count} berkas diperlukan",
   "games.minecraft.runtime.java": "Java {version}",
@@ -190,13 +226,16 @@ export default {
   "games.minecraft.runtime.installing": "Menginstal berkas Minecraft…",
   "games.minecraft.runtime.progress": "{done} dari {total} berkas",
   "games.minecraft.runtime.ready": "Berkas game siap",
-  "games.minecraft.runtime.readyNote": "Berkas telah diverifikasi. Java {version} dan akun Minecraft yang terhubung masih diperlukan untuk bermain.",
+  "games.minecraft.runtime.readyNote":
+    "Berkas telah diverifikasi. Java {version} dan akun Minecraft yang terhubung masih diperlukan untuk bermain.",
   "games.minecraft.runtime.preserved": "Dunia dan mod Anda tidak berubah.",
   "games.minecraft.runtime.resumeNote": "Unduhan yang selesai tetap disimpan jika dibatalkan.",
   "games.minecraft.runtime.install": "Instal berkas",
   "games.minecraft.runtime.verify": "Verifikasi berkas",
-  "games.minecraft.runtime.metadataError": "Berkas game ini tidak dapat diverifikasi. Coba lagi nanti.",
-  "games.minecraft.runtime.legacyError": "Versi ini menggunakan format pemasangan atau peluncuran yang belum didukung Harbor.",
+  "games.minecraft.runtime.metadataError":
+    "Berkas game ini tidak dapat diverifikasi. Coba lagi nanti.",
+  "games.minecraft.runtime.legacyError":
+    "Versi ini menggunakan format pemasangan atau peluncuran yang belum didukung Harbor.",
   "games.minecraft.runtime.loaderError": "Format pemasangan loader ini belum didukung.",
   "games.minecraft.runtime.platformError": "Penyiapan game belum didukung pada sistem ini.",
   "games.minecraft.runtime.versionError": "Versi Minecraft ini tidak ditemukan di katalog resmi.",
@@ -205,59 +244,76 @@ export default {
   "games.minecraft.instances.note": "Dunia, mod, dan pengaturan terpisah untuk setiap konfigurasi.",
   "games.minecraft.instances.import": "Impor paket",
   "games.minecraft.instances.create": "Buat instans",
-  "games.minecraft.instances.desktop": "Buka Harbor desktop untuk membuat dan mengelola instans lokal.",
+  "games.minecraft.instances.desktop":
+    "Buka Harbor desktop untuk membuat dan mengelola instans lokal.",
   "games.minecraft.instances.search": "Cari instans Anda",
   "games.minecraft.instances.storage": "Folder penyimpanan",
   "games.minecraft.instances.chooseFolder": "Pilih folder penyimpanan",
-  "games.minecraft.instances.unreadable": "{count} catatan instans tidak dapat dibaca. Berkasnya tidak berubah.",
+  "games.minecraft.instances.unreadable":
+    "{count} catatan instans tidak dapat dibaca. Berkasnya tidak berubah.",
   "games.minecraft.instances.files": "{count} berkas",
   "games.minecraft.instances.newWorld": "Instans baru",
-  "games.minecraft.instances.runtimeNeeded": "Berkas game dan runtime Java masih perlu dipasang sebelum bermain.",
+  "games.minecraft.instances.runtimeNeeded":
+    "Berkas game dan runtime Java masih perlu dipasang sebelum bermain.",
   "games.minecraft.instances.openFolder": "Buka folder",
   "games.minecraft.instances.renameName": "Ganti nama {name}",
   "games.minecraft.instances.noMatches": "Tidak ada instans yang cocok",
   "games.minecraft.instances.empty": "Mulai dunia baru.",
   "games.minecraft.instances.noMatchesNote": "Coba nama, versi, atau pemuat lain.",
-  "games.minecraft.instances.emptyNote": "Buat konfigurasi sendiri atau impor modpack komunitas ke folder terpisah.",
+  "games.minecraft.instances.emptyNote":
+    "Buat konfigurasi sendiri atau impor modpack komunitas ke folder terpisah.",
   "games.minecraft.instances.clear": "Hapus pencarian",
   "games.minecraft.instances.browse": "Jelajahi modpack",
   "games.minecraft.instances.rename": "Ganti nama instans",
   "games.minecraft.instances.review": "Tinjau paket",
   "games.minecraft.instances.name": "Nama instans",
-  "games.minecraft.instances.createNote": "Membuat folder game Vanilla terpisah untuk versi ini. Game dan Java dipasang secara terpisah.",
+  "games.minecraft.instances.createNote":
+    "Membuat folder game Vanilla terpisah untuk versi ini. Game dan Java dipasang secara terpisah.",
   "games.minecraft.instances.contents": "Isi paket",
   "games.minecraft.instances.filterFiles": "Filter berkas",
   "games.minecraft.instances.optional": "Opsional",
   "games.minecraft.instances.filterMore": "{count} berkas lagi. Persempit filter untuk melihatnya.",
   "games.minecraft.instances.overrides": "Menyertakan {count} berkas konfigurasi dan penimpaan.",
   "games.minecraft.instances.skipped": "Melewati {count} berkas khusus server.",
-  "games.minecraft.instances.verifyNote": "Unduhan diperiksa berdasarkan hash berkas paket. Dunia dan instans yang sudah ada tetap terpisah.",
+  "games.minecraft.instances.verifyNote":
+    "Unduhan diperiksa berdasarkan hash berkas paket. Dunia dan instans yang sudah ada tetap terpisah.",
   "games.minecraft.instances.reviewAgain": "Tinjau lagi",
   "games.minecraft.instances.loadingVersions": "Memuat versi Minecraft…",
   "games.minecraft.instances.added": "Ditambahkan ke instans Anda",
-  "games.minecraft.instances.storageNote": "Pilih lokasi penyimpanan instans Minecraft. Setiap profil Harbor memiliki folder sendiri di sini.",
+  "games.minecraft.instances.storageNote":
+    "Pilih lokasi penyimpanan instans Minecraft. Setiap profil Harbor memiliki folder sendiri di sini.",
   "games.minecraft.instances.isolated": "Dipasang ke instans baru yang terpisah.",
   "games.minecraft.instances.cancelling": "Membatalkan…",
   "games.minecraft.instances.install": "Pasang berkas paket",
   "games.minecraft.instances.save": "Simpan nama",
-  "games.minecraft.instances.packNote": "Tinjau rilis terbaru yang cocok atau pilih rilis di Versi.",
+  "games.minecraft.instances.packNote":
+    "Tinjau rilis terbaru yang cocok atau pilih rilis di Versi.",
   "games.minecraft.instances.phase.pack": "Mengunduh paket…",
   "games.minecraft.instances.phase.review": "Membaca isi paket…",
   "games.minecraft.instances.phase.files": "Memasang berkas…",
   "games.minecraft.instances.phase.overrides": "Menerapkan konfigurasi paket…",
   "games.minecraft.instances.phase.done": "Berkas terpasang",
-  "games.minecraft.instances.folderError": "Pilih folder lokal yang dapat diakses untuk profil Harbor ini.",
-  "games.minecraft.instances.writeError": "Tidak dapat menulis instans. Periksa izin folder dan ruang kosong.",
-  "games.minecraft.instances.readError": "Tidak dapat membaca instans ini. Pastikan drive terhubung dan berkas dapat diakses.",
+  "games.minecraft.instances.folderError":
+    "Pilih folder lokal yang dapat diakses untuk profil Harbor ini.",
+  "games.minecraft.instances.writeError":
+    "Tidak dapat menulis instans. Periksa izin folder dan ruang kosong.",
+  "games.minecraft.instances.readError":
+    "Tidak dapat membaca instans ini. Pastikan drive terhubung dan berkas dapat diakses.",
   "games.minecraft.instances.networkError": "Unduhan gagal. Periksa koneksi dan tinjau paket lagi.",
   "games.minecraft.instances.rateLimit": "Penyedia sedang sibuk. Tunggu sebentar lalu coba lagi.",
-  "games.minecraft.instances.integrityError": "Satu berkas tidak cocok dengan checksum paket. Tidak ada yang ditambahkan ke pustaka.",
-  "games.minecraft.instances.changedError": "Paket berubah atau tinjauannya kedaluwarsa. Tinjau lagi.",
+  "games.minecraft.instances.integrityError":
+    "Satu berkas tidak cocok dengan checksum paket. Tidak ada yang ditambahkan ke pustaka.",
+  "games.minecraft.instances.changedError":
+    "Paket berubah atau tinjauannya kedaluwarsa. Tinjau lagi.",
   "games.minecraft.instances.formatError": "Ini bukan arsip .mrpack yang valid dan didukung.",
-  "games.minecraft.instances.loaderError": "Paket ini menggunakan pemuat game yang tidak dikenali atau bertentangan.",
-  "games.minecraft.instances.sourceError": "Paket ini membutuhkan sumber unduhan yang tidak didukung Harbor.",
-  "games.minecraft.instances.limitError": "Paket atau pustaka ini melebihi batas ukuran yang didukung.",
-  "games.minecraft.instances.busyError": "Operasi paket lain masih berjalan. Tunggu hingga selesai atau batalkan.",
+  "games.minecraft.instances.loaderError":
+    "Paket ini menggunakan pemuat game yang tidak dikenali atau bertentangan.",
+  "games.minecraft.instances.sourceError":
+    "Paket ini membutuhkan sumber unduhan yang tidak didukung Harbor.",
+  "games.minecraft.instances.limitError":
+    "Paket atau pustaka ini melebihi batas ukuran yang didukung.",
+  "games.minecraft.instances.busyError":
+    "Operasi paket lain masih berjalan. Tunggu hingga selesai atau batalkan.",
   "games.minecraft.instances.error": "Tidak dapat menyelesaikan operasi ini. Coba lagi.",
   "games.minecraft.catalog.updated": "Diperbarui",
   "games.minecraft.catalog.gameVersion": "Versi Minecraft",
@@ -270,7 +326,8 @@ export default {
   "games.minecraft.catalog.projectPage": "Halaman proyek",
   "games.minecraft.catalog.network": "Data proyek gagal dimuat. Coba lagi.",
   "games.minecraft.catalog.title": "Temukan dunia berikutnya.",
-  "games.minecraft.catalog.note": "Paket komunitas, mekanik baru, dan cara berbeda menikmati Minecraft.",
+  "games.minecraft.catalog.note":
+    "Paket komunitas, mekanik baru, dan cara berbeda menikmati Minecraft.",
   "games.minecraft.catalog.search": "Cari proyek Minecraft",
   "games.minecraft.catalog.content": "Jenis konten",
   "games.minecraft.catalog.modpack": "Modpack",
@@ -282,7 +339,8 @@ export default {
   "games.minecraft.catalog.allVersions": "Semua versi",
   "games.minecraft.catalog.allLoaders": "Semua pemuat mod",
   "games.minecraft.catalog.sort": "Urutkan",
-  "games.minecraft.catalog.filterError": "Sebagian filter gagal dimuat. Proyek masih bisa dijelajahi.",
+  "games.minecraft.catalog.filterError":
+    "Sebagian filter gagal dimuat. Proyek masih bisa dijelajahi.",
   "games.minecraft.catalog.results": "{count} proyek",
   "games.minecraft.catalog.empty": "Tidak ada proyek yang cocok. Coba versi atau kategori lain.",
   "games.minecraft.catalog.project": "Detail proyek",
@@ -297,21 +355,25 @@ export default {
   "games.minecraft.catalog.issues": "Laporkan masalah",
   "games.minecraft.catalog.wiki": "Wiki",
   "games.minecraft.catalog.linkError": "Tautan ini tidak dapat dibuka.",
-  "games.minecraft.catalog.manageNote": "Tinjau berkas yang kompatibel dan dependensi di folder mod Fabric yang terhubung.",
+  "games.minecraft.catalog.manageNote":
+    "Tinjau berkas yang kompatibel dan dependensi di folder mod Fabric yang terhubung.",
   "games.minecraft.catalog.manage": "Kelola di Mod",
   "games.minecraft.catalog.discover": "Jelajahi",
   "games.minecraft.account.signIn": "Masuk",
   "games.minecraft.account.title": "Akun Minecraft kamu",
-  "games.minecraft.account.intro": "Hubungkan Microsoft untuk melihat skin dan jubah Minecraft serta menerapkan kreasimu.",
+  "games.minecraft.account.intro":
+    "Hubungkan Microsoft untuk melihat skin dan jubah Minecraft serta menerapkan kreasimu.",
   "games.minecraft.account.desktop": "Buka Harbor desktop untuk menghubungkan akun Minecraft.",
-  "games.minecraft.account.setup": "Login Microsoft belum dikonfigurasi pada versi Harbor ini. Kamu tetap bisa mengedit skin secara lokal.",
+  "games.minecraft.account.setup":
+    "Login Microsoft belum dikonfigurasi pada versi Harbor ini. Kamu tetap bisa mengedit skin secara lokal.",
   "games.minecraft.account.codeNote": "Masukkan kode ini di halaman masuk Microsoft.",
   "games.minecraft.account.copy": "Salin kode",
   "games.minecraft.account.openMicrosoft": "Lanjutkan di Microsoft",
   "games.minecraft.account.waiting": "Menunggu kamu menyelesaikan proses masuk…",
   "games.minecraft.account.openManually": "Buka alamat ini di browser:",
   "games.minecraft.account.capes": "Jubah kamu",
-  "games.minecraft.account.capeNote": "Jubah milik akun Minecraft ini. Pilih satu untuk melihat pratinjau.",
+  "games.minecraft.account.capeNote":
+    "Jubah milik akun Minecraft ini. Pilih satu untuk melihat pratinjau.",
   "games.minecraft.account.noCape": "Tanpa jubah",
   "games.minecraft.account.applyCape": "Terapkan jubah",
   "games.minecraft.account.noSkin": "Pratinjau skin akun tidak tersedia.",
@@ -320,15 +382,20 @@ export default {
   "games.minecraft.account.applySkin": "Terapkan ke Minecraft",
   "games.minecraft.account.applied": "Diterapkan ke Minecraft.",
   "games.minecraft.account.network": "Tidak dapat menghubungi layanan akun. Coba lagi sebentar.",
-  "games.minecraft.account.rateLimit": "Terlalu banyak permintaan. Tunggu sebentar sebelum mencoba lagi.",
+  "games.minecraft.account.rateLimit":
+    "Terlalu banyak permintaan. Tunggu sebentar sebelum mencoba lagi.",
   "games.minecraft.account.reconnect": "Masuk lagi untuk menghubungkan kembali akun ini.",
   "games.minecraft.account.expired": "Kode masuk sudah kedaluwarsa. Mulai lagi untuk kode baru.",
   "games.minecraft.account.declined": "Proses masuk dibatalkan atau ditolak.",
-  "games.minecraft.account.notOwned": "Akun ini memerlukan Minecraft: Java Edition dan profil Minecraft.",
+  "games.minecraft.account.notOwned":
+    "Akun ini memerlukan Minecraft: Java Edition dan profil Minecraft.",
   "games.minecraft.account.xbox": "Buat profil Xbox di situs Xbox, lalu coba lagi.",
-  "games.minecraft.account.restricted": "Pengaturan Microsoft atau Xbox menghalangi proses masuk. Periksa pengaturan usia, keluarga, atau wilayah akun.",
-  "games.minecraft.account.skinError": "Skin atau jubah ini tidak dapat diterapkan. Segarkan akun dan coba lagi.",
-  "games.minecraft.account.storeError": "Harbor tidak dapat menyimpan akun dengan aman di perangkat ini.",
+  "games.minecraft.account.restricted":
+    "Pengaturan Microsoft atau Xbox menghalangi proses masuk. Periksa pengaturan usia, keluarga, atau wilayah akun.",
+  "games.minecraft.account.skinError":
+    "Skin atau jubah ini tidak dapat diterapkan. Segarkan akun dan coba lagi.",
+  "games.minecraft.account.storeError":
+    "Harbor tidak dapat menyimpan akun dengan aman di perangkat ini.",
   "games.minecraft.account.error": "Permintaan akun gagal. Coba lagi.",
   "games.minecraft.studio": "Studio skin",
   "games.minecraft.skinTitle": "Jadikan milikmu.",
@@ -359,7 +426,8 @@ export default {
   "games.minecraft.animate": "Animasi berjalan",
   "games.minecraft.resetView": "Atur ulang tampilan",
   "games.minecraft.previewHint": "Seret untuk memutar · Gulir untuk memperbesar",
-  "games.minecraft.editHint": "Tombol panah berpindah piksel. Enter mewarnai. Ctrl / ⌘ Z mengurungkan.",
+  "games.minecraft.editHint":
+    "Tombol panah berpindah piksel. Enter mewarnai. Ctrl / ⌘ Z mengurungkan.",
   "games.minecraft.library": "Skin kamu",
   "games.minecraft.localNote": "Disimpan di perangkat ini untuk profil Harbor ini.",
   "games.minecraft.new": "Skin baru",
@@ -369,8 +437,10 @@ export default {
   "games.minecraft.saving": "Menyimpan…",
   "games.minecraft.pixel": "Piksel {x}, {y}: {color}",
   "games.minecraft.webgl": "Pratinjau 3D tidak tersedia. Kamu tetap bisa mengedit dan mengekspor.",
-  "games.minecraft.errorImport": "Pilih PNG Minecraft berukuran 64 × 64 atau 64 × 32, maksimal 1 MB.",
-  "games.minecraft.errorSave": "Tidak dapat menyimpan. Kosongkan penyimpanan lokal atau hapus skin lama; pustaka memuat 40 skin.",
+  "games.minecraft.errorImport":
+    "Pilih PNG Minecraft berukuran 64 × 64 atau 64 × 32, maksimal 1 MB.",
+  "games.minecraft.errorSave":
+    "Tidak dapat menyimpan. Kosongkan penyimpanan lokal atau hapus skin lama; pustaka memuat 40 skin.",
   "games.minecraft.head": "Kepala",
   "games.minecraft.body": "Badan",
   "games.minecraft.rightArm": "Lengan kanan",
@@ -401,17 +471,21 @@ export default {
   "games.minecraft.release.embedded": "Disertakan",
   "games.minecraft.release.dependencyError": "Beberapa detail dependensi tidak dapat dimuat.",
   "games.minecraft.release.moreDependencies": "Tampilkan dependensi lainnya",
-  "games.minecraft.release.dependencyLimit": "Menampilkan {count} dependensi. Lihat daftar lengkap di Modrinth.",
-  "games.minecraft.release.versionLimit": "Menampilkan {count} rilis. Persempit filter untuk melihat lainnya.",
+  "games.minecraft.release.dependencyLimit":
+    "Menampilkan {count} dependensi. Lihat daftar lengkap di Modrinth.",
+  "games.minecraft.release.versionLimit":
+    "Menampilkan {count} rilis. Persempit filter untuk melihat lainnya.",
   "games.minecraft.release.release": "Rilis",
   "games.minecraft.release.beta": "Beta",
   "games.minecraft.release.alpha": "Alfa",
   "games.minecraft.creation.forgeNote": "Untuk mod dan modpack Forge.",
   "games.minecraft.creation.neoforgeNote": "Untuk mod dan modpack NeoForge.",
-  "games.minecraft.runtime.processorNote": "{loader} menggunakan Java untuk menyiapkan berkas game. Siapkan Java sebelum memasang.",
+  "games.minecraft.runtime.processorNote":
+    "{loader} menggunakan Java untuk menyiapkan berkas game. Siapkan Java sebelum memasang.",
   "games.minecraft.runtime.preparingLoader": "Menyiapkan {loader}…",
   "games.minecraft.runtime.processorProgress": "Langkah {done} dari {total}",
-  "games.minecraft.runtime.processorError": "Loader tidak dapat menyelesaikan persiapan berkas. Coba lagi untuk menggunakan ulang unduhan yang telah diverifikasi.",
+  "games.minecraft.runtime.processorError":
+    "Loader tidak dapat menyelesaikan persiapan berkas. Coba lagi untuk menggunakan ulang unduhan yang telah diverifikasi.",
   "games.minecraft.runtime.javaRequired": "Siapkan Java yang kompatibel, lalu coba pasang lagi.",
   "games.minecraft.notes.title": "Catatan perubahan",
   "games.minecraft.notes.version": "Rilis",
@@ -427,4 +501,3 @@ export default {
   "games.minecraft.hub.curseforge": "Pilihan CurseForge",
   "games.minecraft.hub.browseCurseforge": "Jelajahi CurseForge",
 } satisfies Record<string, string>;
-

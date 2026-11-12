@@ -1,7 +1,8 @@
 export default {
   "games.hydra.checkOnImport": "Файл игры будет проверен при импорте",
   "games.hydra.title": "Импорт из Hydra",
-  "games.hydra.note": "Проверьте игры и подписки на источники из Hydra. Закройте Hydra перед выбором папки базы данных.",
+  "games.hydra.note":
+    "Проверьте игры и подписки на источники из Hydra. Закройте Hydra перед выбором папки базы данных.",
   "games.hydra.choose": "Выбрать папку базы Hydra",
   "games.hydra.reading": "Чтение библиотеки Hydra…",
   "games.hydra.checking": "Проверка файлов · {count} / {total}",
@@ -14,20 +15,26 @@ export default {
   "games.hydra.missing": "Файл игры не привязан",
   "games.hydra.ready": "Файл игры найден",
   "games.hydra.original": "Настройки из Hydra",
-  "games.hydra.pendingNote": "После импорта откройте управление игрой и проверьте файл и параметры запуска перед игрой.",
-  "games.hydra.unsupported": "Некоторые настройки Hydra не перенесены ({count}). Проверьте их в Hydra.",
+  "games.hydra.pendingNote":
+    "После импорта откройте управление игрой и проверьте файл и параметры запуска перед игрой.",
+  "games.hydra.unsupported":
+    "Некоторые настройки Hydra не перенесены ({count}). Проверьте их в Hydra.",
   "games.hydra.skipped": "Пропущено удалённых или нечитаемых записей: {count}",
   "games.hydra.done": "Импортировано игр: {games}, источников: {sources}.",
   "games.hydra.kept": "Сохранено существующих записей: {count}.",
-  "games.hydra.scope": "Импортирует данные библиотеки и выбранные каталоги. Файлы игр остаются в своих папках.",
+  "games.hydra.scope":
+    "Импортирует данные библиотеки и выбранные каталоги. Файлы игр остаются в своих папках.",
   "games.hydra.apply": "Импортировать выбранное ({count})",
   "games.hydra.stopped": "Остановлено. Уже импортированные записи сохранены.",
-  "games.hydra.changed": "Hydra изменилась после проверки. Выберите папку ещё раз, чтобы обновить данные.",
-  "games.hydra.space": "Недостаточно временного места для проверки базы. Освободите место и повторите попытку.",
+  "games.hydra.changed":
+    "Hydra изменилась после проверки. Выберите папку ещё раз, чтобы обновить данные.",
+  "games.hydra.space":
+    "Недостаточно временного места для проверки базы. Освободите место и повторите попытку.",
   "games.hydra.busy": "Уже идёт другая проверка Hydra. Дождитесь её завершения.",
   "games.hydra.timeout": "Чтение заняло слишком много времени. Закройте Hydra и повторите попытку.",
   "games.hydra.limit": "Размер базы превышает поддерживаемый предел проверки.",
-  "games.hydra.readError": "Не удалось прочитать базу Hydra. Закройте Hydra и снова выберите папку базы.",
+  "games.hydra.readError":
+    "Не удалось прочитать базу Hydra. Закройте Hydra и снова выберите папку базы.",
   "games.hydra.imported": "Импортировано из Hydra",
   "games.hydra.sourceExists": "Источник уже добавлен",
   "games.hydra.useFile": "Использовать сохранённый файл игры",
@@ -36,5 +43,5 @@ export default {
   "games.hydra.resetTime": "Сбросить до импортированного и измеренного времени",
   "games.hydra.fileLabel": "Файл игры",
   "games.hydra.argumentsLabel": "Параметры запуска",
-  "games.hydra.prefixLabel": "Папка совместимости"
+  "games.hydra.prefixLabel": "Папка совместимости",
 };

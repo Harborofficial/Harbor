@@ -18,7 +18,8 @@ export default {
   "games.dota.attribute.agi": "Nhanh nhẹn",
   "games.dota.attribute.int": "Trí tuệ",
   "games.dota.attribute.all": "Toàn năng",
-  "games.dota.trendsScope": "Mẫu OpenDota: bảy ngày UTC, gồm hôm nay. Hạng là trung bình của trận; Turbo và trận chuyên nghiệp được tách riêng.",
+  "games.dota.trendsScope":
+    "Mẫu OpenDota: bảy ngày UTC, gồm hôm nay. Hạng là trung bình của trận; Turbo và trận chuyên nghiệp được tách riêng.",
   "games.dota.wins": "tỷ lệ thắng",
   "games.dota.picks": "{count} lượt chọn",
   "games.dota.noSample": "Chưa có mẫu",
@@ -26,7 +27,8 @@ export default {
   "games.dota.moreHeroes": "Thêm tướng",
   "games.dota.matchups": "Đối đầu chuyên nghiệp",
   "games.dota.refreshMatchups": "Làm mới đối đầu",
-  "games.dota.matchupsScope": "Các chiến thắng của {hero} trước từng đối thủ trong trận chuyên nghiệp được ghi nhận trong năm qua. Gồm các bản vá cũ; độc lập với bộ lọc hạng.",
+  "games.dota.matchupsScope":
+    "Các chiến thắng của {hero} trước từng đối thủ trong trận chuyên nghiệp được ghi nhận trong năm qua. Gồm các bản vá cũ; độc lập với bộ lọc hạng.",
   "games.dota.opponent": "Tìm đối thủ",
   "games.dota.minimum": "Số trận tối thiểu",
   "games.dota.minGames": "{count}+ trận",
@@ -48,5 +50,5 @@ export default {
   "games.dota.sample.5": "Legend",
   "games.dota.sample.6": "Ancient",
   "games.dota.sample.7": "Divine",
-  "games.dota.sample.8": "Immortal"
+  "games.dota.sample.8": "Immortal",
 };

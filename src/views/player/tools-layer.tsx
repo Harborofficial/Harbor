@@ -63,22 +63,27 @@ export const ToolsLayer = memo(function ToolsLayer({
 }) {
   return (
     <>
-      {!tenFoot && !pipMode && !drawMode && !showWaiting && pendingResumeSec == null && pendingSeekSec == null && (
-        <SkipPillContainer
-          engine={engine}
-          skipSegments={skipSegments}
-          durationSec={durationSec}
-          hasNextEpisode={hasNextEpisode}
-          hasNextEpDisplay={hasNextEpDisplay}
-          nextEp={nextEp}
-          nextEpMask={nextEpMask}
-          visible={pillsVisible}
-          allowAutoSkip={allowAutoSkip}
-          onSkip={onSkip}
-          onNextEpisode={onNextEpisode}
-          onCancelAutoNext={onCancelAutoNext}
-        />
-      )}
+      {!tenFoot &&
+        !pipMode &&
+        !drawMode &&
+        !showWaiting &&
+        pendingResumeSec == null &&
+        pendingSeekSec == null && (
+          <SkipPillContainer
+            engine={engine}
+            skipSegments={skipSegments}
+            durationSec={durationSec}
+            hasNextEpisode={hasNextEpisode}
+            hasNextEpDisplay={hasNextEpDisplay}
+            nextEp={nextEp}
+            nextEpMask={nextEpMask}
+            visible={pillsVisible}
+            allowAutoSkip={allowAutoSkip}
+            onSkip={onSkip}
+            onNextEpisode={onNextEpisode}
+            onCancelAutoNext={onCancelAutoNext}
+          />
+        )}
 
       {!pipMode && !drawMode && (
         <QuickTools

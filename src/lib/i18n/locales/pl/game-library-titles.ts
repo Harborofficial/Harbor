@@ -1,6 +1,7 @@
 export default {
   "games.titles.title": "Uporządkuj tytuły",
-  "games.titles.note": "Sprawdź lokalne nazwy. Oryginalne tytuły dostawców i pliki gier pozostają bez zmian.",
+  "games.titles.note":
+    "Sprawdź lokalne nazwy. Oryginalne tytuły dostawców i pliki gier pozostają bez zmian.",
   "games.titles.ignored": "Zachowaj pisownię tych słów",
   "games.titles.uppercase": "Zawsze wielkie litery",
   "games.titles.dash": "Zamień osobne łączniki na dwukropki",
@@ -12,5 +13,6 @@ export default {
   "games.titles.changes": "Liczba tytułów do zmiany: {count}",
   "games.titles.applied": "Zaktualizowano tytuły: {count}.",
   "games.titles.unchanged": "Brak zmian tytułów. Nadal możesz zapisać preferencje.",
-  "games.titles.conflict": "Tytuły zmieniły się w innym miejscu. Zamknij i ponownie otwórz ten podgląd przed zapisaniem."
+  "games.titles.conflict":
+    "Tytuły zmieniły się w innym miejscu. Zamknij i ponownie otwórz ten podgląd przed zapisaniem.",
 };

@@ -37,7 +37,10 @@ type RawNode = {
   description: string | null;
   isAdult: boolean | null;
 };
-type RawCharName = { name: { full: string | null; native: string | null } | null; image: { large: string | null } | null };
+type RawCharName = {
+  name: { full: string | null; native: string | null } | null;
+  image: { large: string | null } | null;
+};
 type RawTitleMedia = RawNode & {
   characters: { nodes: RawCharName[] } | null;
   relations: { edges: Array<{ relationType: string | null; node: RawNode | null }> } | null;
@@ -70,7 +73,10 @@ const MANGA_CANON = new Set(["MANGA"]);
 const TITLE_FORMATS = new Set(["TV", "TV_SHORT", "MOVIE"]);
 
 function normTitle(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function relate(a: string, b: string): boolean {
@@ -127,23 +133,53 @@ function fromTitle(m: RawTitleMedia): CharacterHit | null {
   const name = char ? charName(char) : "";
   if (!name) return null;
   const relEdges = m.relations?.edges ?? [];
-  const animeRefs = [toRef(m, "MAIN"), ...relEdges.filter((e) => e.node?.type === "ANIME").map((e) => toRef(e.node, null))];
+  const animeRefs = [
+    toRef(m, "MAIN"),
+    ...relEdges.filter((e) => e.node?.type === "ANIME").map((e) => toRef(e.node, null)),
+  ];
   const mangaEdges = relEdges
     .filter((e) => e.node?.type === "MANGA")
-    .sort((a, b) => (a.relationType === "SOURCE" ? -1 : 0) - (b.relationType === "SOURCE" ? -1 : 0));
+    .sort(
+      (a, b) => (a.relationType === "SOURCE" ? -1 : 0) - (b.relationType === "SOURCE" ? -1 : 0),
+    );
   const mangaRefs = mangaEdges.map((e) => toRef(e.node, null));
-  const anime = pick(animeRefs.filter((r): r is CharacterMediaRef => r != null), ANIME_CANON, 3);
-  const manga = pick(mangaRefs.filter((r): r is CharacterMediaRef => r != null), MANGA_CANON, 3);
+  const anime = pick(
+    animeRefs.filter((r): r is CharacterMediaRef => r != null),
+    ANIME_CANON,
+    3,
+  );
+  const manga = pick(
+    mangaRefs.filter((r): r is CharacterMediaRef => r != null),
+    MANGA_CANON,
+    3,
+  );
   if (anime.length + manga.length === 0) return null;
-  return { id: m.id ?? 0, name, native: char?.name?.native?.trim() || null, image: char?.image?.large ?? null, anime, manga };
+  return {
+    id: m.id ?? 0,
+    name,
+    native: char?.name?.native?.trim() || null,
+    image: char?.image?.large ?? null,
+    anime,
+    manga,
+  };
 }
 
 function fromChar(c: RawChar): CharacterHit | null {
   const name = charName(c);
   if (!name) return null;
-  const refs = (c.media?.edges ?? []).map((e) => toRef(e.node, null)).filter((r): r is CharacterMediaRef => r != null);
-  const anime = pick(refs.filter((r) => r.type === "anime"), ANIME_CANON, 3);
-  const manga = pick(refs.filter((r) => r.type === "manga"), MANGA_CANON, 3);
+  const refs = (c.media?.edges ?? [])
+    .map((e) => toRef(e.node, null))
+    .filter((r): r is CharacterMediaRef => r != null);
+  const anime = pick(
+    refs.filter((r) => r.type === "anime"),
+    ANIME_CANON,
+    3,
+  );
+  const manga = pick(
+    refs.filter((r) => r.type === "manga"),
+    MANGA_CANON,
+    3,
+  );
   if (anime.length + manga.length === 0) return null;
   return {
     id: anime[0]?.anilistId ?? manga[0]?.anilistId ?? 0,

@@ -16,6 +16,8 @@ export default {
   "artwork.local": "Saved on this device. Reduced motion uses a still image.",
   "artwork.error.large": "Choose a smaller file: up to 8 MB and 4096 × 4096 pixels.",
   "artwork.error.external": "This animation uses external media. Export it with images embedded.",
-  "artwork.error.storage": "Couldn’t save the file on this device. Your previous choice is unchanged.",
-  "artwork.error.invalid": "Couldn’t read this file. Choose Lottie (.json or .lottie), GIF, PNG, JPEG or WebP."
+  "artwork.error.storage":
+    "Couldn’t save the file on this device. Your previous choice is unchanged.",
+  "artwork.error.invalid":
+    "Couldn’t read this file. Choose Lottie (.json or .lottie), GIF, PNG, JPEG or WebP.",
 };

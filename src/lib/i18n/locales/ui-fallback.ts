@@ -1,6 +1,10 @@
 // Newly introduced UI copy remains usable until each locale provides an override.
 const uiFallback: Record<string, string> = {
   "Episode information is unavailable": "Episode information is unavailable",
+  "This PDF is shown as page images. Text search, translation, and narration are not available.":
+    "This PDF is shown as page images. Text search, translation, and narration are not available.",
+  "Pick one library folder. Each subfolder is one eBook. Put its files inside as TXT, Markdown, HTML, EPUB, or PDF and optionally add a cover image.":
+    "Pick one library folder. Each subfolder is one eBook. Put its files inside as TXT, Markdown, HTML, EPUB, or PDF and optionally add a cover image.",
   "music.linked.import": "Import from link",
   "music.linked.linkLabel": "YouTube Music playlist link or ID",
   "music.linked.importHelp":
@@ -1131,6 +1135,8 @@ const uiFallback: Record<string, string> = {
   "The stroke or halo drawn behind the letters.": "The stroke or halo drawn behind the letters.",
   "The text Harbor prints on the badge, for example REMUX.":
     "The text Harbor prints on the badge, for example REMUX.",
+  "This font is not available to styled (ASS) subtitles. Re-import it as a TTF or OTF file.":
+    "This font is not available to styled (ASS) subtitles. Re-import it as a TTF or OTF file.",
   "The typeface subtitles are drawn in. Add your own TTF, OTF or WOFF file if none of these suit.":
     "The typeface subtitles are drawn in. Add your own TTF, OTF or WOFF file if none of these suit.",
   "The volume bar stops at 100 percent. No boost is available.":
@@ -2476,6 +2482,11 @@ const uiFallback: Record<string, string> = {
   "Mark released episodes as unwatched": "Mark released episodes as unwatched",
   "Removed on this device. Stremio synchronization is pending.":
     "Removed on this device. Stremio synchronization is pending.",
+  "Removed on this device. Some provider playback progress could not be cleared.":
+    "Removed on this device. Some provider playback progress could not be cleared.",
+  "Also clear provider playback progress": "Also clear provider playback progress",
+  "When you dismiss a Continue Watching card, also delete its saved playback position from every connected provider. Watch history, ratings, and watchlist statuses are unchanged.":
+    "When you dismiss a Continue Watching card, also delete its saved playback position from every connected provider. Watch history, ratings, and watchlist statuses are unchanged.",
   "Remove from downloads": "Remove from downloads",
   "Mark {count} episodes up to here": "Mark {count} episodes up to here",
   "Episode information is unavailable.": "Episode information is unavailable.",
@@ -2731,6 +2742,325 @@ const uiFallback: Record<string, string> = {
     "Optional. Paste your own free Seekr API key to show Seekr's preview thumbnails first and fall back to local FFmpeg trickplay when Seekr has no match. Leave it blank to use local previews only.",
   "Get a key at seekr.tv": "Get a key at seekr.tv",
   "Seekr preview thumbnails": "Seekr preview thumbnails",
+  '"{title}" will be removed from Continue Watching and marked Dropped on connected trackers that support it.':
+    '"{title}" will be removed from Continue Watching and marked Dropped on connected trackers that support it.',
+  "{count} pages, {best} at high quality.": "{count} pages, {best} at high quality.",
+  "{count} upscaled pages stored on this device.": "{count} upscaled pages stored on this device.",
+  "{name} · 2.1 MB · MIT": "{name} · 2.1 MB · MIT",
+  "Allow playing unreleased episodes": "Allow playing unreleased episodes",
+  "Also remove hardcoded styling": "Also remove hardcoded styling",
+  "Auto pre-download next episode": "Auto pre-download next episode",
+  "Automatic (audio track)": "Automatic (audio track)",
+  "Automatic (Silero → Moonshine)": "Automatic (Silero → Moonshine)",
+  "Automatic next-episode downloads turned off": "Automatic next-episode downloads turned off",
+  "Automatic next-episode downloads turned on": "Automatic next-episode downloads turned on",
+  "Automatic uses Silero first, then Moonshine when needed. Moonshine direct skips Silero timing matching for Sync from playback tests.":
+    "Automatic uses Silero first, then Moonshine when needed. Moonshine direct skips Silero timing matching for Sync from playback tests.",
+  "Automatic uses the currently selected audio track. It never guesses from subtitles or downloads a model without approval. Override this if an audio track has incorrect language metadata.":
+    "Automatic uses the currently selected audio track. It never guesses from subtitles or downloads a model without approval. Override this if an audio track has incorrect language metadata.",
+  "Award badge": "Award badge",
+  "Award display mode": "Award display mode",
+  "Award tabs": "Award tabs",
+  "Best quality: a few seconds per page, with the next page pre-upscaled. Color pages use the fast model.":
+    "Best quality: a few seconds per page, with the next page pre-upscaled. Color pages use the fast model.",
+  "Cached pages": "Cached pages",
+  "Catalogs only": "Catalogs only",
+  "Change background": "Change background",
+  "Chapter upscaled": "Chapter upscaled",
+  "Checking connection…": "Checking connection…",
+  "Checking Moonshine…": "Checking Moonshine…",
+  "Checking speech model…": "Checking speech model…",
+  "Choose external subtitle for Auto sync": "Choose external subtitle for Auto sync",
+  "Choose how award wins appear on cards. TV award tabs are always shown at the top.":
+    "Choose how award wins appear on cards. TV award tabs are always shown at the top.",
+  "Choose how award wins appear on cards. You can position award tabs below.":
+    "Choose how award wins appear on cards. You can position award tabs below.",
+  "Connecting to model server…": "Connecting to model server…",
+  "Could not check connection": "Could not check connection",
+  "Could not find a source for the next episode.": "Could not find a source for the next episode.",
+  "Could not prepare the next-episode download.": "Could not prepare the next-episode download.",
+  "Could not start the next-episode download.": "Could not start the next-episode download.",
+  "Couldn't prepare this download. Try another source.":
+    "Couldn't prepare this download. Try another source.",
+  "Couldn't save that background. Reader background storage is full. Try a smaller image or clear cached data.":
+    "Couldn't save that background. Reader background storage is full. Try a smaller image or clear cached data.",
+  "Couldn't start this download. Try another source.":
+    "Couldn't start this download. Try another source.",
+  "Create sections here, then choose a Home section when editing a group. Use Customize Home to arrange the rows.":
+    "Create sections here, then choose a Home section when editing a group. Use Customize Home to arrange the rows.",
+  "Done selecting": "Done selecting",
+  "Doubles small or stretched manga, manhwa and manhua pages so lines stay sharp while you read. Runs locally on your graphics card; nothing is uploaded.":
+    "Doubles small or stretched manga, manhwa and manhua pages so lines stay sharp while you read. Runs locally on your graphics card; nothing is uploaded.",
+  "Download {height}p": "Download {height}p",
+  "Download {language} model": "Download {language} model",
+  "Download a Moonshine language model?": "Download a Moonshine language model?",
+  "Download completed": "Download completed",
+  "Download language model": "Download language model",
+  "Download missing models": "Download missing models",
+  "Download model": "Download model",
+  "Download only the languages you want. Models remain installed between playback sessions; switching languages does not trigger a download. Silero works without Moonshine models.":
+    "Download only the languages you want. Models remain installed between playback sessions; switching languages does not trigger a download. Silero works without Moonshine models.",
+  "Download preparation timed out. Choose another source.":
+    "Download preparation timed out. Choose another source.",
+  "Download queued · {pct}%": "Download queued · {pct}%",
+  "Download the MangaJaNai model below to use it.":
+    "Download the MangaJaNai model below to use it.",
+  "Download the MangaJaNai model in Settings → Shaders → Manga Shaders to unlock it.":
+    "Download the MangaJaNai model in Settings → Shaders → Manga Shaders to unlock it.",
+  "Downloading {height}p · 64 MB…": "Downloading {height}p · 64 MB…",
+  "Downloading model": "Downloading model",
+  "Drop show": "Drop show",
+  "Drop show?": "Drop show?",
+  "Dropped {title}": "Dropped {title}",
+  "Embedded subtitles changing size between titles, or showing empty boxes? Choose Use my style. If the text still keeps its own font or colors, turn on Also remove hardcoded styling. For boxes, also choose Arabic under Font.":
+    "Embedded subtitles changing size between titles, or showing empty boxes? Choose Use my style. If the text still keeps its own font or colors, turn on Also remove hardcoded styling. For boxes, also choose Arabic under Font.",
+  "Estimated timing applied": "Estimated timing applied",
+  "Failed to transfer primary profile.": "Failed to transfer primary profile.",
+  "Failed to transfer primary profile. Please check credentials and try again.":
+    "Failed to transfer primary profile. Please check credentials and try again.",
+  Fast: "Fast",
+  "Fast 2x model": "Fast 2x model",
+  "Fast is instant. MangaJaNai is slower but keeps lines and screentone closer to print. Color pages, including most manhwa and manhua, use the fast model.":
+    "Fast is instant. MangaJaNai is slower but keeps lines and screentone closer to print. Color pages, including most manhwa and manhua, use the fast model.",
+  Feed: "Feed",
+  "Find external subtitles for Auto sync": "Find external subtitles for Auto sync",
+  "Find manga adaptations": "Find manga adaptations",
+  "Force your size, font, and color onto styled subs so every file looks consistent. Best for Arabic or subs showing boxes.":
+    "Force your size, font, and color onto styled subs so every file looks consistent. Best for Arabic or subs showing boxes.",
+  "games.cloud.": "games.cloud.",
+  "games.details.hltbSource": "View on HowLongToBeat",
+  "games.download.bundle.chooseLink":
+    "Choose the paused or failed file whose download link you want to update.",
+  "games.download.bundle.confirmDelete": "Delete game downloads",
+  "games.download.bundle.delete": "Delete downloaded files",
+  "games.download.bundle.deleteCounts":
+    "{files} direct files and {folders} dedicated torrent folders",
+  "games.download.bundle.deletePauseFirst":
+    "Pause this game's downloads first, then delete. Finished files can also be deleted.",
+  "games.download.bundle.deleteScope":
+    "Other files in shared download destinations and installed games are not deleted.",
+  "games.download.bundle.deleteWarning":
+    "This permanently deletes the files recorded for this game. This action cannot be undone.",
+  "games.download.bundle.details": "Show individual files ({count})",
+  "games.download.bundle.files": "{count} files",
+  "games.download.bundle.overall": "Overall progress",
+  "games.download.bundle.speed": "Download Speed",
+  "games.download.bundle.toggle": "Expand or collapse downloads for {name}",
+  "games.download.chooseFolder": "Choose another folder",
+  "games.download.enterFolder": "Open {name}",
+  "games.download.folders": "Folders",
+  "games.download.foldersUnavailable": "Could not read this folder. Try Choose folder instead.",
+  "games.download.folderUp": "Up one folder",
+  "games.download.noFolders":
+    "No subfolders here. You can download into this folder or choose another.",
+  "games.download.recovery.connect": "Connect TorBox to refresh expired download links.",
+  "games.download.recovery.error": "TorBox recovery could not complete.",
+  "games.download.recovery.result":
+    "Refreshed {count} TorBox download links. Verifying saved data...",
+  "games.download.recovery.retry": "Retry TorBox recovery",
+  "games.download.recovery.running": "Refreshing expired TorBox download links...",
+  "games.download.recovery.starting": "Checking expired TorBox download links...",
+  "games.download.recovery.unmatched":
+    "No safe match found in TorBox. Existing downloads were kept.",
+  "games.download.relink.timeRemaining": "~{time} remaining for verification",
+  "games.download.relink.verificationProgress": "Verifying {size} / {total} saved",
+  "games.sources.download.direct": "Direct download",
+  "games.sources.download.directNote":
+    "Download directly to your PC using Harbor's download manager.",
+  "games.sources.download.downloadSize": "Download size:",
+  "games.sources.download.installedSize": "Installed game size:",
+  "games.sources.download.method": "Download method",
+  "games.sources.download.native": "Download in Harbor",
+  "games.sources.download.nativeNote":
+    "Use Harbor's native torrent engine to review and download the files.",
+  "games.sources.download.repackSize": "Repack / release size:",
+  "games.sources.download.sizeNotProvided": "Not provided by source",
+  "Group the manga you want to keep close.": "Group the manga you want to keep close.",
+  "Hide advanced": "Hide advanced",
+  "Hide group title on Home": "Hide group title on Home",
+  "High-quality model": "High-quality model",
+  "Home section": "Home section",
+  "Home sections": "Home sections",
+  "Install Moonshine test runtime": "Install Moonshine test runtime",
+  "Installed locally. The model is used for difficult subtitle sync attempts.":
+    "Installed locally. The model is used for difficult subtitle sync attempts.",
+  "Installed size": "Installed size",
+  "Instant: a quick pass on the page you are reading.":
+    "Instant: a quick pass on the page you are reading.",
+  "Keep the file's look": "Keep the file's look",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "Keeps the file's colors, size, and sign placement, but swaps in your font.",
+  "Language model installed": "Language model installed",
+  "Language model not installed": "Language model not installed",
+  "Language model to manage": "Language model to manage",
+  "Listening to playback": "Listening to playback",
+  "Manage Moonshine models": "Manage Moonshine models",
+  "Manga Shaders": "Manga Shaders",
+  "Manga upscaling": "Manga upscaling",
+  MangaJaNai: "MangaJaNai",
+  "MangaJaNai 2x": "MangaJaNai 2x",
+  "Manually stopped for this episode": "Manually stopped for this episode",
+  "Match my size": "Match my size",
+  "Matched embedded subtitles": "Matched embedded subtitles",
+  "Matching source": "Matching source",
+  "Moonshine direct (testing)": "Moonshine direct (testing)",
+  "Moonshine language": "Moonshine language",
+  "Moonshine language selection": "Moonshine language selection",
+  "Moonshine operation failed": "Moonshine operation failed",
+  "Moonshine's manual language override is set to":
+    "Moonshine's manual language override is set to",
+  "Move left": "Move left",
+  "Move right": "Move right",
+  "music.dock.autoHide": "Automatically hide the music player bar",
+  "music.dock.autoHideHelp":
+    "When enabled, the bar slides down after 2 seconds without interaction. Move your cursor to the bottom edge to bring it back. Off by default.",
+  "music.spotify.browsingLabel": "Browsing",
+  "music.spotifySetup.browseOptional": "Optional",
+  "music.spotifySetup.intro":
+    "Pair Spotify to stream music in Harbor. Spotify Premium is required. Browsing with your own Developer app is optional.",
+  "music.spotifySetup.repair": "Re-pair this device",
+  "music.videos.closeMini": "Close mini player",
+  "music.videos.mini": "Mini player",
+  "music.videos.miniHint": "Keep the video playing in the corner when you leave this page.",
+  "music.videos.resizeMini": "Resize mini player",
+  "New Home section": "New Home section",
+  "Next episode downloaded": "Next episode downloaded",
+  "Next episode: no matching source found": "Next episode: no matching source found",
+  "No award": "No award",
+  "No downloadable next-episode source is available.":
+    "No downloadable next-episode source is available.",
+  "No matching manga found in this source": "No matching manga found in this source",
+  "No matching release found for the next episode.":
+    "No matching release found for the next episode.",
+  "No matching source": "No matching source",
+  "No WebGPU graphics found. Pages will upscale on the CPU and take longer.":
+    "No WebGPU graphics found. Pages will upscale on the CPU and take longer.",
+  "Not available while only the font changes.": "Not available while only the font changes.",
+  "On by default: Continue Watching lets you play the next episode even when its release date is still in the future. Turn this off to block Play until it airs. The countdown and Upcoming label stay visible either way.":
+    "On by default: Continue Watching lets you play the next episode even when its release date is still in the future. Turn this off to block Play until it airs. The countdown and Upcoming label stay visible either way.",
+  "On still-airing series": "On still-airing series",
+  "On the TV": "On the TV",
+  "One 64 MB model per page height. Download it once to unlock MangaJaNai quality.":
+    "One 64 MB model per page height. Download it once to unlock MangaJaNai quality.",
+  "Only pages the browser is stretching. Each page is processed once and cached, so scrolling back is instant.":
+    "Only pages the browser is stretching. Each page is processed once and cached, so scrolling back is instant.",
+  "Optional one-time download. Speech recognition runs on your device; the model is kept between app updates.":
+    "Optional one-time download. Speech recognition runs on your device; the model is kept between app updates.",
+  "Pre-download notifications": "Pre-download notifications",
+  "Pre-download skipped to protect the currently playing torrent.":
+    "Pre-download skipped to protect the currently playing torrent.",
+  "Pre-downloading {episode}": "Pre-downloading {episode}",
+  "Preparing in the background": "Preparing in the background",
+  "Primary profile PIN": "Primary profile PIN",
+  "Processing Moonshine request…": "Processing Moonshine request…",
+  "PublicMetaDB will mark this show as Dropped, remove it from your PMDB watchlist if present, and clear saved resume progress. Watched episode history is kept.":
+    "PublicMetaDB will mark this show as Dropped, remove it from your PMDB watchlist if present, and clear saved resume progress. Watched episode history is kept.",
+  "Reference subtitles suggest a shift, but video audio verification was unavailable. Confirm the timing before keeping it.":
+    "Reference subtitles suggest a shift, but video audio verification was unavailable. Confirm the timing before keeping it.",
+  "Remove model": "Remove model",
+  "Remove section": "Remove section",
+  "Removes tags the subtitle hardcodes per line, such as its own font or colors. Needed when Use my style does not change the text. Breaks signs and karaoke.":
+    "Removes tags the subtitle hardcodes per line, such as its own font or colors. Needed when Use my style does not change the text. Breaks signs and karaoke.",
+  "Removing a section moves its groups back to My Groups. Your groups and lists are kept.":
+    "Removing a section moves its groups back to My Groups. Your groups and lists are kept.",
+  "Reset background": "Reset background",
+  "Reset size & position": "Reset size & position",
+  "Resize & move": "Resize & move",
+  "Resume last watched": "Resume last watched",
+  "Running on {provider}": "Running on {provider}",
+  "Searching in the background": "Searching in the background",
+  "Section name": "Section name",
+  "Select best available source automatically": "Select best available source automatically",
+  "Select downloads for {title}": "Select downloads for {title}",
+  "Select multiple": "Select multiple",
+  "Selected downloads": "Selected downloads",
+  "Sharpens pages that are smaller than the screen. Runs locally and is cached after the first read.":
+    "Sharpens pages that are smaller than the screen. Runs locally and is cached after the first read.",
+  "Show in": "Show in",
+  "Show More Like This after the latest aired episode, even when future episodes are listed. It still won't appear before the latest aired episode.":
+    "Show More Like This after the latest aired episode, even when future episodes are listed. It still won't appear before the latest aired episode.",
+  "Show the movie or show logo instead of its name at the top of the player when artwork is available.":
+    "Show the movie or show logo instead of its name at the top of the player when artwork is available.",
+  "Silero can still sync without it. This model downloads only if you approve. If the audio language is wrong, change Moonshine's override in Settings.":
+    "Silero can still sync without it. This model downloads only if you approve. If the audio language is wrong, change Moonshine's override in Settings.",
+  'Simkl has no separate unwatched state. Unwatching "{title}" removes it from your Simkl library and watch history.':
+    'Simkl has no separate unwatched state. Unwatching "{title}" removes it from your Simkl library and watch history.',
+  "Speech engine": "Speech engine",
+  "Speech engine (testing)": "Speech engine (testing)",
+  "Speech model operation failed": "Speech model operation failed",
+  "Spotify browsing authorization could not be confirmed. Try again.":
+    "Spotify browsing authorization could not be confirmed. Try again.",
+  "Spotify browsing authorized. Playback uses device pairing separately.":
+    "Spotify browsing authorized. Playback uses device pairing separately.",
+  "Sync from playback": "Sync from playback",
+  "Target profile PIN": "Target profile PIN",
+  "The experimental runtime needs Python 3. Native runtime bundling is not yet available in this build.":
+    "The experimental runtime needs Python 3. Native runtime bundling is not yet available in this build.",
+  "The New, In Cinema, Rerun. Turn off for a cleaner grid. Score chips are separate, below.":
+    "The New, In Cinema, Rerun. Turn off for a cleaner grid. Score chips are separate, below.",
+  "The next-episode source is not downloadable.": "The next-episode source is not downloadable.",
+  "The saved audio track could not be restored. Choose an audio track.":
+    "The saved audio track could not be restored. Choose an audio track.",
+  "The saved subtitle could not be restored. Choose a subtitle.":
+    "The saved subtitle could not be restored. Choose a subtitle.",
+  "The saved subtitle timing could not be restored.":
+    "The saved subtitle timing could not be restored.",
+  "The selected audio track is labeled": "The selected audio track is labeled",
+  "The show could not be dropped.": "The show could not be dropped.",
+  "Theatre mode": "Theatre mode",
+  "This device cannot run the upscaler.": "This device cannot run the upscaler.",
+  "This estimate matches subtitles embedded in the video. They may also be mistimed against speech.":
+    "This estimate matches subtitles embedded in the video. They may also be mistimed against speech.",
+  "This offset was measured against embedded dialogue near your current scene. Applying it shifts the whole subtitle track; other scenes may still need different timing.":
+    "This offset was measured against embedded dialogue near your current scene. Applying it shifts the whole subtitle track; other scenes may still need different timing.",
+  "This source opens a website and cannot be downloaded. Choose another source.":
+    "This source opens a website and cannot be downloaded. Choose another source.",
+  "This torrent is already playing. Choose another source to avoid interrupting playback.":
+    "This torrent is already playing. Choose another source to avoid interrupting playback.",
+  "to a template to switch between landscape and poster.":
+    "to a template to switch between landscape and poster.",
+  "Toggle off and on to retry": "Toggle off and on to retry",
+  "Transcribe brief speech samples on your device to synchronize difficult subtitles. Harbor uses an installed model matching your audio track and asks before downloading a missing one.":
+    "Transcribe brief speech samples on your device to synchronize difficult subtitles. Harbor uses an installed model matching your audio track and asks before downloading a missing one.",
+  "Transferring...": "Transferring...",
+  "Translate lyrics to": "Translate lyrics to",
+  "Turn off pre-download notifications": "Turn off pre-download notifications",
+  "Turn on pre-download notifications": "Turn on pre-download notifications",
+  "TV cards use 16:9 art when the service supports it; add":
+    "TV cards use 16:9 art when the service supports it; add",
+  "Unwatch everywhere": "Unwatch everywhere",
+  "Unwatch this movie?": "Unwatch this movie?",
+  "Upscale chapter": "Upscale chapter",
+  "Upscale manga pages": "Upscale manga pages",
+  "Upscale pages": "Upscale pages",
+  "Upscaling can cause lag on slower graphics cards. If MangaJaNai lags, try Fast; if Fast still lags, turn upscaling off.":
+    "Upscaling can cause lag on slower graphics cards. If MangaJaNai lags, try Fast; if Fast still lags, turn upscaling off.",
+  "Upscaling model": "Upscaling model",
+  "Use same release as current playback": "Use same release as current playback",
+  "Use title artwork in the player": "Use title artwork in the player",
+  "Using remembered online source": "Using remembered online source",
+  "Video type": "Video type",
+  "waifu2x upconv7, 2.1 MB. Licensed MIT, downloaded from Hugging Face. One download, then it works offline.":
+    "waifu2x upconv7, 2.1 MB. Licensed MIT, downloaded from Hugging Face. One download, then it works offline.",
+  "When a page needs a height you have not downloaded, fetch that MangaJaNai model (64 MB) in the background.":
+    "When a page needs a height you have not downloaded, fetch that MangaJaNai model (64 MB) in the background.",
+  "When the languages differ, Harbor can use a subtitle from the same release as a timing reference. With speech recognition enabled and its model installed, Auto sync and Sync from playback can also compare speech and pauses to suggest a timing shift for you to review.":
+    "When the languages differ, Harbor can use a subtitle from the same release as a timing reference. With speech recognition enabled and its model installed, Auto sync and Sync from playback can also compare speech and pauses to suggest a timing shift for you to review.",
+  "Whisper is not included in this build. Install a Windows Harbor build with Whisper support.":
+    "Whisper is not included in this build. Install a Windows Harbor build with Whisper support.",
+  "Whisper model download progress": "Whisper model download progress",
+  "Whisper Tiny speech model": "Whisper Tiny speech model",
+  "You can add up to {count} catalogs. Remove one first.":
+    "You can add up to {count} catalogs. Remove one first.",
+  "Your profile changed. Open the menu again and retry.":
+    "Your profile changed. Open the menu again and retry.",
+  "Sync watch progress with AniList": "Sync watch progress with AniList",
+  "Sync watch progress with MyAnimeList": "Sync watch progress with MyAnimeList",
+  "Offset badge position": "Offset badge position",
+  "Offset badge size": "Offset badge size",
+  "Sync badge position": "Sync badge position",
+  "Subtitle font size": "Subtitle font size",
+  "Poster size": "Poster size",
 };
 
 export default uiFallback;

@@ -5,10 +5,7 @@ import {
   type AnimeCharacter,
 } from "@/lib/providers/anime-characters";
 
-export function useAnimeCharacters(
-  canonicalId: string | null,
-  isAnime: boolean,
-): AnimeCharacter[] {
+export function useAnimeCharacters(canonicalId: string | null, isAnime: boolean): AnimeCharacter[] {
   const [characters, setCharacters] = useState<AnimeCharacter[]>([]);
 
   useEffect(() => {

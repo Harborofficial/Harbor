@@ -331,7 +331,8 @@ export async function resolveViaDebrids(
     if (signal.aborted) return { ok: false, code: "aborted", tried };
     if (refreshAfterFailure) invalidatePreparedDebridLink(stream, d, hint);
     const prepared = refreshAfterFailure
-      ? null : await getPreparedDebridLink(stream, d, hint, signal);
+      ? null
+      : await getPreparedDebridLink(stream, d, hint, signal);
     const r: DebridResult<DirectLink> = prepared
       ? { ok: true, data: prepared }
       : await d.playableUrl(magnet, fileIdx, signal, hint);

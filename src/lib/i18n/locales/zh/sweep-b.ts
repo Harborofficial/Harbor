@@ -173,8 +173,7 @@ const sweepB: Record<string, string> = {
     "可使用以下任一工具制作包，导出 JSON，将其托管为 gist，然后在下方粘贴原始链接。",
   "Build a source plugin": "构建来源插件",
   "Build from source": "从源代码构建",
-  "Build identity. Useful when filing a bug report.":
-    "版本标识。提交错误报告时很有用。",
+  "Build identity. Useful when filing a bug report.": "版本标识。提交错误报告时很有用。",
   "Build your own": "打造属于你的",
   "Build your own palette": "创建自己的配色方案",
   "Building EPUB": "正在生成 EPUB",
@@ -298,7 +297,8 @@ const sweepB: Record<string, string> = {
   "Checking {n} items…#one": "正在检查 {n} 个条目…",
   "Checking {total} episodes for sources.": "正在检查 {total} 集的可用来源。",
   "Checking availability": "正在检查是否可用",
-  "Checking harborcommunity.site for a newer build.": "正在检查 harborcommunity.site 上是否有新版本。",
+  "Checking harborcommunity.site for a newer build.":
+    "正在检查 harborcommunity.site 上是否有新版本。",
   "checking now": "正在检查",
   "checking other sources": "正在检查其他来源",
   "Checking SVP installation...": "正在检查 SVP 安装……",
@@ -468,9 +468,11 @@ const sweepB: Record<string, string> = {
     "评论在你主动显示前会被模糊处理，即使未标记为剧透也是如此。",
   "Comments are hidden": "评论已隐藏",
   "Hosted elsewhere": "由外部托管",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "这些套餐由第三方运营。Harbor 与其无关联，也不会因注册获得任何收益。最新价格和条款请见其网站。",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "这些套餐由第三方运营。Harbor 与其无关联，也不会因注册获得任何收益。最新价格和条款请见其网站。",
   "{name} can run on a hosted instance": "{name} 可以运行在托管实例上",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "该服务由第三方运营。Harbor 与其无关联，不转售，也不会因您注册获得任何收益。价格及包含内容请见其网站。",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "该服务由第三方运营。Harbor 与其无关联，不转售，也不会因您注册获得任何收益。价格及包含内容请见其网站。",
   "Show comments": "显示评论",
   "Hide comments": "隐藏评论",
   Compact: "紧凑",
@@ -1166,7 +1168,8 @@ const sweepB: Record<string, string> = {
   "Episodes you can drop into without losing the thread.": "随时看一集，也不会跟丢剧情。",
   "Cached source resolution and direct download links.": "已缓存来源解析与直接下载链接。",
   "Cached source resolution and cloud library access.": "已缓存来源解析与云端资料库访问。",
-  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.": "“两者”会同时显示直链、debrid 和 P2P 结果。“直链/debrid”仅在没有其他来源时才显示 P2P 结果。“P2P”则将其排在最前。",
+  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.":
+    "“两者”会同时显示直链、debrid 和 P2P 结果。“直链/debrid”仅在没有其他来源时才显示 P2P 结果。“P2P”则将其排在最前。",
 };
 
 export default sweepB;

@@ -29,7 +29,9 @@ function mapCdnItem(item: SimklCdnItem, type: "tv" | "movie", isAnime: boolean):
     name = `${item.title} S${pad(item.episode.season)}E${pad(item.episode.episode)}`;
   }
 
-  const poster = item.poster ? `https://wsrv.nl/?url=https://simkl.in/posters/${item.poster}_m.webp&q=90` : null;
+  const poster = item.poster
+    ? `https://wsrv.nl/?url=https://simkl.in/posters/${item.poster}_m.webp&q=90`
+    : null;
 
   return {
     id,
@@ -45,7 +47,9 @@ function mapCdnItem(item: SimklCdnItem, type: "tv" | "movie", isAnime: boolean):
   };
 }
 
-export async function fetchSimklCdnRolling(catalog: "tv" | "anime" | "movie"): Promise<CalendarItem[]> {
+export async function fetchSimklCdnRolling(
+  catalog: "tv" | "anime" | "movie",
+): Promise<CalendarItem[]> {
   const filename = catalog === "movie" ? "movie_release.json" : `${catalog}.json`;
   try {
     const res = await fetch(cdnUrl(filename), { headers: { "User-Agent": UA } });

@@ -1,10 +1,16 @@
 import { fillStyle, SliderReset } from "@/components/slider";
 import { DEFAULT } from "@/lib/settings/defaults";
-import { Plus, RotateCcw, X } from "../icons";
+import { AlertTriangle, Plus, RotateCcw, X } from "../icons";
 import { useEffect, useRef, useState } from "react";
 import subtitleStill from "@/assets/godfather-offer.svg";
 import { sfntFamilyName } from "@/lib/font-family-name";
 import { saveFontData } from "@/lib/font-storage";
+import {
+  installCustomFont,
+  libassFontExt,
+  listInstalledSubFonts,
+  removeCustomFont,
+} from "@/lib/player/sub-font-install";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { advanceFocus, captureFocusReturn } from "@/lib/keyboard-navigation";
@@ -91,8 +97,7 @@ export function SubtitleStylePanel() {
   const { settings, update } = useSettings();
   const t = useT();
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const useMyStyle =
-    settings.subAssOverride === "force" || settings.subAssOverride === "strip";
+  const useMyStyle = settings.subAssOverride === "force" || settings.subAssOverride === "strip";
   const lastLookMode = useRef<"no" | "scale" | "font">("no");
   useEffect(() => {
     const mode = settings.subAssOverride;
@@ -252,7 +257,7 @@ export function SubtitleStylePanel() {
       <SettingGroup label={t("Text")}>
         <SettingRow
           wide
-          label={t("Size")}
+          label={t("Subtitle font size")}
           desc={t("How large subtitles are drawn on the video, at any window size.")}
         >
           <div className={SLIDER_WRAP}>
@@ -263,7 +268,7 @@ export function SubtitleStylePanel() {
               step={1}
               value={settings.subFontSize}
               onChange={(e) => update({ subFontSize: parseInt(e.target.value, 10) })}
-              aria-label={t("Size")}
+              aria-label={t("Subtitle font size")}
               className="harbor-slider h-11 min-w-0 flex-1"
               style={fillStyle(settings.subFontSize, 16, 120)}
             />
@@ -603,6 +608,7 @@ function FontPicker() {
   const uploadRef = useRef<HTMLButtonElement>(null);
   const [error, setError] = useState<FontImportError | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [installed, setInstalled] = useState<Set<string> | null>(null);
   const customFonts = settings.customFonts ?? [];
   const errorMessage =
     error?.kind === "too-large"
@@ -614,6 +620,22 @@ function FontPicker() {
         : error?.kind === "save-failed"
           ? t("Couldn't save that font. It may be invalid, or storage is full.")
           : null;
+
+  // Which custom fonts have a file libass can read. The browser preview can load a
+  // font that styled subtitles never see, so the two checks must stay separate.
+  useEffect(() => {
+    let live = true;
+    void listInstalledSubFonts().then((ids) => {
+      if (live) setInstalled(ids ? new Set(ids) : null);
+    });
+    return () => {
+      live = false;
+    };
+  }, [customFonts]);
+
+  function styledUnavailable(font: { id: string; format: string }): boolean {
+    return libassFontExt(font.format) == null || (installed != null && !installed.has(font.id));
+  }
 
   useEffect(() => {
     if (!error) return;
@@ -652,18 +674,18 @@ function FontPicker() {
       const face = new FontFace(`harbor-font-${id}`, bytes, { display: "swap" });
       await face.load();
       await saveFontData(id, dataUrl);
-      document.fonts.add(face);
       const baseName = file.name.replace(/\.(ttf|otf|woff2?|ttc)$/i, "");
-      const next = [
-        ...customFonts,
-        {
-          id,
-          name: baseName || `Custom ${customFonts.length + 1}`,
-          family,
-          format: formatMap[ext],
-        },
-      ];
-      update({ customFonts: next, subFontFamily: `custom:${id}` });
+      const font = {
+        id,
+        name: baseName || `Custom ${customFonts.length + 1}`,
+        family,
+        format: formatMap[ext],
+      };
+      // Write it while the bytes are in hand. Waiting for a later settings effect
+      // could lose the file when the user leaves this page or changes webview origin.
+      await installCustomFont(font, dataUrl);
+      document.fonts.add(face);
+      update({ customFonts: [...customFonts, font], subFontFamily: `custom:${id}` });
     } catch (e) {
       console.warn("[fonts] read failed", e);
       setError({ kind: "save-failed" });
@@ -678,14 +700,30 @@ function FontPicker() {
     };
     if (settings.subFontFamily === family) patch.subFontFamily = "inter";
     update(patch);
+    void removeCustomFont(id);
     setConfirmId(null);
     if (uploadRef.current) advanceFocus(uploadRef.current);
   };
 
-  const allFonts = [
+  const allFonts: Array<{
+    id: string;
+    label: string;
+    custom: boolean;
+    fontId?: string;
+    format?: string;
+  }> = [
     ...PRESET_FONTS.map((f) => ({ id: f.id as string, label: f.label, custom: false })),
-    ...customFonts.map((f) => ({ id: `custom:${f.id}`, label: f.name, custom: true })),
+    ...customFonts.map((f) => ({
+      id: `custom:${f.id}`,
+      label: f.name,
+      custom: true,
+      fontId: f.id,
+      format: f.format,
+    })),
   ];
+
+  const selectedFont = customFonts.find((f) => `custom:${f.id}` === settings.subFontFamily);
+  const selectedStyledUnavailable = selectedFont ? styledUnavailable(selectedFont) : false;
 
   const confirmFont = customFonts.find((f) => `custom:${f.id}` === `custom:${confirmId}`);
 
@@ -724,6 +762,10 @@ function FontPicker() {
         {allFonts.map((f) => {
           const sel = settings.subFontFamily === f.id;
           const broken = f.custom && unloaded.has(f.id.slice("custom:".length));
+          const styledBlocked =
+            f.custom && f.fontId
+              ? styledUnavailable({ id: f.fontId, format: f.format ?? "" })
+              : false;
           return (
             <div key={f.id} className="flex min-w-0 items-stretch gap-1.5">
               <button
@@ -731,7 +773,13 @@ function FontPicker() {
                 aria-pressed={sel}
                 onClick={() => update({ subFontFamily: f.id })}
                 title={
-                  broken ? t("This font did not load. Remove it and upload it again.") : undefined
+                  broken
+                    ? t("This font did not load. Remove it and upload it again.")
+                    : styledBlocked
+                      ? t(
+                          "This font is not available to styled (ASS) subtitles. Re-import it as a TTF or OTF file.",
+                        )
+                      : undefined
                 }
                 className={`flex h-14 min-w-0 flex-1 items-center justify-center rounded-[10px] border px-3 text-[16.5px] font-semibold transition-colors ${
                   broken
@@ -742,7 +790,12 @@ function FontPicker() {
                 }`}
                 style={{ fontFamily: previewFamily(f.id) }}
               >
-                <span className="min-w-0 break-words">{f.custom ? f.label : t(f.label)}</span>
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <span className="min-w-0 break-words">{f.custom ? f.label : t(f.label)}</span>
+                  {styledBlocked && (
+                    <AlertTriangle size={13} strokeWidth={2.4} className="shrink-0 text-danger" />
+                  )}
+                </span>
               </button>
               {f.custom && (
                 <button
@@ -767,6 +820,16 @@ function FontPicker() {
           {t("Upload font")}
         </button>
       </div>
+      {selectedStyledUnavailable && (
+        <p className="flex max-w-[70ch] items-start gap-2 rounded-[10px] bg-elevated px-4 py-3 text-[15.5px] leading-[22px] text-danger">
+          <AlertTriangle size={16} strokeWidth={2.4} className="mt-0.5 shrink-0" />
+          <span>
+            {t(
+              "This font is not available to styled (ASS) subtitles. Re-import it as a TTF or OTF file.",
+            )}
+          </span>
+        </p>
+      )}
       <input
         ref={fileRef}
         type="file"

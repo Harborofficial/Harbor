@@ -36,6 +36,7 @@ import { copyText } from "@/lib/clipboard-text";
 import type { EBookChapter, EBookChapterContent } from "@/lib/ebook/providers";
 import { ebookTextIdentity } from "@/lib/ebook/chapter-locations";
 import { createEBookFlipPages, type EBookFlipPages } from "@/lib/ebook/book-pages";
+import { PdfDocumentError, pdfFlipbookPages } from "@/lib/ebook/pdf";
 import {
   addEBookBookmark,
   loadEBookAnnotations,
@@ -511,6 +512,60 @@ type ReaderSelection = {
   annotationId?: string;
 };
 
+function pdfChapterSource(id: string): { path: string; page: number } | null {
+  try {
+    const [path, part] = JSON.parse(id) as [string, string];
+    const match = /^pdf:(\d+)$/.exec(part);
+    if (!match || !/\.pdf$/i.test(path)) return null;
+    return { path, page: Number(match[1]) };
+  } catch {
+    return null;
+  }
+}
+
+export function PdfPageView({
+  image,
+  pdf,
+}: {
+  image: string;
+  pdf: NonNullable<EBookChapterContent["pdf"]>;
+}) {
+  const root = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const node = root.current;
+    if (!node) return;
+    const update = () => {
+      const width = node.getBoundingClientRect().width;
+      if (width > 0 && pdf.width > 0) setScale(width / pdf.width);
+    };
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [pdf.width]);
+
+  return (
+    <div ref={root} className="relative mx-auto my-10 inline-block max-w-full">
+      <img
+        src={image}
+        alt=""
+        className="block max-h-[80vh] w-auto max-w-full rounded"
+        draggable={false}
+      />
+      {pdf.textLayer && (
+        <div
+          className="pdf-text-layer"
+          style={{ "--scale-factor": scale } as CSSProperties}
+          dangerouslySetInnerHTML={{ __html: pdf.textLayer }}
+        />
+      )}
+    </div>
+  );
+}
+
 export function HarborReader({
   profile,
   bookId,
@@ -609,7 +664,12 @@ export function HarborReader({
   } | null>(null);
   const [readerText, setReaderText] = useState(content.text ?? "");
   const originalTitle = chapter.title || bookTitle;
-  const originalText = content.originalText ?? content.text ?? "";
+  const pdfPage = Boolean(content.pdf);
+  const pdfText = content.pdf?.text ?? "";
+  const originalText = content.originalText ?? content.text ?? pdfText;
+  const textAvailable = Boolean(originalText.trim());
+  const imageOnly = !textAvailable && Boolean(content.images?.length);
+  const readingMode = prefs.mode;
   const [readerTitle, setReaderTitle] = useState(content.translatedTitle ?? originalTitle);
   const [translation, setTranslation] = useState(() =>
     content.translated
@@ -662,13 +722,21 @@ export function HarborReader({
   const textIdentity = useMemo(() => ebookTextIdentity(readerText), [readerText]);
   const paragraphs = useMemo(
     () =>
-      readerText
-        .replace(/\r/g, "")
-        .split(/\n{2,}/)
-        .map((value) => value.replace(/\n/g, " ").trim())
-        .filter(Boolean),
-    [readerText],
+      pdfPage
+        ? pdfText
+          ? pdfText
+              .split(/\n+/)
+              .map((value) => value.trim())
+              .filter(Boolean)
+          : []
+        : readerText
+            .replace(/\r/g, "")
+            .split(/\n{2,}/)
+            .map((value) => value.replace(/\n/g, " ").trim())
+            .filter(Boolean),
+    [pdfPage, pdfText, readerText],
   );
+  const paragraphProgress = pdfPage ? 1 : Math.max(1, paragraphs.length);
   const resumeVolumeLabel =
     chapter.volumeTitle ||
     (chapter.volume ? t("Volume {volume}", { volume: chapter.volume }) : undefined);
@@ -716,8 +784,9 @@ export function HarborReader({
       next: EBookFlipPages,
       targetParagraph: number,
       presentation: { rtl: boolean; background: string },
+      resumePage?: number,
     ) => {
-      const page = pageForParagraph(next.paragraphStarts, targetParagraph);
+      const page = resumePage ?? pageForParagraph(next.paragraphStarts, targetParagraph);
       const layer: EBookFlipLayer = {
         id: ++flipLayerSequence.current,
         pages: next,
@@ -787,10 +856,39 @@ export function HarborReader({
   );
 
   useEffect(() => {
-    if (prefs.mode !== "book") return;
+    if (readingMode !== "book") return;
     setFlipFailed(false);
     const controller = new AbortController();
     const generation = ++flipGeneration.current;
+    const pdfSource = pdfPage ? pdfChapterSource(chapter.id) : null;
+    if (pdfSource) {
+      const timer = window.setTimeout(() => {
+        void pdfFlipbookPages(pdfSource.path, controller.signal)
+          .then((urls) => {
+            if (controller.signal.aborted || generation !== flipGeneration.current) return;
+            replaceFlipPages(
+              { urls, paragraphStarts: urls.map(() => 0) },
+              0,
+              { rtl: effectiveDirection === "rtl", background: colors.desk },
+              pdfSource.page - 1,
+            );
+          })
+          .catch((error) => {
+            const cancelled =
+              controller.signal.aborted ||
+              (error instanceof DOMException && error.name === "AbortError") ||
+              (error instanceof PdfDocumentError && error.kind === "cancelled");
+            if (!cancelled) {
+              console.warn("[ebook/book-pages]", error);
+              if (generation === flipGeneration.current) setFlipFailed(true);
+            }
+          });
+      }, 0);
+      return () => {
+        window.clearTimeout(timer);
+        controller.abort();
+      };
+    }
     const active = flipPagesRef.current;
     const saved = loadEBookProgress(profile, bookId, progressId);
     const targetParagraph = active.urls.length ? Math.max(0, tracedLine.current) : saved;
@@ -836,6 +934,7 @@ export function HarborReader({
   }, [
     bookCover,
     bookId,
+    chapter.id,
     chapterIndex,
     colors.ink,
     colors.muted,
@@ -847,7 +946,8 @@ export function HarborReader({
     prefs.customFontId,
     prefs.fontSize,
     prefs.lineHeight,
-    prefs.mode,
+    pdfPage,
+    readingMode,
     profile,
     progressId,
     readerText,
@@ -974,7 +1074,12 @@ export function HarborReader({
   const goTo = useCallback(
     (index: number) => {
       const next = Math.max(0, Math.min(paragraphs.length - 1, index));
-      if (prefs.mode === "book" && flipPages.urls.length) {
+      if (pdfPage) {
+        tracedLine.current = 0;
+        setCurrent(0);
+        return;
+      }
+      if (readingMode === "book" && flipPages.urls.length) {
         const page = pageForParagraph(flipPages.paragraphStarts, next);
         bookApi.current?.goToPage(page + 1);
         setFlipPage(page);
@@ -987,7 +1092,7 @@ export function HarborReader({
       tracedLine.current = next;
       setCurrent(next);
     },
-    [flipPages.paragraphStarts, flipPages.urls.length, paragraphs.length, prefs.mode],
+    [flipPages.paragraphStarts, flipPages.urls.length, paragraphs.length, pdfPage, readingMode],
   );
 
   useEffect(() => {
@@ -1015,7 +1120,7 @@ export function HarborReader({
       root.removeEventListener("scroll", update);
       cancelAnimationFrame(frame);
     };
-  }, [bookId, prefs.mode, profile, progressId, updateTrace]);
+  }, [bookId, readingMode, profile, progressId, updateTrace]);
 
   useEffect(() => {
     const page = article.current;
@@ -1033,7 +1138,7 @@ export function HarborReader({
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [prefs.mode, updateTrace]);
+  }, [readingMode, updateTrace]);
 
   useEffect(() => {
     const root = scroller.current;
@@ -1079,7 +1184,7 @@ export function HarborReader({
       root.removeEventListener("wheel", onWheel);
       window.clearTimeout(reset);
     };
-  }, [paragraphs.length, persistReadingPosition, prefs.mode, updateTrace]);
+  }, [paragraphs.length, persistReadingPosition, readingMode, updateTrace]);
 
   useEffect(() => {
     const root = scroller.current;
@@ -1167,7 +1272,7 @@ export function HarborReader({
       root.removeEventListener("pointercancel", up);
       root.removeEventListener("click", click, true);
     };
-  }, [prefs.mode, updateTrace]);
+  }, [readingMode, updateTrace]);
 
   useEffect(() => {
     return () => {
@@ -1567,7 +1672,7 @@ export function HarborReader({
   }, [prefs.mouseLineTrack, prefs.fontSize, prefs.lineHeight, prefs.width, updateTrace]);
 
   useEffect(() => {
-    if (prefs.mode !== "harbor") return;
+    if (readingMode !== "harbor") return;
     traceY.current = null;
     smartTarget.current = tracedLine.current >= 0 ? tracedLine.current : 0;
     let secondFrame = 0;
@@ -1578,7 +1683,7 @@ export function HarborReader({
       window.cancelAnimationFrame(firstFrame);
       window.cancelAnimationFrame(secondFrame);
     };
-  }, [prefs.mode, updateTrace]);
+  }, [readingMode, updateTrace]);
 
   const captureSelection = (event: React.MouseEvent<HTMLElement>) => {
     const selected = window.getSelection();
@@ -1784,44 +1889,50 @@ export function HarborReader({
         <div data-tauri-drag-region className="min-w-0 text-center">
           <div className="truncate text-sm font-semibold">{readerTitle}</div>
           <div className="mt-0.5 text-[11px]" style={{ color: colors.muted }}>
-            {prefs.mode === "book"
+            {readingMode === "book"
               ? `${flipPage + 1} / ${Math.max(1, flipPages.urls.length)}`
-              : `${current + 1} / ${Math.max(1, paragraphs.length)}`}{" "}
+              : `${current + 1} / ${paragraphProgress}`}{" "}
             · {bookTitle}
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <button
-            className="reader-icon"
-            onClick={() => {
-              setPanel("search");
-              setChaptersOpen(false);
-            }}
-            aria-label={t("Search chapter")}
-          >
-            <Search size={18} />
-          </button>
-          <button
-            className="reader-icon"
-            onClick={() => {
-              setPanel("annotations");
-              setChaptersOpen(false);
-            }}
-            aria-label={t("Notes and highlights")}
-          >
-            <Highlighter size={18} />
-          </button>
-          <button
-            className="reader-icon"
-            onClick={() => {
-              setPanel("bookmarks");
-              setChaptersOpen(false);
-            }}
-            aria-label={t("Bookmarks")}
-          >
-            <Bookmark size={18} />
-          </button>
-          {prefs.mode === "book" && (
+          {textAvailable && (
+            <button
+              className="reader-icon"
+              onClick={() => {
+                setPanel("search");
+                setChaptersOpen(false);
+              }}
+              aria-label={t("Search chapter")}
+            >
+              <Search size={18} />
+            </button>
+          )}
+          {textAvailable && !pdfPage && (
+            <>
+              <button
+                className="reader-icon"
+                onClick={() => {
+                  setPanel("annotations");
+                  setChaptersOpen(false);
+                }}
+                aria-label={t("Notes and highlights")}
+              >
+                <Highlighter size={18} />
+              </button>
+              <button
+                className="reader-icon"
+                onClick={() => {
+                  setPanel("bookmarks");
+                  setChaptersOpen(false);
+                }}
+                aria-label={t("Bookmarks")}
+              >
+                <Bookmark size={18} />
+              </button>
+            </>
+          )}
+          {readingMode === "book" && (
             <button
               className="reader-icon"
               onClick={() => patchPrefs({ pageTurnSound: !prefs.pageTurnSound })}
@@ -1846,7 +1957,7 @@ export function HarborReader({
         </div>
       </div>
 
-      {prefs.mode === "book" ? (
+      {readingMode === "book" ? (
         <div className="absolute inset-x-0 bottom-16 top-16 overflow-hidden">
           {flipLayers.map((layer) => {
             const isActive = layer.id === activeFlipLayerId;
@@ -1957,37 +2068,52 @@ export function HarborReader({
                 {readerTitle}
               </h1>
             </header>
-            {paragraphs.map((text, index) => (
+            {!pdfPage &&
+              paragraphs.map((text, index) => (
+                <p
+                  key={index}
+                  data-reader-line={index}
+                  ref={(node) => {
+                    blocks.current[index] = node;
+                  }}
+                  className={`relative mb-[1.1em] scroll-mt-24 text-pretty transition-colors ${index === current ? "reader-current" : index < current ? "reader-read" : ""}`}
+                  style={{ textAlign: "start" }}
+                  onMouseEnter={() => prefs.mouseLineTrack && setCurrent(index)}
+                  onDoubleClick={() => {
+                    setCurrent(index);
+                    addBookmark(index);
+                  }}
+                >
+                  {renderText(text, index)}
+                </p>
+              ))}
+            {imageOnly && (
               <p
-                key={index}
-                data-reader-line={index}
-                ref={(node) => {
-                  blocks.current[index] = node;
-                }}
-                className={`relative mb-[1.1em] scroll-mt-24 text-pretty transition-colors ${index === current ? "reader-current" : index < current ? "reader-read" : ""}`}
-                style={{ textAlign: "start" }}
-                onMouseEnter={() => prefs.mouseLineTrack && setCurrent(index)}
-                onDoubleClick={() => {
-                  setCurrent(index);
-                  addBookmark(index);
-                }}
+                className="mb-8 rounded-xl border p-4 text-sm"
+                style={{ borderColor: `${colors.muted}35`, color: colors.muted }}
               >
-                {renderText(text, index)}
+                {t(
+                  "This PDF is shown as page images. Text search, translation, and narration are not available.",
+                )}
               </p>
-            ))}
-            {(content.images ?? []).map((src, index) => (
-              <img
-                key={src + index}
-                src={src}
-                className="mx-auto my-10 max-h-[80vh] max-w-full rounded"
-                alt=""
-              />
-            ))}
+            )}
+            {content.pdf && content.images?.[0] && (
+              <PdfPageView image={content.images[0]} pdf={content.pdf} />
+            )}
+            {!pdfPage &&
+              (content.images ?? []).map((src, index) => (
+                <img
+                  key={src + index}
+                  src={src}
+                  className="mx-auto my-10 max-h-[80vh] max-w-full rounded"
+                  alt=""
+                />
+              ))}
           </article>
         </div>
       )}
 
-      {prefs.mode === "harbor" && trace && (
+      {readingMode === "harbor" && trace && (
         <div
           dir={effectiveDirection}
           className="pointer-events-none fixed z-20 rounded-md transition-[top,height] duration-100"
@@ -2040,14 +2166,16 @@ export function HarborReader({
         >
           <SkipBack size={21} strokeWidth={2} fill="currentColor" />
         </button>
-        <button
-          className="reader-icon"
-          onClick={() => addBookmark()}
-          aria-label={t("Bookmark current passage")}
-        >
-          <Bookmark size={18} />
-        </button>
-        {prefs.mode === "book" && (
+        {textAvailable && !pdfPage && (
+          <button
+            className="reader-icon"
+            onClick={() => addBookmark()}
+            aria-label={t("Bookmark current passage")}
+          >
+            <Bookmark size={18} />
+          </button>
+        )}
+        {readingMode === "book" && (
           <>
             <button
               className="reader-icon"
@@ -2075,136 +2203,151 @@ export function HarborReader({
             </button>
           </>
         )}
-        <button
-          className={`reader-icon ${translation ? "reader-icon-accent reader-language-toggle" : translationError ? "text-red-400" : ""}`}
-          disabled={translating}
-          onClick={translation ? toggleTranslation : () => void translateChapter()}
-          aria-label={
-            translation
-              ? showOriginal
-                ? t("Show translation")
-                : t("Show original language")
-              : t("Translate chapter")
-          }
-          title={
-            translationError ||
-            (translation
-              ? showOriginal
-                ? t("Show translation")
-                : t("Show original language")
-              : t("Translate chapter"))
-          }
-        >
-          {translating ? (
-            <TranslationSpinner />
-          ) : (
-            <>
-              <Languages size={18} />
-              {translation && <span>{showOriginal ? t("Translation") : t("Original")}</span>}
-            </>
-          )}
-        </button>
-        {translating && (
-          <div
-            className="flex items-center gap-1 whitespace-nowrap pe-2 text-[11px] tabular-nums"
-            style={{ color: colors.muted }}
-          >
-            <strong className="text-current">≈{translationProgress.percent}%</strong>
-            <span>·</span>
-            <span>
-              {translationProgress.etaMs == null
-                ? t("Estimating…")
-                : formatEtaLabel(translationProgress.etaMs)}
-            </span>
-          </div>
-        )}
-        <VoicePicker
-          voices={availableNarrationVoices}
-          value={prefs.narrationVoice}
-          disabled={narrationLoading}
-          colors={colors}
-          onChange={(voice) => {
-            stopSpeech();
-            patchPrefs({ narrationVoice: voice });
-          }}
-          previewingVoice={voicePreviewId}
-          previewLoading={voicePreviewLoading}
-          onPreview={(voice) => void previewVoice(voice)}
-        />
-        <button
-          className={`reader-icon ${narrationLoading ? "reader-icon-cancel" : "reader-icon-accent"}`}
-          onClick={
-            narrationLoading ? stopSpeech : speaking ? toggleNarrationPause : () => void speakFrom()
-          }
-          aria-label={
-            narrationLoading
-              ? t("Cancel Edge TTS generation")
-              : speaking
-                ? narrationPaused
-                  ? t("Resume narration")
-                  : t("Pause narration")
-                : t("Read chapter with Edge TTS")
-          }
-          title={
-            narrationLoading
-              ? t("Cancel audio generation")
-              : narrationNotice || t("Read the complete chapter with Edge TTS")
-          }
-        >
-          {narrationLoading ? (
-            <X size={18} strokeWidth={2.5} />
-          ) : speaking && !narrationPaused ? (
-            <Pause size={18} fill="currentColor" />
-          ) : (
-            <Play size={18} fill="currentColor" />
-          )}
-        </button>
-        {narrationLoading && (
-          <div
-            className="flex items-center gap-1.5 pe-2 text-[11px] font-semibold tabular-nums"
-            style={{ color: colors.muted }}
-            title={t("Preparing narration audio")}
-          >
-            <Loader2 size={13} className="animate-spin motion-reduce:animate-none" />
-            <span>{generationPercent > 1 ? `${generationPercent}%` : "Preparing"}</span>
-          </div>
-        )}
-        {(speaking || audioDuration > 0) && (
-          <div className="flex w-[clamp(170px,19vw,280px)] items-center gap-2 px-2">
-            <span className="w-9 text-end text-[10px] tabular-nums" style={{ color: colors.muted }}>
-              {formatAudioTime(audioPosition)}
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={Math.max(audioDuration, 0.01)}
-              step={0.05}
-              value={Math.min(audioPosition, Math.max(audioDuration, 0.01))}
-              disabled={!audio.current || !audioDuration}
-              onChange={(event) => {
-                const next = Number(event.target.value);
-                if (!audio.current || !Number.isFinite(next)) return;
-                audio.current.currentTime = next;
-                setAudioPosition(next);
-              }}
-              aria-label={t("Audio position")}
-              className="ebook-audio-seeker h-5 min-w-0 flex-1 cursor-pointer disabled:cursor-wait disabled:opacity-35"
-              style={
-                {
-                  "--audio-progress": `${audioDuration ? (audioPosition / audioDuration) * 100 : 0}%`,
-                } as React.CSSProperties
+        {textAvailable && !pdfPage && (
+          <>
+            <button
+              className={`reader-icon ${translation ? "reader-icon-accent reader-language-toggle" : translationError ? "text-red-400" : ""}`}
+              disabled={translating}
+              onClick={translation ? toggleTranslation : () => void translateChapter()}
+              aria-label={
+                translation
+                  ? showOriginal
+                    ? t("Show translation")
+                    : t("Show original language")
+                  : t("Translate chapter")
               }
+              title={
+                translationError ||
+                (translation
+                  ? showOriginal
+                    ? t("Show translation")
+                    : t("Show original language")
+                  : t("Translate chapter"))
+              }
+            >
+              {translating ? (
+                <TranslationSpinner />
+              ) : (
+                <>
+                  <Languages size={18} />
+                  {translation && <span>{showOriginal ? t("Translation") : t("Original")}</span>}
+                </>
+              )}
+            </button>
+            {translating && (
+              <div
+                className="flex items-center gap-1 whitespace-nowrap pe-2 text-[11px] tabular-nums"
+                style={{ color: colors.muted }}
+              >
+                <strong className="text-current">≈{translationProgress.percent}%</strong>
+                <span>·</span>
+                <span>
+                  {translationProgress.etaMs == null
+                    ? t("Estimating…")
+                    : formatEtaLabel(translationProgress.etaMs)}
+                </span>
+              </div>
+            )}
+          </>
+        )}
+        {textAvailable && (
+          <>
+            <VoicePicker
+              voices={availableNarrationVoices}
+              value={prefs.narrationVoice}
+              disabled={narrationLoading}
+              colors={colors}
+              onChange={(voice) => {
+                stopSpeech();
+                patchPrefs({ narrationVoice: voice });
+              }}
+              previewingVoice={voicePreviewId}
+              previewLoading={voicePreviewLoading}
+              onPreview={(voice) => void previewVoice(voice)}
             />
-            <span className="w-9 text-[10px] tabular-nums" style={{ color: colors.muted }}>
-              -{formatAudioTime(Math.max(0, audioDuration - audioPosition))}
-            </span>
-          </div>
+            <button
+              className={`reader-icon ${narrationLoading ? "reader-icon-cancel" : "reader-icon-accent"}`}
+              onClick={
+                narrationLoading
+                  ? stopSpeech
+                  : speaking
+                    ? toggleNarrationPause
+                    : () => void speakFrom()
+              }
+              aria-label={
+                narrationLoading
+                  ? t("Cancel Edge TTS generation")
+                  : speaking
+                    ? narrationPaused
+                      ? t("Resume narration")
+                      : t("Pause narration")
+                    : t("Read chapter with Edge TTS")
+              }
+              title={
+                narrationLoading
+                  ? t("Cancel audio generation")
+                  : narrationNotice || t("Read the complete chapter with Edge TTS")
+              }
+            >
+              {narrationLoading ? (
+                <X size={18} strokeWidth={2.5} />
+              ) : speaking && !narrationPaused ? (
+                <Pause size={18} fill="currentColor" />
+              ) : (
+                <Play size={18} fill="currentColor" />
+              )}
+            </button>
+            {narrationLoading && (
+              <div
+                className="flex items-center gap-1.5 pe-2 text-[11px] font-semibold tabular-nums"
+                style={{ color: colors.muted }}
+                title={t("Preparing narration audio")}
+              >
+                <Loader2 size={13} className="animate-spin motion-reduce:animate-none" />
+                <span>{generationPercent > 1 ? `${generationPercent}%` : "Preparing"}</span>
+              </div>
+            )}
+            {(speaking || audioDuration > 0) && (
+              <div className="flex w-[clamp(170px,19vw,280px)] items-center gap-2 px-2">
+                <span
+                  className="w-9 text-end text-[10px] tabular-nums"
+                  style={{ color: colors.muted }}
+                >
+                  {formatAudioTime(audioPosition)}
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={Math.max(audioDuration, 0.01)}
+                  step={0.05}
+                  value={Math.min(audioPosition, Math.max(audioDuration, 0.01))}
+                  disabled={!audio.current || !audioDuration}
+                  onChange={(event) => {
+                    const next = Number(event.target.value);
+                    if (!audio.current || !Number.isFinite(next)) return;
+                    audio.current.currentTime = next;
+                    setAudioPosition(next);
+                  }}
+                  aria-label={t("Audio position")}
+                  className="ebook-audio-seeker h-5 min-w-0 flex-1 cursor-pointer disabled:cursor-wait disabled:opacity-35"
+                  style={
+                    {
+                      "--audio-progress": `${audioDuration ? (audioPosition / audioDuration) * 100 : 0}%`,
+                    } as React.CSSProperties
+                  }
+                />
+                <span className="w-9 text-[10px] tabular-nums" style={{ color: colors.muted }}>
+                  -{formatAudioTime(Math.max(0, audioDuration - audioPosition))}
+                </span>
+              </div>
+            )}
+          </>
         )}
         <div className="px-3 text-xs tabular-nums" style={{ color: colors.muted }}>
           {Math.round(
-            prefs.mode === "book"
+            readingMode === "book"
               ? ((flipPage + 1) / Math.max(1, flipPages.urls.length)) * 100
-              : ((current + 1) / Math.max(1, paragraphs.length)) * 100,
+              : ((current + 1) / paragraphProgress) * 100,
           )}
           %
         </div>
@@ -2400,7 +2543,12 @@ export function HarborReader({
                   <p className="text-sm font-medium">{t("Background image")}</p>
                   {readerBackground.controls}
                 </div>
-                <Settings prefs={prefs} patch={patchPrefs} colors={colors} />
+                <Settings
+                  prefs={prefs}
+                  patch={patchPrefs}
+                  colors={colors}
+                  bookModeDisabled={false}
+                />
               </>
             )}
             {panel === "search" && (
@@ -2619,7 +2767,7 @@ export function HarborReader({
           onClose={() => setEditing(null)}
         />
       )}
-      <style>{`.reader-icon{display:grid;width:42px;height:42px;place-items:center;border-radius:999px;color:inherit;transition:.16s ease}.reader-icon:hover{background:rgba(127,127,127,.16);transform:translateY(-1px)}.reader-icon:active{transform:scale(.92)}.reader-icon:disabled{pointer-events:none;opacity:.28}.reader-icon-accent{background:var(--color-accent);color:#111}.reader-icon-cancel{background:rgba(239,68,68,.16);color:#f87171;box-shadow:inset 0 0 0 1px rgba(248,113,113,.28)}.reader-icon-cancel:hover{background:rgba(239,68,68,.25);color:#fca5a5}.reader-language-toggle{display:flex;width:auto;gap:6px;padding:0 12px;font-size:11px;font-weight:700}.reader-current{border-radius:4px}.reader-read{color:var(--reader-read-color)}.reader-annotation{color:inherit;border-radius:3px;padding:.04em .02em;cursor:pointer}.reader-annotation:hover{outline:1px solid color-mix(in srgb,var(--color-accent) 60%,transparent)}.ebook-book-crossfade-in{animation:ebook-book-fade-in 240ms ease-out both;will-change:opacity}.ebook-book-crossfade-out{animation:ebook-book-fade-out 240ms ease-out both;will-change:opacity}@keyframes ebook-book-fade-in{from{opacity:0}to{opacity:1}}@keyframes ebook-book-fade-out{from{opacity:1}to{opacity:0}}@media(prefers-reduced-motion:reduce){.ebook-book-crossfade-in,.ebook-book-crossfade-out{animation:none}}.ebook-audio-seeker{appearance:none;background:transparent}.ebook-audio-seeker::-webkit-slider-runnable-track{height:4px;border-radius:99px;background:linear-gradient(90deg,var(--color-accent) var(--audio-progress),rgba(127,127,127,.28) var(--audio-progress))}.ebook-audio-seeker::-webkit-slider-thumb{appearance:none;width:12px;height:12px;margin-top:-4px;border:2px solid var(--color-accent);border-radius:50%;background:#111;box-shadow:0 0 0 3px color-mix(in srgb,var(--color-accent) 18%,transparent);transition:transform .15s}.ebook-audio-seeker:hover::-webkit-slider-thumb{transform:scale(1.2)}`}</style>
+      <style>{`.reader-icon{display:grid;width:42px;height:42px;place-items:center;border-radius:999px;color:inherit;transition:.16s ease}.reader-icon:hover{background:rgba(127,127,127,.16);transform:translateY(-1px)}.reader-icon:active{transform:scale(.92)}.reader-icon:disabled{pointer-events:none;opacity:.28}.reader-icon-accent{background:var(--color-accent);color:#111}.reader-icon-cancel{background:rgba(239,68,68,.16);color:#f87171;box-shadow:inset 0 0 0 1px rgba(248,113,113,.28)}.reader-icon-cancel:hover{background:rgba(239,68,68,.25);color:#fca5a5}.reader-language-toggle{display:flex;width:auto;gap:6px;padding:0 12px;font-size:11px;font-weight:700}.reader-current{border-radius:4px}.reader-read{color:var(--reader-read-color)}.reader-annotation{color:inherit;border-radius:3px;padding:.04em .02em;cursor:pointer}.reader-annotation:hover{outline:1px solid color-mix(in srgb,var(--color-accent) 60%,transparent)}.pdf-text-layer{position:absolute;inset:0;z-index:1;overflow:hidden;line-height:1;text-align:initial;text-size-adjust:none;transform-origin:0 0}.pdf-text-layer span,.pdf-text-layer br{position:absolute;color:transparent;white-space:pre;cursor:text;transform-origin:0% 0%}.pdf-text-layer .markedContent{inset:0}.pdf-text-layer ::selection{background:color-mix(in srgb,var(--color-accent) 38%,transparent)}.ebook-book-crossfade-in{animation:ebook-book-fade-in 240ms ease-out both;will-change:opacity}.ebook-book-crossfade-out{animation:ebook-book-fade-out 240ms ease-out both;will-change:opacity}@keyframes ebook-book-fade-in{from{opacity:0}to{opacity:1}}@keyframes ebook-book-fade-out{from{opacity:1}to{opacity:0}}@media(prefers-reduced-motion:reduce){.ebook-book-crossfade-in,.ebook-book-crossfade-out{animation:none}}.ebook-audio-seeker{appearance:none;background:transparent}.ebook-audio-seeker::-webkit-slider-runnable-track{height:4px;border-radius:99px;background:linear-gradient(90deg,var(--color-accent) var(--audio-progress),rgba(127,127,127,.28) var(--audio-progress))}.ebook-audio-seeker::-webkit-slider-thumb{appearance:none;width:12px;height:12px;margin-top:-4px;border:2px solid var(--color-accent);border-radius:50%;background:#111;box-shadow:0 0 0 3px color-mix(in srgb,var(--color-accent) 18%,transparent);transition:transform .15s}.ebook-audio-seeker:hover::-webkit-slider-thumb{transform:scale(1.2)}`}</style>
     </div>
   );
 }
@@ -2868,12 +3016,15 @@ function Settings({
   prefs,
   patch,
   colors,
+  bookModeDisabled,
 }: {
   prefs: EBookReaderPrefs;
   patch: (value: Partial<EBookReaderPrefs>) => void;
   colors: (typeof paper)[keyof typeof paper];
+  bookModeDisabled: boolean;
 }) {
   const t = useT();
+  const activeMode = bookModeDisabled ? "harbor" : prefs.mode;
   const [adjustmentsOpen, setAdjustmentsOpen] = useState(true);
   const [audioCacheStatus, setAudioCacheStatus] = useState("");
   const { fonts, busy: fontBusy, error: fontError, addFont, removeFont } = useCustomFonts();
@@ -2902,19 +3053,21 @@ function Settings({
               { mode: "harbor", label: t("Harbor"), icon: <Type size={18} /> },
               { mode: "book", label: t("Book"), icon: <BookOpen size={18} /> },
             ] as const
-          ).map((item) => (
-            <button
-              key={item.mode}
-              type="button"
-              aria-pressed={prefs.mode === item.mode}
-              onClick={() => patch({ mode: item.mode })}
-              className={`flex h-14 items-center justify-center gap-2 rounded-xl border transition ${prefs.mode === item.mode ? "border-accent bg-accent/10 text-accent" : "hover:bg-white/5"}`}
-              style={{ borderColor: prefs.mode === item.mode ? undefined : `${colors.muted}35` }}
-            >
-              {item.icon}
-              <span className="text-sm font-semibold">{item.label}</span>
-            </button>
-          ))}
+          )
+            .filter((item) => !bookModeDisabled || item.mode !== "book")
+            .map((item) => (
+              <button
+                key={item.mode}
+                type="button"
+                aria-pressed={activeMode === item.mode}
+                onClick={() => patch({ mode: item.mode })}
+                className={`flex h-14 items-center justify-center gap-2 rounded-xl border transition ${activeMode === item.mode ? "border-accent bg-accent/10 text-accent" : "hover:bg-white/5"}`}
+                style={{ borderColor: activeMode === item.mode ? undefined : `${colors.muted}35` }}
+              >
+                {item.icon}
+                <span className="text-sm font-semibold">{item.label}</span>
+              </button>
+            ))}
         </div>
       </Setting>
       <Setting label={t("Saved audio")}>

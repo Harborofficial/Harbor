@@ -20,7 +20,9 @@ export function MusicActionGlyph({
   const [arrived, setArrived] = useState(false);
   useLayoutEffect(() => {
     setArrived(
-      state === "done" && previous.current.state !== "done" && previous.current.identity === identity,
+      state === "done" &&
+        previous.current.state !== "done" &&
+        previous.current.identity === identity,
     );
     previous.current = { state, identity };
   }, [state, identity]);

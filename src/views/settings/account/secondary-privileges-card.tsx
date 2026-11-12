@@ -5,7 +5,7 @@ import { SettingGroup } from "../kit";
 import { ROW_DESC, ToggleRow } from "../shared";
 import type { SecondaryProfilePrivileges } from "@/lib/settings/types";
 
-import { getSecondaryPrivileges } from "@/lib/settings/defaults";
+import { getSecondaryPrivileges } from "@/lib/profiles/privileges";
 
 export function SecondaryPrivilegesCard() {
   const t = useT();

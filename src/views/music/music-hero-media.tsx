@@ -14,7 +14,9 @@ let taught = false;
 
 type Preview = { key: string; url: string; audioUrl: string | null };
 
-async function previewFor(track: MusicTrack): Promise<{ url: string; audioUrl: string | null } | null> {
+async function previewFor(
+  track: MusicTrack,
+): Promise<{ url: string; audioUrl: string | null } | null> {
   const direct = await musicVideoStream(track).catch(() => null);
   if (direct?.url) return { url: direct.url, audioUrl: direct.audioUrl };
   const query = [track.artist, track.title].filter(Boolean).join(" ").trim();
@@ -208,14 +210,7 @@ export function MusicHeroMedia({
           />
         )}
         {live?.audioUrl && (
-          <audio
-            ref={audio}
-            key={live.audioUrl}
-            src={live.audioUrl}
-            muted
-            loop
-            preload="auto"
-          />
+          <audio ref={audio} key={live.audioUrl} src={live.audioUrl} muted loop preload="auto" />
         )}
       </div>
       <button
@@ -233,7 +228,11 @@ export function MusicHeroMedia({
         onClick={() => setMuted((value) => !value)}
       >
         <span className="music-hero-sound-glyph" data-on={state === "loading" || undefined}>
-          <MusicGlyph name="loading" size={17} className="animate-spin motion-reduce:animate-none" />
+          <MusicGlyph
+            name="loading"
+            size={17}
+            className="animate-spin motion-reduce:animate-none"
+          />
         </span>
         <span className="music-hero-sound-glyph" data-on={state === "muted" || undefined}>
           <MusicGlyph name="volume-mute" size={17} />

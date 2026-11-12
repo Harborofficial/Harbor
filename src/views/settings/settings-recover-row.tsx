@@ -15,7 +15,8 @@ function legacyDiffers(blob: string, cur: Settings): boolean {
     const t = (p.theme ?? {}) as Partial<Settings["theme"]>;
     if ((t.preset ?? "") !== cur.theme.preset) return true;
     if ((t.fontPair ?? "") !== cur.theme.fontPair) return true;
-    if (JSON.stringify(t.customColors ?? null) !== JSON.stringify(cur.theme.customColors ?? null)) return true;
+    if (JSON.stringify(t.customColors ?? null) !== JSON.stringify(cur.theme.customColors ?? null))
+      return true;
     for (const k of KEY_FIELDS) {
       if (((p[k] as string) ?? "") !== ((cur[k] as string) ?? "")) return true;
     }

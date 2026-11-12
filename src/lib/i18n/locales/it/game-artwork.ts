@@ -1,6 +1,7 @@
 export default {
   "games.metadataImport.title": "Importa dati dei giochi",
-  "games.metadataImport.note": "Abbina i giochi per titolo, piattaforma e identità nello store. Gli abbinamenti esistenti restano invariati.",
+  "games.metadataImport.note":
+    "Abbina i giochi per titolo, piattaforma e identità nello store. Gli abbinamenti esistenti restano invariati.",
   "games.metadataImport.scope": "Giochi da abbinare",
   "games.metadataImport.progress": "{count} di {total} controllati",
   "games.metadataImport.savedCount": "{count} importati",
@@ -14,20 +15,24 @@ export default {
   "games.metadataImport.incomplete": "Troppi risultati. Scegli un abbinamento.",
   "games.metadataImport.artwork": "Scegli le immagini per completare l’importazione.",
   "games.metadataImport.reviewAction": "Controlla",
-  "games.metadataImport.stopNote": "Interrompi o chiudi per annullare il lavoro restante. Le importazioni completate vengono conservate.",
+  "games.metadataImport.stopNote":
+    "Interrompi o chiudi per annullare il lavoro restante. Le importazioni completate vengono conservate.",
   "games.metadataImport.stop": "Interrompi",
   "games.metadataImport.resume": "Continua / riprova",
   "games.metadataImport.start": "Cerca abbinamenti",
   "games.metadataImport.review": "Da controllare",
   "games.artwork.selectionSetting": "Selezione sfondo IGDB",
-  "games.artwork.selectionNote": "Si applica alle nuove associazioni di metadati. Le immagini esistenti non cambiano.",
+  "games.artwork.selectionNote":
+    "Si applica alle nuove associazioni di metadati. Le immagini esistenti non cambiano.",
   "games.artwork.policy.first": "Prima immagine",
   "games.artwork.policy.random": "Immagine casuale",
   "games.artwork.policy.manual": "Scelgo io",
   "games.artwork.screenshotsSetting": "Usa screenshot se manca un’illustrazione",
-  "games.artwork.screenshotsNote": "Usa uno screenshot solo quando IGDB non ha illustrazioni di sfondo.",
+  "games.artwork.screenshotsNote":
+    "Usa uno screenshot solo quando IGDB non ha illustrazioni di sfondo.",
   "games.artwork.iconSetting": "Usa copertine come icone della libreria",
-  "games.artwork.iconNote": "Usa piccole copertine IGDB nella barra laterale e nella libreria rapida per le nuove associazioni. Le immagini locali hanno la precedenza.",
+  "games.artwork.iconNote":
+    "Usa piccole copertine IGDB nella barra laterale e nella libreria rapida per le nuove associazioni. Le immagini locali hanno la precedenza.",
   "games.artwork.importError": "Impossibile caricare le immagini per questa associazione. Riprova.",
 
   "games.artwork.browse": "Sfoglia immagini IGDB",
@@ -37,14 +42,17 @@ export default {
   "games.artwork.cover": "Copertina",
   "games.artwork.unknownSize": "Dimensioni non disponibili",
   "games.artwork.original": "Automatico",
-  "games.artwork.noMatch": "Nessuna immagine trovata per questo gioco. Prova un’altra corrispondenza dei metadati.",
-  "games.artwork.localCover": "La copertina locale resta in uso. Rimuovila dalla personalizzazione della libreria per usare questa.",
+  "games.artwork.noMatch":
+    "Nessuna immagine trovata per questo gioco. Prova un’altra corrispondenza dei metadati.",
+  "games.artwork.localCover":
+    "La copertina locale resta in uso. Rimuovila dalla personalizzazione della libreria per usare questa.",
   "games.artwork.choose": "{count} immagini",
   "games.artwork.first": "Prima immagine",
   "games.artwork.random": "Immagine casuale",
-  "games.artwork.screenshotFallback": "Nessuna illustrazione disponibile. Sono mostrate le schermate.",
+  "games.artwork.screenshotFallback":
+    "Nessuna illustrazione disponibile. Sono mostrate le schermate.",
   "games.artwork.empty": "IGDB non ha immagini per questa scelta.",
   "games.artwork.imageError": "Impossibile caricare alcune immagini.",
   "games.artwork.reset": "Ripristina immagini",
-  "games.artwork.conflict": "Immagini o metadati sono cambiati altrove. Riapri il selettore."
+  "games.artwork.conflict": "Immagini o metadati sono cambiati altrove. Riapri il selettore.",
 } satisfies Record<string, string>;

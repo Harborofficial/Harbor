@@ -150,9 +150,7 @@ export function useBpArt({
     };
   }, [ref, id, type, tmdbKey, missing, found]);
 
-  const hydrated = found
-    ? live(pickArt(shape, targetWidth, found.poster, found.background))
-    : NONE;
+  const hydrated = found ? live(pickArt(shape, targetWidth, found.poster, found.background)) : NONE;
   const chosen = missing ? hydrated : stored;
   const failing = chosen.url;
 

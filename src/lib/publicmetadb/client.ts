@@ -59,7 +59,9 @@ async function doFetch(path: string, opts: PmdbRequestOptions): Promise<Response
     headers["Authorization"] = `Bearer ${opts.token}`;
   }
 
-  const url = path.startsWith("http") ? path : `${PMDB_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+  const url = path.startsWith("http")
+    ? path
+    : `${PMDB_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 
   return safeFetch(url, {
     method,
@@ -102,9 +104,10 @@ export async function pmdbRequest<T>(path: string, opts: PmdbRequestOptions = {}
       if (!RETRY_STATUSES.has(res.status)) break;
 
       const retryAfterSec = Number(res.headers.get("Retry-After"));
-      const delayMs = !Number.isNaN(retryAfterSec) && retryAfterSec > 0
-        ? retryAfterSec * 1000
-        : Math.min(1000 * 2 ** attempt, 8000);
+      const delayMs =
+        !Number.isNaN(retryAfterSec) && retryAfterSec > 0
+          ? retryAfterSec * 1000
+          : Math.min(1000 * 2 ** attempt, 8000);
 
       if (attempt >= 3) break;
       await sleep(delayMs);

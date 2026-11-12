@@ -151,10 +151,7 @@ test("the canon lists a viewer names are complete on disk even when the index he
     const snap = snapshotOf(id);
     const entry = index.lists.find((l) => l.id === id);
     assert.ok(entry, `${id} is indexed`);
-    assert.ok(
-      entry.head.length < snap.count,
-      `${id} is the partial case the lazy load exists for`,
-    );
+    assert.ok(entry.head.length < snap.count, `${id} is the partial case the lazy load exists for`);
     assert.equal(snap.items.length, snap.count, `${id} snapshot holds every item`);
   }
 });
@@ -171,7 +168,10 @@ test("the Criterion snapshot is in spine order with sparse slots", () => {
 
 test("the row and the page only badge a number the data carries", () => {
   const registry = read("src/lib/curated/registry.ts");
-  assert.match(registry, /export function cardBadge[\s\S]*?ordering === "ranked"[\s\S]*?item\.rank/);
+  assert.match(
+    registry,
+    /export function cardBadge[\s\S]*?ordering === "ranked"[\s\S]*?item\.rank/,
+  );
   assert.match(registry, /ordering === "spine"[\s\S]*?spineFor\(item\.imdb\)/);
   assert.match(registry, /ordering === "awarded"[\s\S]*?item\.awardYear/);
   const shared = "src/components/curated-card-badge.tsx";
@@ -184,7 +184,10 @@ test("the row and the page only badge a number the data carries", () => {
     const source = read(path);
     assert.ok(!/\bindexOf\b|\bi \+ 1\b/.test(source), `${path} never counts positions itself`);
   }
-  for (const path of ["src/components/curated-list-row.tsx", "src/views/curated-list/list-grid.tsx"]) {
+  for (const path of [
+    "src/components/curated-list-row.tsx",
+    "src/views/curated-list/list-grid.tsx",
+  ]) {
     const source = read(path);
     assert.match(
       source,

@@ -58,6 +58,15 @@ function anilistPickable(groups: AnilistListGroup[]): PickableList[] {
       lists.push({ id: `anilist:${rail.key}`, name: `AniList · ${rail.title}`, items });
     }
   }
+  const rewatching = toItems(
+    (byStatus.get("REPEATING") ?? [])
+      .filter((entry) => !entry.private)
+      .slice(0, MAX_FEATURED_ITEMS)
+      .map(anilistEntryToMeta),
+  );
+  if (rewatching.length) {
+    lists.push({ id: "anilist:rewatching", name: "AniList · Rewatching", items: rewatching });
+  }
   for (const group of groups) {
     if (!group.isCustomList || !group.name) continue;
     const items = toItems(
@@ -86,6 +95,16 @@ function malPickable(groups: MalListGroup[]): PickableList[] {
     if (items.length) {
       lists.push({ id: `mal:${rail.key}`, name: `MyAnimeList · ${rail.title}`, items });
     }
+  }
+  const rewatching = toItems(
+    groups
+      .flatMap((group) => group.entries)
+      .filter((entry) => entry.isRewatching)
+      .slice(0, MAX_FEATURED_ITEMS)
+      .map((entry) => malAnimeToMeta(entry.anime)),
+  );
+  if (rewatching.length) {
+    lists.push({ id: "mal:rewatching", name: "MyAnimeList · Rewatching", items: rewatching });
   }
   return lists;
 }

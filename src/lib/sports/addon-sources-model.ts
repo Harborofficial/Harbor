@@ -1,3 +1,4 @@
+import { addonBaseUrl, addonResourceUrl } from "@/lib/addon-url";
 import type { Addon, CatalogDef } from "../addons";
 import type { Meta } from "../cinemeta";
 import type { SportsGame } from "./espn-types";
@@ -115,12 +116,15 @@ export function sportsAddonRequests(
 
 export function sportsAddonCatalogUrl(request: SportsAddonRequest, skip = 0): string {
   const { addon, catalog, extras } = request;
-  const base = addon.transportUrl.replace(/\/manifest\.json\/?$/i, "");
+  const base = addonBaseUrl(addon.transportUrl);
   const values = [...extras, ...(skip ? [{ name: "skip", value: String(skip) }] : [])];
   const suffix = values.length
     ? `/${values.map((e) => `${encodeURIComponent(e.name)}=${encodeURIComponent(e.value)}`).join("&")}`
     : "";
-  return `${base}/catalog/${encodeURIComponent(catalog.type)}/${encodeURIComponent(catalog.id)}${suffix}.json`;
+  return addonResourceUrl(
+    base,
+    `catalog/${encodeURIComponent(catalog.type)}/${encodeURIComponent(catalog.id)}${suffix}.json`,
+  );
 }
 
 export function sportsAddonListings(
@@ -132,7 +136,7 @@ export function sportsAddonListings(
   if (!Array.isArray(raw)) return [];
   const matchEvent = createEventChannelMatcher(game);
   const networks = (game.broadcasts ?? []).map(normalizeChannelName).filter((n) => n.length >= 3);
-  const base = addon.transportUrl.replace(/\/manifest\.json\/?$/i, "");
+  const base = addonBaseUrl(addon.transportUrl);
   const out: SportsAddonListing[] = [];
   for (const value of raw.slice(0, 1500)) {
     if (

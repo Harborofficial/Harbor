@@ -23,7 +23,9 @@ export function AudioTab() {
   return (
     <Section
       title={t("Audio")}
-      subtitle={t("Shape the sound without touching your system EQ. Applies on the mpv engine; the HTML5 engine plays audio untouched.")}
+      subtitle={t(
+        "Shape the sound without touching your system EQ. Applies on the mpv engine; the HTML5 engine plays audio untouched.",
+      )}
     >
       <ToggleRow
         label={t("Normalize loudness")}
@@ -33,14 +35,18 @@ export function AudioTab() {
       />
       <ToggleRow
         label={t("Mix surround sound down to stereo")}
-        sub={t("Turn on if you watch on a laptop or headphones and dialogue feels too quiet next to the effects. Leave off if you have a real surround setup or a soundbar.")}
+        sub={t(
+          "Turn on if you watch on a laptop or headphones and dialogue feels too quiet next to the effects. Leave off if you have a real surround setup or a soundbar.",
+        )}
         value={settings.mpvDownmixStereo}
         onChange={(v) => update({ mpvDownmixStereo: v })}
       />
       <SettingRow
         wide
         label={t("Sound profile")}
-        desc={t("Night mode gently compresses loud moments for late-night watching. Profiles take effect when the next track loads and stack with the normalizer.")}
+        desc={t(
+          "Night mode gently compresses loud moments for late-night watching. Profiles take effect when the next track loads and stack with the normalizer.",
+        )}
       >
         <div className="flex w-full flex-col gap-3">
           <Segmented
@@ -60,7 +66,9 @@ export function AudioTab() {
       <SettingRow
         wide
         label={t("Maximum volume boost")}
-        desc={t("How far you can boost past 100 percent on the volume bar. Higher settings can get very loud.")}
+        desc={t(
+          "How far you can boost past 100 percent on the volume bar. Higher settings can get very loud.",
+        )}
       >
         <div className="flex w-full flex-col gap-3">
           <Segmented
@@ -98,7 +106,9 @@ function AudioOutputRow() {
       desc={
         loading
           ? t("Detecting devices...")
-          : t("Send audio to specific speakers, headphones or a receiver. System default follows your system's audio output.")
+          : t(
+              "Send audio to specific speakers, headphones or a receiver. System default follows your system's audio output.",
+            )
       }
     >
       <div className="w-full max-w-[420px]">

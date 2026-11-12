@@ -53,12 +53,14 @@ function seriesModule(overrides: Record<string, unknown> = {}) {
     kitsuToAnilist: async () => null,
   };
   const kitsu = {
+    kitsuEpisodes: async () => [],
     parseKitsuId: (id: string) => {
       const m = /^kitsu:(\d+)/.exec(id);
       return m ? Number(m[1]) : null;
     },
   };
   const entry = load("src/lib/providers/anime-entry.ts", {
+    "@/lib/providers/anime-franchise-root": { franchiseRoot: async (id: string) => id },
     "@/lib/providers/anime-kitsu-addon": addon,
     "@/lib/providers/anime-mapping": mapping,
     "@/lib/providers/kitsu": kitsu,
@@ -117,6 +119,12 @@ function seriesModule(overrides: Record<string, unknown> = {}) {
     "./providers/tvdb-proxy": {
       fetchTvdbProxyImages: async () => ({}),
       pickTvdbImage: () => undefined,
+    },
+    "./providers/tvdb-order": { fetchTvdbOrder: async () => null },
+    "./providers/tvdb": { tvdbLangFromIso1: () => "en" },
+    "./metadata-sources": {
+      addonKeyFromSource: () => null,
+      normalizeMetadataSourceChain: (_section: unknown, chain: string[] | undefined) => chain ?? [],
     },
     "./providers/anime-franchise-root": { franchiseRoot: async (id: string) => id },
     "./streams/anime-identity": { foreignAnimeProviderSeasons: async () => null },

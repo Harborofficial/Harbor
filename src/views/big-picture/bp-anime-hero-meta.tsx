@@ -104,7 +104,11 @@ export function BpAnimeHeroMeta({
 
   return (
     <div className="mt-[12px]">
-      {top && <span data-bp-anime-pill-top className={PILL_TOP}>{top}</span>}
+      {top && (
+        <span data-bp-anime-pill-top className={PILL_TOP}>
+          {top}
+        </span>
+      )}
       {facts && (
         <div
           data-bp-anime-facts
@@ -117,7 +121,11 @@ export function BpAnimeHeroMeta({
               {slot}
             </span>
           ))}
-          {format && <span data-bp-anime-pill-grey className={PILL_GREY}>{format}</span>}
+          {format && (
+            <span data-bp-anime-pill-grey className={PILL_GREY}>
+              {format}
+            </span>
+          )}
         </div>
       )}
     </div>

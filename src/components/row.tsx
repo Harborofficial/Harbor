@@ -232,6 +232,7 @@ export function Row({
   min = 144,
   shape = "portrait",
   scrollKey,
+  scrollAnchorKey,
   arrowsAlways = false,
   alwaysActive = false,
   children,
@@ -252,6 +253,8 @@ export function Row({
   alwaysActive?: boolean;
   arrowsAlways?: boolean;
   scrollKey?: string;
+  /** Resets the row to its start when the head item changes. */
+  scrollAnchorKey?: string;
   children: React.ReactNode;
   onEndReached?: () => void;
   onViewAll?: () => void;
@@ -433,6 +436,14 @@ export function Row({
   );
 
   const childCount = Children.count(children);
+  const memoryKey =
+    scrollKey == null
+      ? undefined
+      : scrollAnchorKey != null
+        ? `${scrollKey}:${scrollAnchorKey}`
+        : scrollKey;
+  const prevAnchorRef = useRef(scrollAnchorKey);
+  const prevMemoryRef = useRef(memoryKey);
   const restoredRef = useRef(false);
   const userInteractedRef = useRef(false);
   useEffect(() => {
@@ -444,8 +455,8 @@ export function Row({
   }, [childCount, trackEl, cellWidth, effMin, rtl]);
   useLayoutEffect(() => {
     if (!trackEl || cellWidth == null) return;
-    if (scrollKey && !restoredRef.current && childCount > 0) {
-      const n = recallRowScroll(scrollKey);
+    if (memoryKey && !restoredRef.current && childCount > 0) {
+      const n = recallRowScroll(memoryKey);
       // A fresh track is already at zero. Only a saved nonzero position needs
       // synchronous geometry before paint; reading every new track forces layout.
       if (n != null && n > 0) {
@@ -459,7 +470,7 @@ export function Row({
     if (!userInteractedRef.current && lastScrollPosRef.current !== 0) {
       writePos(trackEl, 0);
     }
-  }, [childCount, cellWidth, trackEl, scrollKey, recallRowScroll]);
+  }, [childCount, cellWidth, trackEl, memoryKey, recallRowScroll]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -500,11 +511,11 @@ export function Row({
           measureScroll();
         });
       }
-      if (!scrollKey) return;
+      if (!memoryKey) return;
       if (saveTimer != null) window.clearTimeout(saveTimer);
       saveTimer = window.setTimeout(() => {
         saveTimer = null;
-        rememberRowScroll(scrollKey, readPos(track));
+        rememberRowScroll(memoryKey, readPos(track));
       }, 200);
     };
     track.addEventListener("scroll", onScroll, { passive: true });
@@ -556,7 +567,7 @@ export function Row({
           saveTimer = null;
         }
         writePos(track, 0);
-        rememberRowScroll(scrollKey, 0);
+        if (memoryKey) rememberRowScroll(memoryKey, 0);
         userInteractedRef.current = false;
       });
     };
@@ -575,11 +586,11 @@ export function Row({
       if (saveTimer != null) window.clearTimeout(saveTimer);
       if (wheelSettle != null) window.clearTimeout(wheelSettle);
       if (rafId.current != null) cancelAnimationFrame(rafId.current);
-      if (scrollKey && lastScrollPosRef.current > 0) {
-        rememberRowScroll(scrollKey, lastScrollPosRef.current);
+      if (memoryKey && lastScrollPosRef.current > 0) {
+        rememberRowScroll(memoryKey, lastScrollPosRef.current);
       }
     };
-  }, [scrollKey, rememberRowScroll]);
+  }, [scrollKey, memoryKey, rememberRowScroll]);
 
   const scroll = (dir: -1 | 1) => {
     const el = trackRef.current;
@@ -681,6 +692,24 @@ export function Row({
     };
     rafId.current = requestAnimationFrame(tick);
   };
+
+  useLayoutEffect(() => {
+    const previousAnchor = prevAnchorRef.current;
+    const previousMemory = prevMemoryRef.current;
+    prevAnchorRef.current = scrollAnchorKey;
+    prevMemoryRef.current = memoryKey;
+    if (previousAnchor === scrollAnchorKey) return;
+    // The head changing means the previous snapshot is no longer relevant.
+    // Clear it so switching back to an old head cannot restore a hidden start.
+    if (previousMemory) rememberRowScroll(previousMemory, 0);
+    const track = trackRef.current;
+    if (track) {
+      cancelGlide();
+      writePos(track, 0);
+    }
+    if (memoryKey) rememberRowScroll(memoryKey, 0);
+    userInteractedRef.current = false;
+  }, [scrollAnchorKey, memoryKey, rememberRowScroll]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     dockPointerXRef.current = null;

@@ -74,9 +74,7 @@ async function shrink(file: File): Promise<Blob> {
   }
   context.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
-  const blob = await new Promise<Blob | null>((done) =>
-    canvas.toBlob(done, "image/webp", QUALITY),
-  );
+  const blob = await new Promise<Blob | null>((done) => canvas.toBlob(done, "image/webp", QUALITY));
   if (!blob) throw new Error("music.playlist.coverFailed");
   return blob;
 }

@@ -35,7 +35,17 @@ test("allows tall webtoon strips within the GPU budget", () => {
   assert.equal(shouldUpscale(strip), false);
   assert.equal(shouldUpscale({ ...strip, maxPixels: MAX_GPU_PAGE_PIXELS }), true);
   assert.equal(
-    shouldUpscale({ ...strip, naturalHeight: 12000, maxPixels: MAX_GPU_PAGE_PIXELS }),
+    shouldUpscale({
+      naturalWidth: 690,
+      naturalHeight: 12526,
+      renderedWidth: 690,
+      dpr: 1.05,
+      maxPixels: MAX_GPU_PAGE_PIXELS,
+    }),
+    true,
+  );
+  assert.equal(
+    shouldUpscale({ ...strip, naturalHeight: 13000, maxPixels: MAX_GPU_PAGE_PIXELS }),
     false,
   );
 });

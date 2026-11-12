@@ -15,12 +15,15 @@ export default {
   "games.metadata.type.fork": "Odgałęzienie",
   "games.metadata.type.pack": "Pakiet",
   "games.metadata.type.update": "Aktualizacja",
-  "games.metadata.note": "Wybierz grafiki i informacje o grze. Program uruchamiający i pliki pozostaną bez zmian.",
-  "games.metadata.conflict": "Dopasowanie zmieniono w innym oknie. Zamknij i otwórz ponownie, aby sprawdzić aktualny wybór.",
+  "games.metadata.note":
+    "Wybierz grafiki i informacje o grze. Program uruchamiający i pliki pozostaną bez zmian.",
+  "games.metadata.conflict":
+    "Dopasowanie zmieniono w innym oknie. Zamknij i otwórz ponownie, aby sprawdzić aktualny wybór.",
   "games.match.title": "Znajdź grafiki i informacje",
   "games.match.use": "Użyj tej gry",
   "games.match.remove": "Usuń dopasowanie",
   "games.match.source": "Grafiki i informacje z IGDB",
-  "games.match.note": "Wybierz wydanie pasujące do pliku. Harbor zachowa oryginalny plik i jego nazwę.",
-  "games.match.empty": "Spróbuj tytułu bez oznaczeń regionu lub rewizji."
+  "games.match.note":
+    "Wybierz wydanie pasujące do pliku. Harbor zachowa oryginalny plik i jego nazwę.",
+  "games.match.empty": "Spróbuj tytułu bez oznaczeń regionu lub rewizji.",
 };

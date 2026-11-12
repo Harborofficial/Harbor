@@ -190,7 +190,9 @@ export async function installPackFromFiles(
     else unmatched.push(file.name);
   }
   if (Object.keys(icons).length === 0) {
-    throw new Error("No files matched an award ID. Name each file after its award (e.g. oscar.png).");
+    throw new Error(
+      "No files matched an award ID. Name each file after its award (e.g. oscar.png).",
+    );
   }
   const pack: AwardPack = { name: packName, author: "Uploaded", icons };
   state = { ...state, packs: [...state.packs.filter((p) => p.name !== pack.name), pack] };
@@ -214,7 +216,9 @@ export async function installPackFromZip(
     else unmatched.push(name.split("/").pop() ?? name);
   }
   if (Object.keys(icons).length === 0) {
-    throw new Error("No files matched an award ID. Name each file after its award (e.g. oscar.png).");
+    throw new Error(
+      "No files matched an award ID. Name each file after its award (e.g. oscar.png).",
+    );
   }
   const name = file.name.replace(/\.zip$/i, "") || "Imported pack";
   const pack: AwardPack = { name, author: "Imported", icons };

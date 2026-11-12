@@ -197,7 +197,9 @@ export function BundleDetail({ bundle, onClose }: { bundle: StoreBundle; onClose
             )}
 
             {t.description && (
-              <p className="max-w-[70ch] text-[15.5px] leading-[22px] text-ink-muted">{t.description}</p>
+              <p className="max-w-[70ch] text-[15.5px] leading-[22px] text-ink-muted">
+                {t.description}
+              </p>
             )}
 
             <div className="h-px bg-edge-soft" />

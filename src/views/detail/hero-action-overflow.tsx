@@ -8,7 +8,12 @@ import { useT } from "@/lib/i18n";
 import { AddToListMenu } from "@/components/lists/add-to-list-menu";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import type { ListItemInput } from "@/lib/custom-lists";
-import { AnilistMenuItems, PmdbMenuItems, SimklMenuItems, TraktMenuItems } from "./overflow-sync-items";
+import {
+  AnilistMenuItems,
+  PmdbMenuItems,
+  SimklMenuItems,
+  TraktMenuItems,
+} from "./overflow-sync-items";
 import { UiIcon } from "@/components/ui-icon";
 
 const CIRCLES_SAVED_ESTIMATE = 132;
@@ -146,7 +151,9 @@ export function HeroActionOverflow({
           className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-canvas/80 text-ink transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.94]"
         >
           <MoreHorizontal size={20} strokeWidth={1.9} />
-          {isFav && <span className="absolute end-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-accent" />}
+          {isFav && (
+            <span className="absolute end-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-accent" />
+          )}
         </button>
       </HoverTooltip>
       {menu &&
@@ -332,7 +339,9 @@ function Item({
             : "text-ink hover:bg-raised"
       }`}
     >
-      <span className={danger ? "text-danger" : active ? "text-accent" : "text-ink-muted"}>{icon}</span>
+      <span className={danger ? "text-danger" : active ? "text-accent" : "text-ink-muted"}>
+        {icon}
+      </span>
       {label}
     </button>
   );

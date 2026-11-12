@@ -19,6 +19,10 @@ async function navigation({
     played = [],
     requests = [],
     downloads = [];
+  const completedDownloadFor = async (...args) => {
+    downloads.push(args);
+    return null;
+  };
   const mocks = {
     react: {
       useState: () => [
@@ -53,12 +57,15 @@ async function navigation({
       localPlayerSrc: (entry) => ({ meta: firstMeta, url: entry.path }),
     },
     "@/lib/download/downloads-store": {
-      completedDownloadFor: async (...args) => {
-        downloads.push(args);
+      completedDownloadFor,
+    },
+    "@/lib/download/player-src": {},
+    "@/lib/download/completed-episode-source": {
+      completedEpisodeSource: async (meta, episode) => {
+        await completedDownloadFor(meta.id, episode.season, episode.episode);
         return null;
       },
     },
-    "@/lib/download/player-src": {},
   };
   const source = readFileSync(
     new URL("../src/views/player/hooks/use-episode-navigation.ts", import.meta.url),

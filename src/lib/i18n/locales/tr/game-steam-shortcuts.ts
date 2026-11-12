@@ -1,14 +1,17 @@
 export default {
   "games.shortcuts.reviewLaunch": "Başlatmayı incele",
   "games.shortcuts.state.local": "Doğrudan başlatılabilir",
-  "games.shortcuts.shortcut_identity": "Steam bu kısayola geçerli bir kimlik atamamış. Ayarları inceleyip doğrudan başlat veya Steam’de yeniden kaydedip yenile.",
+  "games.shortcuts.shortcut_identity":
+    "Steam bu kısayola geçerli bir kimlik atamamış. Ayarları inceleyip doğrudan başlat veya Steam’de yeniden kaydedip yenile.",
 
   "games.shortcuts.activity.open": "Etkinlik",
   "games.shortcuts.activity.title": "Kısayol etkinliği",
-  "games.shortcuts.activity.note": "Bu Harbor profilindeki son taramalar ve başlatmalar. En fazla 300 kayıt.",
+  "games.shortcuts.activity.note":
+    "Bu Harbor profilindeki son taramalar ve başlatmalar. En fazla 300 kayıt.",
   "games.shortcuts.activity.remember": "Oturumlar arasında sakla",
   "games.shortcuts.activity.detailed": "Tarama ayrıntılarını ekle",
-  "games.shortcuts.activity.storageError": "Kaydedilen etkinliğe erişilemedi. Bu oturumdaki kayıtlar gösterilmeye devam ediyor.",
+  "games.shortcuts.activity.storageError":
+    "Kaydedilen etkinliğe erişilemedi. Bu oturumdaki kayıtlar gösterilmeye devam ediyor.",
   "games.shortcuts.activity.empty": "Henüz etkinlik yok.",
   "games.shortcuts.activity.clear": "Etkinliği temizle",
   "games.shortcuts.activity.duration": "{ms} ms",
@@ -25,9 +28,12 @@ export default {
 
   "games.shortcuts.launchDirect": "Doğrudan başlat",
   "games.shortcuts.viaSteam": "Steam üzerinden oyna",
-  "games.shortcuts.directNote": "Bu çalıştırılabilir dosyayı başlatma seçenekleri ve başlangıç klasörüyle açar.",
-  "games.shortcuts.shortcut_changed": "Bu kısayol Steam'de değiştirildi. Kütüphaneyi yenileyip başlatma ayarlarını gözden geçirin.",
-  "games.shortcuts.shortcut_options": "Bu başlatma seçenekleri bir Steam komut sarmalayıcısı kullanıyor. Kısayolu Steam üzerinden başlatın.",
+  "games.shortcuts.directNote":
+    "Bu çalıştırılabilir dosyayı başlatma seçenekleri ve başlangıç klasörüyle açar.",
+  "games.shortcuts.shortcut_changed":
+    "Bu kısayol Steam'de değiştirildi. Kütüphaneyi yenileyip başlatma ayarlarını gözden geçirin.",
+  "games.shortcuts.shortcut_options":
+    "Bu başlatma seçenekleri bir Steam komut sarmalayıcısı kullanıyor. Kısayolu Steam üzerinden başlatın.",
   "games.dock.shortcut": "Steam kısayolları",
   "games.shortcuts.note": "Steam kütüphanene eklenen Steam dışı oyunlar.",
   "games.shortcuts.chooseFolder": "Steam klasörünü seç",
@@ -47,9 +53,11 @@ export default {
   "games.shortcuts.tags": "Etiketler",
   "games.shortcuts.storeError": "Bu ayarlar kaydedilemedi.",
   "games.shortcuts.shortcut_location": "Steam klasörünü veya içindeki userdata klasörünü seç.",
-  "games.shortcuts.shortcut_account": "Bu kısayolun hesabıyla Steam’i açıp yenile. Harbor aynı Steam kurulumunu kullanmalı.",
+  "games.shortcuts.shortcut_account":
+    "Bu kısayolun hesabıyla Steam’i açıp yenile. Harbor aynı Steam kurulumunu kullanmalı.",
   "games.shortcuts.shortcut_missing": "Bu kısayol artık yok. Kütüphaneyi yenile.",
-  "games.shortcuts.shortcut_executable": "Çalıştırılabilir dosya eksik veya mutlak dosya yolu desteklenmiyor.",
+  "games.shortcuts.shortcut_executable":
+    "Çalıştırılabilir dosya eksik veya mutlak dosya yolu desteklenmiyor.",
   "games.shortcuts.shortcut_launch": "Steam bu kısayolu açamadı. Tekrar dene.",
-  "games.shortcuts.shortcut_read": "Steam kısayolları okunamadı. Yenilemeyi dene."
+  "games.shortcuts.shortcut_read": "Steam kısayolları okunamadı. Yenilemeyi dene.",
 };

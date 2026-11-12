@@ -8,8 +8,10 @@ export default {
   "games.sidebar.customOrder": "Urutan saya",
   "games.sidebar.arrange": "Atur bilah samping",
   "games.sidebar.resetFilters": "Atur ulang filter",
-  "games.sidebar.arrangeNote": "Seret atau gunakan panah untuk mengurutkan. Sematkan game utama atau sembunyikan entri dari bilah ini.",
-  "games.sidebar.saveFailed": "Preferensi bilah samping gagal disimpan. Perubahan berlaku untuk sesi ini.",
+  "games.sidebar.arrangeNote":
+    "Seret atau gunakan panah untuk mengurutkan. Sematkan game utama atau sembunyikan entri dari bilah ini.",
+  "games.sidebar.saveFailed":
+    "Preferensi bilah samping gagal disimpan. Perubahan berlaku untuk sesi ini.",
   "games.sidebar.move": "Pindahkan {name}",
   "games.sidebar.up": "Naikkan {name}",
   "games.sidebar.down": "Turunkan {name}",
@@ -19,12 +21,15 @@ export default {
   "games.sidebar.hide": "Sembunyikan {name} dari bilah",
   "games.sidebar.pinned": "Disematkan",
   "games.dock.welcomeTitle": "Tampilkan tab game?",
-  "games.dock.welcomeNote": "Akses game cukup dengan mengarahkan kursor. Nonaktifkan kapan saja di Pengaturan → Tema & tampilan → Antarmuka.",
+  "games.dock.welcomeNote":
+    "Akses game cukup dengan mengarahkan kursor. Nonaktifkan kapan saja di Pengaturan → Tema & tampilan → Antarmuka.",
   "games.dock.welcomeEnable": "Tampilkan tab game",
   "games.dock.welcomeDismiss": "Nanti saja",
   "games.dock.settingTitle": "Pustaka cepat",
-  "games.dock.settingNote": "Tampilkan tab samar di tepi untuk akses cepat ke pustaka Anda. Nonaktif secara default.",
-  "games.dock.launchError": "Game tidak dapat dibuka. Periksa instalasi dan peluncurnya, lalu coba lagi.",
+  "games.dock.settingNote":
+    "Tampilkan tab samar di tepi untuk akses cepat ke pustaka Anda. Nonaktif secara default.",
+  "games.dock.launchError":
+    "Game tidak dapat dibuka. Periksa instalasi dan peluncurnya, lalu coba lagi.",
   "games.dock.launcher": "Peluncur",
   "games.dock.client": "Buka di {launcher}",
   "games.dock.openClient": "Buka {name} di {launcher}",
@@ -75,5 +80,6 @@ export default {
   "games.badge.unavailable": "Berkas tidak tersedia",
   "games.badge.notInstalled": "Belum dipasang",
   "games.home.libraryFirstTitle": "Buka Game di pustaka Anda",
-  "games.home.libraryFirstNote": "Mulai dari pustaka Anda alih-alih Jelajahi setiap kali membuka Game."
+  "games.home.libraryFirstNote":
+    "Mulai dari pustaka Anda alih-alih Jelajahi setiap kali membuka Game.",
 };

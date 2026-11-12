@@ -27,7 +27,9 @@ function BadgeChip({ b }: { b: Badge }) {
           <Award size={40} className="text-ink-muted" />
         )}
       </div>
-      <span className="line-clamp-2 text-center text-[11px] leading-tight text-ink-muted">{b.name}</span>
+      <span className="line-clamp-2 text-center text-[11px] leading-tight text-ink-muted">
+        {b.name}
+      </span>
     </HoverTooltip>
   );
 }
@@ -90,7 +92,10 @@ function BadgesScroller({ badges }: { badges: Badge[] }) {
 
   return (
     <div className="group/badges relative">
-      <div ref={ref} className="-mx-5 flex gap-4 overflow-x-auto px-5 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        ref={ref}
+        className="-mx-5 flex gap-4 overflow-x-auto px-5 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {badges.map((b) => (
           <div key={b.id} className="w-[72px] shrink-0">
             <BadgeChip b={b} />

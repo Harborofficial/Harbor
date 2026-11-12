@@ -71,7 +71,11 @@ export function PublicMetaDbProvider({ children }: { children: ReactNode }) {
 
   const disconnect = useCallback(() => {
     setSession(null);
-    try { setPmdbDefaultListId(null); } catch { /* Disconnect even if preferences cannot be saved. */ }
+    try {
+      setPmdbDefaultListId(null);
+    } catch {
+      /* Disconnect even if preferences cannot be saved. */
+    }
     invalidatePmdbWatchedCache();
     clearPmdbWatchlistCache();
     clearPendingResumes();
@@ -95,10 +99,10 @@ export function PublicMetaDbProvider({ children }: { children: ReactNode }) {
       type?: "movie" | "series",
     ): Promise<boolean> => {
       const target = episode
-        ? await resolvePmdbEpisodeTarget(
-            metaId,
-            { season: episode.season, episode: episode.episode },
-        ).catch(() => null)
+        ? await resolvePmdbEpisodeTarget(metaId, {
+            season: episode.season,
+            episode: episode.episode,
+          }).catch(() => null)
         : ((await resolvePmdbTarget(metaId, type).catch(() => null)) ??
           resolveTarget(metaId, episode, type));
       if (!target) return false;
@@ -114,10 +118,10 @@ export function PublicMetaDbProvider({ children }: { children: ReactNode }) {
       type?: "movie" | "series",
     ): Promise<boolean> => {
       const target = episode
-        ? await resolvePmdbEpisodeTarget(
-            metaId,
-            { season: episode.season, episode: episode.episode },
-        ).catch(() => null)
+        ? await resolvePmdbEpisodeTarget(metaId, {
+            season: episode.season,
+            episode: episode.episode,
+          }).catch(() => null)
         : ((await resolvePmdbTarget(metaId, type).catch(() => null)) ??
           resolveTarget(metaId, episode, type));
       if (!target) return false;
@@ -178,7 +182,16 @@ export function PublicMetaDbProvider({ children }: { children: ReactNode }) {
       resolveTarget,
       resolveTargetAsync,
     }),
-    [session, connect, updateUsername, disconnect, markWatched, unmarkWatched, resolveTarget, resolveTargetAsync],
+    [
+      session,
+      connect,
+      updateUsername,
+      disconnect,
+      markWatched,
+      unmarkWatched,
+      resolveTarget,
+      resolveTargetAsync,
+    ],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -35,7 +35,8 @@ export function FeedView({ onOpenProfile }: { onOpenProfile?: (handle: string) =
       return;
     }
     const animeIsh = /^(kitsu|mal|anilist|anidb):/i.test(item.metaId);
-    const type: MetaType = item.type === "series" || item.type === "anime" || animeIsh ? "series" : "movie";
+    const type: MetaType =
+      item.type === "series" || item.type === "anime" || animeIsh ? "series" : "movie";
     openMeta({ id: item.metaId, type, name: item.title, poster: item.posterUrl });
   };
 
@@ -44,7 +45,10 @@ export function FeedView({ onOpenProfile }: { onOpenProfile?: (handle: string) =
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[360px]"
-        style={{ background: "linear-gradient(180deg, color-mix(in oklch, var(--color-elevated), transparent 55%), transparent 80%)" }}
+        style={{
+          background:
+            "linear-gradient(180deg, color-mix(in oklch, var(--color-elevated), transparent 55%), transparent 80%)",
+        }}
       />
 
       <div className="relative mx-auto w-full max-w-[820px] px-6 pb-24 pt-28 sm:px-10">
@@ -93,7 +97,9 @@ export function FeedView({ onOpenProfile }: { onOpenProfile?: (handle: string) =
             body={
               f.friendCount === 0
                 ? t("Add a few friends and their watching, ratings, and favorites land here.")
-                : t("Your friends have not shared anything yet. Activity sharing is off by default.")
+                : t(
+                    "Your friends have not shared anything yet. Activity sharing is off by default.",
+                  )
             }
             icon={<UserPlus size={28} strokeWidth={1.7} />}
           />
@@ -118,7 +124,8 @@ export function FeedView({ onOpenProfile }: { onOpenProfile?: (handle: string) =
                 disabled={f.loadingMore}
                 className="mx-auto mt-8 flex h-10 items-center gap-2 rounded-full border border-edge-soft px-5 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-50"
               >
-                {f.loadingMore ? <Loader2 size={14} className="animate-spin" /> : null} {f.loadingMore ? t("Loading") : t("Load more")}
+                {f.loadingMore ? <Loader2 size={14} className="animate-spin" /> : null}{" "}
+                {f.loadingMore ? t("Loading") : t("Load more")}
               </button>
             )}
           </>

@@ -14,7 +14,9 @@ export function useAnilistWatched(harborId: string, episodes: KitsuEpisode[]): A
   const [result, setResult] = useState<AnilistWatched>(EMPTY);
   const epSig = useMemo(
     () =>
-      episodes.map((e) => `${e.id}:${e.seasonNumber ?? 1}:${e.number}:${e.airdate ?? ""}`).join("|"),
+      episodes
+        .map((e) => `${e.id}:${e.seasonNumber ?? 1}:${e.number}:${e.airdate ?? ""}`)
+        .join("|"),
     [episodes],
   );
   const episodesRef = useRef(episodes);
@@ -45,8 +47,7 @@ export function useAnilistWatched(harborId: string, episodes: KitsuEpisode[]): A
       const mediaTotal = info.episodes;
       const cap =
         mediaTotal != null && mediaTotal > 0 ? Math.min(sorted.length, mediaTotal) : sorted.length;
-      const watchedCount =
-        status === "COMPLETED" ? cap : Math.max(0, Math.min(progress, cap));
+      const watchedCount = status === "COMPLETED" ? cap : Math.max(0, Math.min(progress, cap));
       const watchedKeys = new Set<string>();
       for (let i = 0; i < watchedCount; i++) {
         const ep = sorted[i];

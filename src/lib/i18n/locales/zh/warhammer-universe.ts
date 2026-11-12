@@ -19,14 +19,16 @@ export default {
   "games.warhammerUniverse.free": "在 Warhammer TV 免费观看",
   "games.warhammerUniverse.subscription": "可能需要 Warhammer+ 订阅",
   "games.warhammerUniverse.movieNote": "2010年动画电影。在 Harbor 详情中查看演员、预告与可用来源。",
-  "games.warhammerUniverse.screenScope": "Warhammer TV 的公开精选。《战锤：锤与爆弹》跨越多个世界；观看权限由服务商决定。",
+  "games.warhammerUniverse.screenScope":
+    "Warhammer TV 的公开精选。《战锤：锤与爆弹》跨越多个世界；观看权限由服务商决定。",
   "games.warhammerUniverse.lore": "深入背景故事",
   "games.warhammerUniverse.loreNote": "由世界的创作者以图像呈现人物、派系与关键事件。",
   "games.warhammerUniverse.setting": "选择世界设定",
   "games.warhammerUniverse.searchLore": "搜索人物、派系或事件",
   "games.warhammerUniverse.subjects": "{count} 个主题",
   "games.warhammerUniverse.watchLore": "在 Warhammer TV 观看",
-  "games.warhammerUniverse.loreScope": "官方英文单集简介。各设定有独立资料库；这是入门索引，并非完整百科。",
+  "games.warhammerUniverse.loreScope":
+    "官方英文单集简介。各设定有独立资料库；这是入门索引，并非完整百科。",
   "games.warhammerUniverse.fullLibrary": "完整背景资料库",
   "games.warhammerUniverse.settingGuide": "40K 世界指南",
   "games.warhammerUniverse.books": "小说与有声书",
@@ -35,5 +37,5 @@ export default {
   "games.warhammerUniverse.videosNote": "YouTube 创作者带来的背景解说、深度讨论与故事。",
   "games.warhammerUniverse.searchVideos": "搜索战锤视频",
   "games.warhammerUniverse.unavailable": "无法刷新此来源。其他部分仍可使用。",
-  "games.warhammerUniverse.partial": "这里仅展示部分内容。打开完整资料库以查看更多。"
+  "games.warhammerUniverse.partial": "这里仅展示部分内容。打开完整资料库以查看更多。",
 };

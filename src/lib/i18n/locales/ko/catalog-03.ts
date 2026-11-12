@@ -973,8 +973,10 @@ const catalog03: Record<string, string> = {
     "키보드나 리모컨으로 포스터 행을 탐색할 때 미리 불러온 와이드 아트워크를 사용해 포스터 카드를 확장합니다.",
   "Expand sidebar": "사이드바 펼치기",
   "Cached source resolution and direct download links.": "캐시된 소스 확인과 직접 다운로드 링크.",
-  "Cached source resolution and cloud library access.": "캐시된 소스 확인과 클라우드 라이브러리 접근.",
-  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.": "둘 다는 직접, 디브리드, P2P 결과를 함께 표시합니다. 직접/디브리드는 다른 결과가 없을 때만 P2P 결과를 보여 줍니다. P2P는 P2P 결과를 맨 앞에 둡니다.",
+  "Cached source resolution and cloud library access.":
+    "캐시된 소스 확인과 클라우드 라이브러리 접근.",
+  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.":
+    "둘 다는 직접, 디브리드, P2P 결과를 함께 표시합니다. 직접/디브리드는 다른 결과가 없을 때만 P2P 결과를 보여 줍니다. P2P는 P2P 결과를 맨 앞에 둡니다.",
 };
 
 export default catalog03;

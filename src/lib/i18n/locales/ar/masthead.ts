@@ -5,12 +5,10 @@ const masthead: Record<string, string> = {
     "عوالم متأنّية وفصول مشرقة تستحق المشاهدة مع فنجان قهوة.",
   "Good Morning": "صباح الخير",
   "Today's openers": "افتتاحيات اليوم",
-  "Series to ease into while the day is still quiet.":
-    "مسلسلات هادئة لبداية يوم لا يزال ساكنًا.",
+  "Series to ease into while the day is still quiet.": "مسلسلات هادئة لبداية يوم لا يزال ساكنًا.",
   Daybreak: "مطلع الفجر",
   "First-light picks": "اختيارات أول الضوء",
-  "Worlds to step into before the inbox catches up.":
-    "عوالم تدخلها قبل أن يلاحقك البريد.",
+  "Worlds to step into before the inbox catches up.": "عوالم تدخلها قبل أن يلاحقك البريد.",
   "AM Picks": "اختيارات الصباح",
   "Coffee-and-couch": "قهوة وأريكة",
   "Half-hours, anthologies, and a few epics for the morning routine.":
@@ -25,8 +23,7 @@ const masthead: Record<string, string> = {
     "قصص تكافئ انتباهك قبل أن يعلو صخب اليوم.",
   "This Morning": "هذا الصباح",
   "Worth catching up on": "تستحق اللحاق بها",
-  "What everyone has been quietly binging this week.":
-    "ما يشاهده الجميع بشغف هذا الأسبوع.",
+  "What everyone has been quietly binging this week.": "ما يشاهده الجميع بشغف هذا الأسبوع.",
 
   "Afternoon Picks": "اختيارات بعد الظهر",
   "Daytime watching": "مشاهدة نهارية",
@@ -112,8 +109,7 @@ const masthead: Record<string, string> = {
     "دراما هادئة وإثارة لاذعة ومسلسلات تحتفظ بها لنفسك.",
   "Night Owl": "ساهر الليل",
   "While the world's asleep": "بينما العالم نائم",
-  "Series with the patience to match your late-night hours.":
-    "مسلسلات بصبر يضاهي ساعاتك المتأخرة.",
+  "Series with the patience to match your late-night hours.": "مسلسلات بصبر يضاهي ساعاتك المتأخرة.",
 };
 
 export default masthead;

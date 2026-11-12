@@ -24,7 +24,9 @@ export function VoyagePrefetch({ meta }: { meta: Meta }) {
   const { addons: allAddons } = useAddons(authKey, settings);
   const addons = useMemo(
     () =>
-      allAddons ? allAddons.filter((a) => settings.pluginsBackground || !isPluginAddon(a)) : allAddons,
+      allAddons
+        ? allAddons.filter((a) => settings.pluginsBackground || !isPluginAddon(a))
+        : allAddons,
     [allAddons, settings.pluginsBackground],
   );
   const animeTitles = useAnimeAltTitles(meta);
@@ -33,10 +35,12 @@ export function VoyagePrefetch({ meta }: { meta: Meta }) {
   const strictMode = settings.streamFilterLevel === "strict";
   const filterDisabled = settings.streamFilterLevel === "off";
 
-  const animePreference = streamIds && hasAnimeStreamIds(streamIds)
-    ? settings.animePreferImdbStreams : undefined;
-  const preferredAnimeImdbId = animePreference && streamIds
-    ? preferredAnimeImdbStreamId(meta.id, undefined, imdb.id, imdb.verified, streamIds) : undefined;
+  const animePreference =
+    streamIds && hasAnimeStreamIds(streamIds) ? settings.animePreferImdbStreams : undefined;
+  const preferredAnimeImdbId =
+    animePreference && streamIds
+      ? preferredAnimeImdbStreamId(meta.id, undefined, imdb.id, imdb.verified, streamIds)
+      : undefined;
   const configHash = useMemo(
     () =>
       buildPickerConfigHash({

@@ -18,7 +18,10 @@ import { useBpT } from "./bp-i18n";
 
 const COLUMNS = "repeat(auto-fill, minmax(clamp(230px, 21vw, 400px), 1fr))";
 
-export function awardSourceIcon(id: AwardSourceId, custom: Record<string, string>): {
+export function awardSourceIcon(
+  id: AwardSourceId,
+  custom: Record<string, string>,
+): {
   src: string;
   invert: boolean;
 } {
@@ -92,9 +95,7 @@ export function BpAnimeAward({
               <Trophy size={16} strokeWidth={2.6} />
               {t("Anime award")}
             </span>
-            <h1
-              className="font-display text-[clamp(22px,3.6vh,50px)] font-semibold leading-[1.05] tracking-[-0.02em] text-ink"
-            >
+            <h1 className="font-display text-[clamp(22px,3.6vh,50px)] font-semibold leading-[1.05] tracking-[-0.02em] text-ink">
               {data.meta.name}
             </h1>
           </div>
@@ -191,9 +192,7 @@ function BpAwardCategory({
   return (
     <section className="flex flex-col gap-[clamp(7px,1vh,15px)]">
       <div className="flex items-baseline justify-between gap-[clamp(9px,1vw,18px)] border-b border-[var(--bp-edge)] pb-[clamp(5px,0.7vh,11px)]">
-        <h2
-          className="flex items-center gap-[clamp(6px,0.6vw,12px)] text-[clamp(22px,3vh,28px)] font-bold tracking-[-0.01em] text-ink"
-        >
+        <h2 className="flex items-center gap-[clamp(6px,0.6vw,12px)] text-[clamp(22px,3vh,28px)] font-bold tracking-[-0.01em] text-ink">
           {category.isAOTY && (
             <span className="rounded-full bg-[var(--bp-glass)] px-[clamp(7px,0.7vw,13px)] py-[2px] text-[clamp(14px,1.9vh,18px)] font-bold uppercase tracking-[0.18em] text-ink-muted">
               {t("Grand")}

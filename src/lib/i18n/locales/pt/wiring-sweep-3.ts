@@ -131,8 +131,10 @@ const wiringSweep3: Record<string, string> = {
   "No previous versions yet. Your next update starts the history.":
     "Ainda não há versões anteriores. Sua próxima atualização iniciará o histórico.",
   "Get yours at": "Obtenha o seu em",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "Usado para verificar o cache e desbloquear links. O Harbor nunca adiciona nem remove nada da sua conta por conta própria.",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Mesmo uso somente leitura do Real-Debrid. Também permite colocar na fila fontes que não estão no cache pelo seletor de reprodução.",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "Usado para verificar o cache e desbloquear links. O Harbor nunca adiciona nem remove nada da sua conta por conta própria.",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Mesmo uso somente leitura do Real-Debrid. Também permite colocar na fila fontes que não estão no cache pelo seletor de reprodução.",
   "AllDebrid deprecated their cache-check endpoint, so streams may show as unknown until you actually hit Play.":
     "O AllDebrid descontinuou o endpoint de verificação de cache, então as fontes podem aparecer como desconhecidas até você tocar em Reproduzir.",
   "Uses the directdl endpoint, which skips queueing for anything already cached.":

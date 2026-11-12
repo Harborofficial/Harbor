@@ -2,10 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, SlidersHorizontal } from "@/components/icons/music-icons";
 import { MusicGenreBrowser } from "./music-genre-browser";
 import { useT } from "@/lib/i18n";
-import {
-  loadMusicDiscoveryChart,
-  loadMusicDiscoveryGenres,
-} from "@/lib/music/discovery";
+import { loadMusicDiscoveryChart, loadMusicDiscoveryGenres } from "@/lib/music/discovery";
 import { readMusicPreference, writeMusicPreference } from "@/lib/music/preferences";
 import type { MusicCatalogRow as CatalogRow } from "@/lib/music/types";
 import "./music-tastes.css";
@@ -50,11 +47,29 @@ export function MusicTastes({
         </h1>
         <p>{t("music.taste.body")}</p>
       </header>
-      <MusicGenreBrowser mode="tastes" selected={draft} onSelect={genre =>
-        setDraft(values => values.includes(genre.id) ? values.filter(id => id !== genre.id) : [...values, genre.id])
-      } />
+      <MusicGenreBrowser
+        mode="tastes"
+        selected={draft}
+        onSelect={(genre) =>
+          setDraft((values) =>
+            values.includes(genre.id)
+              ? values.filter((id) => id !== genre.id)
+              : [...values, genre.id],
+          )
+        }
+      />
       <footer>
-        <div><p>{t("music.taste.local")}</p><button type="button" className="music-home-text" disabled={!draft.length} onClick={() => setDraft([])}>{t("music.taste.clear")}</button></div>
+        <div>
+          <p>{t("music.taste.local")}</p>
+          <button
+            type="button"
+            className="music-home-text"
+            disabled={!draft.length}
+            onClick={() => setDraft([])}
+          >
+            {t("music.taste.clear")}
+          </button>
+        </div>
         <button
           type="button"
           className="music-home-primary"

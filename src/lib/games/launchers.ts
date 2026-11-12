@@ -3,7 +3,17 @@ import { launcherCatalogArtwork } from "./launcher-discovery";
 import { wowClassicEdition } from "./wow-classic";
 import { wowClassicArt } from "./wow-art";
 
-export type GameLauncher = "battlenet" | "ea" | "ubisoft" | "epic" | "gog" | "riot" | "rockstar" | "rsi" | "bsg" | "itch";
+export type GameLauncher =
+  | "battlenet"
+  | "ea"
+  | "ubisoft"
+  | "epic"
+  | "gog"
+  | "riot"
+  | "rockstar"
+  | "rsi"
+  | "bsg"
+  | "itch";
 export type LauncherGame = {
   id: string;
   launcher: GameLauncher;
@@ -19,7 +29,11 @@ export type LauncherGame = {
   artwork?: { capsule?: string; hero?: string; logo?: string };
   catalogSteamId?: number;
   /** Per-profile native observation; never inferred from successful client dispatch. */
-  activity?: { seconds?: number; lastPlayed?: number; state?: "waiting" | "running" | "unconfirmed" | "notStarted" };
+  activity?: {
+    seconds?: number;
+    lastPlayed?: number;
+    state?: "waiting" | "running" | "unconfirmed" | "notStarted";
+  };
 };
 export type LauncherScan = {
   supported: boolean;
@@ -28,8 +42,15 @@ export type LauncherScan = {
   warnings: string[];
 };
 export const LAUNCHER_NAMES: Record<GameLauncher, string> = {
-  battlenet: "Battle.net", ea: "EA app", ubisoft: "Ubisoft Connect", epic: "Epic Games",
-  gog: "GOG GALAXY", riot: "Riot Games", rockstar: "Rockstar Games", rsi: "RSI Launcher", bsg: "Battlestate Games",
+  battlenet: "Battle.net",
+  ea: "EA app",
+  ubisoft: "Ubisoft Connect",
+  epic: "Epic Games",
+  gog: "GOG GALAXY",
+  riot: "Riot Games",
+  rockstar: "Rockstar Games",
+  rsi: "RSI Launcher",
+  bsg: "Battlestate Games",
   itch: "itch.io",
 };
 
@@ -43,16 +64,31 @@ export function isLauncherGameId(value: unknown): value is string {
   }
   if (value.startsWith("ea:")) {
     const ids = value.slice(3).split(",");
-    return ids.length <= 64 && ids.every((id, index) => /^[A-Za-z0-9._:-]{1,128}$/.test(id) && (index === 0 || ids[index - 1]! < id));
+    return (
+      ids.length <= 64 &&
+      ids.every(
+        (id, index) => /^[A-Za-z0-9._:-]{1,128}$/.test(id) && (index === 0 || ids[index - 1]! < id),
+      )
+    );
   }
-  if (value.startsWith("epic:")) return /^[A-Za-z0-9._-]{1,128}:[A-Za-z0-9._-]{1,128}:[A-Za-z0-9._-]{1,128}$/.test(value.slice(5));
+  if (value.startsWith("epic:"))
+    return /^[A-Za-z0-9._-]{1,128}:[A-Za-z0-9._-]{1,128}:[A-Za-z0-9._-]{1,128}$/.test(
+      value.slice(5),
+    );
   if (value.startsWith("gog:")) return /^[1-9][0-9]{0,19}$/.test(value.slice(4));
-  if (value.startsWith("riot:")) return /^(league_of_legends|valorant|bacon|lion):(live|pbe)$/.test(value.slice(5));
-  if (value.startsWith("rockstar:")) return /^(gta5|gta5_gen9|gta4|rdr|rdr2|lanoire|lanoirevr|mp3|gtasa|gta3|gtavc|bully|gta3unreal|gtavcunreal|gtasaunreal)$/.test(value.slice(9));
-  if (value.startsWith("rsi:")) return /^star-citizen:(live|ptu|eptu|tech-preview)$/.test(value.slice(4));
+  if (value.startsWith("riot:"))
+    return /^(league_of_legends|valorant|bacon|lion):(live|pbe)$/.test(value.slice(5));
+  if (value.startsWith("rockstar:"))
+    return /^(gta5|gta5_gen9|gta4|rdr|rdr2|lanoire|lanoirevr|mp3|gtasa|gta3|gtavc|bully|gta3unreal|gtavcunreal|gtasaunreal)$/.test(
+      value.slice(9),
+    );
+  if (value.startsWith("rsi:"))
+    return /^star-citizen:(live|ptu|eptu|tech-preview)$/.test(value.slice(4));
   if (value.startsWith("bsg:")) return /^(eft|arena)$/.test(value.slice(4));
   if (value.startsWith("itch:")) {
-    const match = /^itch:([1-9][0-9]{0,15}):[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.exec(value);
+    const match = /^itch:([1-9][0-9]{0,15}):[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.exec(
+      value,
+    );
     return !!match && Number.isSafeInteger(Number(match[1]));
   }
   return false;
@@ -125,21 +161,40 @@ const CATALOG_IDENTITIES: Readonly<Record<string, number>> = {
 
 function launcherCatalogIdentity(id: string): number | undefined {
   if (!isLauncherGameId(id)) return undefined;
-  const ids = id.startsWith("ea:") ? id.slice(3).split(",").map(alias => `ea:${alias}`) : [id];
-  const matches = ids.map(key => Object.hasOwn(CATALOG_IDENTITIES, key) ? CATALOG_IDENTITIES[key] : undefined);
+  const ids = id.startsWith("ea:")
+    ? id
+        .slice(3)
+        .split(",")
+        .map((alias) => `ea:${alias}`)
+    : [id];
+  const matches = ids.map((key) =>
+    Object.hasOwn(CATALOG_IDENTITIES, key) ? CATALOG_IDENTITIES[key] : undefined,
+  );
   // Every observed EA alias must identify the same edition. Unknown/mixed aliases
   // stay unresolved; a familiar title or one matching alias is insufficient.
-  return matches.every(value => value !== undefined && value === matches[0]) ? matches[0] : undefined;
+  return matches.every((value) => value !== undefined && value === matches[0])
+    ? matches[0]
+    : undefined;
 }
 /** Also enrich older saved/collection entries without changing their native identity. */
 export function launcherCatalogGame(game: GameSummary): GameSummary {
   const igdbId = launcherCatalogIdentity(game.id);
   const catalogSteamId = launcherCatalogSteamId(game.id, game.catalogSteamId);
-  return igdbId ? { ...game, igdbId, catalogSteamId, steamId: undefined }
-    : isLauncherGameId(game.id) || game.catalogSteamId !== catalogSteamId ? { ...game, catalogSteamId, ...(isLauncherGameId(game.id) ? { steamId: undefined } : {}) } : game;
+  return igdbId
+    ? { ...game, igdbId, catalogSteamId, steamId: undefined }
+    : isLauncherGameId(game.id) || game.catalogSteamId !== catalogSteamId
+      ? { ...game, catalogSteamId, ...(isLauncherGameId(game.id) ? { steamId: undefined } : {}) }
+      : game;
 }
 export function launcherCatalogSteamId(id: unknown, value: unknown): number | undefined {
-  return isLauncherGameId(id) && id.startsWith("ubisoft:") && typeof value === "number" && Number.isSafeInteger(value) && value > 0 && value <= 0xffff_ffff ? value : undefined;
+  return isLauncherGameId(id) &&
+    id.startsWith("ubisoft:") &&
+    typeof value === "number" &&
+    Number.isSafeInteger(value) &&
+    value > 0 &&
+    value <= 0xffff_ffff
+    ? value
+    : undefined;
 }
 export function launcherGameSummary(game: LauncherGame): GameSummary {
   const igdbId = launcherCatalogIdentity(launcherDispatchId(game));
@@ -148,11 +203,18 @@ export function launcherGameSummary(game: LauncherGame): GameSummary {
   const classic = wowClassicEdition({ id: launcherDispatchId(game) });
   // Progression clients retain their native identity; a Classic image is not a Retail catalog join.
   const classicArt = classic ? wowClassicArt(classic, game.name) : undefined;
-  const capsule = game.artwork?.capsule || game.artwork?.hero || catalog?.capsule || classicArt?.backdrop || "";
+  const capsule =
+    game.artwork?.capsule || game.artwork?.hero || catalog?.capsule || classicArt?.backdrop || "";
   const portrait = game.artwork?.capsule || catalog?.portrait;
-  return { id: game.id, name: game.name, platforms: ["Windows"], capsule,
+  return {
+    id: game.id,
+    name: game.name,
+    platforms: ["Windows"],
+    capsule,
     ...(portrait ? { portrait } : {}),
-    ...(igdbId ? { igdbId } : {}), ...(catalogSteamId ? { catalogSteamId } : {}) };
+    ...(igdbId ? { igdbId } : {}),
+    ...(catalogSteamId ? { catalogSteamId } : {}),
+  };
 }
 // Exact original-edition assets from IGDB's October 3, 2026 catalog response.
 // Keep landscape screenshots separate from portrait covers and remaster identities.
@@ -164,30 +226,62 @@ function classicCatalogArtwork(id: number | undefined) {
     133: ["sc6vmp", "co1xxv"],
   };
   const entry = id === undefined ? undefined : assets[id];
-  return entry ? {
-    capsule: `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${entry[0]}.jpg`,
-    portrait: `https://images.igdb.com/igdb/image/upload/t_cover_big_2x/${entry[1]}.jpg`,
-  } : undefined;
+  return entry
+    ? {
+        capsule: `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${entry[0]}.jpg`,
+        portrait: `https://images.igdb.com/igdb/image/upload/t_cover_big_2x/${entry[1]}.jpg`,
+      }
+    : undefined;
 }
 /** Only known public publisher assets belong in portable native-game snapshots. */
 export function launcherProductImage(id: unknown, value: unknown): string {
-  if (isLauncherGameId(id) && id.startsWith("itch:") && typeof value === "string" && value.length <= 8192 && !/[\s\x00-\x1f\x7f]/.test(value)) {
+  if (
+    isLauncherGameId(id) &&
+    id.startsWith("itch:") &&
+    typeof value === "string" &&
+    value.length <= 8192 &&
+    !/[\s\x00-\x1f\x7f]/.test(value)
+  ) {
     try {
       const url = new URL(value);
-      if (url.protocol === "https:" && url.hostname === "img.itch.zone" && !url.username && !url.password && !url.port && !url.search && !url.hash && url.pathname.length > 1) return value;
-    } catch { /* Only the publisher's public artwork can be persisted. */ }
+      if (
+        url.protocol === "https:" &&
+        url.hostname === "img.itch.zone" &&
+        !url.username &&
+        !url.password &&
+        !url.port &&
+        !url.search &&
+        !url.hash &&
+        url.pathname.length > 1
+      )
+        return value;
+    } catch {
+      /* Only the publisher's public artwork can be persisted. */
+    }
     return "";
   }
-  return isLauncherGameId(id) && id.startsWith("ubisoft:") && typeof value === "string"
-    && /^https:\/\/ubistatic3-a\.akamaihd\.net\/orbit\/uplay_launcher_3_0\/assets\/[a-f0-9]{32}\.(?:jpg|jpeg|png|webp)$/i.test(value) ? value : "";
+  return isLauncherGameId(id) &&
+    id.startsWith("ubisoft:") &&
+    typeof value === "string" &&
+    /^https:\/\/ubistatic3-a\.akamaihd\.net\/orbit\/uplay_launcher_3_0\/assets\/[a-f0-9]{32}\.(?:jpg|jpeg|png|webp)$/i.test(
+      value,
+    )
+    ? value
+    : "";
 }
 /** Exact provider identity wins. Catalog joins are only for catalog entries, never other storefront copies. */
-export function findLauncherInstall(game: Pick<GameSummary, "id" | "igdbId" | "steamId">, scan?: LauncherScan | null): LauncherGame | undefined {
+export function findLauncherInstall(
+  game: Pick<GameSummary, "id" | "igdbId" | "steamId">,
+  scan?: LauncherScan | null,
+): LauncherGame | undefined {
   if (!scan?.supported) return undefined;
-  const exact = scan.games.find(install => install.id === game.id);
+  const exact = scan.games.find((install) => install.id === game.id);
   if (exact) return exact;
   if (!game.id.startsWith("igdb:") || game.steamId || !game.igdbId) return undefined;
-  const matches = scan.games.filter(install => launcherGameSummary(install).igdbId === game.igdbId && install.state === "installed");
+  const matches = scan.games.filter(
+    (install) =>
+      launcherGameSummary(install).igdbId === game.igdbId && install.state === "installed",
+  );
   // Multiple providers/installations require an explicit source choice.
   return matches.length === 1 ? matches[0] : undefined;
 }
@@ -196,9 +290,16 @@ export function isRetailWow(game: Pick<GameSummary, "id" | "igdbId" | "steamId">
   return !game.steamId && game.igdbId === WOW_IGDB_ID;
 }
 export function canLaunchGame(game: LauncherGame, scan: LauncherScan): boolean {
-  const classic = game.launcher === "battlenet" && game.launchMode === "direct"
-    && ["classic:d2", "classic:d2x", "classic:w3", "classic:w3x"].includes(game.productId);
-  return scan.supported && game.state === "installed" && (classic || scan.clients.some(client => client.launcher === game.launcher && client.installed));
+  const classic =
+    game.launcher === "battlenet" &&
+    game.launchMode === "direct" &&
+    ["classic:d2", "classic:d2x", "classic:w3", "classic:w3x"].includes(game.productId);
+  return (
+    scan.supported &&
+    game.state === "installed" &&
+    (classic ||
+      scan.clients.some((client) => client.launcher === game.launcher && client.installed))
+  );
 }
 
 /** Library IDs can survive EA manifest changes; only current product IDs go to native dispatch. */

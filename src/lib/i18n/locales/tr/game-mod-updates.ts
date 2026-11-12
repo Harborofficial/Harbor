@@ -11,12 +11,14 @@ export default {
   "games.mods.restore": "Öncekini geri yükle",
   "games.mods.restored": "Önceki sürüm geri yüklendi.",
   "games.mods.changeTitle": "Değiştirilecek dosyalar",
-  "games.mods.backupNote": "Değiştirilen sürümler yerel yedekte tutulur. Geri dönmek için kurulumunuzda Öncekini geri yükle seçeneğini kullanın. Bağımlılıklar yeniden denetlenir.",
+  "games.mods.backupNote":
+    "Değiştirilen sürümler yerel yedekte tutulur. Geri dönmek için kurulumunuzda Öncekini geri yükle seçeneğini kullanın. Bağımlılıklar yeniden denetlenir.",
   "games.mods.currentVersion": "Yüklü: {version}",
   "games.mods.current": "Yüklü",
-  "games.mods.versionNote": "Uyumlu bir sürüm seçin. Harbor değişiklikleri denetler ve önceki sürümü yerel olarak saklar. Uygulamadan önce Minecraft’ı kapatın.",
+  "games.mods.versionNote":
+    "Uyumlu bir sürüm seçin. Harbor değişiklikleri denetler ve önceki sürümü yerel olarak saklar. Uygulamadan önce Minecraft’ı kapatın.",
   "games.mods.applyChanges": "Değişiklikleri uygula",
   "games.mods.reviewChanges": "Değişiklikleri incele",
   "games.mods.previousVersion": "Önceki: {version}",
-  "games.mods.restoreConfirm": "{version} sürümü geri yüklensin mi? Önce Minecraft’ı kapatın."
+  "games.mods.restoreConfirm": "{version} sürümü geri yüklensin mi? Önce Minecraft’ı kapatın.",
 } satisfies Record<string, string>;

@@ -1,8 +1,4 @@
-import {
-  fetchInstalledAddons,
-  fetchManifestAt,
-  filterEnabled,
-} from "@/lib/addon-store";
+import { fetchInstalledAddons, fetchManifestAt, filterEnabled } from "@/lib/addon-store";
 import { userAddons, withDebridKeys, type Addon } from "@/lib/addons";
 import { applyOrderToItems, loadDisplayOrder } from "@/lib/addons-store/reorder";
 import { buildDebridClients } from "@/lib/debrid/registry";

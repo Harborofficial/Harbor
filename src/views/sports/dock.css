@@ -37,9 +37,20 @@
   touch-action: none;
   user-select: none;
 }
-.sports-player-dock .sports-dock-chrome header:active { cursor: grabbing; }
-.sports-dock-logo { width: 36px; height: 32px; flex-shrink: 0; object-fit: contain; }
-.sports-dock-volume { display: flex; align-items: center; gap: 8px; }
+.sports-player-dock .sports-dock-chrome header:active {
+  cursor: grabbing;
+}
+.sports-dock-logo {
+  width: 36px;
+  height: 32px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+.sports-dock-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .sports-player-dock .sports-dock-chrome footer {
   height: 50px;
   flex-shrink: 0;

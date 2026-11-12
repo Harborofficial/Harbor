@@ -172,7 +172,7 @@ export default {
   "Show all {count}": "Ver todos ({count})",
   "{count} competing": "{count} em prova",
   "Starting field": "Grelha de partida",
-  "Leaderboard": "Classificacao",
+  Leaderboard: "Classificacao",
   "Full field": "Grelha completa",
   "Loading event schedule…": "Carregando calendário do evento…",
   "Loading lineups…": "Carregando escalações…",

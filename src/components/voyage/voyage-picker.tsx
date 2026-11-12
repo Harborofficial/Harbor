@@ -50,7 +50,14 @@ export function VoyagePicker({ voyage, inline = false }: { voyage: Voyage; inlin
       </div>
 
       {hover.meta && hover.anchor && (
-        <PortHoverCard key={hover.meta.id} id={hoverId} meta={hover.meta} anchor={hover.anchor} onEnter={hover.keep} onLeave={hover.leave} />
+        <PortHoverCard
+          key={hover.meta.id}
+          id={hoverId}
+          meta={hover.meta}
+          anchor={hover.anchor}
+          onEnter={hover.keep}
+          onLeave={hover.leave}
+        />
       )}
 
       <div className="mt-1 flex items-center justify-between gap-2">

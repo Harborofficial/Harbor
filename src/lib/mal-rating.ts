@@ -32,7 +32,8 @@ export async function jikanScore(malId: number): Promise<string | null> {
   const p = (async () => {
     try {
       const j = await animeCatalogRequest<{ score?: number }>(`/anime/${malId}`);
-      const score = typeof j?.data?.score === "number" && j.data.score > 0 ? j.data.score.toFixed(1) : null;
+      const score =
+        typeof j?.data?.score === "number" && j.data.score > 0 ? j.data.score.toFixed(1) : null;
       const c = readCache();
       c[malId] = { score, t: Date.now() };
       writeCache(c);

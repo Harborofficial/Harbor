@@ -14,15 +14,38 @@ import {
 import type { MusicTrack } from "../src/lib/music/types";
 
 test("queue provenance survives source resolution but does not leak to a different queue", () => {
-  const track: MusicTrack = { id: "spotify-track", connectorId: "spotify", title: "Song", artist: "Artist", artwork: "", durationSeconds: 100, durationLabel: "1:40" };
-  const resolved: MusicTrack = { ...track, id: "youtube-track", connectorId: "youtube_music", collectionOrigin: { id: track.id, connectorId: track.connectorId } };
-  const origin = { kind: "spotify" as const, id: "original-list", name: "Original", collection: "playlist" as const, nextOffset: 50 };
+  const track: MusicTrack = {
+    id: "spotify-track",
+    connectorId: "spotify",
+    title: "Song",
+    artist: "Artist",
+    artwork: "",
+    durationSeconds: 100,
+    durationLabel: "1:40",
+  };
+  const resolved: MusicTrack = {
+    ...track,
+    id: "youtube-track",
+    connectorId: "youtube_music",
+    collectionOrigin: { id: track.id, connectorId: track.connectorId },
+  };
+  const origin = {
+    kind: "spotify" as const,
+    id: "original-list",
+    name: "Original",
+    collection: "playlist" as const,
+    nextOffset: 50,
+  };
   registerMusicQueueOrigin([track], origin);
   beginMusicQueue([resolved], []);
   assert.deepEqual(getMusicPlaybackOrigin(), origin);
   const revision = getMusicQueueRevision();
   beginMusicQueue([resolved], [resolved]);
-  assert.equal(getMusicQueueRevision(), revision, "advancing within the same queue preserves continuation requests");
+  assert.equal(
+    getMusicQueueRevision(),
+    revision,
+    "advancing within the same queue preserves continuation requests",
+  );
   beginMusicQueue([{ ...track, id: "different" }], [resolved]);
   assert.equal(getMusicPlaybackOrigin(), null);
   assert.ok(getMusicQueueRevision() > revision, "a different queue invalidates pending additions");

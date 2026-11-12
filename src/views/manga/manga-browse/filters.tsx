@@ -193,16 +193,27 @@ export function TagDropdown({
     return q ? tags.filter((t) => t.name.toLowerCase().includes(q)) : tags;
   }, [tags, filter]);
   const categories = shown.filter((tag) => tag.group === "Categories");
-  const sources = shown.filter((tag) => tag.group !== "Categories")
+  const sources = shown
+    .filter((tag) => tag.group !== "Categories")
     .sort((a, b) => a.name.localeCompare(b.name));
   const renderTag = (tag: MangaTag) => (
-    <TagRow key={tag.id} label={tag.name} active={tag.id === tagId}
-      onClick={() => (onSelect(tag.id), setOpen(false))} />
+    <TagRow
+      key={tag.id}
+      label={tag.name}
+      active={tag.id === tagId}
+      onClick={() => (onSelect(tag.id), setOpen(false))}
+    />
   );
 
   return (
     <div ref={ref} className="relative">
-      <button ref={triggerRef} type="button" aria-expanded={open} onClick={() => setOpen((v) => !v)} className={TRIGGER}>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className={TRIGGER}
+      >
         <Layers size={15} className="text-ink-subtle" />
         <span className="max-w-[140px] truncate font-medium">
           {tagId === FAVORITES ? t("Library") : active ? active.name : t(allLabel)}
@@ -210,7 +221,10 @@ export function TagDropdown({
         <ChevronDown size={14} className="text-ink-subtle" />
       </button>
       {open && (
-        <div style={{ left: menuLeft }} className="absolute z-30 mt-1.5 w-[240px] max-w-[calc(100vw-16px)] overflow-hidden rounded-lg border border-edge-soft bg-raised shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)]">
+        <div
+          style={{ left: menuLeft }}
+          className="absolute z-30 mt-1.5 w-[240px] max-w-[calc(100vw-16px)] overflow-hidden rounded-lg border border-edge-soft bg-raised shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)]"
+        >
           <div className="border-b border-edge-soft/60 p-2">
             <input
               autoFocus
@@ -238,12 +252,18 @@ export function TagDropdown({
               {tagId === FAVORITES && <Check size={14} className="text-accent" />}
             </button>
             <div className="my-1 border-t border-edge-soft/60" />
-            {categories.length > 0 && <>
-              <div className="px-3 py-1.5 text-[11px] font-medium text-ink-subtle">{t("Categories")}</div>
-              {categories.map(renderTag)}
-              <div className="my-1 border-t border-edge-soft/60" />
-            </>}
-            <div className="px-3 py-1.5 text-[11px] font-medium text-ink-subtle">{t("Extensions")}</div>
+            {categories.length > 0 && (
+              <>
+                <div className="px-3 py-1.5 text-[11px] font-medium text-ink-subtle">
+                  {t("Categories")}
+                </div>
+                {categories.map(renderTag)}
+                <div className="my-1 border-t border-edge-soft/60" />
+              </>
+            )}
+            <div className="px-3 py-1.5 text-[11px] font-medium text-ink-subtle">
+              {t("Extensions")}
+            </div>
             <TagRow
               label={t(allLabel)}
               active={!tagId}

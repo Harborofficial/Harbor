@@ -52,11 +52,16 @@ export default {
   "games.guides.date.all": "Mọi thời điểm",
   "games.guides.viewers": "{count} người đang xem",
   "games.guides.views": "{count} lượt xem",
-  "games.guides.import.callofdutywarzone": "Sao chép giá trị vào thiết lập tương ứng của Warzone. Chỉnh DPI trong phần mềm chuột.",
-  "games.guides.import.css": "Sao chép thiết lập vào Counter-Strike: Source. Dữ liệu lấy từ kho lưu trữ cộng đồng có ngày tháng.",
-  "games.guides.import.cod": "Dùng các giá trị này trong đúng phiên bản trò chơi. Chỉnh DPI trong phần mềm chuột.",
-  "games.guides.noCrosshair": "Nguồn này không cung cấp đủ chi tiết về tâm ngắm để xem trước chính xác.",
-  "games.guides.previewNote": "Bản xem trước tĩnh từ thông số đã công bố. Độ phân giải, chuyển động và độ giật có thể làm thay đổi kết quả trong trò chơi.",
+  "games.guides.import.callofdutywarzone":
+    "Sao chép giá trị vào thiết lập tương ứng của Warzone. Chỉnh DPI trong phần mềm chuột.",
+  "games.guides.import.css":
+    "Sao chép thiết lập vào Counter-Strike: Source. Dữ liệu lấy từ kho lưu trữ cộng đồng có ngày tháng.",
+  "games.guides.import.cod":
+    "Dùng các giá trị này trong đúng phiên bản trò chơi. Chỉnh DPI trong phần mềm chuột.",
+  "games.guides.noCrosshair":
+    "Nguồn này không cung cấp đủ chi tiết về tâm ngắm để xem trước chính xác.",
+  "games.guides.previewNote":
+    "Bản xem trước tĩnh từ thông số đã công bố. Độ phân giải, chuyển động và độ giật có thể làm thay đổi kết quả trong trò chơi.",
   "games.guides.previewBackground": "Đổi nền sáng của bản xem trước",
   "games.guides.crosshairPreview": "Xem trước tâm ngắm",
   "games.guides.noPlayers": "Không có người chơi phù hợp. Thử tên khác.",
@@ -73,22 +78,28 @@ export default {
   "games.guides.sourceErrorTitle": "Hãy thử lại",
   "games.guides.more": "Tải thêm",
   "games.guides.moreKick": "Xem thêm trên Kick",
-  "games.guides.configNote": "Thiết lập do người chơi và nhà sáng tạo công bố. Chọn hồ sơ để xem nguồn, ngày và thiết lập.",
+  "games.guides.configNote":
+    "Thiết lập do người chơi và nhà sáng tạo công bố. Chọn hồ sơ để xem nguồn, ngày và thiết lập.",
   "games.guides.players": "Tất cả người chơi",
   "games.guides.useConfig": "Dùng thiết lập này",
-  "games.guides.import.cs2": "Dán lệnh vào bảng điều khiển dành cho nhà phát triển của CS2. Nhập mã tâm ngắm tại Cài đặt → Trò chơi → Tâm ngắm. Kiểm tra giá trị trước khi áp dụng.",
-  "games.guides.import.valorant": "Sao chép mã tâm ngắm, rồi mở Cài đặt → Tâm ngắm → Nhập mã hồ sơ trong VALORANT. Nhập các giá trị khác ở phần cài đặt tương ứng.",
-  "games.guides.import.rainbowsixsiege": "Sao chép thiết lập rồi nhập giá trị trong phần cài đặt chuột và hiển thị của Siege. DPI được đặt trong phần mềm chuột.",
+  "games.guides.import.cs2":
+    "Dán lệnh vào bảng điều khiển dành cho nhà phát triển của CS2. Nhập mã tâm ngắm tại Cài đặt → Trò chơi → Tâm ngắm. Kiểm tra giá trị trước khi áp dụng.",
+  "games.guides.import.valorant":
+    "Sao chép mã tâm ngắm, rồi mở Cài đặt → Tâm ngắm → Nhập mã hồ sơ trong VALORANT. Nhập các giá trị khác ở phần cài đặt tương ứng.",
+  "games.guides.import.rainbowsixsiege":
+    "Sao chép thiết lập rồi nhập giá trị trong phần cài đặt chuột và hiển thị của Siege. DPI được đặt trong phần mềm chuột.",
   "games.guides.copyCrosshair": "Sao chép tâm ngắm",
   "games.guides.copyCommands": "Sao chép lệnh",
   "games.guides.copySettings": "Sao chép thiết lập",
   "games.guides.copied": "Đã sao chép",
   "games.guides.copyError": "Không thể sao chép. Hãy thử lại.",
-  "games.guides.embedNote": "Nền tảng của nhà sáng tạo cung cấp tính năng phát. Nếu hạn chế nhúng, hãy mở bản gốc.",
+  "games.guides.embedNote":
+    "Nền tảng của nhà sáng tạo cung cấp tính năng phát. Nếu hạn chế nhúng, hãy mở bản gốc.",
   "games.guides.readerErrorTitle": "Không thể tải hướng dẫn này",
   "games.guides.short": "Hướng dẫn",
   "games.guides.title": "Hướng dẫn và cách chơi",
-  "games.guides.note": "Tìm bước tiếp theo. Đọc hướng dẫn cộng đồng, xem video hướng dẫn hoặc người đang chơi.",
+  "games.guides.note":
+    "Tìm bước tiếp theo. Đọc hướng dẫn cộng đồng, xem video hướng dẫn hoặc người đang chơi.",
   "games.guides.written": "Bài hướng dẫn",
   "games.guides.videos": "Video",
   "games.guides.live": "Trực tiếp",
@@ -102,7 +113,8 @@ export default {
   "games.guides.videoTitle": "Xem và học",
   "games.guides.twitch": "Duyệt Twitch",
   "games.guides.youtube": "Thêm trên YouTube",
-  "games.guides.liveNote": "Kết quả trực tiếp từ YouTube. Trạng thái có thể thay đổi khi bạn duyệt.",
+  "games.guides.liveNote":
+    "Kết quả trực tiếp từ YouTube. Trạng thái có thể thay đổi khi bạn duyệt.",
   "games.guides.error": "Không tải được nguồn này. Hãy thử lại.",
   "games.guides.empty": "Không tìm thấy hướng dẫn. Thử tìm kiếm hoặc nguồn khác.",
   "games.guides.noLive": "Hiện không có buổi phát trực tiếp phù hợp.",
@@ -112,8 +124,7 @@ export default {
   "games.guides.playerNote": "Phát qua YouTube. Nếu tác giả hạn chế nhúng, hãy mở video gốc.",
   "games.guides.readerError": "Không đọc được hướng dẫn tại đây. Thử lại hoặc mở bản gốc.",
   "games.guides.contents": "Trong hướng dẫn này",
-  "games.guides.credits": "Tác giả và giấy phép"
-,
+  "games.guides.credits": "Tác giả và giấy phép",
   "games.guides.copy": "Sao chép",
   "games.guides.previewMap": "Hiển thị ảnh chụp bản đồ phía sau tâm ngắm",
   "games.guides.skins": "Skin",
@@ -123,5 +134,5 @@ export default {
   "games.guides.teammates": "Đồng đội",
   "games.guides.specs": "Thông số kỹ thuật",
   "games.guides.exportAll": "Xuất tất cả",
-  "games.guides.copyValue": "Sao chép {label}"
+  "games.guides.copyValue": "Sao chép {label}",
 } satisfies Record<string, string>;

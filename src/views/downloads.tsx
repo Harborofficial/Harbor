@@ -1,5 +1,12 @@
 import { useMemo, useRef, useState } from "react";
-import { CheckSquare2, Download as DownloadIcon, Ellipsis, ListFilter, ListVideo, X } from "lucide-react";
+import {
+  CheckSquare2,
+  Download as DownloadIcon,
+  Ellipsis,
+  ListFilter,
+  ListVideo,
+  X,
+} from "lucide-react";
 import { Poster, usePosterChain } from "@/components/poster";
 import { useSessionState } from "@/lib/session-state";
 import { useScrollMemory } from "@/lib/view";
@@ -18,7 +25,11 @@ import { DownloadRow } from "./downloads/download-row";
 import { SaveLocationChip } from "./downloads/save-location";
 import { AutoDownloadButton, AutoDownloadModal } from "./downloads/auto-download-modal";
 import { fmtBytes, fmtSpeed } from "./downloads/downloads-format";
-import { selectedVisibleIds, toggleDownloadGroupSelection, toggleDownloadSelection } from "./downloads/selection";
+import {
+  selectedVisibleIds,
+  toggleDownloadGroupSelection,
+  toggleDownloadSelection,
+} from "./downloads/selection";
 import { DownloadSelectionCheck } from "./downloads/selection-check";
 import { matchesDownloadFilter, type DownloadsFilter } from "./downloads/downloads-visibility";
 
@@ -111,7 +122,9 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
     visibleItems.length === 0
       ? t("Saved movies, episodes, and eBooks for offline use")
       : [
-          visibleItems.length === 1 ? t("1 item") : t("{count} items", { count: visibleItems.length }),
+          visibleItems.length === 1
+            ? t("1 item")
+            : t("{count} items", { count: visibleItems.length }),
           counts.active - paused > 0
             ? t("{count} downloading", { count: counts.active - paused })
             : null,
@@ -211,9 +224,11 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
                 setSelectionMode((value) => !value);
                 setSelectedIds(new Set());
               }}
-              className={`ml-auto inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold ring-1 transition-colors ${selectionMode
-                ? "bg-accent/10 text-accent ring-accent/40"
-                : "bg-elevated/50 text-ink-muted ring-edge-soft hover:text-ink"}`}
+              className={`ml-auto inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold ring-1 transition-colors ${
+                selectionMode
+                  ? "bg-accent/10 text-accent ring-accent/40"
+                  : "bg-elevated/50 text-ink-muted ring-edge-soft hover:text-ink"
+              }`}
             >
               {selectionMode ? <X size={14} /> : <CheckSquare2 size={14} />}
               {selectionMode ? t("Done selecting") : t("Select multiple")}
@@ -221,38 +236,42 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
           </div>
         )}
 
-        <div className={`harbor-download-selection-panel ${selectionMode ? "is-open" : ""}`} inert={!selectionMode} aria-hidden={!selectionMode}>
+        <div
+          className={`harbor-download-selection-panel ${selectionMode ? "is-open" : ""}`}
+          inert={!selectionMode}
+          aria-hidden={!selectionMode}
+        >
           <div className="min-h-0 overflow-hidden">
-          <div className="harbor-download-selection-toolbar flex flex-wrap items-center gap-2 rounded-xl border border-edge-soft bg-elevated/45 px-3 py-2">
-            <span className="mr-auto text-[12px] font-semibold tabular-nums text-ink-muted">
-              {t("{count} selected", { count: selected.length })}
-            </span>
-            <button
-              type="button"
-              disabled={visibleIds.length === 0}
-              onClick={() => setSelectedIds(new Set(visibleIds))}
-              className="rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-ink-muted hover:bg-elevated hover:text-ink disabled:opacity-40"
-            >
-              {t("Select all")}
-            </button>
-            <button
-              type="button"
-              disabled={selected.length === 0}
-              onClick={() => setSelectedIds(new Set())}
-              className="rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-ink-muted hover:bg-elevated hover:text-ink disabled:opacity-40"
-            >
-              {t("Clear")}
-            </button>
-            <button
-              type="button"
-              disabled={selected.length === 0}
-              aria-haspopup="menu"
-              onClick={(event) => openSelectedActions(event.currentTarget)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3.5 py-1.5 text-[12px] font-semibold text-canvas transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {t("Actions")} <Ellipsis size={15} />
-            </button>
-          </div>
+            <div className="harbor-download-selection-toolbar flex flex-wrap items-center gap-2 rounded-xl border border-edge-soft bg-elevated/45 px-3 py-2">
+              <span className="mr-auto text-[12px] font-semibold tabular-nums text-ink-muted">
+                {t("{count} selected", { count: selected.length })}
+              </span>
+              <button
+                type="button"
+                disabled={visibleIds.length === 0}
+                onClick={() => setSelectedIds(new Set(visibleIds))}
+                className="rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-ink-muted hover:bg-elevated hover:text-ink disabled:opacity-40"
+              >
+                {t("Select all")}
+              </button>
+              <button
+                type="button"
+                disabled={selected.length === 0}
+                onClick={() => setSelectedIds(new Set())}
+                className="rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-ink-muted hover:bg-elevated hover:text-ink disabled:opacity-40"
+              >
+                {t("Clear")}
+              </button>
+              <button
+                type="button"
+                disabled={selected.length === 0}
+                aria-haspopup="menu"
+                onClick={(event) => openSelectedActions(event.currentTarget)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3.5 py-1.5 text-[12px] font-semibold text-canvas transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {t("Actions")} <Ellipsis size={15} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -368,12 +387,13 @@ function ShowGroup({
   const latest = useRef({ batchActions, filter });
   latest.current = { batchActions, filter };
   const allDownloads = () =>
-    downloadsSnapshot().filter((item) =>
-      item.metaId === group.metaId &&
-      item.season != null &&
-      (latest.current.filter === "canceled"
-        ? item.status === "canceled"
-        : item.status !== "canceled"),
+    downloadsSnapshot().filter(
+      (item) =>
+        item.metaId === group.metaId &&
+        item.season != null &&
+        (latest.current.filter === "canceled"
+          ? item.status === "canceled"
+          : item.status !== "canceled"),
     );
   const source = {
     kind: "actions" as const,
@@ -447,10 +467,14 @@ function ShowGroup({
       <div
         tabIndex={0}
         role={selectionMode ? "checkbox" : "group"}
-        aria-checked={selectionMode ? (allSelected ? true : selectedCount > 0 ? "mixed" : false) : undefined}
-        aria-label={selectionMode
-          ? t("Select downloads for {title}", { title: group.title })
-          : t("Download actions for {title}", { title: group.title })}
+        aria-checked={
+          selectionMode ? (allSelected ? true : selectedCount > 0 ? "mixed" : false) : undefined
+        }
+        aria-label={
+          selectionMode
+            ? t("Select downloads for {title}", { title: group.title })
+            : t("Download actions for {title}", { title: group.title })
+        }
         onClick={selectionMode ? () => onToggleGroup(episodeIds) : undefined}
         onContextMenu={(event) => {
           if (selectionMode) event.preventDefault();
@@ -462,7 +486,11 @@ function ShowGroup({
             onToggleGroup(episodeIds);
             return;
           }
-          if (selectionMode || (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10"))) return;
+          if (
+            selectionMode ||
+            (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10"))
+          )
+            return;
           event.preventDefault();
           event.stopPropagation();
           const rect = event.currentTarget.getBoundingClientRect();
@@ -488,10 +516,17 @@ function ShowGroup({
             {totalBytes > 0 ? `  ·  ${fmtBytes(totalBytes)}` : ""}
           </span>
         </div>
-        <div className={`harbor-download-selection-slot ${selectionMode ? "is-visible" : ""}`} aria-hidden={!selectionMode}>
+        <div
+          className={`harbor-download-selection-slot ${selectionMode ? "is-visible" : ""}`}
+          aria-hidden={!selectionMode}
+        >
           <div className="harbor-download-selection-slot-inner">
             {selectionMode && (
-              <DownloadSelectionCheck checked={allSelected} partial={selectedCount > 0 && !allSelected} delayMs={30} />
+              <DownloadSelectionCheck
+                checked={allSelected}
+                partial={selectedCount > 0 && !allSelected}
+                delayMs={30}
+              />
             )}
           </div>
         </div>

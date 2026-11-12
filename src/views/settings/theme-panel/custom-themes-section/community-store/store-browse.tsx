@@ -117,7 +117,8 @@ export function StoreBrowse({
     });
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
-      if (filterRootRef.current?.contains(target) || filterMenuRef.current?.contains(target)) return;
+      if (filterRootRef.current?.contains(target) || filterMenuRef.current?.contains(target))
+        return;
       setFilterOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {

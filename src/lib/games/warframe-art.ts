@@ -10,12 +10,26 @@ export const WARFRAME_ART: Partial<Record<WarframeWorld, string>> = {
 };
 
 // Digital Extremes' Baro announcement art; original UI emblems from WFCD/genesis-assets.
-export const WARFRAME_BARO_ART = "https://www-static.warframe.com/uploads/thumbnails/7bd48753f37eba9469c585bf2adb387a_1600x900.png";
-export const WARFRAME_RELIC_ART = ["RelicLithD.png", "RelicMesoD.png", "RelicNeoD.png", "RelicAxiD.png", "RelicImmortalD.png"]
-  .map(name => `https://cdn.warframestat.us/img/${name}`);
+export const WARFRAME_BARO_ART =
+  "https://www-static.warframe.com/uploads/thumbnails/7bd48753f37eba9469c585bf2adb387a_1600x900.png";
+export const WARFRAME_RELIC_ART = [
+  "RelicLithD.png",
+  "RelicMesoD.png",
+  "RelicNeoD.png",
+  "RelicAxiD.png",
+  "RelicImmortalD.png",
+].map((name) => `https://cdn.warframestat.us/img/${name}`);
 
 const factions: Record<string, string> = {
-  Grineer: "grineer", Corpus: "corpus", Infested: "infested", Corrupted: "corrupted",
-  Orokin: "corrupted", Narmer: "narmer", Sentient: "sentient", Murmur: "murmur", "The Murmur": "murmur",
+  Grineer: "grineer",
+  Corpus: "corpus",
+  Infested: "infested",
+  Corrupted: "corrupted",
+  Orokin: "corrupted",
+  Narmer: "narmer",
+  Sentient: "sentient",
+  Murmur: "murmur",
+  "The Murmur": "murmur",
 };
-export const warframeFactionArt = (name: string) => factions[name] ? `/games/warframe/${factions[name]}.svg` : "";
+export const warframeFactionArt = (name: string) =>
+  factions[name] ? `/games/warframe/${factions[name]}.svg` : "";

@@ -159,7 +159,11 @@ const leagueData = (leagueId: number) =>
       league_id: leagueId,
       name: "BLAST Slam VIII",
       streams: [
-        { stream_name: "BLAST Dota", language: "en", stream_url: "https://www.twitch.tv/blastdota" },
+        {
+          stream_name: "BLAST Dota",
+          language: "en",
+          stream_url: "https://www.twitch.tv/blastdota",
+        },
         { stream_name: "BLAST Dota", stream_url: "https://www.youtube.com/@BLASTDota" },
         { stream_name: "BLAST", stream_url: "blast.tv/dota/live" },
       ],
@@ -349,25 +353,25 @@ test("Rocket League still reads the official BLAST page and reports an outage ho
 
 test("Valve league broadcasts come back by shape, and only on an allowlisted host", async () => {
   assert.deepEqual(
-    dota.parseDotaLeagueBroadcasts(JSON.parse(leagueData(1))).map((stream) => [
-      stream.platform,
-      stream.url,
-      stream.title,
-    ]),
+    dota
+      .parseDotaLeagueBroadcasts(JSON.parse(leagueData(1)))
+      .map((stream) => [stream.platform, stream.url, stream.title]),
     [["twitch", "https://www.twitch.tv/blastdota", "BLAST Dota"]],
   );
   // A renamed container is survivable; an unlisted host, a vod path and a bare image are not.
   assert.deepEqual(
-    dota.parseDotaLeagueBroadcasts({
-      result: {
-        broadcasts: [
-          { title: "Main", url: "www.twitch.tv/dota2ti" },
-          { title: "Mirror", link: "https://vk.com/dota" },
-          { title: "Replay", vod_url: "https://www.twitch.tv/videos/2199991" },
-        ],
-        logo_url: "https://cdn.cloudflare.steamstatic.com/apps/dota2/x.png",
-      },
-    }).map((stream) => stream.url),
+    dota
+      .parseDotaLeagueBroadcasts({
+        result: {
+          broadcasts: [
+            { title: "Main", url: "www.twitch.tv/dota2ti" },
+            { title: "Mirror", link: "https://vk.com/dota" },
+            { title: "Replay", vod_url: "https://www.twitch.tv/videos/2199991" },
+          ],
+          logo_url: "https://cdn.cloudflare.steamstatic.com/apps/dota2/x.png",
+        },
+      })
+      .map((stream) => stream.url),
     ["https://www.twitch.tv/dota2ti"],
   );
   assert.equal(dota.parseDotaLeagueBroadcasts({}).length, 0);
@@ -403,7 +407,10 @@ test("only an OpenDota row offers its event id as a Valve league id", () => {
 test("a request signature is per header set, and the allowlist is the last gate on a link", async () => {
   serve([{ match: /example\.test/, body: "one" }]);
   const url = "https://example.test/schedule";
-  assert.equal(await feeds.requestEsportsText(url, 60_000, { headers: { "x-api-key": "a" } }), "one");
+  assert.equal(
+    await feeds.requestEsportsText(url, 60_000, { headers: { "x-api-key": "a" } }),
+    "one",
+  );
   await feeds.requestEsportsText(url, 60_000, { headers: { "x-api-key": "a" } });
   assert.equal(hit(/example\.test/), 1);
   await feeds.requestEsportsText(url, 60_000, { headers: { "x-api-key": "b" } });

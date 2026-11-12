@@ -11,12 +11,14 @@ export default {
   "games.mods.restore": "استعادة السابق",
   "games.mods.restored": "تمت استعادة الإصدار السابق.",
   "games.mods.changeTitle": "الملفات المطلوب تغييرها",
-  "games.mods.backupNote": "تُحفظ الإصدارات المستبدلة في نسخة احتياطية محلية. استخدم استعادة السابق في إعدادك للرجوع؛ سيُعاد فحص الاعتماديات.",
+  "games.mods.backupNote":
+    "تُحفظ الإصدارات المستبدلة في نسخة احتياطية محلية. استخدم استعادة السابق في إعدادك للرجوع؛ سيُعاد فحص الاعتماديات.",
   "games.mods.currentVersion": "المثبّت: {version}",
   "games.mods.current": "مثبّت",
-  "games.mods.versionNote": "اختر إصدارًا متوافقًا. يراجع Harbor التغييرات ويحتفظ بالإصدار السابق محليًا. أغلق Minecraft قبل تطبيق التغييرات.",
+  "games.mods.versionNote":
+    "اختر إصدارًا متوافقًا. يراجع Harbor التغييرات ويحتفظ بالإصدار السابق محليًا. أغلق Minecraft قبل تطبيق التغييرات.",
   "games.mods.applyChanges": "تطبيق التغييرات",
   "games.mods.reviewChanges": "مراجعة التغييرات",
   "games.mods.previousVersion": "السابق: {version}",
-  "games.mods.restoreConfirm": "هل تريد استعادة الإصدار {version}؟ أغلق Minecraft أولًا."
+  "games.mods.restoreConfirm": "هل تريد استعادة الإصدار {version}؟ أغلق Minecraft أولًا.",
 } satisfies Record<string, string>;

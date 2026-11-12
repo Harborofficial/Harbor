@@ -51,7 +51,8 @@ export function relevanceScore(name: string, query: string): number {
   return score;
 }
 
-function typeScore(itemType: string | null | undefined, reqType: "movie" | "series"): number {  const t = (itemType ?? "").toLowerCase();
+function typeScore(itemType: string | null | undefined, reqType: "movie" | "series"): number {
+  const t = (itemType ?? "").toLowerCase();
   if (!t) return 0;
   const wantSeries = reqType === "series";
   if (wantSeries && SERIES_TYPES.has(t)) return 20;
@@ -105,7 +106,11 @@ export function yearRejects(media: BridgeMedia, req: StreamPluginRequest): boole
  * them answer a request for a specific season is what put a bonus episode's streams beside the
  * real one. Asking without a season still accepts them, which is how a provider that numbers
  * nothing at all is reached. */
-function numbered(episodes: BridgeEpisode[], season: number | null, episode: number): BridgeEpisode[] {
+function numbered(
+  episodes: BridgeEpisode[],
+  season: number | null,
+  episode: number,
+): BridgeEpisode[] {
   return episodes.filter((e) => e.episode === episode && (season == null || e.season === season));
 }
 

@@ -3,7 +3,10 @@ import { decodeChapterId, isDigits, makeServer, type SuwayomiServer } from "./mo
 
 export type SyncTarget = { server: SuwayomiServer; mangaId: string; key: string };
 
-function headersFor(server: SuwayomiServer, extra?: Record<string, string>): Record<string, string> {
+function headersFor(
+  server: SuwayomiServer,
+  extra?: Record<string, string>,
+): Record<string, string> {
   const h: Record<string, string> = { ...(extra ?? {}) };
   if (server.authHeader) h.authorization = server.authHeader;
   return h;

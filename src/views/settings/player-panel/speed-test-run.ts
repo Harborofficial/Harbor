@@ -49,7 +49,9 @@ export async function runSpeedTest(onLive: (mbps: number) => void): Promise<Spee
     while (!stop && elapsed() < DURATION_MS) {
       let res: Response;
       try {
-        res = await fetch(`${URL_BASE}?bytes=${CHUNK_BYTES}&n=${Math.random()}`, { cache: "no-store" });
+        res = await fetch(`${URL_BASE}?bytes=${CHUNK_BYTES}&n=${Math.random()}`, {
+          cache: "no-store",
+        });
       } catch {
         networkError = true;
         stop = true;

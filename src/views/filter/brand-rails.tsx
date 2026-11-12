@@ -11,7 +11,12 @@ import type { StandardRail } from "./rails-config";
 
 export function compactMoney(n: number, lang: string): string {
   try {
-    return new Intl.NumberFormat(lang, { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1 }).format(n);
+    return new Intl.NumberFormat(lang, {
+      style: "currency",
+      currency: "USD",
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(n);
   } catch {
     return `$${Math.round(n / 1e6)}M`;
   }
@@ -21,7 +26,9 @@ export function RailHeading({ title, kicker }: { title: string; kicker: string }
   return (
     <span className="flex flex-col">
       <span className="text-[20px] font-medium tracking-tight text-ink">{title}</span>
-      <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">{kicker}</span>
+      <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">
+        {kicker}
+      </span>
     </span>
   );
 }
@@ -30,7 +37,9 @@ function CaptionCard({ title, caption }: { title: BrandTitle; caption: string })
   return (
     <div className="flex flex-col gap-1.5">
       <PickCard meta={title.meta} />
-      <span className="truncate text-[12.5px] font-semibold tabular-nums text-ink-muted">{caption}</span>
+      <span className="truncate text-[12.5px] font-semibold tabular-nums text-ink-muted">
+        {caption}
+      </span>
     </div>
   );
 }
@@ -41,9 +50,16 @@ export function BoxOfficeRail({ stats }: { stats: BrandStats }) {
   const posterRow = usePosterRow();
   if (stats.grossing.length < 3) return null;
   return (
-    <Row {...posterRow} title={<RailHeading title={t("Top grossing")} kicker={t("Box office champions")} />}>
+    <Row
+      {...posterRow}
+      title={<RailHeading title={t("Top grossing")} kicker={t("Box office champions")} />}
+    >
       {stats.grossing.map((x, i) => (
-        <CaptionCard key={x.tmdbId} title={x} caption={`#${i + 1} · ${compactMoney(x.revenue, lang)}`} />
+        <CaptionCard
+          key={x.tmdbId}
+          title={x}
+          caption={`#${i + 1} · ${compactMoney(x.revenue, lang)}`}
+        />
       ))}
     </Row>
   );
@@ -53,7 +69,13 @@ export function FranchisesRail({ stats, name }: { stats: BrandStats; name: strin
   const t = useT();
   if (stats.franchises.length < 2) return null;
   return (
-    <Row title={<RailHeading title={t("Franchises")} kicker={t("The universes {name} built", { name })} />} min={250} shape="landscape">
+    <Row
+      title={
+        <RailHeading title={t("Franchises")} kicker={t("The universes {name} built", { name })} />
+      }
+      min={250}
+      shape="landscape"
+    >
       {stats.franchises.map((f) => (
         <CollectionCard key={f.id} id={f.id} name={f.name} knownBackdrop={f.backdrop} />
       ))}
@@ -66,7 +88,15 @@ export function LongestRunningRail({ stats, name }: { stats: BrandStats; name: s
   const posterRow = usePosterRow();
   if (stats.longest.length < 3) return null;
   return (
-    <Row {...posterRow} title={<RailHeading title={t("Marathon material")} kicker={t("The longest-running shows on {name}", { name })} />}>
+    <Row
+      {...posterRow}
+      title={
+        <RailHeading
+          title={t("Marathon material")}
+          kicker={t("The longest-running shows on {name}", { name })}
+        />
+      }
+    >
       {stats.longest.map((x) => (
         <CaptionCard
           key={x.tmdbId}
@@ -114,9 +144,16 @@ export function DecadesSection({ filter, stats }: { filter: Browsed; stats: Bran
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">{t("Through the decades")}</span>
+        <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">
+          {t("Through the decades")}
+        </span>
         {decades.map((d) => (
-          <button key={d} type="button" onClick={() => setPicked(d)} className={`brand-chip ${d === active ? "is-on" : ""}`}>
+          <button
+            key={d}
+            type="button"
+            onClick={() => setPicked(d)}
+            className={`brand-chip ${d === active ? "is-on" : ""}`}
+          >
             {d}s
           </button>
         ))}

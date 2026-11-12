@@ -72,7 +72,7 @@ test("music track menus retain playback and text copying without a save-artwork 
   );
   assert.deepEqual(
     items.map((item: any) => item.id),
-    ["play", "similar", "copy"],
+    ["play", "next", "similar", "copy"],
   );
   await items[0].run();
   assert.equal(played, 1);
@@ -147,7 +147,13 @@ test("book-view reader pages remain a trusted reader target without image action
       },
     },
     "@/lib/i18n": { useT: () => translate },
-    "./flipbook": { guardPageLoaded: nothing, hasNativeZoom: () => false },
+    "./flipbook": {
+      disposeFlipbook: nothing,
+      fitLevel: () => 0,
+      guardPageLoaded: nothing,
+      hasNativeZoom: () => false,
+      nativePan: nothing,
+    },
     "./reader-utils": { measureAspect: async () => 1.4 },
   });
   const root = createRoot(document.querySelector("#root")!);

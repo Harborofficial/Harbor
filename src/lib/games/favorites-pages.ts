@@ -10,8 +10,10 @@ export async function collectFavoriteMatches(
   filters: FavoriteReviewFilters,
   signal: AbortSignal,
 ): Promise<FavoritePage> {
-  const games: GameHighlight[] = [], seen = new Set<string>();
-  let nextOffset: number | null = offset, cachedAt: number | undefined;
+  const games: GameHighlight[] = [],
+    seen = new Set<string>();
+  let nextOffset: number | null = offset,
+    cachedAt: number | undefined;
   // The first screen can look beyond a sparse page. Later paging is already
   // bounded by usePagedGameRow; don't multiply its three-request loop.
   const limit = offset === 0 && (filters.minCount || filters.minPositive) ? 3 : 1;
@@ -19,8 +21,9 @@ export async function collectFavoriteMatches(
     signal.throwIfAborted();
     const cursor: number = nextOffset;
     let page: FavoritePage;
-    try { page = await load(cursor); }
-    catch (error) {
+    try {
+      page = await load(cursor);
+    } catch (error) {
       signal.throwIfAborted();
       // A later page failing must not erase matches already found. Leave its
       // cursor available for the next explicit page request.
@@ -28,10 +31,13 @@ export async function collectFavoriteMatches(
       throw error;
     }
     signal.throwIfAborted();
-    if (page.nextOffset !== null && page.nextOffset <= cursor) throw Error("Favorites cursor did not advance");
-    for (const game of page.games) if (!seen.has(game.id) && matchesFavoriteReviews(game, filters)) {
-      seen.add(game.id); games.push(game);
-    }
+    if (page.nextOffset !== null && page.nextOffset <= cursor)
+      throw Error("Favorites cursor did not advance");
+    for (const game of page.games)
+      if (!seen.has(game.id) && matchesFavoriteReviews(game, filters)) {
+        seen.add(game.id);
+        games.push(game);
+      }
     if (page.cachedAt !== undefined) cachedAt = Math.min(cachedAt ?? Infinity, page.cachedAt);
     nextOffset = page.nextOffset;
     if (games.length >= 12) break;

@@ -1,3 +1,4 @@
+import { addonBaseUrl, addonResourceUrl } from "@/lib/addon-url";
 import { cinemetaEnabled, meta as cinemetaMeta, type Meta } from "./cinemeta";
 import { safeFetch as fetch } from "./safe-fetch";
 import { addonAccepts, gatherCatalogAddons, userAddons, type Addon } from "./addons";
@@ -157,7 +158,7 @@ export function preferredVideoOverview(v: PreferredVideo | undefined): string {
 
 function withOrigin(meta: Meta, addon: Addon): Meta {
   if (meta.addonOrigin?.base) return meta;
-  const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
+  const base = addonBaseUrl(addon.transportUrl);
   return {
     ...meta,
     addonOrigin: {
@@ -189,8 +190,8 @@ function isCinemeta(addon: Addon): boolean {
 }
 
 async function fetchAddonMeta(addon: Addon, type: string, id: string): Promise<Meta | null> {
-  const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
-  const url = `${base}/meta/${type}/${id}.json`;
+  const base = addonBaseUrl(addon.transportUrl);
+  const url = addonResourceUrl(base, `meta/${type}/${id}.json`);
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), ADDON_TIMEOUT_MS);
   try {

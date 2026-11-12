@@ -66,12 +66,7 @@ export function BpKeyboardSheet({
       style={{ background: SHEET_WASH }}
     >
       <div className="mx-auto flex w-full max-w-[min(94vw,1180px)] flex-col gap-[clamp(5px,0.7vh,9px)]">
-        <BpKeyboard
-          disabled={!open}
-          onChar={onChar}
-          onBackspace={onBackspace}
-          onClear={onClear}
-        />
+        <BpKeyboard disabled={!open} onChar={onChar} onBackspace={onBackspace} onClear={onClear} />
         <div data-bp-row style={{ paddingInline: 0, marginInline: 0 }}>
           <button
             type="button"

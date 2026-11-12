@@ -1,6 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
 import { withTimeout } from "@/lib/progressive-rows";
-import { invalidateMusicHealth, lanePool, mergeMusicSearchLanes, searchAcrossMusicSources } from "./sources";
+import {
+  invalidateMusicHealth,
+  lanePool,
+  mergeMusicSearchLanes,
+  searchAcrossMusicSources,
+} from "./sources";
 import type { RankedMusicSearchResults } from "./sources";
 import type {
   MusicAlbumRef,
@@ -72,7 +77,11 @@ export async function searchTyped(
   if (!trimmed) return { tracks: [], albums: [], artists: [], playlists: [] };
   if (!connector) return searchAcrossMusicSources(trimmed, limit);
   const results = await withTimeout(
-    invoke<MusicSearchResults>("music_search_typed", { query: trimmed, limit: lanePool(limit), connector }),
+    invoke<MusicSearchResults>("music_search_typed", {
+      query: trimmed,
+      limit: lanePool(limit),
+      connector,
+    }),
     SINGLE_SOURCE_TIMEOUT_MS,
   );
   return mergeMusicSearchLanes([{ id: connector, results }], limit);

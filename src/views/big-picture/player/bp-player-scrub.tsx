@@ -14,8 +14,7 @@ const STEP_RAMP_X = 3;
 const STEP_RUSH_X = 6;
 
 const RING: CSSProperties = {
-  boxShadow:
-    "0 0 0 2px var(--bp-void), 0 0 0 4px var(--bp-focus-stroke)",
+  boxShadow: "0 0 0 2px var(--bp-void), 0 0 0 4px var(--bp-focus-stroke)",
 };
 
 function pct(value: number, total: number): number {

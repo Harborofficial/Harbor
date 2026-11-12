@@ -16,7 +16,7 @@ import { PasswordPrompt } from "./password-prompt";
 import { ProfileTile } from "./profile-tile";
 import { PinEntry } from "./pin-entry";
 import { isNuvioSignedIn, loadNuvioState } from "@/lib/nuvio/nuvio-client";
-import { getSecondaryPrivileges } from "@/lib/settings/defaults";
+import { getSecondaryPrivileges } from "@/lib/profiles/privileges";
 import {
   setActiveNuvioProfile,
   verifyNuvioPin,

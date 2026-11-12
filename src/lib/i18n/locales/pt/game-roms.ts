@@ -18,12 +18,15 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "Partidas de criadores",
   "games.roms.watchVideo": "Assistir ao vídeo",
   "games.roms.noVideos": "Ainda não há vídeos para estes jogos.",
-  "games.roms.libraryNote": "Traga seus próprios jogos. Importe arquivos, escolha um emulador e reúna sua coleção.",
+  "games.roms.libraryNote":
+    "Traga seus próprios jogos. Importe arquivos, escolha um emulador e reúna sua coleção.",
   "games.roms.openLibrary": "Abrir biblioteca",
   "games.roms.downloadCharts": "ROM hacks mais baixados",
-  "games.roms.downloadChartsNote": "Downloads totais de patches no Romhack Plaza. Abra um projeto para ver criador, versão e requisitos.",
+  "games.roms.downloadChartsNote":
+    "Downloads totais de patches no Romhack Plaza. Abra um projeto para ver criador, versão e requisitos.",
   "games.roms.downloadCount": "{count} downloads",
-  "games.roms.chartUnavailable": "A lista de downloads está indisponível agora. Você ainda pode acessar o Romhack Plaza.",
+  "games.roms.chartUnavailable":
+    "A lista de downloads está indisponível agora. Você ainda pode acessar o Romhack Plaza.",
   "games.roms.allPlatforms": "Todas as plataformas",
   "games.roms.moreReleases": "Mostrar mais lançamentos",
   "games.roms.fewerReleases": "Mostrar menos lançamentos",
@@ -59,14 +62,16 @@ const gameRoms: Record<string, string> = {
   "games.roms.noCollection": "Ainda não há jogos desta coleção no console selecionado.",
   "games.roms.community": "Feito pela comunidade",
   "games.roms.hacksTitle": "Um jogo familiar. Uma aventura diferente.",
-  "games.roms.hacksNote": "Descubra ROM hacks, encontre o jogo original em que se baseiam e prepare sua cópia modificada para jogar.",
+  "games.roms.hacksNote":
+    "Descubra ROM hacks, encontre o jogo original em que se baseiam e prepare sua cópia modificada para jogar.",
   "games.roms.catalogNote": "Explore o catálogo por console, gênero, época de lançamento e série.",
   "games.roms.genre": "Gênero",
   "games.roms.allGenres": "Todos os gêneros",
   "games.roms.era": "Época de lançamento",
   "games.roms.reset": "Redefinir filtros",
   "games.roms.empty": "Tente outro título ou amplie os filtros para este console.",
-  "games.roms.source": "Metadados e relações entre jogos do IGDB. Importe seus arquivos locais para jogar títulos compatíveis no Harbor.",
+  "games.roms.source":
+    "Metadados e relações entre jogos do IGDB. Importe seus arquivos locais para jogar títulos compatíveis no Harbor.",
   "games.roms.playerScore": "Nota dos jogadores do IGDB · {count} avaliações",
   "games.roms.combinedScore": "Nota combinada do IGDB · {count} avaliações",
   "games.roms.sort.discussed": "Mais avaliações",

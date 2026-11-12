@@ -10,13 +10,18 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 export async function listTargets() {
   const res = await fetch(`${BASE}/json/list`).catch(() => null);
-  if (!res || !res.ok) throw new Error(`no CDP endpoint on :${PORT} (launch Harbor via scripts/dev-diag.ps1 or with WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=${PORT})`);
+  if (!res || !res.ok)
+    throw new Error(
+      `no CDP endpoint on :${PORT} (launch Harbor via scripts/dev-diag.ps1 or with WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=${PORT})`,
+    );
   const all = await res.json();
   return all.filter((t) => t.type === "page" && !t.url.startsWith("devtools://"));
 }
 
 function pickTarget(targets) {
-  return targets.find((t) => /tauri\.localhost|tauri:\/\/|localhost:1420/.test(t.url)) ?? targets[0];
+  return (
+    targets.find((t) => /tauri\.localhost|tauri:\/\/|localhost:1420/.test(t.url)) ?? targets[0]
+  );
 }
 
 export class Cdp {
@@ -69,8 +74,13 @@ export class Cdp {
 export async function evalInPage(expr) {
   const cdp = await Cdp.connect();
   try {
-    const r = await cdp.send("Runtime.evaluate", { expression: expr, returnByValue: true, awaitPromise: true });
-    if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description ?? "eval failed");
+    const r = await cdp.send("Runtime.evaluate", {
+      expression: expr,
+      returnByValue: true,
+      awaitPromise: true,
+    });
+    if (r.exceptionDetails)
+      throw new Error(r.exceptionDetails.exception?.description ?? "eval failed");
     return r.result.value;
   } finally {
     cdp.close();
@@ -183,7 +193,14 @@ export async function watch(seconds = 30, intervalSec = 5) {
   for (let i = 0; i <= ticks; i++) {
     const c = await counts().catch((e) => ({ error: e.message }));
     const r = rss();
-    samples.push({ t: i * intervalSec, jsHeapMB: c.jsHeapMB ?? null, nodes: c.nodes, imgsLoaded: c.imgsLoaded, estImgDecodeMB: c.estImgDecodeMB, rssTotalMB: r.totalMB ?? null });
+    samples.push({
+      t: i * intervalSec,
+      jsHeapMB: c.jsHeapMB ?? null,
+      nodes: c.nodes,
+      imgsLoaded: c.imgsLoaded,
+      estImgDecodeMB: c.estImgDecodeMB,
+      rssTotalMB: r.totalMB ?? null,
+    });
     if (i < ticks) await new Promise((res) => setTimeout(res, intervalSec * 1000));
   }
   const first = samples[0];
@@ -240,7 +257,9 @@ async function main() {
     case "snapshot":
       return print(await snapshot());
     default:
-      return print("usage: harbor-diag <pages|eval <js>|counts|layers|bigimgs|rss|watch [sec] [interval]|snapshot>");
+      return print(
+        "usage: harbor-diag <pages|eval <js>|counts|layers|bigimgs|rss|watch [sec] [interval]|snapshot>",
+      );
   }
 }
 

@@ -110,7 +110,9 @@ export function usePipMode(params: {
       unlistenExited = null;
       if (nativeDetached.current) {
         nativeDetached.current = false;
-        void import("@tauri-apps/api/core").then(({ invoke }) => invoke("pip_window_exit")).catch(() => {});
+        void import("@tauri-apps/api/core")
+          .then(({ invoke }) => invoke("pip_window_exit"))
+          .catch(() => {});
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

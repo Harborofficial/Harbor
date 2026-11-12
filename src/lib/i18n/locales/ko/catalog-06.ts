@@ -806,7 +806,8 @@ const catalog06: Record<string, string> = {
   "Nothing is uploaded and nothing ships with Harbor. Everything stays on this device and you are responsible for the images you add.":
     "아무것도 업로드되지 않으며 Harbor에는 어떤 콘텐츠도 포함되어 있지 않습니다. 모든 항목은 이 기기에만 보관되며, 추가한 이미지에 대한 책임은 회원님에게 있습니다.",
   "Nothing left in today's picks": "오늘의 추천작을 모두 확인했습니다",
-  "Nothing left to confirm while P2P is disabled.": "P2P가 비활성화되어 있어 더 이상 확인할 항목이 없습니다.",
+  "Nothing left to confirm while P2P is disabled.":
+    "P2P가 비활성화되어 있어 더 이상 확인할 항목이 없습니다.",
   "Nothing left to post after removing links.": "링크를 삭제하니 게시할 내용이 없습니다.",
   "Nothing matched this filter. Try another category or change your region in Settings.":
     "이 필터와 일치하는 항목이 없습니다. 다른 카테고리를 선택하거나 설정에서 지역을 변경해 보세요.",

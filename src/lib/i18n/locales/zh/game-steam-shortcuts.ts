@@ -1,7 +1,8 @@
 export default {
   "games.shortcuts.reviewLaunch": "检查启动设置",
   "games.shortcuts.state.local": "可直接启动",
-  "games.shortcuts.shortcut_identity": "Steam 尚未为此快捷方式分配有效 ID。请检查设置后直接启动，或在 Steam 中重新保存并刷新。",
+  "games.shortcuts.shortcut_identity":
+    "Steam 尚未为此快捷方式分配有效 ID。请检查设置后直接启动，或在 Steam 中重新保存并刷新。",
 
   "games.shortcuts.activity.open": "活动",
   "games.shortcuts.activity.title": "快捷方式活动",
@@ -27,7 +28,8 @@ export default {
   "games.shortcuts.viaSteam": "通过 Steam 游玩",
   "games.shortcuts.directNote": "使用指定的启动选项和起始文件夹启动此可执行文件。",
   "games.shortcuts.shortcut_changed": "此快捷方式已在 Steam 中更改。请刷新游戏库并检查启动设置。",
-  "games.shortcuts.shortcut_options": "这些启动选项使用 Steam 命令包装器。请通过 Steam 启动此快捷方式。",
+  "games.shortcuts.shortcut_options":
+    "这些启动选项使用 Steam 命令包装器。请通过 Steam 启动此快捷方式。",
   "games.dock.shortcut": "Steam 快捷方式",
   "games.shortcuts.note": "添加到 Steam 库中的非 Steam 游戏。",
   "games.shortcuts.chooseFolder": "选择 Steam 文件夹",
@@ -47,9 +49,10 @@ export default {
   "games.shortcuts.tags": "标签",
   "games.shortcuts.storeError": "无法保存这些设置。",
   "games.shortcuts.shortcut_location": "请选择 Steam 文件夹或其中的 userdata 文件夹。",
-  "games.shortcuts.shortcut_account": "请使用此快捷方式所属的账户打开 Steam，然后刷新。Harbor 必须使用同一个 Steam 安装。",
+  "games.shortcuts.shortcut_account":
+    "请使用此快捷方式所属的账户打开 Steam，然后刷新。Harbor 必须使用同一个 Steam 安装。",
   "games.shortcuts.shortcut_missing": "此快捷方式已不存在，请刷新游戏库。",
   "games.shortcuts.shortcut_executable": "快捷方式的可执行文件缺失，或其绝对路径不受支持。",
   "games.shortcuts.shortcut_launch": "Steam 无法打开此快捷方式，请重试。",
-  "games.shortcuts.shortcut_read": "无法读取 Steam 快捷方式，请尝试刷新。"
+  "games.shortcuts.shortcut_read": "无法读取 Steam 快捷方式，请尝试刷新。",
 };

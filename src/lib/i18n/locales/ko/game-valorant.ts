@@ -21,7 +21,8 @@ export default {
   "games.valorant.search": "요원 찾기",
   "games.valorant.referenceError": "게임 정보를 불러오지 못했습니다.",
   "games.valorant.stale": "새로고침하지 못했습니다. 마지막으로 불러온 결과입니다.",
-  "games.valorant.metaError": "경쟁전 통계를 이용할 수 없습니다. 요원 정보는 계속 이용할 수 있습니다.",
+  "games.valorant.metaError":
+    "경쟁전 통계를 이용할 수 없습니다. 요원 정보는 계속 이용할 수 있습니다.",
   "games.valorant.agents": "요원 순위",
   "games.valorant.sort": "요원 정렬",
   "games.valorant.winSort": "승률 높은 순",
@@ -34,20 +35,24 @@ export default {
   "games.valorant.sampleNote": "등장 횟수가 200회 미만인 요원은 마지막에 표시됩니다.",
   "games.valorant.empty": "필터에 맞는 결과가 없습니다.",
   "games.valorant.checked": "확인: {date}",
-  "games.valorant.metaScope": "선택한 패치의 OP.GG 경쟁전 데이터입니다. 선택률은 전체 요원 등장 중 차지하는 비율입니다. 모든 플레이어가 아닌 제공처의 표본을 나타냅니다.",
-  "games.valorant.referenceScope": "게임 이미지와 참고 정보는 Valorant-API를 통해 제공됩니다. 업데이트가 늦을 수 있습니다. Harbor는 Riot Games의 공식 승인을 받지 않았습니다.",
+  "games.valorant.metaScope":
+    "선택한 패치의 OP.GG 경쟁전 데이터입니다. 선택률은 전체 요원 등장 중 차지하는 비율입니다. 모든 플레이어가 아닌 제공처의 표본을 나타냅니다.",
+  "games.valorant.referenceScope":
+    "게임 이미지와 참고 정보는 Valorant-API를 통해 제공됩니다. 업데이트가 늦을 수 있습니다. Harbor는 Riot Games의 공식 승인을 받지 않았습니다.",
   "games.valorant.samples": "등장 {count}회",
   "games.valorant.smallSample": "표본 부족",
   "games.valorant.abilities": "스킬",
   "games.valorant.watchAbility": "스킬 보기",
   "games.valorant.videoError": "시연 영상을 재생하지 못했습니다.",
   "games.valorant.mapMeta": "이 맵의 요원 메타",
-  "games.valorant.mapScope": "현재 경쟁전 로테이션에 없는 맵도 포함됩니다. 맵 이름과 위치 명칭은 영어입니다.",
+  "games.valorant.mapScope":
+    "현재 경쟁전 로테이션에 없는 맵도 포함됩니다. 맵 이름과 위치 명칭은 영어입니다.",
   "games.valorant.callouts": "위치 명칭",
   "games.valorant.compareWeapon": "비교 대상",
   "games.valorant.weapon": "무기",
   "games.valorant.distance": "거리",
-  "games.valorant.damageScope": "방어구, 관통, 스킬 적용 전 기본 사격 수치입니다. 산탄총은 펠릿당 피해량입니다.",
+  "games.valorant.damageScope":
+    "방어구, 관통, 스킬 적용 전 기본 사격 수치입니다. 산탄총은 펠릿당 피해량입니다.",
   "games.valorant.weaponStats": "무기 성능",
   "games.valorant.cost": "크레드",
   "games.valorant.magazine": "탄창",
@@ -55,5 +60,5 @@ export default {
   "games.valorant.reload": "재장전 · 초",
   "games.valorant.head": "머리 피해",
   "games.valorant.body": "몸통 피해",
-  "games.valorant.legs": "다리 피해"
+  "games.valorant.legs": "다리 피해",
 };

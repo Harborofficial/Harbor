@@ -36,7 +36,9 @@ export function normalizeExtensionRepoUrl(raw: string): string | null {
   const t = raw.trim();
   if (!/^https?:\/\/.+/i.test(t)) return null;
   if (/\/index(\.min)?\.json(\?.*)?$/i.test(t)) return t;
-  const gh = t.match(/^https?:\/\/github\.com\/([^/]+)\/([^/?#]+?)(?:\.git)?(?:\/tree\/([^/?#]+))?\/?$/i);
+  const gh = t.match(
+    /^https?:\/\/github\.com\/([^/]+)\/([^/?#]+?)(?:\.git)?(?:\/tree\/([^/?#]+))?\/?$/i,
+  );
   if (gh) {
     const branch = gh[3] || "repo";
     return `https://raw.githubusercontent.com/${gh[1]}/${gh[2]}/${branch}/index.min.json`;

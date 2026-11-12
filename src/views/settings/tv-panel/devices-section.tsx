@@ -169,7 +169,9 @@ export function TvDevicesSection() {
 
         {isTauri && settled && count === 0 ? (
           <p className="max-w-[70ch] px-1 py-1 text-[15.5px] font-normal leading-[22px] text-ink-subtle">
-            {t("Nothing else answered. A Harbor shows up here a moment after it starts on this network.")}
+            {t(
+              "Nothing else answered. A Harbor shows up here a moment after it starts on this network.",
+            )}
           </p>
         ) : null}
 

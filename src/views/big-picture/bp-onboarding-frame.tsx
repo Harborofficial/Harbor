@@ -253,11 +253,7 @@ export function BpOnboardFrame({
             </h1>
             {step.mark && (
               <span className="flex h-[clamp(30px,4.1vh,58px)] w-[clamp(30px,4.1vh,58px)] shrink-0 items-center justify-center rounded-full bg-[var(--bp-panel-2)] ring-1 ring-[var(--bp-edge-2)]">
-                <img
-                  src={step.mark}
-                  alt=""
-                  className="h-[56%] w-[56%] object-contain opacity-90"
-                />
+                <img src={step.mark} alt="" className="h-[56%] w-[56%] object-contain opacity-90" />
               </span>
             )}
           </div>

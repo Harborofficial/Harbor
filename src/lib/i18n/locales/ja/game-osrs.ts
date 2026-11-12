@@ -21,7 +21,8 @@ export default {
   "games.osrs.buy": "即時購入",
   "games.osrs.sell": "即時売却",
   "games.osrs.unseen": "観測データなし",
-  "games.osrs.observed": "成立した取引の記録です。現在の注文ではありません。購入と売却の観測時刻は異なる場合があります。",
+  "games.osrs.observed":
+    "成立した取引の記録です。現在の注文ではありません。購入と売却の観測時刻は異なる場合があります。",
   "games.osrs.history": "価格履歴",
   "games.osrs.period": "期間",
   "games.osrs.range.6h": "過去6時間",
@@ -42,5 +43,5 @@ export default {
   "games.osrs.averages": "取引データがない箇所は空白になります。取引所税はここでは計算しません。",
   "games.osrs.table": "直近24区間",
   "games.osrs.time": "時刻",
-  "games.osrs.volume": "取引数量"
+  "games.osrs.volume": "取引数量",
 };

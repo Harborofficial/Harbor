@@ -196,10 +196,7 @@ export function EsportsEventsRow({
   const t = useT();
   const { ref, handlers } = useDragScroll<HTMLDivElement>();
   const tournaments = useCs2Tournaments(active && games.includes("cs2"), refresh);
-  const summaries = useMemo(
-    () => esportsEventSummaries(feeds, tournaments),
-    [feeds, tournaments],
-  );
+  const summaries = useMemo(() => esportsEventSummaries(feeds, tournaments), [feeds, tournaments]);
   const ranked = useMemo(
     () => rankEsportsEvents(summaries.filter((summary) => games.includes(summary.game))),
     [summaries, games],

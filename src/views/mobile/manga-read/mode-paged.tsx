@@ -78,7 +78,12 @@ export function ModePaged({
     >
       <div className="m-auto flex items-center justify-center gap-1">
         {ordered.map((i) => (
-          <ProxiedImg key={i} url={pages[i] ?? ""} className="block shrink-0 object-contain" style={imgStyle} />
+          <ProxiedImg
+            key={i}
+            url={pages[i] ?? ""}
+            className="block shrink-0 object-contain"
+            style={imgStyle}
+          />
         ))}
       </div>
     </div>

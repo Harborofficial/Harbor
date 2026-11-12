@@ -36,13 +36,17 @@ function LookTab() {
     <>
       <Section
         title={t("Subtitle style")}
-        subtitle={t("Adjust the text and background. The preview shows your changes as you make them.")}
+        subtitle={t(
+          "Adjust the text and background. The preview shows your changes as you make them.",
+        )}
       >
         <SubtitleStylePanel />
       </Section>
       <Section
         title={t("Sync indicator")}
-        subtitle={t("The small on-screen readout that appears while you nudge subtitle timing with Z and X during playback. Automatic syncing lives in the Sync tab.")}
+        subtitle={t(
+          "The small on-screen readout that appears while you nudge subtitle timing with Z and X during playback. Automatic syncing lives in the Sync tab.",
+        )}
       >
         <SubtitleOffsetSettings />
       </Section>

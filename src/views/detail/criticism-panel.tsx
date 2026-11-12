@@ -4,12 +4,7 @@ import { AnchoredMenu } from "@/components/anchored-menu";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
-import {
-  getMusicState,
-  playMusic,
-  subscribeMusic,
-  toggleMusicPlayback,
-} from "@/lib/music/player";
+import { getMusicState, playMusic, subscribeMusic, toggleMusicPlayback } from "@/lib/music/player";
 import type { MusicPlaybackPhase, MusicTrack } from "@/lib/music/types";
 import { durationLabelOf, type CriticismEpisode } from "@/lib/providers/podcast-criticism";
 import { openUrl } from "@/lib/window";
@@ -75,10 +70,7 @@ export function CriticismPanel({
         <ul className="max-h-[300px] overflow-y-auto px-1.5 py-1.5 [scrollbar-width:thin]">
           {episodes.map((episode) => (
             <li key={episode.id} className="flex items-center gap-1">
-              <EpisodeRow
-                episode={episode}
-                phase={now.id === episode.id ? now.phase : null}
-              />
+              <EpisodeRow episode={episode} phase={now.id === episode.id ? now.phase : null} />
               {episode.pageUrl.length > 0 && (
                 <HoverTooltip
                   label={t("Open in Apple Podcasts")}

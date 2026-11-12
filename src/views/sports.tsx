@@ -49,22 +49,42 @@ const EsportsArena = lazy(() =>
 const Personalize = lazy(() =>
   import("./sports/hub-personalize").then((m) => ({ default: m.HubPersonalize })),
 );
-const LinkedEsportsMatch = lazy(() => import("./sports/esports-match").then(m => ({ default: m.EsportsMatchView })));
+const LinkedEsportsMatch = lazy(() =>
+  import("./sports/esports-match").then((m) => ({ default: m.EsportsMatchView })),
+);
 
 export function SportsView({ active = false }: { active?: boolean }) {
   const { sportsEvent } = useView();
   return (
     <SportsAccessGate active={active}>
-      {sportsEvent ? <LinkedEsportsEvent match={sportsEvent} active={active} /> : <SportsHubView active={active} />}
+      {sportsEvent ? (
+        <LinkedEsportsEvent match={sportsEvent} active={active} />
+      ) : (
+        <SportsHubView active={active} />
+      )}
     </SportsAccessGate>
   );
 }
 
 function LinkedEsportsEvent({ match, active }: { match: EsportsMatch; active: boolean }) {
   const { goBack, openPlayer } = useView();
-  return <main className="sh-page"><Suspense fallback={null}>{active && <LinkedEsportsMatch key={`${match.game}:${match.id}`} match={match} onClose={goBack} onWatch={stream => {
-    const source = officialBroadcastSource(stream); if (source) openPlayer(source);
-  }} />}</Suspense></main>;
+  return (
+    <main className="sh-page">
+      <Suspense fallback={null}>
+        {active && (
+          <LinkedEsportsMatch
+            key={`${match.game}:${match.id}`}
+            match={match}
+            onClose={goBack}
+            onWatch={(stream) => {
+              const source = officialBroadcastSource(stream);
+              if (source) openPlayer(source);
+            }}
+          />
+        )}
+      </Suspense>
+    </main>
+  );
 }
 
 function SportsHubView({ active = false }: { active?: boolean }) {
@@ -104,9 +124,13 @@ function SportsHubView({ active = false }: { active?: boolean }) {
     const restore = () => {
       const saved = eventTrigger.current;
       // Schedule rows can be remounted by viewport virtualization while the page is parked.
-      const target = saved?.element.isConnected ? saved.element : saved?.label
-        ? scrollRef.current?.querySelector<HTMLElement>(`[aria-label="${CSS.escape(saved.label)}"]`)
-        : null;
+      const target = saved?.element.isConnected
+        ? saved.element
+        : saved?.label
+          ? scrollRef.current?.querySelector<HTMLElement>(
+              `[aria-label="${CSS.escape(saved.label)}"]`,
+            )
+          : null;
       if (target?.getClientRects().length) {
         target.focus({ preventScroll: true });
         eventTrigger.current = null;
@@ -232,15 +256,19 @@ function SportsHubView({ active = false }: { active?: boolean }) {
     board.games.find((g) => g.state === "pre" && hubLeague(g.league)?.group === "soccer");
   const open = (game: SportsGame) => {
     const trigger = document.activeElement;
-    eventTrigger.current = trigger instanceof HTMLElement
-      ? { element: trigger, label: trigger.getAttribute("aria-label") }
-      : null;
+    eventTrigger.current =
+      trigger instanceof HTMLElement
+        ? { element: trigger, label: trigger.getAttribute("aria-label") }
+        : null;
     if (
       game.source === "thesportsdb-hub" ||
       game.source === "opendota" ||
       ["combat", "motorsport", "golf"].includes(hubLeague(game.league)?.group || "")
     )
-      openMatchDetail(game, all.filter((item) => item.league === game.league && item.context?.id === game.context?.id));
+      openMatchDetail(
+        game,
+        all.filter((item) => item.league === game.league && item.context?.id === game.context?.id),
+      );
     else openMatchDetail(game);
   };
   const busy =
@@ -289,10 +317,7 @@ function SportsHubView({ active = false }: { active?: boolean }) {
           <span className="sh-eyebrow">HARBOR SPORTS</span>
           <h1>{t("Every game. Your game.")}</h1>
         </div>
-        <SportsPersonalizeHint
-          active={active && !setup}
-          onPersonalize={() => setSetup(true)}
-        />
+        <SportsPersonalizeHint active={active && !setup} onPersonalize={() => setSetup(true)} />
       </header>
       <nav className="sh-view-tabs" aria-label={t("Sports navigation")}>
         {[
@@ -323,13 +348,11 @@ function SportsHubView({ active = false }: { active?: boolean }) {
             role="status"
             title={brokenLeagues.length ? brokenLeagues.join(", ") : undefined}
           >
-            {busy ? (
-              t("Updating schedules…")
-            ) : failures || statusStale ? (
-              t("Some schedules are unavailable")
-            ) : (
-              t("Up to date")
-            )}
+            {busy
+              ? t("Updating schedules…")
+              : failures || statusStale
+                ? t("Some schedules are unavailable")
+                : t("Up to date")}
           </span>
         )}
         <SportsRefreshButton busy={busy} onRefresh={() => setRefresh((n) => n + 1)} />

@@ -1,8 +1,8 @@
 export default {
   "Match stats": "比赛统计",
-  "Timeline": "比赛进程",
+  Timeline: "比赛进程",
   "Head to head": "交锋记录",
-  "Standings": "积分榜",
+  Standings: "积分榜",
   "Loading team results…": "正在加载队伍赛果…",
   "No completed matches were returned for this team.": "此来源未返回该队伍已结束的比赛。",
   "Team results could not be loaded. Your current schedule is still shown.":

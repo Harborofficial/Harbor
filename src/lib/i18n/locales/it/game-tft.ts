@@ -3,7 +3,8 @@ export default {
   "games.tft.intro": "Prepara una squadra prima della prossima partita.",
   "games.tft.version": "Versione dati {version}",
   "games.tft.refresh": "Aggiorna riferimento",
-  "games.tft.refreshFailed": "Aggiornamento non riuscito. Il riferimento precedente è ancora disponibile.",
+  "games.tft.refreshFailed":
+    "Aggiornamento non riuscito. Il riferimento precedente è ancora disponibile.",
   "games.tft.loadFailed": "Impossibile caricare il riferimento dei campioni.",
   "games.tft.set": "Set",
   "games.tft.current": "Attuale",
@@ -19,7 +20,8 @@ export default {
   "games.tft.save": "Salva squadra",
   "games.tft.savedTeams": "Squadre salvate",
   "games.tft.delete": "Elimina squadra salvata",
-  "games.tft.note": "Ogni campione viene contato una volta. Oggetti ed effetti speciali possono modificare i tratti o lo spazio della squadra.",
+  "games.tft.note":
+    "Ogni campione viene contato una volta. Oggetti ed effetti speciali possono modificare i tratti o lo spazio della squadra.",
   "games.tft.saveFailed": "Impossibile salvare sul dispositivo. La squadra attuale è ancora qui.",
   "games.tft.missing": "Alcuni campioni salvati non sono più in questo set.",
   "games.tft.imported": "Squadra importata.",
@@ -54,5 +56,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "Rigenerazione salute",
   "games.tft.stat.set14AmpIcon": "Amplificazione danni",
   "games.tft.stat.TFTManaRegen": "Rigenerazione mana",
-  "games.tft.stat.scaleSV": "Rubavita globale"
+  "games.tft.stat.scaleSV": "Rubavita globale",
 };

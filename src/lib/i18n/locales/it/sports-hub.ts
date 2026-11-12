@@ -174,7 +174,7 @@ export default {
   "Show all {count}": "Mostra tutti ({count})",
   "{count} competing": "{count} in gara",
   "Starting field": "Griglia di partenza",
-  "Leaderboard": "Classifica",
+  Leaderboard: "Classifica",
   "Full field": "Griglia completa",
   "Loading event schedule…": "Caricamento calendario dell’evento…",
   "Loading lineups…": "Caricamento formazioni…",

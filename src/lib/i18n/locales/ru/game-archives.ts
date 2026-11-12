@@ -6,10 +6,13 @@ export default {
   "games.cleanup.review": "Проверить архивы",
   "games.cleanup.confirm": "Переместить эти части архива в корзину?",
   "games.cleanup.binNote": "Место освободится, когда вы сами очистите корзину.",
-  "games.cleanup.completedNote": "Папка с архивами находится в корзине. При необходимости восстановите её оттуда.",
+  "games.cleanup.completedNote":
+    "Папка с архивами находится в корзине. При необходимости восстановите её оттуда.",
   "games.cleanup.restoredNote": "Части архива возвращены в исходную папку.",
-  "games.cleanup.uncertainNote": "Harbor не смог подтвердить результат. Перед продолжением проверьте исходную папку и корзину.",
-  "games.cleanup.recoveryNote": "Часть файлов может находиться во временной папке Harbor. Продолжите очистку или восстановите их без замены существующих файлов.",
+  "games.cleanup.uncertainNote":
+    "Harbor не смог подтвердить результат. Перед продолжением проверьте исходную папку и корзину.",
+  "games.cleanup.recoveryNote":
+    "Часть файлов может находиться во временной папке Harbor. Продолжите очистку или восстановите их без замены существующих файлов.",
   "games.cleanup.working": "Проверка файлов архива",
   "games.cleanup.restore": "Восстановить сохранённые файлы",
   "games.cleanup.resume": "Продолжить очистку",
@@ -19,17 +22,23 @@ export default {
   "games.cleanup.restored": "Архивы восстановлены",
   "games.cleanup.unconfirmed": "Результат не подтверждён",
   "games.cleanup.unavailable": "Обновите настольное приложение для управления скачанными архивами.",
-  "games.cleanup.archive_cleanup_in_use": "Другая операция использует эти файлы. Остановите её и повторите проверку.",
-  "games.cleanup.archive_cleanup_recovery": "Сохранённую очистку нужно проверить. Сохраните файлы и осмотрите их папку.",
-  "games.cleanup.archive_cleanup_recycle": "Не удалось переместить файлы в корзину. Восстановите их или повторите попытку.",
-  "games.cleanup.archive_cleanup_receipt": "Для этой распаковки нет полного списка исходных файлов. Очистка архивов здесь недоступна.",
+  "games.cleanup.archive_cleanup_in_use":
+    "Другая операция использует эти файлы. Остановите её и повторите проверку.",
+  "games.cleanup.archive_cleanup_recovery":
+    "Сохранённую очистку нужно проверить. Сохраните файлы и осмотрите их папку.",
+  "games.cleanup.archive_cleanup_recycle":
+    "Не удалось переместить файлы в корзину. Восстановите их или повторите попытку.",
+  "games.cleanup.archive_cleanup_receipt":
+    "Для этой распаковки нет полного списка исходных файлов. Очистка архивов здесь недоступна.",
   "games.cleanup.blocker.anotherProfile": "Эти архивы использует другой профиль.",
   "games.cleanup.blocker.activeDownload": "Эти файлы ещё нужны для загрузки.",
   "games.cleanup.blocker.sharing": "Перед очисткой остановите раздачу этого торрента.",
   "games.cleanup.blocker.pendingPreparation": "Эти файлы ожидают распаковки.",
   "games.cleanup.blocker.otherExtraction": "Эти файлы использует другая распаковка.",
-  "games.cleanup.orphanNote": "Запись о распаковке удалена. Восстановите сохранённые архивы в исходную папку.",
-  "games.preparation.storeError": "Не удалось сохранить параметры распаковки. Ваш выбор сохранён в этом окне. Попробуйте снова.",
+  "games.cleanup.orphanNote":
+    "Запись о распаковке удалена. Восстановите сохранённые архивы в исходную папку.",
+  "games.preparation.storeError":
+    "Не удалось сохранить параметры распаковки. Ваш выбор сохранён в этом окне. Попробуйте снова.",
   "games.preparation.enable": "Распаковать после загрузки",
   "games.preparation.note": "Архив будет сохранён. Проверьте установку перед запуском установщика.",
   "games.preparation.folder": "{name} распаковано",
@@ -58,20 +67,26 @@ export default {
   "games.setupShortcuts.adding": "Добавление…",
   "games.setupShortcuts.add": "Добавить ярлык",
   "games.setupShortcuts.exists": "Другой ярлык уже использует это имя. Он не был изменён.",
-  "games.setupShortcuts.missing": "Не удалось проверить файл игры. Проверьте его расположение и повторите попытку.",
+  "games.setupShortcuts.missing":
+    "Не удалось проверить файл игры. Проверьте его расположение и повторите попытку.",
   "games.setupShortcuts.unsupported": "Ярлыки доступны для игр, работающих напрямую в Windows.",
   "games.setupShortcuts.error": "Не удалось обновить ярлыки. Повторите попытку.",
 
-  "games.archive.archive_decoder": "Harbor не удалось распаковать этот архив в пределах своих ограничений. Попробуйте другой архиватор.",
-  "games.archive.archive_password_or_checksum": "Возможно, пароль неверен или архив повреждён. Проверьте пароль или скачайте архив заново.",
+  "games.archive.archive_decoder":
+    "Harbor не удалось распаковать этот архив в пределах своих ограничений. Попробуйте другой архиватор.",
+  "games.archive.archive_password_or_checksum":
+    "Возможно, пароль неверен или архив повреждён. Проверьте пароль или скачайте архив заново.",
   "games.archive.password": "Пароль архива",
-  "games.archive.passwordNote": "Используется только для этой распаковки и не сохраняется в истории загрузок.",
-  "games.archive.archive_password": "Этот пароль не открыл архив. Проверьте его и попробуйте ещё раз.",
+  "games.archive.passwordNote":
+    "Используется только для этой распаковки и не сохраняется в истории загрузок.",
+  "games.archive.archive_password":
+    "Этот пароль не открыл архив. Проверьте его и попробуйте ещё раз.",
   "games.archive.open": "Распаковать архив",
   "games.archive.extractNamed": "Распаковать {name}",
   "games.archive.eyebrow": "От загрузки к библиотеке",
   "games.archive.title": "Распаковать файлы игры",
-  "games.archive.intro": "Проверьте ZIP / 7z / RAR / TAR / TAR.GZ / ISO-архив и выберите, куда поместить файлы. Harbor создаст новую папку и сохранит исходный архив.",
+  "games.archive.intro":
+    "Проверьте ZIP / 7z / RAR / TAR / TAR.GZ / ISO-архив и выберите, куда поместить файлы. Harbor создаст новую папку и сохранит исходный архив.",
   "games.archive.source": "Архив",
   "games.archive.chooseSource": "Выбрать архив",
   "games.archive.chooseParent": "Выбрать папку назначения",
@@ -86,36 +101,53 @@ export default {
   "games.archive.searchPreview": "Поиск в этом просмотре",
   "games.archive.destination": "Выберите место для этих файлов",
   "games.archive.folderName": "Имя новой папки",
-  "games.archive.destinationNote": "Существующая папка не будет заменена. Выберите другое имя, если это уже занято.",
+  "games.archive.destinationNote":
+    "Существующая папка не будет заменена. Выберите другое имя, если это уже занято.",
   "games.archive.phase.checking": "Проверка архива",
   "games.archive.phase.extracting": "Распаковка файлов",
   "games.archive.phase.complete": "Файлы готовы",
   "games.archive.ready": "Всё готово к следующему шагу",
   "games.archive.complete": "Распаковано файлов: {count}",
-  "games.archive.completeNote": "Файлы готовы. Для портативной игры добавьте её исполняемый файл в разделе «Локальные игры». Игры с установщиком по-прежнему нужно отдельно установить.",
+  "games.archive.completeNote":
+    "Файлы готовы. Для портативной игры добавьте её исполняемый файл в разделе «Локальные игры». Игры с установщиком по-прежнему нужно отдельно установить.",
   "games.archive.originalKept": "Исходный архив сохранён.",
-  "games.archive.zipOnly": "ZIP / 7z / RAR / TAR / TAR.GZ / ISO-архивы · файлы не запускаются автоматически",
+  "games.archive.zipOnly":
+    "ZIP / 7z / RAR / TAR / TAR.GZ / ISO-архивы · файлы не запускаются автоматически",
   "games.archive.openFolder": "Показать папку",
   "games.archive.localLibrary": "Локальные игры",
-  "games.archive.archive_profile": "Не удалось определить этот профиль Harbor. Заново откройте «Игры» и повторите попытку.",
-  "games.archive.archive_busy": "Другая операция с архивом уже выполняется. Сначала завершите или отмените её.",
+  "games.archive.archive_profile":
+    "Не удалось определить этот профиль Harbor. Заново откройте «Игры» и повторите попытку.",
+  "games.archive.archive_busy":
+    "Другая операция с архивом уже выполняется. Сначала завершите или отмените её.",
   "games.archive.archive_canceled": "Распаковка отменена. Исходный архив по-прежнему доступен.",
-  "games.archive.archive_read": "Не удалось прочитать архив. Убедитесь, что файл ещё доступен, и повторите попытку.",
-  "games.archive.archive_links": "Архив содержит ссылки или специальные файлы. Воспользуйтесь инструкциями по установке от проекта.",
+  "games.archive.archive_read":
+    "Не удалось прочитать архив. Убедитесь, что файл ещё доступен, и повторите попытку.",
+  "games.archive.archive_links":
+    "Архив содержит ссылки или специальные файлы. Воспользуйтесь инструкциями по установке от проекта.",
   "games.archive.archive_limit": "Архив превышает текущие ограничения Harbor на распаковку.",
-  "games.archive.archive_changed": "Архив изменился после проверки. Проверьте его снова перед распаковкой.",
-  "games.archive.archive_path": "Архив содержит путь, который Harbor не может безопасно распаковать. Файлы игры не были заменены.",
-  "games.archive.archive_format": "Это неподдерживаемый ZIP / 7z / RAR / TAR / TAR.GZ / ISO-архив или его каталог повреждён.",
+  "games.archive.archive_changed":
+    "Архив изменился после проверки. Проверьте его снова перед распаковкой.",
+  "games.archive.archive_path":
+    "Архив содержит путь, который Harbor не может безопасно распаковать. Файлы игры не были заменены.",
+  "games.archive.archive_format":
+    "Это неподдерживаемый ZIP / 7z / RAR / TAR / TAR.GZ / ISO-архив или его каталог повреждён.",
   "games.archive.archive_encrypted": "Введите пароль этого архива, чтобы продолжить.",
-  "games.archive.archive_compression": "Этот ZIP / 7z / RAR / TAR / TAR.GZ / ISO использует метод сжатия, который Harbor пока не поддерживает.",
-  "games.archive.archive_collision": "Некоторые записи архива перезаписали бы друг друга. Ничего не распаковано.",
+  "games.archive.archive_compression":
+    "Этот ZIP / 7z / RAR / TAR / TAR.GZ / ISO использует метод сжатия, который Harbor пока не поддерживает.",
+  "games.archive.archive_collision":
+    "Некоторые записи архива перезаписали бы друг друга. Ничего не распаковано.",
   "games.archive.archive_destination": "Выберите доступную папку и допустимое имя для новой папки.",
-  "games.archive.archive_write": "Не удалось записать файлы. Проверьте место и права доступа в папке назначения, затем проверьте архив заново.",
-  "games.archive.archive_exists": "Эта папка уже существует. Выберите другое имя, чтобы сохранить её файлы.",
+  "games.archive.archive_write":
+    "Не удалось записать файлы. Проверьте место и права доступа в папке назначения, затем проверьте архив заново.",
+  "games.archive.archive_exists":
+    "Эта папка уже существует. Выберите другое имя, чтобы сохранить её файлы.",
   "games.archive.archive_platform": "Распаковка архивов недоступна на этом устройстве.",
-  "games.archive.archive_expired": "Срок действия проверки архива истёк. Проверьте его заново, чтобы продолжить.",
-  "games.archive.archive_space": "Недостаточно свободного места для распакованных файлов. Выберите другое место назначения.",
-  "games.archive.archive_checksum": "Файл в архиве не прошёл проверку целостности. Незавершённый результат не был предоставлен для использования.",
+  "games.archive.archive_expired":
+    "Срок действия проверки архива истёк. Проверьте его заново, чтобы продолжить.",
+  "games.archive.archive_space":
+    "Недостаточно свободного места для распакованных файлов. Выберите другое место назначения.",
+  "games.archive.archive_checksum":
+    "Файл в архиве не прошёл проверку целостности. Незавершённый результат не был предоставлен для использования.",
   "games.archive.space.title": "Место на целевом диске",
   "games.archive.space.checking": "Проверка места на целевом диске…",
   "games.archive.space.free": "Доступно: {size}",
@@ -123,12 +155,16 @@ export default {
   "games.archive.space.reserved": "Зарезервировано другими операциями Harbor: {size}",
   "games.archive.space.after": "Будет доступно после распаковки: {size}",
   "games.archive.space.shortfall": "Нужно ещё {size}",
-  "games.archive.space.unknown": "Не удалось определить свободное место. Harbor проверит его снова при начале распаковки.",
+  "games.archive.space.unknown":
+    "Не удалось определить свободное место. Harbor проверит его снова при начале распаковки.",
   "games.archive.space.error": "Не удалось проверить место на целевом диске.",
   "games.archive.space.refresh": "Проверить место снова",
-  "games.archive.space.note": "Включает небольшой запас места. Другие приложения по-прежнему могут использовать этот диск.",
-  "games.archive.space.shortfallNote": "Освободите место или выберите другое место назначения и проверьте снова.",
-  "games.archive.keepWorking": "Распаковка продолжится в разделе «Загрузки». Можно закрыть это окно.",
+  "games.archive.space.note":
+    "Включает небольшой запас места. Другие приложения по-прежнему могут использовать этот диск.",
+  "games.archive.space.shortfallNote":
+    "Освободите место или выберите другое место назначения и проверьте снова.",
+  "games.archive.keepWorking":
+    "Распаковка продолжится в разделе «Загрузки». Можно закрыть это окно.",
   "games.archive.viewDownloads": "Показать в загрузках",
   "games.archive.phase.publishing": "Завершение",
   "games.archive.state.failed": "Ошибка распаковки",
@@ -139,21 +175,29 @@ export default {
   "games.archive.cancelExtract": "Отменить распаковку",
   "games.archive.retry": "Проверить и повторить",
   "games.archive.showPartial": "Показать неполные файлы",
-  "games.archive.partialNote": "Harbor сохранил папку с частично распакованными файлами. Проверьте её перед удалением; повторная попытка начнёт распаковку заново.",
+  "games.archive.partialNote":
+    "Harbor сохранил папку с частично распакованными файлами. Проверьте её перед удалением; повторная попытка начнёт распаковку заново.",
   "games.archive.progressFiles": "{count} из {total} файлов",
-  "games.archive.archive_store": "Harbor не смог сохранить ход распаковки. Ваши файлы сохранены для проверки.",
+  "games.archive.archive_store":
+    "Harbor не смог сохранить ход распаковки. Ваши файлы сохранены для проверки.",
   "games.archive.archive_start": "Не удалось начать распаковку. Попробуйте ещё раз.",
-  "games.archive.archive_history": "История распаковки заполнена. Удалите старую запись, чтобы продолжить; её файлы останутся.",
-  "games.archive.archive_interrupted": "Harbor закрылся до завершения распаковки. Проверьте сохранённый путь и повторите попытку.",
-  "games.archive.archive_parts": "Эти части не составляют один архив. Убедитесь, что все они относятся к одной загрузке.",
+  "games.archive.archive_history":
+    "История распаковки заполнена. Удалите старую запись, чтобы продолжить; её файлы останутся.",
+  "games.archive.archive_interrupted":
+    "Harbor закрылся до завершения распаковки. Проверьте сохранённый путь и повторите попытку.",
+  "games.archive.archive_parts":
+    "Эти части не составляют один архив. Убедитесь, что все они относятся к одной загрузке.",
   "games.archive.archive_tool": "В этой сборке нет поддержки дополнительных форматов архивов.",
-  "games.archive.unavailable": "Обновите приложение для компьютера, чтобы распаковывать архивы в фоне.",
+  "games.archive.unavailable":
+    "Обновите приложение для компьютера, чтобы распаковывать архивы в фоне.",
   "games.archive.continueSetup": "Настроить игру",
   "games.archive.dismissRecord": "Удалить запись · сохранить файлы",
-  "games.archive.archive_multipart": "Этот формат разделённого архива пока не поддерживается. Распакуйте его архиватором и откройте полученную папку в Harbor.",
+  "games.archive.archive_multipart":
+    "Этот формат разделённого архива пока не поддерживается. Распакуйте его архиватором и откройте полученную папку в Harbor.",
   "games.archive.partsCount": "Частей архива: {count}",
   "games.archive.partsNote": "Храните все части в одной папке. Harbor распакует их вместе.",
   "games.archive.partsMore": "Показать больше частей",
   "games.archive.setHash": "SHA-256 набора архивов",
-  "games.archive.archive_missing_part": "Не хватает части архива. Скачайте все части в одну папку и проверьте архив снова.",
+  "games.archive.archive_missing_part":
+    "Не хватает части архива. Скачайте все части в одну папку и проверьте архив снова.",
 };

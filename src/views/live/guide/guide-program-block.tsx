@@ -53,17 +53,9 @@ export function GuideProgramBlock({
   const isLive = !isPast && program.startMs <= nowMs && nowMs < program.endMs;
   const progress =
     isLive && program.endMs > program.startMs
-      ? Math.max(
-          0,
-          Math.min(
-            1,
-            (nowMs - program.startMs) / (program.endMs - program.startMs),
-          ),
-        )
+      ? Math.max(0, Math.min(1, (nowMs - program.startMs) / (program.endMs - program.startMs)))
       : null;
-  const remainingMin = isLive
-    ? Math.max(0, Math.round((program.endMs - nowMs) / 60_000))
-    : null;
+  const remainingMin = isLive ? Math.max(0, Math.round((program.endMs - nowMs) / 60_000)) : null;
 
   const left = (program.startMs - windowStart) * PX_PER_MS;
   const width = (program.endMs - program.startMs) * PX_PER_MS;
@@ -92,10 +84,7 @@ export function GuideProgramBlock({
     const r = ref.current?.getBoundingClientRect();
     if (!r) return;
     const viewportW = window.innerWidth;
-    const center = Math.max(
-      170,
-      Math.min(viewportW - 170, r.left + r.width / 2),
-    );
+    const center = Math.max(170, Math.min(viewportW - 170, r.left + r.width / 2));
     setPos({ left: center, above: r.top - 8, below: r.bottom + 8 });
   };
 
@@ -166,9 +155,7 @@ export function GuideProgramBlock({
             <div className="mt-auto flex flex-col gap-1 pt-1">
               <div className="flex flex-nowrap items-center gap-1.5 overflow-hidden text-[10.5px] tabular-nums text-ink-subtle">
                 <span className="shrink-0">{formatTimeLabel(program.startMs)}</span>
-                {showEndTime && (
-                  <span className="shrink-0">{formatTimeLabel(program.endMs)}</span>
-                )}
+                {showEndTime && <span className="shrink-0">{formatTimeLabel(program.endMs)}</span>}
                 {remainingMin != null && showRemaining && (
                   <span className="shrink-0 text-ink-muted">
                     {t("{n}m left", { n: remainingMin })}

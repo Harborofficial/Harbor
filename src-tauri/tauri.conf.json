@@ -72,7 +72,8 @@
       "THIRD-PARTY-NOTICES.txt": "notices/",
       "resources/harbor-stream-blocker/": "resources/harbor-stream-blocker/",
       "resources/capstan/": "resources/capstan/",
-      "resources/pokemon-engine/": "resources/pokemon-engine/"
+      "resources/pokemon-engine/": "resources/pokemon-engine/",
+      "resources/moonshine/": "resources/moonshine/"
     },
     "licenseFile": "installer/eula.txt",
     "icon": [

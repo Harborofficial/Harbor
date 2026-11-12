@@ -18,7 +18,13 @@ export function BpCollectionsBand({ limit = 30 }: { limit?: number }) {
   if (settled && entries.length === 0) return null;
 
   return (
-    <section ref={rowRef} data-bp-row data-bp-row-key="collections-band" aria-label={t("Collections")} className="relative">
+    <section
+      ref={rowRef}
+      data-bp-row
+      data-bp-row-key="collections-band"
+      aria-label={t("Collections")}
+      className="relative"
+    >
       <div
         data-bp-scroll-x
         className="flex items-stretch gap-[clamp(11px,1vw,20px)] overflow-x-auto px-[var(--bp-gutter)] pt-[clamp(22px,2.6vh,40px)] pb-[60px] -mb-[38px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

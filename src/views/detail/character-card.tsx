@@ -22,9 +22,7 @@ export function CharacterCard({
   const { toggle } = useCharacterFavorites();
 
   const Wrap: "button" | "div" = onOpen ? "button" : "div";
-  const wrapProps = onOpen
-    ? { onClick: () => onOpen(character), type: "button" as const }
-    : {};
+  const wrapProps = onOpen ? { onClick: () => onOpen(character), type: "button" as const } : {};
 
   return (
     <Wrap

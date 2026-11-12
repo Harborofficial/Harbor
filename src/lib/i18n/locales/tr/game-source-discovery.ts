@@ -3,15 +3,19 @@ export default {
   "games.sources.links.copied": "Kopyalandı",
 
   "games.sources.catalogProgress": "Kaynaklar kontrol ediliyor · {checked}/{total}",
-  "games.sources.source_capacity": "Kaynak katalogları 2 GB profil sınırını aşıyor. Kullanmadığınız kaynakları kaldırıp tekrar deneyin. Kayıtlı kataloglar değiştirilmedi.",
-  "games.sources.source_quota": "Bu kaynakları kaydetmek için yeterli alan yok. Yer açın veya kullanmadığınız kaynakları kaldırıp tekrar deneyin. Kayıtlı kataloglar değiştirilmedi.",
+  "games.sources.source_capacity":
+    "Kaynak katalogları 2 GB profil sınırını aşıyor. Kullanmadığınız kaynakları kaldırıp tekrar deneyin. Kayıtlı kataloglar değiştirilmedi.",
+  "games.sources.source_quota":
+    "Bu kaynakları kaydetmek için yeterli alan yok. Yer açın veya kullanmadığınız kaynakları kaldırıp tekrar deneyin. Kayıtlı kataloglar değiştirilmedi.",
 
-  "games.sources.batch.busy": "Başka bir dosya seçimi hazırlanıyor. Kısa süre sonra tekrar deneyin.",
+  "games.sources.batch.busy":
+    "Başka bir dosya seçimi hazırlanıyor. Kısa süre sonra tekrar deneyin.",
   "games.sources.batch.limit": "Bir seferde en fazla 200 dosya seçin.",
 
   "games.sources.batch.failedFile": "{file} hazırlanamadı.",
 
-  "games.sources.batch.restart": "Seçili dosyaları birlikte indirmek için güncellemeden sonra Harbor'ı yeniden başlatın.",
+  "games.sources.batch.restart":
+    "Seçili dosyaları birlikte indirmek için güncellemeden sonra Harbor'ı yeniden başlatın.",
 
   "games.torrent.start": "Dosyaları indir",
 
@@ -19,45 +23,58 @@ export default {
 
   "games.sources.verification.action": "Kaynağı doğrula",
 
-  "games.sources.verification.waiting": "Kaynak penceresinde doğrulamayı tamamlayın. Harbor ardından kataloğu kontrol edecek.",
+  "games.sources.verification.waiting":
+    "Kaynak penceresinde doğrulamayı tamamlayın. Harbor ardından kataloğu kontrol edecek.",
 
-  "games.sources.source_verify_busy": "Başka bir kaynak doğrulanıyor. Önce işlemi tamamlayın veya o pencereyi kapatın.",
+  "games.sources.source_verify_busy":
+    "Başka bir kaynak doğrulanıyor. Önce işlemi tamamlayın veya o pencereyi kapatın.",
 
-  "games.sources.source_verify_failed": "Doğrulama tamamlanamadı. Tekrar deneyin veya kaynak adresini güncelleyin.",
+  "games.sources.source_verify_failed":
+    "Doğrulama tamamlanamadı. Tekrar deneyin veya kaynak adresini güncelleyin.",
 
-  "games.sources.source_verify_timeout": "Doğrulama zaman aşımına uğradı. Hazır olduğunuzda tekrar deneyin.",
+  "games.sources.source_verify_timeout":
+    "Doğrulama zaman aşımına uğradı. Hazır olduğunuzda tekrar deneyin.",
 
-  "games.sources.source_verify_unavailable": "Bu kaynağı doğrulamak için Harbor’ı güncelleyip yeniden başlatın.",
+  "games.sources.source_verify_unavailable":
+    "Bu kaynağı doğrulamak için Harbor’ı güncelleyip yeniden başlatın.",
 
   "games.sources.browser.direct": "Doğrudan indir",
 
   "games.sources.site.title": "Bir site aç",
-  "games.sources.site.note": "Herhangi bir sitedeki indirme sayfasını yapıştırın. Harbor onu kendi penceresinde açar, dosyayı orada seçersiniz ve Harbor'a iner.",
+  "games.sources.site.note":
+    "Herhangi bir sitedeki indirme sayfasını yapıştırın. Harbor onu kendi penceresinde açar, dosyayı orada seçersiniz ve Harbor'a iner.",
   "games.sources.site.url": "Sayfa bağlantısı",
   "games.sources.site.open": "Siteyi aç",
   "games.sources.site.invalid": "Herkese açık bir https bağlantısı olmalı.",
-  "games.sources.browser.intro": "Debrid hesabı gerekmez. {host}’da bir dosya seçin, ardından Harbor’da kaydedileceği yeri belirleyin.",
-  "games.sources.browser.fallback": "İndirme kendiliğinden başlamazsa {host} sayfasındaki yedek bağlantıyı kullanın. Harbor dosyayı yine de yakalar.",
+  "games.sources.browser.intro":
+    "Debrid hesabı gerekmez. {host}’da bir dosya seçin, ardından Harbor’da kaydedileceği yeri belirleyin.",
+  "games.sources.browser.fallback":
+    "İndirme kendiliğinden başlamazsa {host} sayfasındaki yedek bağlantıyı kullanın. Harbor dosyayı yine de yakalar.",
 
   "games.sources.browser.choose": "{host}’da dosya seç",
 
-  "games.sources.browser.waiting": "{host} penceresinde dosyayı seçin. Harbor nereye kaydedileceğini soracak.",
+  "games.sources.browser.waiting":
+    "{host} penceresinde dosyayı seçin. Harbor nereye kaydedileceğini soracak.",
 
   "games.sources.browser.selected": "Harbor’da indirmeye hazır",
 
   "games.sources.browser.another": "Başka dosya seç",
 
-  "games.sources.browser.failed": "{host} bu dosyayı Harbor’a aktaramadı. Tekrar deneyin veya {host}’da açın.",
+  "games.sources.browser.failed":
+    "{host} bu dosyayı Harbor’a aktaramadı. Tekrar deneyin veya {host}’da açın.",
 
-  "games.sources.browser.timeout": "Dosya seçimi zaman aşımına uğradı. Dosya seçmek için {host}’ı yeniden açın.",
+  "games.sources.browser.timeout":
+    "Dosya seçimi zaman aşımına uğradı. Dosya seçmek için {host}’ı yeniden açın.",
 
-  "games.sources.browser.restart": "{host}’dan doğrudan indirmek için güncellemeden sonra Harbor’ı yeniden başlatın.",
+  "games.sources.browser.restart":
+    "{host}’dan doğrudan indirmek için güncellemeden sonra Harbor’ı yeniden başlatın.",
 
   "games.sources.retrySavedCatalog": "Kayıtlı kataloğu yeniden dene",
 
   "games.sources.catalogUnavailable": "Kayıtlı katalog kullanılamıyor",
 
-  "games.sources.catalogRepair": "Sürümlerini geri yüklemek için bu kaynağı yenileyin. Diğer kaynaklar kullanılabilir durumda.",
+  "games.sources.catalogRepair":
+    "Sürümlerini geri yüklemek için bu kaynağı yenileyin. Diğer kaynaklar kullanılabilir durumda.",
 
   "games.sources.restoreCatalog": "Kaynağı yenile",
 
@@ -65,7 +82,8 @@ export default {
 
   "games.sources.partialRecent": "Kullanılamayan kaynaklar: {count}. Son sürümler eksik olabilir.",
 
-  "games.sources.source_incomplete": "Bazı kayıtlı kataloglar okunamadı. Yeni veri eklemeden önce bunları geri yükleyin veya kaldırın.",
+  "games.sources.source_incomplete":
+    "Bazı kayıtlı kataloglar okunamadı. Yeni veri eklemeden önce bunları geri yükleyin veya kaldırın.",
 
   "games.sources.saving": "Kaynak kaydediliyor…",
 
@@ -87,25 +105,31 @@ export default {
 
   "games.sources.more": "Daha fazla göster ({count} kaldı)",
 
-  "games.sources.matchNote": "Sürümleri ve indirme seçeneklerini karşılaştırmak için bir kaynak seçin.",
+  "games.sources.matchNote":
+    "Sürümleri ve indirme seçeneklerini karşılaştırmak için bir kaynak seçin.",
 
   "games.sources.platform.native": "{platform} sürümü",
 
-  "games.sources.platform.nativeNote": "İndirmeden önce işlemci ve sistem gereksinimlerini kontrol edin.",
+  "games.sources.platform.nativeNote":
+    "İndirmeden önce işlemci ve sistem gereksinimlerini kontrol edin.",
 
   "games.sources.platform.compatibility": "Windows sürümü · Wine veya Proton gerekli",
 
-  "games.sources.platform.compatibilityNote": "Linux'ta yerel kitaplığınızdan Wine veya Proton'u yapılandırın. Hile önleme dahil uyumluluk oyuna bağlıdır. Steam oyunlarında Steam'in uyumluluk ayarlarını kullanın.",
+  "games.sources.platform.compatibilityNote":
+    "Linux'ta yerel kitaplığınızdan Wine veya Proton'u yapılandırın. Hile önleme dahil uyumluluk oyuna bağlıdır. Steam oyunlarında Steam'in uyumluluk ayarlarını kullanın.",
 
   "games.sources.platform.other": "{platform} sürümü · {host} üzerinde yerel çalışmaz",
 
-  "games.sources.platform.otherNote": "İşletim sisteminize uygun sürümü seçin. Harbor bu paketi bu cihazda yerel olarak kuramaz veya çalıştıramaz.",
+  "games.sources.platform.otherNote":
+    "İşletim sisteminize uygun sürümü seçin. Harbor bu paketi bu cihazda yerel olarak kuramaz veya çalıştıramaz.",
 
   "games.sources.platform.unknown": "Platform belirtilmemiş",
 
-  "games.sources.platform.unknownNote": "Kaynak, paketin işletim sistemini belirtmiyor. İndirmeden önce yayıncının bilgilerini kontrol edin.",
+  "games.sources.platform.unknownNote":
+    "Kaynak, paketin işletim sistemini belirtmiyor. İndirmeden önce yayıncının bilgilerini kontrol edin.",
 
-  "games.sources.platform.browseNote": "Yerel oyun dosyalarını indirmek ve yönetmek için Harbor masaüstünü kullanın.",
+  "games.sources.platform.browseNote":
+    "Yerel oyun dosyalarını indirmek ve yönetmek için Harbor masaüstünü kullanın.",
 
   "games.sources.platform.browse": "{platform} sürümü",
 
@@ -113,15 +137,11 @@ export default {
 
   "games.setup.openNative": "Yükleyiciyi aç",
 
-
-
   "games.sources.art.torrent": "Torrent indirme",
 
   "games.sources.art.engine": "Harbor torrent motoru",
 
   "games.sources.art.reviewTorrent": "Harbor’da indir",
-
-
 
   "games.sources.ad.note": "Bu dosyayı AllDebrid ile hazırla, ardından nereye kaydedileceğini seç.",
 
@@ -129,11 +149,13 @@ export default {
 
   "games.sources.ad.passwordRequired": "Bu bağlantı için parola gerekiyor. Girip tekrar dene.",
 
-  "games.sources.ad.blocked": "AllDebrid bu bağlantıyı onaylamanı istiyor. E-postanı veya AllDebrid hesabını kontrol edip tekrar dene.",
+  "games.sources.ad.blocked":
+    "AllDebrid bu bağlantıyı onaylamanı istiyor. E-postanı veya AllDebrid hesabını kontrol edip tekrar dene.",
 
   "games.sources.ad.quota": "Bu sunucu için AllDebrid kotan doldu.",
 
-  "games.sources.ad.unsupported": "AllDebrid bu bağlantıyı desteklemiyor. Başka bir bağlantı seçmek için kaynağı aç.",
+  "games.sources.ad.unsupported":
+    "AllDebrid bu bağlantıyı desteklemiyor. Başka bir bağlantı seçmek için kaynağı aç.",
 
   "games.sources.ad.preparing": "AllDebrid’de hazırlanıyor",
 
@@ -145,7 +167,8 @@ export default {
 
   "games.sources.ad.kept": "Kapatınca istek korunur. Kontrol etmek için bağlantıyı yeniden aç.",
 
-  "games.sources.ad.uncertain": "Bu istek zaten AllDebrid’de olabilir. Yeniden hazırlamadan önce hesabını kontrol et.",
+  "games.sources.ad.uncertain":
+    "Bu istek zaten AllDebrid’de olabilir. Yeniden hazırlamadan önce hesabını kontrol et.",
 
   "games.sources.ad.renew": "Bu dosyayı indirmek için yeni bir bağlantı hazırla.",
 
@@ -155,13 +178,16 @@ export default {
 
   "games.sources.repair.note": "Yeni kaynağı inceleyip kaydedene kadar mevcut liste korunur.",
 
-  "games.sources.source_changed": "Bu kaynak değişti. Kaydetmeden önce bağlantısını yeniden inceleyin.",
+  "games.sources.source_changed":
+    "Bu kaynak değişti. Kaydetmeden önce bağlantısını yeniden inceleyin.",
 
-  "games.sources.source_website_limit": "Bu web sitesi tek bir yanıtta 4 MB'tan fazla veri döndürdü.",
+  "games.sources.source_website_limit":
+    "Bu web sitesi tek bir yanıtta 4 MB'tan fazla veri döndürdü.",
 
   "games.sources.discovery.address": "Web sitesi veya katalog bağlantısı",
 
-  "games.sources.discovery.hint": "Bir web sitesi, JSON kataloğu veya Hydra kurulum bağlantısı yapıştırın.",
+  "games.sources.discovery.hint":
+    "Bir web sitesi, JSON kataloğu veya Hydra kurulum bağlantısı yapıştırın.",
 
   "games.sources.discovery.choose": "Bu web sitesinde yayımlanan bir katalog seçin.",
 
@@ -173,13 +199,17 @@ export default {
 
   "games.sources.discovery.preview": "Katalog önizlemesi",
 
-  "games.sources.discovery.reviewNote": "Yalnızca katalog kayıtları kaydedilir. Dosyalar siz seçtiğinizde indirilir.",
+  "games.sources.discovery.reviewNote":
+    "Yalnızca katalog kayıtları kaydedilir. Dosyalar siz seçtiğinizde indirilir.",
 
-  "games.sources.source_no_catalog": "Bu web sitesi Harbor’ın okuyabileceği bir katalog bağlantısı yayımlamıyor. Bunun yerine JSON kataloğunun bağlantısını yapıştırın.",
+  "games.sources.source_no_catalog":
+    "Bu web sitesi Harbor’ın okuyabileceği bir katalog bağlantısı yayımlamıyor. Bunun yerine JSON kataloğunun bağlantısını yapıştırın.",
 
-  "games.sources.source_url": "Bir web sitesi adresi, HTTP(S) katalog URL’si veya Hydra kurulum bağlantısı girin.",
+  "games.sources.source_url":
+    "Bir web sitesi adresi, HTTP(S) katalog URL’si veya Hydra kurulum bağlantısı girin.",
 
-  "games.sources.source_limit": "Katalog sınırı: 64 MB veya 150.000 sürüm. Profil sınırı: 2 GB veya 128 kaynak.",
+  "games.sources.source_limit":
+    "Katalog sınırı: 64 MB veya 150.000 sürüm. Profil sınırı: 2 GB veya 128 kaynak.",
 
   "games.sources.source_processing": "Katalog işlenemedi. Tekrar deneyin.",
 
@@ -201,7 +231,8 @@ export default {
 
   "games.sources.website.unavailable": "Bazı web siteleri kontrol edilemedi.",
 
-  "games.sources.website.note": "Yeni kayıtlar önbelleğe alınır. Arama, web sitesinin kataloğunda yapılır.",
+  "games.sources.website.note":
+    "Yeni kayıtlar önbelleğe alınır. Arama, web sitesinin kataloğunda yapılır.",
 
   "games.sources.links.title": "İndirme seçenekleri",
 
@@ -211,7 +242,8 @@ export default {
 
   "games.sources.links.connected": "Bağlı",
 
-  "games.sources.links.connect": "Burada kullanmak için Kaynaklar ayarlarından {name} hizmetini bağlayın.",
+  "games.sources.links.connect":
+    "Burada kullanmak için Kaynaklar ayarlarından {name} hizmetini bağlayın.",
 
   "games.sources.links.settings": "Kaynaklar ayarları",
 
@@ -227,7 +259,8 @@ export default {
 
   "games.sources.links.prepare": "Bağlantıyı hazırla",
 
-  "games.sources.links.account": "Hizmet bağlantıyı reddetti. Kaynaklar ayarlarından anahtarını kontrol edin.",
+  "games.sources.links.account":
+    "Hizmet bağlantıyı reddetti. Kaynaklar ayarlarından anahtarını kontrol edin.",
 
   "games.sources.links.rate": "Hizmet Harbor’dan beklemesini istedi. Biraz sonra tekrar deneyin.",
 
@@ -235,9 +268,11 @@ export default {
 
   "games.sources.links.empty": "Hizmet indirilebilir dosya döndürmedi.",
 
-  "games.sources.links.invalid": "Hizmet eksik dosya bilgileri döndürdü. Kaynağı açın veya tekrar deneyin.",
+  "games.sources.links.invalid":
+    "Hizmet eksik dosya bilgileri döndürdü. Kaynağı açın veya tekrar deneyin.",
 
-  "games.sources.links.failed": "Hizmet bu bağlantıyı hazırlayamadı. Kullanılabilirliğini ve hesabınızı kontrol edin.",
+  "games.sources.links.failed":
+    "Hizmet bu bağlantıyı hazırlayamadı. Kullanılabilirliğini ve hesabınızı kontrol edin.",
 
   "games.sources.links.destination": "Hedef seç",
 
@@ -249,11 +284,13 @@ export default {
 
   "games.sources.web.start": "TorBox’ta başlat",
 
-  "games.sources.web.note": "TorBox bu bağlantıyı hesabına indirir. Hazır olduğunda bir dosya ve yerel hedef seç.",
+  "games.sources.web.note":
+    "TorBox bu bağlantıyı hesabına indirir. Hazır olduğunda bir dosya ve yerel hedef seç.",
 
   "games.sources.web.kept": "Bu pencereyi kapatmak TorBox işini korur.",
 
-  "games.sources.web.uncertain": "Bu istek TorBox’ta zaten bulunuyor olabilir. Yeni bir iş başlatmadan önce kontrol et.",
+  "games.sources.web.uncertain":
+    "Bu istek TorBox’ta zaten bulunuyor olabilir. Yeni bir iş başlatmadan önce kontrol et.",
 
   "games.sources.web.check": "TorBox’ı kontrol et",
 
@@ -261,13 +298,16 @@ export default {
 
   "games.sources.web.more": "Eski işleri kontrol et",
 
-  "games.sources.web.notFound": "Eşleşen iş bulunamadı. Yeni bir iş, gecikmiş isteği yineleyebilir.",
+  "games.sources.web.notFound":
+    "Eşleşen iş bulunamadı. Yeni bir iş, gecikmiş isteği yineleyebilir.",
 
-  "games.sources.web.nextPage": "{page}. sayfa kontrol edildi. Eski işleri kontrol etmeye devam et.",
+  "games.sources.web.nextPage":
+    "{page}. sayfa kontrol edildi. Eski işleri kontrol etmeye devam et.",
 
   "games.sources.web.again": "Başka bir iş başlat",
 
-  "games.sources.web.storage": "Harbor bu işi kaydedemedi. Otomatik olarak yeniden gönderilmeyecek.",
+  "games.sources.web.storage":
+    "Harbor bu işi kaydedemedi. Otomatik olarak yeniden gönderilmeyecek.",
 
   "games.sources.web.preparing": "TorBox’ta hazırlanıyor",
 
@@ -323,9 +363,11 @@ export default {
 
   "games.sources.host.queueNote": "Bu sunucu, hizmetin bulut aktarımını kullanır.",
 
-  "games.sources.host.unknownNote": "Bu alan adı sağlayıcının dizininde yok. Bağlantıyı yine de deneyebilirsiniz.",
+  "games.sources.host.unknownNote":
+    "Bu alan adı sağlayıcının dizininde yok. Bağlantıyı yine de deneyebilirsiniz.",
 
-  "games.sources.host.fileNote": "Dosyanın kullanılabilirliği bağlantı hazırlanırken kontrol edilir.",
+  "games.sources.host.fileNote":
+    "Dosyanın kullanılabilirliği bağlantı hazırlanırken kontrol edilir.",
 
   "games.sources.host.account": "Kotanızı kontrol etmek için bu hizmeti yeniden bağlayın.",
 
@@ -335,11 +377,13 @@ export default {
 
   "games.sources.pm.start": "Premiumize’da başlat",
 
-  "games.sources.pm.note": "Premiumize bu bağlantıyı bulutuna kaydeder. Hazır olduğunda bir dosya seç.",
+  "games.sources.pm.note":
+    "Premiumize bu bağlantıyı bulutuna kaydeder. Hazır olduğunda bir dosya seç.",
 
   "games.sources.pm.kept": "Kapatmak Premiumize aktarımını korur.",
 
-  "games.sources.pm.uncertain": "Bu istek zaten Premiumize’da olabilir. Yenisini oluşturmadan önce son aktarımları incele.",
+  "games.sources.pm.uncertain":
+    "Bu istek zaten Premiumize’da olabilir. Yenisini oluşturmadan önce son aktarımları incele.",
 
   "games.sources.pm.check": "Premiumize’ı kontrol et",
 
@@ -349,7 +393,8 @@ export default {
 
   "games.sources.pm.failed": "Aktarım başarısız",
 
-  "games.sources.pm.notFound": "Aktarım seçilmedi. Yeni bir aktarım başlatmak isteği yineleyebilir.",
+  "games.sources.pm.notFound":
+    "Aktarım seçilmedi. Yeni bir aktarım başlatmak isteği yineleyebilir.",
 
   "games.sources.pm.select": "Bu aktarımı kullan",
 
@@ -365,7 +410,8 @@ export default {
 
   "games.sources.pm.files": "Dosyalar",
 
-  "games.sources.pm.container": "Bu kaynak bağlantılar içeriyor. Tek bir dosya bağlantısı seçmek için kaynağı aç.",
+  "games.sources.pm.container":
+    "Bu kaynak bağlantılar içeriyor. Tek bir dosya bağlantısı seçmek için kaynağı aç.",
 
   "games.sources.pm.folder": "Klasörü aç",
 
@@ -385,7 +431,8 @@ export default {
 
   "games.sources.public.empty": "Bu listede dosya yok.",
 
-  "games.sources.public.review": "Bu dosyaya erişimi kontrol etmek için {host} üzerinden devam edin.",
+  "games.sources.public.review":
+    "Bu dosyaya erişimi kontrol etmek için {host} üzerinden devam edin.",
 
   "games.sources.public.restricted": "{host} bu dosyayı kısıtladı.",
 
@@ -417,7 +464,6 @@ export default {
 
   "games.sources.batch.destination": "Klasör seç",
 
-  "games.download.transfer_batch_names": "Bazı dosya adları çakışıyor veya değiştirilmeden kaydedilemiyor. Bu dosyaları ayrı ayrı seçin."
-
+  "games.download.transfer_batch_names":
+    "Bazı dosya adları çakışıyor veya değiştirilmeden kaydedilemiyor. Bu dosyaları ayrı ayrı seçin.",
 };
-

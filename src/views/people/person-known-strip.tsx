@@ -153,7 +153,9 @@ function KnownTile({ tile, size, onOpen }: { tile: Tile; size: StripSize; onOpen
         {tile.award && tile.awardType && (
           <span
             className="absolute start-0.5 top-0.5 flex items-center justify-center"
-            style={{ filter: `drop-shadow(0 1px 2px rgba(0,0,0,0.9))${tint ? ` drop-shadow(0 0 2px ${tint})` : ""}` }}
+            style={{
+              filter: `drop-shadow(0 1px 2px rgba(0,0,0,0.9))${tint ? ` drop-shadow(0 0 2px ${tint})` : ""}`,
+            }}
             title={awardLabel(t, tile.awardType)}
           >
             <AwardLogo type={tile.awardType} size={BADGE[size].logo + 3} />

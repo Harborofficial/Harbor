@@ -879,7 +879,8 @@ const catalog08: Record<string, string> = {
     "L'editor è una copia interattiva del player. Fai clic su un controllo per spostarlo, ridimensionarlo, cambiarne lo stile o nasconderlo.",
   "The end time has to be after the start.":
     "L'ora di fine deve essere successiva a quella di inizio.",
-  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.": "Il motore resta in ascolto su una porta locale e si unisce alla DHT per trovare peer. I trasferimenti attivi sono gli stream che ha aperto al momento.",
+  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.":
+    "Il motore resta in ascolto su una porta locale e si unisce alla DHT per trovare peer. I trasferimenti attivi sono gli stream che ha aperto al momento.",
   "The escape hatch for power users. One mpv option per line as key=value, exactly like mpv.conf. These apply last, so they override every dial above. Anything Harbor can't read is skipped, so a typo won't break playback. Restart playback to apply.":
     "L'opzione avanzata per utenti esperti. Un'opzione mpv per riga nel formato key=value, esattamente come in mpv.conf. Queste opzioni vengono applicate per ultime, quindi hanno la precedenza su tutte le impostazioni precedenti. Harbor ignora ciò che non riesce a leggere, perciò un errore di battitura non interromperà la riproduzione. Riavvia la riproduzione per applicarle.",
   "The free tier is $0 for personal use. Just pick the first option, no payment needed.":

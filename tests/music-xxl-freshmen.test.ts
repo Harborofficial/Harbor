@@ -22,7 +22,10 @@ Trailing prose with [[Not A Class]].`;
 
 test("every year in the table is read, newest first", () => {
   const classes = parseXxlFreshmen(TABLE);
-  assert.deepEqual(classes.map((row) => row.year), [2026, 2009, 2007]);
+  assert.deepEqual(
+    classes.map((row) => row.year),
+    [2026, 2009, 2007],
+  );
 });
 
 test("a link's display name wins over its target, so Saigon is not Saigon (rapper)", () => {
@@ -32,14 +35,22 @@ test("a link's display name wins over its target, so Saigon is not Saigon (rappe
 });
 
 test("portraits follow exact article redirects, rejecting namesakes and unsafe image URLs", () => {
-  const row = parseXxlFreshmen(TABLE).find(value => value.year === 2007)!;
+  const row = parseXxlFreshmen(TABLE).find((value) => value.year === 2007)!;
   const image = "https://upload.wikimedia.org/wikipedia/commons/portrait.jpg";
-  const payload = { query: { redirects: [{ from: "Saigon (rapper)", to: "Saigon (musician)" }], pages: {
-    1: { title: "Saigon (musician)", thumbnail: { source: image } },
-    2: { title: "Plies (rapper)", thumbnail: { source: "https://unrelated.example/photo.jpg" } },
-    3: { title: "Young Dro", pageprops: { disambiguation: "" }, thumbnail: { source: image } },
-    4: { title: "Saigon", thumbnail: { source: image + "wrong" } },
-  } } };
+  const payload = {
+    query: {
+      redirects: [{ from: "Saigon (rapper)", to: "Saigon (musician)" }],
+      pages: {
+        1: { title: "Saigon (musician)", thumbnail: { source: image } },
+        2: {
+          title: "Plies (rapper)",
+          thumbnail: { source: "https://unrelated.example/photo.jpg" },
+        },
+        3: { title: "Young Dro", pageprops: { disambiguation: "" }, thumbnail: { source: image } },
+        4: { title: "Saigon", thumbnail: { source: image + "wrong" } },
+      },
+    },
+  };
   assert.deepEqual(xxlPortraits(payload, row), { Saigon: image });
   assert.deepEqual(xxlPortraits(null, row), {});
 });
@@ -48,8 +59,7 @@ test("citations, footnote templates and self-closing refs never reach a name", (
   const row = parseXxlFreshmen(TABLE).find((r) => r.year === 2009);
   assert.deepEqual(row?.artists, ["Wale", "B.o.B", "Blu"]);
   for (const entry of parseXxlFreshmen(TABLE))
-    for (const artist of entry.artists)
-      assert.ok(!/ref|cite|efn|\{\{|\]\]/.test(artist), artist);
+    for (const artist of entry.artists) assert.ok(!/ref|cite|efn|\{\{|\]\]/.test(artist), artist);
 });
 
 test("prose outside the table is not mistaken for a class", () => {

@@ -1,11 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import {
-  hasListingBadges,
-  listingBadges,
-  listingLine,
-} from "../src/views/plugins/listing-badges";
+import { hasListingBadges, listingBadges, listingLine } from "../src/views/plugins/listing-badges";
 import type { Meta } from "../src/lib/cinemeta";
 
 const meta = (extras?: Meta["listingExtras"]): Meta => ({
@@ -108,7 +104,13 @@ test("high dynamic range is not on the poster, wherever it was said", () => {
 });
 
 test("two resolutions or fewer leave nothing to count", () => {
-  const two = meta({ rest: "x", languages: [], quality: [], resolutions: ["1080p", "720p"], hdr: null });
+  const two = meta({
+    rest: "x",
+    languages: [],
+    quality: [],
+    resolutions: ["1080p", "720p"],
+    hdr: null,
+  });
   assert.equal(listingBadges(two, both).resolutionsMore, 0);
   const one = meta({ rest: "x", languages: [], quality: [], resolutions: ["1080p"], hdr: null });
   assert.equal(listingBadges(one, both).resolutionsMore, 0);
@@ -175,10 +177,7 @@ test("the tooltip carries the whole line, not the reading of it", () => {
     languages: ["Hindi"],
     quality: ["WEB-DL"],
   });
-  assert.equal(
-    listingLine(withJunk),
-    "(2026) WEB-DL Hindi Stand-Up Special and more info ahead",
-  );
+  assert.equal(listingLine(withJunk), "(2026) WEB-DL Hindi Stand-Up Special and more info ahead");
   assert.equal(listingLine(meta({ rest: "", languages: [], quality: [] })), undefined);
 });
 

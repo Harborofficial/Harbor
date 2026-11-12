@@ -331,10 +331,8 @@ export function esportsRowFallbacks<T extends SeriesCandidate>(
   const covered = new Set(ranked.map((entry) => entry.event.game));
   return games
     .filter((game) => !covered.has(game))
-    .map(
-      (game): EsportsRowFallback => ({
-        game,
-        reason: ESPORTS_UPCOMING_SOURCE[game] ? "no-events" : "no-source",
-      }),
-    );
+    .map((game): EsportsRowFallback => ({
+      game,
+      reason: ESPORTS_UPCOMING_SOURCE[game] ? "no-events" : "no-source",
+    }));
 }

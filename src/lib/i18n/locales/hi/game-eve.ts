@@ -46,7 +46,8 @@ export default {
   "games.eve.avoid": "{name} से बचें",
   "games.eve.less": "कम पड़ाव दिखाएँ",
   "games.eve.allStops": "सभी पड़ाव दिखाएँ",
-  "games.eve.activityNote": "रिपोर्ट की गई गतिविधि पुराने घटनाक्रम की है और इसमें वर्महोल क्षेत्र शामिल नहीं है। सुरक्षा प्राथमिकता सुरक्षित रास्ते की गारंटी नहीं देती।",
+  "games.eve.activityNote":
+    "रिपोर्ट की गई गतिविधि पुराने घटनाक्रम की है और इसमें वर्महोल क्षेत्र शामिल नहीं है। सुरक्षा प्राथमिकता सुरक्षित रास्ते की गारंटी नहीं देती।",
   "games.eve.noRoute": "स्टारगेट का कोई रास्ता नहीं मिला।",
   "games.eve.incursions": "आक्रमण",
   "games.eve.refreshIncursions": "आक्रमण रीफ़्रेश करें",
@@ -60,5 +61,5 @@ export default {
   "games.eve.influence": "प्रभाव",
   "games.eve.systems": "सिस्टम · {count}",
   "games.eve.boss": "बॉस मौजूद",
-  "games.eve.routeThere": "यहाँ का रास्ता"
+  "games.eve.routeThere": "यहाँ का रास्ता",
 };

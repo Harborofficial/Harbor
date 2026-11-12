@@ -136,16 +136,23 @@ export function ParentalPinModal({
         aria-label={headerLabel}
         onKeyDown={(e) => {
           if (e.defaultPrevented || e.key !== "Tab") return;
-          const controls = Array.from(e.currentTarget.querySelectorAll<HTMLElement>(
-            'button:not([disabled]), input:not([disabled]), [tabindex="0"]',
-          )).filter(isVisible);
+          const controls = Array.from(
+            e.currentTarget.querySelectorAll<HTMLElement>(
+              'button:not([disabled]), input:not([disabled]), [tabindex="0"]',
+            ),
+          ).filter(isVisible);
           const first = controls[0];
           const last = controls[controls.length - 1];
-          if (!first) { e.preventDefault(); return; }
+          if (!first) {
+            e.preventDefault();
+            return;
+          }
           if (e.shiftKey && e.target === first) {
-            e.preventDefault(); last.focus();
+            e.preventDefault();
+            last.focus();
           } else if (!e.shiftKey && e.target === last) {
-            e.preventDefault(); first.focus();
+            e.preventDefault();
+            first.focus();
           }
         }}
         className={`relative flex w-full max-w-[420px] flex-col gap-7 overflow-hidden rounded-3xl px-9 py-9 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200 ${
@@ -178,10 +185,16 @@ export function ParentalPinModal({
         )}
         <div className="relative flex items-start justify-between gap-4">
           <div className="flex flex-col gap-0.5">
-            <h2 className={`text-[19px] font-medium tracking-tight ${kids ? "font-display text-[22px] font-bold text-white" : "text-ink"}`}>
+            <h2
+              className={`text-[19px] font-medium tracking-tight ${kids ? "font-display text-[22px] font-bold text-white" : "text-ink"}`}
+            >
               {headerLabel}
             </h2>
-            <p className={`text-[12.5px] leading-relaxed ${kids ? "text-white/85" : "text-ink-muted"}`}>{headerSub}</p>
+            <p
+              className={`text-[12.5px] leading-relaxed ${kids ? "text-white/85" : "text-ink-muted"}`}
+            >
+              {headerSub}
+            </p>
           </div>
           <button
             onClick={mode.onCancel}
@@ -239,7 +252,9 @@ export function ParentalPinModal({
             ))}
           </button>
           {error && (
-            <p className={`text-[12.5px] font-medium ${kids ? "text-amber-200" : "text-red-300"}`}>{error}</p>
+            <p className={`text-[12.5px] font-medium ${kids ? "text-amber-200" : "text-red-300"}`}>
+              {error}
+            </p>
           )}
           <div dir="ltr" className="grid grid-cols-3 gap-2.5 pt-1">
             {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
@@ -251,13 +266,20 @@ export function ParentalPinModal({
             <PinKey onClick={() => tap("0")} disabled={busy} kids={kids}>
               0
             </PinKey>
-            <PinKey onClick={backspace} disabled={busy || pin.length === 0} kids={kids} aria-label={t("Delete")}>
+            <PinKey
+              onClick={backspace}
+              disabled={busy || pin.length === 0}
+              kids={kids}
+              aria-label={t("Delete")}
+            >
               <Delete size={18} strokeWidth={1.8} />
             </PinKey>
           </div>
         </div>
 
-        <p className={`relative text-center text-[11.5px] ${kids ? "text-white/70" : "text-ink-subtle"}`}>
+        <p
+          className={`relative text-center text-[11.5px] ${kids ? "text-white/70" : "text-ink-subtle"}`}
+        >
           {t("Type on your keyboard or tap the digits above.")}
         </p>
       </div>

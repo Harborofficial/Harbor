@@ -52,11 +52,16 @@ export default {
   "games.guides.date.all": "Any time",
   "games.guides.viewers": "{count} watching",
   "games.guides.views": "{count} views",
-  "games.guides.import.callofdutywarzone": "Copy the settings and enter them in the matching Warzone settings. DPI is set in your mouse software.",
-  "games.guides.import.css": "Copy the settings and enter the values in Counter-Strike: Source. These are dated community archives.",
-  "games.guides.import.cod": "Use these values in the matching game edition. DPI is set in your mouse software.",
-  "games.guides.noCrosshair": "This source does not provide enough crosshair detail for a reliable preview.",
-  "games.guides.previewNote": "Static preview from published values. Resolution, movement and recoil can change the result in game.",
+  "games.guides.import.callofdutywarzone":
+    "Copy the settings and enter them in the matching Warzone settings. DPI is set in your mouse software.",
+  "games.guides.import.css":
+    "Copy the settings and enter the values in Counter-Strike: Source. These are dated community archives.",
+  "games.guides.import.cod":
+    "Use these values in the matching game edition. DPI is set in your mouse software.",
+  "games.guides.noCrosshair":
+    "This source does not provide enough crosshair detail for a reliable preview.",
+  "games.guides.previewNote":
+    "Static preview from published values. Resolution, movement and recoil can change the result in game.",
   "games.guides.previewBackground": "Toggle light preview background",
   "games.guides.crosshairPreview": "Crosshair preview",
   "games.guides.noPlayers": "No matching players. Try another name.",
@@ -73,12 +78,16 @@ export default {
   "games.guides.sourceErrorTitle": "Let’s try that again",
   "games.guides.more": "Load more",
   "games.guides.moreKick": "More on Kick",
-  "games.guides.configNote": "Published player and creator settings. Choose a profile to see its source, date and setup.",
+  "games.guides.configNote":
+    "Published player and creator settings. Choose a profile to see its source, date and setup.",
   "games.guides.players": "All players",
   "games.guides.useConfig": "Use this setup",
-  "games.guides.import.cs2": "Copy the commands into CS2’s developer console. Crosshair codes can be imported in Settings → Game → Crosshair. Review the values before applying them.",
-  "games.guides.import.valorant": "Copy the crosshair code, then open Settings → Crosshair → Import profile code in VALORANT. Other values can be entered in the matching settings.",
-  "games.guides.import.rainbowsixsiege": "Copy the settings and enter the values in Siege’s mouse and display settings. DPI is set in your mouse software.",
+  "games.guides.import.cs2":
+    "Copy the commands into CS2’s developer console. Crosshair codes can be imported in Settings → Game → Crosshair. Review the values before applying them.",
+  "games.guides.import.valorant":
+    "Copy the crosshair code, then open Settings → Crosshair → Import profile code in VALORANT. Other values can be entered in the matching settings.",
+  "games.guides.import.rainbowsixsiege":
+    "Copy the settings and enter the values in Siege’s mouse and display settings. DPI is set in your mouse software.",
   "games.guides.copyCrosshair": "Copy crosshair",
   "games.guides.copyCommands": "Copy commands",
   "games.guides.copySettings": "Copy settings",
@@ -86,11 +95,13 @@ export default {
   "games.guides.copyValue": "Copy {label}",
   "games.guides.copied": "Copied",
   "games.guides.copyError": "Could not copy. Try again.",
-  "games.guides.embedNote": "Playback is provided by the creator’s platform. If embedding is restricted, open the original.",
+  "games.guides.embedNote":
+    "Playback is provided by the creator’s platform. If embedding is restricted, open the original.",
   "games.guides.readerErrorTitle": "We couldn’t load this guide",
   "games.guides.short": "Guides",
   "games.guides.title": "Guides & walkthroughs",
-  "games.guides.note": "Find your next step. Read community guides, watch a walkthrough, or join someone playing.",
+  "games.guides.note":
+    "Find your next step. Read community guides, watch a walkthrough, or join someone playing.",
   "games.guides.written": "Written guides",
   "games.guides.videos": "Videos",
   "games.guides.live": "Live",
@@ -111,11 +122,11 @@ export default {
   "games.guides.previous": "Previous",
   "games.guides.next": "Next",
   "games.guides.original": "Open original",
-  "games.guides.playerNote": "Playback is provided by YouTube. If a creator restricts embedding, open the original video.",
+  "games.guides.playerNote":
+    "Playback is provided by YouTube. If a creator restricts embedding, open the original video.",
   "games.guides.readerError": "This guide could not be read here. Retry or open the original.",
   "games.guides.contents": "In this guide",
-  "games.guides.credits": "Authors & license"
-,
+  "games.guides.credits": "Authors & license",
   "games.guides.copy": "Copy",
   "games.guides.previewMap": "Show a map screenshot behind the crosshair",
   "games.guides.skins": "Skins",
@@ -123,5 +134,5 @@ export default {
   "games.guides.setup": "Setup & streaming",
   "games.guides.pcSpecs": "PC specs",
   "games.guides.teammates": "Teammates",
-  "games.guides.specs": "Specifications"
+  "games.guides.specs": "Specifications",
 } satisfies Record<string, string>;

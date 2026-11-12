@@ -16,28 +16,43 @@ export default {
   "games.patch.saveCopy": "Salva una nuova copia",
   "games.patch.verified": "File verificati",
   "games.patch.ready": "Patch preparata",
-  "games.patch.verifiedNote": "Il gioco originale, la patch e la copia finale corrispondono alle somme di controllo della patch BPS.",
-  "games.patch.ipsNote": "IPS non include una somma di controllo del gioco originale. Verifica la versione richiesta dal progetto prima di salvare.",
+  "games.patch.verifiedNote":
+    "Il gioco originale, la patch e la copia finale corrispondono alle somme di controllo della patch BPS.",
+  "games.patch.ipsNote":
+    "IPS non include una somma di controllo del gioco originale. Verifica la versione richiesta dal progetto prima di salvare.",
   "games.patch.output": "Copia finale",
   "games.patch.fingerprint": "Impronta del file · SHA-256",
   "games.patch.fingerprints": "Impronte dei file · SHA-256",
   "games.patch.localNote": "Sul tuo dispositivo · BPS · IPS · UPS · Fino a 256 MB",
-  "games.patch.desktop": "Applica le patch nell’app desktop Harbor per Windows, macOS o Linux. I file restano sul tuo dispositivo e il gioco originale viene conservato.",
+  "games.patch.desktop":
+    "Applica le patch nell’app desktop Harbor per Windows, macOS o Linux. I file restano sul tuo dispositivo e il gioco originale viene conservato.",
   "games.patch.done": "Pronto per una nuova avventura",
-  "games.patch.preserved": "La copia modificata è stata salvata. Il gioco originale e la patch restano invariati.",
-  "games.patch.patch_source_mismatch": "Questa patch richiede un altro file o un’altra versione del gioco. Controlla i requisiti del progetto e scegli il file corretto.",
-  "games.patch.patch_checksum_mismatch": "La somma di controllo della patch non corrisponde. Il file potrebbe essere incompleto; scaricalo di nuovo dal progetto.",
-  "games.patch.patch_target_mismatch": "La copia finale non corrisponde alla somma di controllo prevista. Non è stato salvato nulla.",
+  "games.patch.preserved":
+    "La copia modificata è stata salvata. Il gioco originale e la patch restano invariati.",
+  "games.patch.patch_source_mismatch":
+    "Questa patch richiede un altro file o un’altra versione del gioco. Controlla i requisiti del progetto e scegli il file corretto.",
+  "games.patch.patch_checksum_mismatch":
+    "La somma di controllo della patch non corrisponde. Il file potrebbe essere incompleto; scaricalo di nuovo dal progetto.",
+  "games.patch.patch_target_mismatch":
+    "La copia finale non corrisponde alla somma di controllo prevista. Non è stato salvato nulla.",
   "games.patch.patch_expired": "Questa preparazione è scaduta. Verifica di nuovo la patch.",
-  "games.patch.patch_inputs_changed": "Un file selezionato è cambiato dopo la verifica. Verifica di nuovo la patch prima di salvare.",
-  "games.patch.patch_output_exists": "Esiste già un file in questa posizione. Scegli un altro nome; Harbor non sostituisce i file esistenti.",
-  "games.patch.patch_read_failed": "Impossibile leggere uno dei file. Verifica che sia ancora disponibile e selezionalo di nuovo.",
-  "games.patch.patch_write_failed": "Impossibile salvare la copia. Controlla la cartella e lo spazio disponibile oppure scegli un’altra posizione.",
-  "games.patch.patch_too_large": "Il gioco originale, la patch e la copia finale non possono superare 256 MB ciascuno.",
+  "games.patch.patch_inputs_changed":
+    "Un file selezionato è cambiato dopo la verifica. Verifica di nuovo la patch prima di salvare.",
+  "games.patch.patch_output_exists":
+    "Esiste già un file in questa posizione. Scegli un altro nome; Harbor non sostituisce i file esistenti.",
+  "games.patch.patch_read_failed":
+    "Impossibile leggere uno dei file. Verifica che sia ancora disponibile e selezionalo di nuovo.",
+  "games.patch.patch_write_failed":
+    "Impossibile salvare la copia. Controlla la cartella e lo spazio disponibile oppure scegli un’altra posizione.",
+  "games.patch.patch_too_large":
+    "Il gioco originale, la patch e la copia finale non possono superare 256 MB ciascuno.",
   "games.patch.patch_busy": "È in corso l’elaborazione di un’altra patch. Riprova quando termina.",
-  "games.patch.patch_game_type": "Scegli un file di gioco supportato, come GBA, GB, NES, SFC, NDS o ROM.",
-  "games.patch.patch_output_type": "Mantieni l’estensione del gioco originale quando salvi la copia.",
-  "games.patch.invalid": "Impossibile leggere questa patch. Controlla il file e la versione del gioco richiesta dal progetto.",
+  "games.patch.patch_game_type":
+    "Scegli un file di gioco supportato, come GBA, GB, NES, SFC, NDS o ROM.",
+  "games.patch.patch_output_type":
+    "Mantieni l’estensione del gioco originale quando salvi la copia.",
+  "games.patch.invalid":
+    "Impossibile leggere questa patch. Controlla il file e la versione del gioco richiesta dal progetto.",
   "games.hub.spotlight": "In primo piano",
   "games.hub.watch": "Guarda il gameplay",
   "games.hub.watchTitle": "Guardalo in azione",
@@ -49,7 +64,8 @@ export default {
   "games.hub.viewOriginal": "Vedi il gioco originale",
   "games.hub.toolkitNote": "Scarica una patch per il tuo gioco originale.",
   "games.hub.baseVersion": "Usa esattamente la versione e la regione indicate dal progetto.",
-  "games.hub.catalogNote": "Esplora ROM hack e mod per console. Filtra per sistema o cerca per nome.",
+  "games.hub.catalogNote":
+    "Esplora ROM hack e mod per console. Filtra per sistema o cerca per nome.",
   "games.hub.findVideos": "Cerca gameplay",
   "games.hub.resources": "Community di ROM hacking",
   "games.patch.open": "Applica una patch",
@@ -60,10 +76,12 @@ export default {
   "games.atlas.sort.rated": "Voti più alti",
   "games.atlas.sort.newest": "Più recenti",
   "games.atlas.sort.oldest": "Meno recenti",
-  "games.hub.stepPatch": "Scegli il gioco originale e una patch BPS, IPS o UPS. Harbor salva una copia separata.",
-  "games.patch.description": "Scegli il gioco originale e una patch BPS, IPS o UPS. Harbor salva una copia separata.",
+  "games.hub.stepPatch":
+    "Scegli il gioco originale e una patch BPS, IPS o UPS. Harbor salva una copia separata.",
+  "games.patch.description":
+    "Scegli il gioco originale e una patch BPS, IPS o UPS. Harbor salva una copia separata.",
   "games.patch.choosePatch": "Scegli una patch (BPS, IPS, UPS)",
   "games.patch.patch_unsupported": "Questo file non è una patch BPS, IPS o UPS supportata.",
   "games.discovery.viewGame": "Vedi il gioco",
-  "games.atlas.basedOn": "Basato su questo gioco"
+  "games.atlas.basedOn": "Basato su questo gioco",
 };

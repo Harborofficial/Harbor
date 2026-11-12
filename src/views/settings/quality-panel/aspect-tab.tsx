@@ -13,7 +13,9 @@ export function AspectTab() {
   return (
     <Section
       title={t("Aspect ratio")}
-      subtitle={t("Default picture shape on the mpv engine. Fit keeps the source as-is with any black bars; the rest stretch or crop to fill, handy for old 4:3 shows on a widescreen TV.")}
+      subtitle={t(
+        "Default picture shape on the mpv engine. Fit keeps the source as-is with any black bars; the rest stretch or crop to fill, handy for old 4:3 shows on a widescreen TV.",
+      )}
     >
       <Segmented
         value={settings.cropMode}
@@ -24,7 +26,9 @@ export function AspectTab() {
       <SettingRow
         wide
         label={t("Change the ratio while watching")}
-        desc={t("Want to change the ratio mid-playback? The live aspect button is hidden by default to keep the player tidy.")}
+        desc={t(
+          "Want to change the ratio mid-playback? The live aspect button is hidden by default to keep the player tidy.",
+        )}
       >
         <div className="flex flex-wrap items-center gap-2.5">
           <button

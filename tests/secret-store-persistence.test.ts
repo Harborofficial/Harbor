@@ -11,10 +11,7 @@ import ts from "typescript";
 const file = fileURLToPath(new URL("../src/lib/secret-store.ts", import.meta.url));
 const ROSTER = JSON.stringify({
   activeId: "p_second",
-  profiles: [
-    { id: "p_main", isPrimary: true },
-    { id: "p_second" },
-  ],
+  profiles: [{ id: "p_main", isPrimary: true }, { id: "p_second" }],
 });
 
 function harness({ store: initial = {}, roster = ROSTER } = {}) {
@@ -66,7 +63,11 @@ function harness({ store: initial = {}, roster = ROSTER } = {}) {
       const rosterIds = (() => {
         try {
           const parsed = JSON.parse(roster);
-          return [parsed.activeId, ...parsed.profiles.filter((p) => p.isPrimary).map((p) => p.id), ...parsed.profiles.map((p) => p.id)];
+          return [
+            parsed.activeId,
+            ...parsed.profiles.filter((p) => p.isPrimary).map((p) => p.id),
+            ...parsed.profiles.map((p) => p.id),
+          ];
         } catch {
           return [];
         }
@@ -143,7 +144,11 @@ test("a session stored by another profile is adopted into the shared key", async
     await h.api.flushSecrets();
     const secrets = h.api.getAllSecrets();
     assert.equal(secrets["harbor.trakt.session.v1"], '{"refreshToken":"from-main"}');
-    assert.equal(secrets["harbor.trakt.session.v1.p_main"], undefined, "the old copy moves, never duplicates");
+    assert.equal(
+      secrets["harbor.trakt.session.v1.p_main"],
+      undefined,
+      "the old copy moves, never duplicates",
+    );
     assert.equal(h.timers.length, 0, "adoption is not a debounced write");
   } finally {
     h.restore();
@@ -159,10 +164,17 @@ test("the active profile's own session is preferred over the main profile's", as
   });
   try {
     await h.api.loadSecrets();
-    assert.equal(h.api.readSharedSecret("harbor.trakt.session.v1"), '{"refreshToken":"from-second"}');
+    assert.equal(
+      h.api.readSharedSecret("harbor.trakt.session.v1"),
+      '{"refreshToken":"from-second"}',
+    );
     await h.api.flushSecrets();
     const secrets = h.api.getAllSecrets();
-    assert.equal(secrets["harbor.trakt.session.v1.p_main"], '{"refreshToken":"from-main"}', "the untouched copy stays");
+    assert.equal(
+      secrets["harbor.trakt.session.v1.p_main"],
+      '{"refreshToken":"from-main"}',
+      "the untouched copy stays",
+    );
   } finally {
     h.restore();
   }

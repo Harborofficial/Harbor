@@ -75,7 +75,9 @@ export function StreamFiltersPanel() {
   const t = useT();
   const { settings, update } = useSettings();
   const filters = settings.customStreamFilters ?? [];
-  const activeFilter = filters.find((filter) => filter.id === settings.activeStreamFilterId && !isFilterEmpty(filter));
+  const activeFilter = filters.find(
+    (filter) => filter.id === settings.activeStreamFilterId && !isFilterEmpty(filter),
+  );
   const activeId = activeFilter?.id ?? null;
   const [editing, setEditing] = useState<CustomStreamFilter | null>(null);
   const [building, setBuilding] = useState(false);
@@ -89,7 +91,9 @@ export function StreamFiltersPanel() {
         ? filters.map((f) => (f.id === filter.id ? filter : f))
         : [...filters, filter],
       activeStreamFilterId: isFilterEmpty(filter)
-        ? activeId === filter.id ? null : activeId
+        ? activeId === filter.id
+          ? null
+          : activeId
         : filter.id,
     });
     setEditing(null);
@@ -127,7 +131,9 @@ export function StreamFiltersPanel() {
   return (
     <Section
       title={t("Saved stream filters")}
-      subtitle={t("Save the stream quality you prefer. Streams must match every category you set; leave a category blank to accept any value. If nothing matches, Harbor uses the next best available source.")}
+      subtitle={t(
+        "Save the stream quality you prefer. Streams must match every category you set; leave a category blank to accept any value. If nothing matches, Harbor uses the next best available source.",
+      )}
     >
       <SettingRow
         label={t("No filter")}
@@ -145,9 +151,7 @@ export function StreamFiltersPanel() {
         <SettingRow
           key={f.id}
           wide
-          icon={
-            <Filter size={18} className={activeId === f.id ? "text-accent" : undefined} />
-          }
+          icon={<Filter size={18} className={activeId === f.id ? "text-accent" : undefined} />}
           label={f.name.trim() || t("Untitled filter")}
           desc={
             isFilterEmpty(f) ? (
@@ -160,9 +164,11 @@ export function StreamFiltersPanel() {
           <span className="flex flex-wrap items-center gap-2.5">
             <ActiveButton
               on={activeId === f.id}
-              label={activeId === f.id
-                ? t("Turn off {name}", { name: f.name.trim() || t("Untitled filter") })
-                : t("Use {name}", { name: f.name.trim() || t("Untitled filter") })}
+              label={
+                activeId === f.id
+                  ? t("Turn off {name}", { name: f.name.trim() || t("Untitled filter") })
+                  : t("Use {name}", { name: f.name.trim() || t("Untitled filter") })
+              }
               disabled={isFilterEmpty(f)}
               onClick={() => toggleActive(f.id)}
             />
@@ -178,7 +184,12 @@ export function StreamFiltersPanel() {
               <Pencil size={18} strokeWidth={2} />
               {t("Edit")}
             </button>
-            <button type="button" onClick={() => askDelete(f.id)} aria-label={t("Delete {name}", { name: f.name.trim() || t("Untitled filter") })} className={ROW_ACTION_DANGER}>
+            <button
+              type="button"
+              onClick={() => askDelete(f.id)}
+              aria-label={t("Delete {name}", { name: f.name.trim() || t("Untitled filter") })}
+              className={ROW_ACTION_DANGER}
+            >
               <Trash2 size={18} strokeWidth={2} />
               {t("Delete")}
             </button>
@@ -194,7 +205,9 @@ export function StreamFiltersPanel() {
             ? t("Create your first filter with the stream quality you prefer.")
             : t("Choose a name, then select the resolutions, sources, codecs and audio you prefer.")
         }
-        tip={t("A filter applies everywhere Harbor picks a stream: the source picker, the instant pick, and Big Picture on TV.")}
+        tip={t(
+          "A filter applies everywhere Harbor picks a stream: the source picker, the instant pick, and Big Picture on TV.",
+        )}
       >
         <button
           type="button"

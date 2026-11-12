@@ -8,7 +8,9 @@ export function PlayTab() {
     <Section title={t("Play button behavior")} bare>
       <div className="flex flex-col gap-[11px]">
         <p className={`max-w-[70ch] ${ROW_DESC}`}>
-          {t("Choose what happens when you hit Play on a title. Manual gives you full control over quality and source.")}
+          {t(
+            "Choose what happens when you hit Play on a title. Manual gives you full control over quality and source.",
+          )}
         </p>
         <PlayModePanel />
       </div>

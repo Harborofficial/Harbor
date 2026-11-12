@@ -14,7 +14,12 @@ export type AvatarPackJson = {
 };
 
 export type ParsedPackSet = { name: string | null; items: AvatarPackJsonItem[] };
-export type ParsedPack = { name: string; author?: string; description?: string; sets: ParsedPackSet[] };
+export type ParsedPack = {
+  name: string;
+  author?: string;
+  description?: string;
+  sets: ParsedPackSet[];
+};
 
 export class AvatarPackError extends Error {}
 
@@ -42,7 +47,8 @@ export function parseAvatarPackJson(text: string): ParsedPack {
   } catch {
     throw new AvatarPackError("That file is not valid JSON.");
   }
-  if (!json || typeof json !== "object") throw new AvatarPackError("That file is not an avatar pack.");
+  if (!json || typeof json !== "object")
+    throw new AvatarPackError("That file is not an avatar pack.");
   if (typeof json.harborAvatarPack !== "number") {
     throw new AvatarPackError('Missing "harborAvatarPack": 1 at the top level.');
   }
@@ -102,7 +108,10 @@ export function itemLabel(item: AvatarPackJsonItem, index: number): string {
   } catch {
     /* keep the raw name */
   }
-  const stem = base.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim();
+  const stem = base
+    .replace(/\.[^.]+$/, "")
+    .replace(/[_-]+/g, " ")
+    .trim();
   return stem.slice(0, 40) || `Avatar ${index + 1}`;
 }
 

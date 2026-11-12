@@ -49,7 +49,12 @@ test("team discovery excludes inactive history, deduplicates and preserves unkno
 });
 test("schedule logos retain inactive teams and reject missing or unsafe artwork", async () => {
   const data = [
-    { team_id: 1, name: "Older team", last_match_time: 1, logo_url: "https://cdn.example.com/old.png" },
+    {
+      team_id: 1,
+      name: "Older team",
+      last_match_time: 1,
+      logo_url: "https://cdn.example.com/old.png",
+    },
     { team_id: 2, name: "No logo" },
     { team_id: 3, name: "Unsafe", logo_url: "javascript:alert(1)" },
     { team_id: 4, name: "Credentials", logo_url: "https://user:secret@example.com/logo.png" },
@@ -57,9 +62,15 @@ test("schedule logos retain inactive teams and reject missing or unsafe artwork"
   ];
   assert.deepEqual([...parseEsportsTeamLogos(data)], [["1", "https://cdn.example.com/old.png"]]);
   let calls = 0;
-  const client = createEsportsProfileClient(async () => { calls++; return data; });
+  const client = createEsportsProfileClient(async () => {
+    calls++;
+    return data;
+  });
   const signal = new AbortController().signal;
-  const [logos, active] = await Promise.all([client.fetchTeamLogos(signal), client.fetchTeams(signal)]);
+  const [logos, active] = await Promise.all([
+    client.fetchTeamLogos(signal),
+    client.fetchTeams(signal),
+  ]);
   assert.equal(logos.get("1"), "https://cdn.example.com/old.png");
   assert.equal(active.length, 0);
   assert.equal(calls, 1, "logo enrichment and active profiles share one directory request");

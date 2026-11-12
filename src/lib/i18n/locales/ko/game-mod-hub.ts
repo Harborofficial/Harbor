@@ -26,7 +26,8 @@ export default {
   "games.modHub.entryNote": "모드를 찾아보고 설치된 콘텐츠를 관리하세요.",
   "games.modHub.switchGame": "게임 변경",
   "games.modHub.creatorDownload": "제작자 사이트에서 다운로드",
-  "games.modHub.legacyNote": "The Sims 2와 The Sims 3 콘텐츠는 제작자 사이트에서 다운로드할 수 있습니다. 로컬 모드 관리는 현재 The Sims 4를 지원합니다.",
+  "games.modHub.legacyNote":
+    "The Sims 2와 The Sims 3 콘텐츠는 제작자 사이트에서 다운로드할 수 있습니다. 로컬 모드 관리는 현재 The Sims 4를 지원합니다.",
   "games.modHub.bodyShop": "바디샵",
   "games.modHub.patterns": "패턴",
   "games.modHub.sets": "테마 세트",
@@ -42,5 +43,5 @@ export default {
   "games.modHub.creator": "제작자",
   "games.modHub.viewOnSource": "제작자 페이지",
   "games.modHub.filesPending": "프로젝트 파일을 불러오는 중…",
-  "games.modHub.picked": "MTS 추천"
+  "games.modHub.picked": "MTS 추천",
 };

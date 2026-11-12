@@ -211,7 +211,11 @@ export function groupChannels(channels: IptvChannel[]): Map<string, IptvChannel[
 const EPG_HEADER_ATTRS = ["url-tvg", "x-tvg-url", "tvg-url"];
 
 export function readM3uHeaderEpgUrls(text: string, baseUrl?: string): string[] {
-  const header = text.replace(/^\uFEFF/, "").split(/\r?\n/, 1)[0]?.trim() ?? "";
+  const header =
+    text
+      .replace(/^\uFEFF/, "")
+      .split(/\r?\n/, 1)[0]
+      ?.trim() ?? "";
   if (!/^#EXTM3U(?:\s|$)/i.test(header)) return [];
   const urls: string[] = [];
   for (const name of EPG_HEADER_ATTRS) {

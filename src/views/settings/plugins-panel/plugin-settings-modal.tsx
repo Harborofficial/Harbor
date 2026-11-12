@@ -57,7 +57,9 @@ export function PluginSettingsModal({
         if (cancelled) return;
         setFields([]);
         const say = tRef.current;
-        setError(say("This plugin's settings form failed to load: {error}", { error: errorText(say, e) }));
+        setError(
+          say("This plugin's settings form failed to load: {error}", { error: errorText(say, e) }),
+        );
       });
     return () => {
       cancelled = true;

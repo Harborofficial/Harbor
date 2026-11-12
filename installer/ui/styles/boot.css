@@ -35,5 +35,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hb-boot { transition: none; }
+  .hb-boot {
+    transition: none;
+  }
 }

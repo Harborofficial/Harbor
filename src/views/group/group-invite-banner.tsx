@@ -60,7 +60,11 @@ export function GroupInviteBanner({
           disabled={!!busy}
           className="flex h-10 items-center gap-1.5 rounded-full bg-accent px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-50"
         >
-          {busy === "accept" ? <Loader2 size={14} className="animate-spin" /> : <Check size={15} strokeWidth={2.6} />}
+          {busy === "accept" ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <Check size={15} strokeWidth={2.6} />
+          )}
           {t("Accept")}
         </button>
       </div>

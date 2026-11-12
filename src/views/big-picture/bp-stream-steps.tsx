@@ -77,7 +77,11 @@ export function BpAutoStep({
           </p>
         )}
         <p className="flex items-center gap-[clamp(9px,0.9vw,16px)] text-[clamp(14px,1.95vh,22px)] font-semibold text-ink-subtle">
-          <Loader2 size={22} className="animate-spin motion-reduce:[animation-duration:2.4s]" strokeWidth={2.4} />
+          <Loader2
+            size={22}
+            className="animate-spin motion-reduce:[animation-duration:2.4s]"
+            strokeWidth={2.4}
+          />
           {caption}
         </p>
       </div>

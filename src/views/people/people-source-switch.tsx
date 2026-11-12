@@ -58,7 +58,10 @@ export function PeopleSourceSwitch({
   const t = useT();
   const listRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const [indicator, setIndicator] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
+  const [indicator, setIndicator] = useState<{ left: number; width: number }>({
+    left: 0,
+    width: 0,
+  });
   const [armed, setArmed] = useState(false);
 
   const visible = useMemo(() => {
@@ -132,7 +135,9 @@ export function PeopleSourceSwitch({
           <span
             aria-hidden="true"
             className={`pointer-events-none absolute bottom-0 h-[2px] rounded-full bg-accent ${
-              armed ? "transition-[left,width] duration-250 ease-out motion-reduce:transition-none" : ""
+              armed
+                ? "transition-[left,width] duration-250 ease-out motion-reduce:transition-none"
+                : ""
             }`}
             style={{ left: indicator.left, width: indicator.width }}
           />

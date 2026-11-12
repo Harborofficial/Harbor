@@ -57,7 +57,10 @@ export function ProfileEmpty({ handle, onBack }: { handle: string; onBack: () =>
     <Shell
       icon={<UserX size={28} />}
       title={t("No such captain")}
-      body={t("We could not find anyone at @{handle}. The handle may have changed or the profile was removed.", { handle })}
+      body={t(
+        "We could not find anyone at @{handle}. The handle may have changed or the profile was removed.",
+        { handle },
+      )}
       action={
         <button
           onClick={onBack}

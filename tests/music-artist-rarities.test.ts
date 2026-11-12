@@ -26,7 +26,10 @@ test("a short uploader name never swallows a longer artist", () => {
 });
 
 test("the artist named in the title counts, whoever uploaded it", () => {
-  assert.equal(mentionsArtist(upload("Kanye West - 530 (Unreleased)", "leighton"), "kanyewest"), true);
+  assert.equal(
+    mentionsArtist(upload("Kanye West - 530 (Unreleased)", "leighton"), "kanyewest"),
+    true,
+  );
   assert.equal(
     mentionsArtist(upload("Famous- Kanye West (Unreleased Version)", "erotica"), "kanyewest"),
     true,

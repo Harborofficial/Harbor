@@ -1,9 +1,10 @@
-import { readFileSync, readdirSync, statSync, openSync, readSync, closeSync } from 'node:fs';
-import { join, basename } from 'node:path';
-import { verifyMacAppArchive } from './macos-verify-artifact.mjs';
+import { readFileSync, readdirSync, statSync, openSync, readSync, closeSync } from "node:fs";
+import { join, basename } from "node:path";
+import { verifyMacAppArchive } from "./macos-verify-artifact.mjs";
 
-const BASE = process.env.HARBOR_OPS_BASE || 'https://harborcommunity.site/themes/api';
-const FNAME = /^Harbor_\d+\.\d+\.\d+_(?:(?:beta|stable)_)?(x64-setup\.exe|x64-installer\.exe|aarch64\.app\.tar\.gz|aarch64\.dmg|aarch64_legacy\.app\.tar\.gz|macos-apple-silicon-aarch64\.app\.tar\.gz|macos-intel-x64\.app\.tar\.gz|macos-apple-silicon-aarch64\.dmg|macos-intel-x64\.dmg)$/;
+const BASE = process.env.HARBOR_OPS_BASE || "https://harborcommunity.site/themes/api";
+const FNAME =
+  /^Harbor_\d+\.\d+\.\d+_(?:(?:beta|stable)_)?(x64-setup\.exe|x64-installer\.exe|aarch64\.app\.tar\.gz|aarch64\.dmg|aarch64_legacy\.app\.tar\.gz|macos-apple-silicon-aarch64\.app\.tar\.gz|macos-intel-x64\.app\.tar\.gz|macos-apple-silicon-aarch64\.dmg|macos-intel-x64\.dmg)$/;
 const SEMVER = /^\d+\.\d+\.\d+$/;
 const needsSig = (n) => /\.exe$|\.app\.tar\.gz$/.test(n);
 
@@ -11,41 +12,47 @@ function arg(name, fallback) {
   const i = process.argv.indexOf(`--${name}`);
   if (i === -1) return fallback;
   const v = process.argv[i + 1];
-  return v && !v.startsWith('--') ? v : true;
+  return v && !v.startsWith("--") ? v : true;
 }
 
-const token = (process.env.HARBOR_THEMES_ADMIN_TOKEN || '').trim();
+const token = (process.env.HARBOR_THEMES_ADMIN_TOKEN || "").trim();
 if (!token) {
-  console.error('HARBOR_THEMES_ADMIN_TOKEN is not set. Source ~/.harbor/harbor-themes.env first.');
+  console.error("HARBOR_THEMES_ADMIN_TOKEN is not set. Source ~/.harbor/harbor-themes.env first.");
   process.exit(1);
 }
 
-const dir = arg('dir');
-const version = arg('version');
-const channel = arg('channel', 'beta');
-const notesFile = arg('notes-file');
-const dry = arg('dry', false) === true;
-const skipUpload = arg('skip-upload', false) === true;
-const publishOnly = arg('publish-only', false) === true;
+const dir = arg("dir");
+const version = arg("version");
+const channel = arg("channel", "beta");
+const notesFile = arg("notes-file");
+const dry = arg("dry", false) === true;
+const skipUpload = arg("skip-upload", false) === true;
+const publishOnly = arg("publish-only", false) === true;
 
 if (!dir || dir === true || !version || version === true || !SEMVER.test(version)) {
-  console.error('Usage: node scripts/publish-release.mjs --dir <artifacts> --version 0.9.129 [--channel beta] [--notes-file notes.txt] [--dry] [--skip-upload] [--publish-only]');
+  console.error(
+    "Usage: node scripts/publish-release.mjs --dir <artifacts> --version 0.9.129 [--channel beta] [--notes-file notes.txt] [--dry] [--skip-upload] [--publish-only]",
+  );
   process.exit(1);
 }
 
-async function api(path, { method = 'GET', body, raw, headers = {} } = {}) {
+async function api(path, { method = "GET", body, raw, headers = {} } = {}) {
   const init = { method, headers: { Authorization: `Bearer ${token}`, ...headers } };
   if (raw !== undefined) {
     init.body = raw;
-    init.headers['Content-Type'] = 'application/octet-stream';
+    init.headers["Content-Type"] = "application/octet-stream";
   } else if (body !== undefined) {
     init.body = JSON.stringify(body);
-    init.headers['Content-Type'] = 'application/json';
+    init.headers["Content-Type"] = "application/json";
   }
   const res = await fetch(`${BASE}${path}`, init);
   const text = await res.text();
   let data = null;
-  try { data = text ? JSON.parse(text) : null; } catch { data = { raw: text.slice(0, 400) }; }
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = { raw: text.slice(0, 400) };
+  }
   if (!res.ok) {
     const err = new Error(`${method} ${path} -> ${res.status} ${JSON.stringify(data)}`);
     err.status = res.status;
@@ -62,7 +69,7 @@ function fmt(bytes) {
 }
 
 function readSlice(path, start, length) {
-  const fd = openSync(path, 'r');
+  const fd = openSync(path, "r");
   try {
     const buf = Buffer.allocUnsafe(length);
     let off = 0;
@@ -80,7 +87,9 @@ function readSlice(path, start, length) {
 async function verifyArtifact(path, name) {
   if (!/\.app\.tar\.gz$/.test(name)) return;
   const checked = await verifyMacAppArchive(path);
-  console.log(`   macOS check: ${checked.frameworks} bundled libraries, ${checked.binaries} Mach-O binaries, none machine-local`);
+  console.log(
+    `   macOS check: ${checked.frameworks} bundled libraries, ${checked.binaries} Mach-O binaries, none machine-local`,
+  );
 }
 
 async function upload(path) {
@@ -89,19 +98,28 @@ async function upload(path) {
   const sigPath = `${path}.sig`;
   let sig;
   if (needsSig(name)) {
-    try { sig = readFileSync(sigPath, 'utf8').trim(); } catch {
+    try {
+      sig = readFileSync(sigPath, "utf8").trim();
+    } catch {
       throw new Error(`${name} needs ${name}.sig and it is missing`);
     }
     if (!sig) throw new Error(`${name}.sig is empty`);
   }
-  console.log(`\n-> ${name}  ${fmt(size)}${sig ? ' (+sig)' : ''}`);
+  console.log(`\n-> ${name}  ${fmt(size)}${sig ? " (+sig)" : ""}`);
   await verifyArtifact(path, name);
-  if (dry) { console.log('   --dry, not uploaded'); return; }
+  if (dry) {
+    console.log("   --dry, not uploaded");
+    return;
+  }
 
-  const init = await api('/ops/releases/artifact/chunk/init', { method: 'POST', body: { filename: name } });
+  const init = await api("/ops/releases/artifact/chunk/init", {
+    method: "POST",
+    body: { filename: name },
+  });
   const uploadId = init.uploadId;
   const partSize = Number(init.partSize);
-  if (!uploadId || !Number.isInteger(partSize) || partSize < 1) throw new Error(`bad upload config ${JSON.stringify(init)}`);
+  if (!uploadId || !Number.isInteger(partSize) || partSize < 1)
+    throw new Error(`bad upload config ${JSON.stringify(init)}`);
   const total = Math.ceil(size / partSize) || 1;
   const parts = [];
   try {
@@ -113,7 +131,7 @@ async function upload(path) {
       for (let attempt = 1; attempt <= 4; attempt += 1) {
         try {
           const q = `?filename=${encodeURIComponent(name)}&uploadId=${encodeURIComponent(uploadId)}&partNumber=${partNumber}`;
-          const part = await api(`/ops/releases/artifact/chunk${q}`, { method: 'PUT', raw: chunk });
+          const part = await api(`/ops/releases/artifact/chunk${q}`, { method: "PUT", raw: chunk });
           parts.push({ partNumber, etag: part.etag });
           lastErr = null;
           break;
@@ -123,13 +141,25 @@ async function upload(path) {
         }
       }
       if (lastErr) throw lastErr;
-      process.stdout.write(`\r   part ${parts.length}/${total}  ${fmt(Math.min(start + length, size))} / ${fmt(size)}   `);
+      process.stdout.write(
+        `\r   part ${parts.length}/${total}  ${fmt(Math.min(start + length, size))} / ${fmt(size)}   `,
+      );
     }
-    process.stdout.write('\n');
-    const done = await api('/ops/releases/artifact/chunk/complete', { method: 'POST', body: { filename: name, uploadId, parts, sig } });
-    console.log(`   staged ${name} (${fmt(done.size ?? size)})${done.version ? ` version ${done.version}` : ''}`);
+    process.stdout.write("\n");
+    const done = await api("/ops/releases/artifact/chunk/complete", {
+      method: "POST",
+      body: { filename: name, uploadId, parts, sig },
+    });
+    console.log(
+      `   staged ${name} (${fmt(done.size ?? size)})${done.version ? ` version ${done.version}` : ""}`,
+    );
   } catch (e) {
-    try { await api('/ops/releases/artifact/chunk/abort', { method: 'POST', body: { filename: name, uploadId } }); } catch {}
+    try {
+      await api("/ops/releases/artifact/chunk/abort", {
+        method: "POST",
+        body: { filename: name, uploadId },
+      });
+    } catch {}
     throw e;
   }
 }
@@ -144,9 +174,11 @@ if (!publishOnly) {
     console.error(`No artifacts in ${dir} matching Harbor_${version}_*`);
     process.exit(1);
   }
-  console.log(`Artifacts for ${version}: ${found.join(', ')}`);
-  if (found.some((f) => f.endsWith('.dmg'))) {
-    console.log('note: dmgs are not inspected here; package them from the same .app as the checked .app.tar.gz.');
+  console.log(`Artifacts for ${version}: ${found.join(", ")}`);
+  if (found.some((f) => f.endsWith(".dmg"))) {
+    console.log(
+      "note: dmgs are not inspected here; package them from the same .app as the checked .app.tar.gz.",
+    );
   }
   for (const f of found) {
     if (skipUpload) {
@@ -158,18 +190,23 @@ if (!publishOnly) {
   }
 }
 
-const before = await api('/ops/releases/status');
+const before = await api("/ops/releases/status");
 console.log(`\nstaged now: ${JSON.stringify(before.staged)}`);
 
-const notes = notesFile && notesFile !== true ? readFileSync(notesFile, 'utf8').replace(/\r\n/g, '\n').trim() : '';
+const notes =
+  notesFile && notesFile !== true
+    ? readFileSync(notesFile, "utf8").replace(/\r\n/g, "\n").trim()
+    : "";
 if (dry) {
-  console.log(`\n--dry: would publish ${version} to ${channel} with ${notes.length} chars of notes.`);
+  console.log(
+    `\n--dry: would publish ${version} to ${channel} with ${notes.length} chars of notes.`,
+  );
   process.exit(0);
 }
 
 console.log(`\nPublishing ${version} to ${channel} ...`);
-const r = await api('/ops/releases/publish', { method: 'POST', body: { version, channel, notes } });
+const r = await api("/ops/releases/publish", { method: "POST", body: { version, channel, notes } });
 console.log(`published ${r.published} to ${r.channel}`);
 
-const after = await api('/ops/releases/status');
+const after = await api("/ops/releases/status");
 console.log(`live ${channel}: ${JSON.stringify(after.live?.[channel], null, 2)}`);

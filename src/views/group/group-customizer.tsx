@@ -99,7 +99,9 @@ export function GroupCustomizer({
     <div className="flex flex-col gap-4 rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-[13.5px] font-semibold text-ink">{t("Show customization to members")}</div>
+          <div className="text-[13.5px] font-semibold text-ink">
+            {t("Show customization to members")}
+          </div>
           <div className="text-[12px] text-ink-subtle">
             {t("Off keeps your font, background, and canvas as a private preview.")}
           </div>
@@ -185,10 +187,14 @@ export function GroupCustomizer({
       </Row>
 
       <p className="text-[12px] leading-relaxed text-ink-subtle">
-        {t("Your canvas runs in a sandbox with no scripts, so use HTML and CSS for layout and art.")}
+        {t(
+          "Your canvas runs in a sandbox with no scripts, so use HTML and CSS for layout and art.",
+        )}
       </p>
 
-      {error && <p className="rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>}
+      {error && (
+        <p className="rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>
+      )}
 
       <button
         type="button"
@@ -203,7 +209,15 @@ export function GroupCustomizer({
   );
 }
 
-function Row({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Row({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
       <div className="mb-1.5 flex items-baseline justify-between gap-3">

@@ -11,5 +11,5 @@ export default {
   "games.studioCatalog.minimumRating.value": "{count}+ / 100",
   "games.studioCatalog.minimumVotes.all": "Mọi số lượng đánh giá",
   "games.studioCatalog.minimumVotes.value": "{count}+ đánh giá",
-  "games.studioCatalog.ratingFloor": "Điểm số cần ít nhất 5 đánh giá."
+  "games.studioCatalog.ratingFloor": "Điểm số cần ít nhất 5 đánh giá.",
 };

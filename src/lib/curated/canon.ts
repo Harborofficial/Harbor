@@ -1,6 +1,12 @@
 import { curatedList, curatedLists } from "./registry";
 import { CRITERION_LIST_ID, spineFor } from "./spine";
-import type { CuratedCompanion, CuratedList, CuratedListItem, ListBrand, ListOrdering } from "./types";
+import type {
+  CuratedCompanion,
+  CuratedList,
+  CuratedListItem,
+  ListBrand,
+  ListOrdering,
+} from "./types";
 
 export type CanonEntry = {
   listId: string;

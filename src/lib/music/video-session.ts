@@ -29,7 +29,9 @@ function resolvableVideo(track: MusicTrack | null | undefined): track is MusicTr
   if (!track?.connectorId || track.connectorId === "catalog") return false;
   // YouTube audio tracks still have a video behind them, so warming those too makes opening the
   // picture pane a cache hit instead of another extractor run.
-  return track.connectorId === "youtube" ? !!track.sourceId || !!track.id : track.mediaKind === "video";
+  return track.connectorId === "youtube"
+    ? !!track.sourceId || !!track.id
+    : track.mediaKind === "video";
 }
 
 /**

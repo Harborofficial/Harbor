@@ -45,7 +45,9 @@ function normalizeAuth(auth?: SuwayomiAuth): SuwayomiAuth | undefined {
 }
 
 function serverId(baseUrl: string): string {
-  return `suwa-${cleanBase(baseUrl).replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`.slice(0, 80);
+  return `suwa-${cleanBase(baseUrl)
+    .replace(/[^a-z0-9]+/gi, "-")
+    .toLowerCase()}`.slice(0, 80);
 }
 
 export function listServers(): SuwayomiServer[] {
@@ -81,7 +83,11 @@ export function getServer(id: string): SuwayomiServer | undefined {
   return listServers().find((s) => s.id === id);
 }
 
-export function addServer(name: string, baseUrl: string, auth?: SuwayomiAuth): SuwayomiServer | null {
+export function addServer(
+  name: string,
+  baseUrl: string,
+  auth?: SuwayomiAuth,
+): SuwayomiServer | null {
   if (!isValidBase(baseUrl)) return null;
   const clean = cleanBase(baseUrl);
   const id = serverId(clean);

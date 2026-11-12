@@ -57,11 +57,21 @@ export function SubStyleBar() {
         className="pointer-events-auto flex max-w-[calc(100vw-56px)] flex-wrap items-center justify-center gap-2 rounded-md bg-elevated px-2 py-2 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
       >
         <div className={GROUP}>
-          <FontMenu value={settings.subFontFamily} fonts={settings.customFonts} onChange={(f) => update({ subFontFamily: f })} />
+          <FontMenu
+            value={settings.subFontFamily}
+            fonts={settings.customFonts}
+            onChange={(f) => update({ subFontFamily: f })}
+          />
           <span aria-hidden className="h-6 w-px bg-edge-soft" />
-          <SizeStepper value={settings.subFontSize} onChange={(n) => update({ subFontSize: clamp(n, 16, 120) })} />
+          <SizeStepper
+            value={settings.subFontSize}
+            onChange={(n) => update({ subFontSize: clamp(n, 16, 120) })}
+          />
           <span aria-hidden className="h-6 w-px bg-edge-soft" />
-          <BoldToggle on={settings.subBold} onToggle={() => update({ subBold: !settings.subBold })} />
+          <BoldToggle
+            on={settings.subBold}
+            onToggle={() => update({ subBold: !settings.subBold })}
+          />
         </div>
 
         <div className={GROUP}>

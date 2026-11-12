@@ -63,7 +63,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.performance": "Đáng xem",
   "music.explore.stage": "Sân khấu và buổi diễn",
   "music.explore.liveFrom": "{artist} biểu diễn trực tiếp",
-  "music.explore.performanceHint": "Sân khấu lớn, buổi diễn thân mật và màn trình diễn đáng xem lại.",
+  "music.explore.performanceHint":
+    "Sân khấu lớn, buổi diễn thân mật và màn trình diễn đáng xem lại.",
   "music.explore.watchPerformance": "Xem biểu diễn",
   "music.explore.events": "Hàng ghế đầu lễ hội",
   "music.explore.eventHint": "Ưu tiên set mới. Chọn sự kiện và khám phá theo năm.",
@@ -104,6 +105,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.limited":
     "Nguồn này cung cấp một tuyển tập, có thể không bao gồm toàn bộ danh mục.",
   "music.rockHall.title": "Đại sảnh Danh vọng Rock & Roll",
-  "music.rockHall.subtitle": "Mọi khóa từ năm 1986, lấy trực tiếp từ Wikipedia"
+  "music.rockHall.subtitle": "Mọi khóa từ năm 1986, lấy trực tiếp từ Wikipedia",
 };
 export default musicTaste;

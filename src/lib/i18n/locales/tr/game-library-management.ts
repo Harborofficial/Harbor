@@ -14,18 +14,24 @@ export default {
   "games.manage.uninstallOptions": "Kaldırma seçenekleri…",
   "games.manage.remove": "Harbor’dan çıkar…",
   "games.manage.manage": "Yönet",
-  "games.manage.failed": "İşlem tamamlanamadı. Oyun ve başlatıcının hâlâ kullanılabilir olduğunu kontrol edip tekrar dene.",
+  "games.manage.failed":
+    "İşlem tamamlanamadı. Oyun ve başlatıcının hâlâ kullanılabilir olduğunu kontrol edip tekrar dene.",
   "games.manage.removed": "Harbor’dan çıkarıldı",
   "games.manage.sent": "{source} içinde devam et",
   "games.manage.removeTitle": "Kitaplık kaydı çıkarılsın mı?",
   "games.manage.uninstallTitle": "Bu oyun kaldırılsın mı?",
   "games.manage.optionsTitle": "{source} ile kaldır",
   "games.manage.removedNote": "Kitaplık kaydı çıkarıldı. Oyun dosyaları bilgisayarda duruyor.",
-  "games.manage.sentNote": "{source} açıldı. İşlemi orada tamamla; döndüğünde Harbor kurulum durumunu günceller.",
-  "games.manage.removeNote": "{name} ve Harbor oynama geçmişini bu profilden çıkarır. Oyunu kaldırmaz veya dosyalarını silmez.",
-  "games.manage.steamNote": "{name} oyununu Steam kaldıracak. Steam’de tekrar onaylaman gerekebilir. Önce saklamak istediğin yerel kayıtları ve modları yedekle.",
-  "games.manage.launcherNote": "{source} uygulamasını aç, {name} oyununu seç ve Yönet veya Kaldır seçeneğini kullan. Kaldırmayı başlatıcı yapar; Harbor oyun klasörünü silmez.",
-  "games.manage.windowsNote": "Windows Yüklü uygulamalar bölümünde {name} oyununu bulup Kaldır’ı seç. Taşınabilir oyunlarda oyunun kendi talimatlarını izle. Harbor klasörü silmez.",
+  "games.manage.sentNote":
+    "{source} açıldı. İşlemi orada tamamla; döndüğünde Harbor kurulum durumunu günceller.",
+  "games.manage.removeNote":
+    "{name} ve Harbor oynama geçmişini bu profilden çıkarır. Oyunu kaldırmaz veya dosyalarını silmez.",
+  "games.manage.steamNote":
+    "{name} oyununu Steam kaldıracak. Steam’de tekrar onaylaman gerekebilir. Önce saklamak istediğin yerel kayıtları ve modları yedekle.",
+  "games.manage.launcherNote":
+    "{source} uygulamasını aç, {name} oyununu seç ve Yönet veya Kaldır seçeneğini kullan. Kaldırmayı başlatıcı yapar; Harbor oyun klasörünü silmez.",
+  "games.manage.windowsNote":
+    "Windows Yüklü uygulamalar bölümünde {name} oyununu bulup Kaldır’ı seç. Taşınabilir oyunlarda oyunun kendi talimatlarını izle. Harbor klasörü silmez.",
   "games.manage.opening": "Açılıyor…",
   "games.manage.confirmUninstall": "Steam’e devam et",
   "games.manage.openSource": "{source} aç",

@@ -50,7 +50,7 @@ export function useAnilistAnimeRailsState(): AnilistRailsState & { retry: () => 
   const { isConnected, session } = useAnilist();
   const [state, setState] = useState<AnilistRailsState>(IDLE);
   const [attempt, setAttempt] = useState(0);
-  const retry = useCallback(() => setAttempt(value => value + 1), []);
+  const retry = useCallback(() => setAttempt((value) => value + 1), []);
 
   useEffect(() => {
     if (!isConnected || !session) {
@@ -74,12 +74,18 @@ export function useAnilistAnimeRailsState(): AnilistRailsState & { retry: () => 
       const seedIds = SEED_STATUSES.flatMap((s) =>
         (entriesByStatus.get(s) ?? []).map((e) => e.media.id),
       );
-      const recs = seedIds.length > 0 ? await fetchAnilistRecommendations(seedIds, excludeIds).catch(() => []) : [];
+      const recs =
+        seedIds.length > 0
+          ? await fetchAnilistRecommendations(seedIds, excludeIds).catch(() => [])
+          : [];
       if (cancelled) return;
       setState({
         rails:
           recs.length >= MIN_RECS
-            ? [{ key: "recommended", title: "Recommended for you", metas: recs.slice(0, 40) }, ...out]
+            ? [
+                { key: "recommended", title: "Recommended for you", metas: recs.slice(0, 40) },
+                ...out,
+              ]
             : out,
         loading: false,
         error: false,

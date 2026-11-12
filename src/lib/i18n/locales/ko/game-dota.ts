@@ -18,7 +18,8 @@ export default {
   "games.dota.attribute.agi": "민첩",
   "games.dota.attribute.int": "지능",
   "games.dota.attribute.all": "만능",
-  "games.dota.trendsScope": "OpenDota 표본: 오늘을 포함한 UTC 기준 7일. 등급은 경기 평균이며, 터보와 프로 경기는 별도로 집계합니다.",
+  "games.dota.trendsScope":
+    "OpenDota 표본: 오늘을 포함한 UTC 기준 7일. 등급은 경기 평균이며, 터보와 프로 경기는 별도로 집계합니다.",
   "games.dota.wins": "승률",
   "games.dota.picks": "선택 {count}회",
   "games.dota.noSample": "표본 없음",
@@ -26,7 +27,8 @@ export default {
   "games.dota.moreHeroes": "영웅 더 보기",
   "games.dota.matchups": "프로 상대 전적",
   "games.dota.refreshMatchups": "상대 전적 새로고침",
-  "games.dota.matchupsScope": "지난 1년간 기록된 프로 경기에서 {hero}의 상대별 승률입니다. 이전 패치를 포함하며 등급 필터와는 별개입니다.",
+  "games.dota.matchupsScope":
+    "지난 1년간 기록된 프로 경기에서 {hero}의 상대별 승률입니다. 이전 패치를 포함하며 등급 필터와는 별개입니다.",
   "games.dota.opponent": "상대 찾기",
   "games.dota.minimum": "최소 경기 수",
   "games.dota.minGames": "{count}경기 이상",
@@ -48,5 +50,5 @@ export default {
   "games.dota.sample.5": "전설",
   "games.dota.sample.6": "고대",
   "games.dota.sample.7": "신성",
-  "games.dota.sample.8": "불멸자"
+  "games.dota.sample.8": "불멸자",
 };

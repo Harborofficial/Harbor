@@ -34,7 +34,11 @@ test("no row rule is keyed on :has([data-bp-focus])", () => {
     .map((line, i) => [i + 1, line] as const)
     .filter(([, line]) => /:has\([^)]*data-bp-focus/.test(line))
     .map(([n, line]) => `${TOKENS}:${n} ${line.trim()}`);
-  assert.deepEqual(offenders, [], `key these on [data-bp-row-focus] instead:\n${offenders.join("\n")}`);
+  assert.deepEqual(
+    offenders,
+    [],
+    `key these on [data-bp-row-focus] instead:\n${offenders.join("\n")}`,
+  );
 });
 
 test("the containment rule matches the attribute the ring writes", () => {

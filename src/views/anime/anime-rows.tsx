@@ -58,14 +58,54 @@ export const SPECS: Spec[] = [
     pool: "era",
     fetcher: (p) => jikanByEra("1990-01-01", "1999-12-31", p),
   },
-  { key: "genre-action", title: "Action & Adventure", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Action, p) },
-  { key: "genre-romance", title: "Romance", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Romance, p) },
-  { key: "genre-slice", title: "Slice of Life", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.SliceOfLife, p) },
-  { key: "genre-mecha", title: "Mecha", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Mecha, p) },
-  { key: "genre-fantasy", title: "Fantasy", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Fantasy, p) },
-  { key: "genre-scifi", title: "Sci-Fi", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.SciFi, p) },
-  { key: "genre-psych", title: "Psychological", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Psychological, p) },
-  { key: "genre-horror", title: "Horror & Supernatural", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Horror, p) },
+  {
+    key: "genre-action",
+    title: "Action & Adventure",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Action, p),
+  },
+  {
+    key: "genre-romance",
+    title: "Romance",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Romance, p),
+  },
+  {
+    key: "genre-slice",
+    title: "Slice of Life",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.SliceOfLife, p),
+  },
+  {
+    key: "genre-mecha",
+    title: "Mecha",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Mecha, p),
+  },
+  {
+    key: "genre-fantasy",
+    title: "Fantasy",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Fantasy, p),
+  },
+  {
+    key: "genre-scifi",
+    title: "Sci-Fi",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.SciFi, p),
+  },
+  {
+    key: "genre-psych",
+    title: "Psychological",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Psychological, p),
+  },
+  {
+    key: "genre-horror",
+    title: "Horror & Supernatural",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Horror, p),
+  },
 ];
 
 export const HERO_KEYS = new Set(["airing", "top-airing", "upcoming", "popular"]);
@@ -74,7 +114,13 @@ export const TOP_PICKS_KEY = "top-airing";
 export const ROW_MIN_VISIBLE = 12;
 export const ROW_MAX_PAGES = 5;
 
-export type RowState = { metas: Meta[]; page: number; hasMore: boolean; ready: boolean; failed?: boolean };
+export type RowState = {
+  metas: Meta[];
+  page: number;
+  hasMore: boolean;
+  ready: boolean;
+  failed?: boolean;
+};
 
 export const EMPTY_ROW: RowState = { metas: [], page: 1, hasMore: false, ready: false };
 
@@ -90,7 +136,13 @@ export function isAnimeRow(row: AddonRow): boolean {
   return animeIds / sample.length >= 0.5;
 }
 
-export function RowSkeleton({ title, shape = "portrait" }: { title: string; shape?: "portrait" | "landscape" }) {
+export function RowSkeleton({
+  title,
+  shape = "portrait",
+}: {
+  title: string;
+  shape?: "portrait" | "landscape";
+}) {
   const { settings } = useSettings();
   const landscape = shape === "landscape";
   const w = landscape ? 260 : Math.round(144 * settings.posterScale);

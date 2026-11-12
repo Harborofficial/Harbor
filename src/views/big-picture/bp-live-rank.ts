@@ -109,12 +109,7 @@ export function rankBpLive(input: BpRankInput): NowItem[] {
 
   const pool = dedupeById([
     ...input.guide,
-    ...buildBpGuide(
-      input.channels.slice(0, SCAN_CAP),
-      input.epg,
-      input.tvgCounts,
-      input.nowMs,
-    ),
+    ...buildBpGuide(input.channels.slice(0, SCAN_CAP), input.epg, input.tvgCounts, input.nowMs),
   ]);
 
   const ctx: RankCtx = {

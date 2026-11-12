@@ -15,7 +15,15 @@ function trackStyle(value: number, min: number, max: number, step?: number): CSS
   } as CSSProperties;
 }
 
-export function SliderReset({ show, onReset, settingName }: { show: boolean; onReset: () => void; settingName?: string }) {
+export function SliderReset({
+  show,
+  onReset,
+  settingName,
+}: {
+  show: boolean;
+  onReset: () => void;
+  settingName?: string;
+}) {
   const t = useT();
   return (
     <button
@@ -69,7 +77,11 @@ export function Slider({
         className={`harbor-slider ${disabled ? "opacity-40" : ""} ${className}`}
       />
       {resetTo !== undefined && (
-        <SliderReset settingName={ariaLabel} show={value !== resetTo} onReset={() => onChange(resetTo)} />
+        <SliderReset
+          settingName={ariaLabel}
+          show={value !== resetTo}
+          onReset={() => onChange(resetTo)}
+        />
       )}
     </>
   );

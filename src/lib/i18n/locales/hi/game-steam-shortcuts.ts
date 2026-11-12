@@ -1,14 +1,16 @@
 export default {
   "games.shortcuts.reviewLaunch": "लॉन्च की समीक्षा करें",
   "games.shortcuts.state.local": "सीधे लॉन्च करना उपलब्ध है",
-  "games.shortcuts.shortcut_identity": "Steam ने इस शॉर्टकट को मान्य आईडी नहीं दी है। सेटिंग्स की समीक्षा करके सीधे लॉन्च करें, या Steam में इसे फिर से सहेजकर रीफ़्रेश करें।",
+  "games.shortcuts.shortcut_identity":
+    "Steam ने इस शॉर्टकट को मान्य आईडी नहीं दी है। सेटिंग्स की समीक्षा करके सीधे लॉन्च करें, या Steam में इसे फिर से सहेजकर रीफ़्रेश करें।",
 
   "games.shortcuts.activity.open": "गतिविधि",
   "games.shortcuts.activity.title": "शॉर्टकट गतिविधि",
   "games.shortcuts.activity.note": "इस Harbor प्रोफ़ाइल के हाल के स्कैन और लॉन्च। अधिकतम 300 प्रविष्टियाँ।",
   "games.shortcuts.activity.remember": "सत्रों के बीच सहेजें",
   "games.shortcuts.activity.detailed": "स्कैन का विवरण शामिल करें",
-  "games.shortcuts.activity.storageError": "सहेजी गई गतिविधि तक पहुँच नहीं हो सकी। इस सत्र की प्रविष्टियाँ अब भी दिखाई जाती हैं।",
+  "games.shortcuts.activity.storageError":
+    "सहेजी गई गतिविधि तक पहुँच नहीं हो सकी। इस सत्र की प्रविष्टियाँ अब भी दिखाई जाती हैं।",
   "games.shortcuts.activity.empty": "अभी कोई गतिविधि नहीं है।",
   "games.shortcuts.activity.clear": "गतिविधि साफ़ करें",
   "games.shortcuts.activity.duration": "{ms} मिलीसेकंड",
@@ -25,9 +27,12 @@ export default {
 
   "games.shortcuts.launchDirect": "सीधे लॉन्च करें",
   "games.shortcuts.viaSteam": "Steam से खेलें",
-  "games.shortcuts.directNote": "इस निष्पादन योग्य फ़ाइल को उसके लॉन्च विकल्पों और आरंभिक फ़ोल्डर के साथ शुरू करता है।",
-  "games.shortcuts.shortcut_changed": "Steam में यह शॉर्टकट बदल गया है। लाइब्रेरी रीफ़्रेश करें और इसकी लॉन्च सेटिंग जाँचें।",
-  "games.shortcuts.shortcut_options": "इन लॉन्च विकल्पों में Steam कमांड रैपर है। इस शॉर्टकट को Steam से शुरू करें।",
+  "games.shortcuts.directNote":
+    "इस निष्पादन योग्य फ़ाइल को उसके लॉन्च विकल्पों और आरंभिक फ़ोल्डर के साथ शुरू करता है।",
+  "games.shortcuts.shortcut_changed":
+    "Steam में यह शॉर्टकट बदल गया है। लाइब्रेरी रीफ़्रेश करें और इसकी लॉन्च सेटिंग जाँचें।",
+  "games.shortcuts.shortcut_options":
+    "इन लॉन्च विकल्पों में Steam कमांड रैपर है। इस शॉर्टकट को Steam से शुरू करें।",
   "games.dock.shortcut": "Steam शॉर्टकट",
   "games.shortcuts.note": "आपकी Steam लाइब्रेरी में जोड़े गए गैर-Steam गेम।",
   "games.shortcuts.chooseFolder": "Steam फ़ोल्डर चुनें",
@@ -47,9 +52,11 @@ export default {
   "games.shortcuts.tags": "टैग",
   "games.shortcuts.storeError": "सेटिंग सहेजी नहीं जा सकीं।",
   "games.shortcuts.shortcut_location": "Steam फ़ोल्डर या उसके userdata फ़ोल्डर को चुनें।",
-  "games.shortcuts.shortcut_account": "इस शॉर्टकट के खाते से Steam खोलें, फिर रीफ़्रेश करें। Harbor को उसी Steam इंस्टॉलेशन का उपयोग करना होगा।",
+  "games.shortcuts.shortcut_account":
+    "इस शॉर्टकट के खाते से Steam खोलें, फिर रीफ़्रेश करें। Harbor को उसी Steam इंस्टॉलेशन का उपयोग करना होगा।",
   "games.shortcuts.shortcut_missing": "यह शॉर्टकट अब मौजूद नहीं है। लाइब्रेरी रीफ़्रेश करें।",
-  "games.shortcuts.shortcut_executable": "शॉर्टकट का एक्ज़ीक्यूटेबल मौजूद नहीं है या उसका पूर्ण फ़ाइल पथ समर्थित नहीं है।",
+  "games.shortcuts.shortcut_executable":
+    "शॉर्टकट का एक्ज़ीक्यूटेबल मौजूद नहीं है या उसका पूर्ण फ़ाइल पथ समर्थित नहीं है।",
   "games.shortcuts.shortcut_launch": "Steam यह शॉर्टकट नहीं खोल सका। फिर कोशिश करें।",
-  "games.shortcuts.shortcut_read": "Steam शॉर्टकट पढ़े नहीं जा सके। रीफ़्रेश करके देखें।"
+  "games.shortcuts.shortcut_read": "Steam शॉर्टकट पढ़े नहीं जा सके। रीफ़्रेश करके देखें।",
 };

@@ -161,6 +161,7 @@ function nativeAdjacent(meta: Meta): { prev: PlayEpisode | null; next: PlayEpiso
       "@/views/library/local-tab/show-group": {},
       "@/lib/download/downloads-store": {},
       "@/lib/download/player-src": {},
+      "@/lib/download/completed-episode-source": { completedEpisodeSource: async () => null },
     },
     "\nexports.addonVideoAdjacent = addonVideoAdjacent;",
   );

@@ -158,5 +158,11 @@ export function usePinchZoom({ zoom, onZoom, onPan, rootRef }: Args) {
     return false;
   };
 
-  return { onPointerDown, onPointerMove, onPointerUp: endPointer, onPointerCancel: endPointer, shouldSuppressClick };
+  return {
+    onPointerDown,
+    onPointerMove,
+    onPointerUp: endPointer,
+    onPointerCancel: endPointer,
+    shouldSuppressClick,
+  };
 }

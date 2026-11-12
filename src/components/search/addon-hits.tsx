@@ -41,10 +41,15 @@ export function AddonHits({ hits, onClose }: { hits: AddonHit[]; onClose: () => 
                 )}
               </div>
               {a.blurb && (
-                <span className="line-clamp-1 text-[12.5px] leading-snug text-ink-subtle">{a.blurb}</span>
+                <span className="line-clamp-1 text-[12.5px] leading-snug text-ink-subtle">
+                  {a.blurb}
+                </span>
               )}
             </div>
-            <ChevronRight size={18} className="dir-icon shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
+            <ChevronRight
+              size={18}
+              className="dir-icon shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+            />
           </button>
         ))}
       </div>

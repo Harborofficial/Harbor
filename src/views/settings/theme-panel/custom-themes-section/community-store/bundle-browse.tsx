@@ -292,7 +292,9 @@ function BundleEmpty({ copy, onShare }: { copy: Copy; onShare?: () => void }) {
       </span>
       <div className="flex flex-col gap-1.5">
         <h3 className="text-[18px] font-semibold tracking-tight text-ink">{t(copy.emptyTitle)}</h3>
-        <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(copy.emptyBody)}</p>
+        <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
+          {t(copy.emptyBody)}
+        </p>
       </div>
       {onShare && (
         <button

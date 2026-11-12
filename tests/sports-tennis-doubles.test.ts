@@ -67,7 +67,11 @@ test("singles is untouched by the new branch", () => {
 
 test("a real team with no roster still uses the team branch", () => {
   const side = toSide(
-    { id: "1", type: "team", team: { id: "5", displayName: "Toronto Raptors", abbreviation: "TOR", logo: "x.png" } },
+    {
+      id: "1",
+      type: "team",
+      team: { id: "5", displayName: "Toronto Raptors", abbreviation: "TOR", logo: "x.png" },
+    },
     "basketball",
   );
   assert.equal(side.name, "Toronto Raptors");

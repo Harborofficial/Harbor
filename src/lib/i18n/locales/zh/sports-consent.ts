@@ -32,10 +32,13 @@ export default {
   "Show Sports": "显示体育",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "在导航中显示体育。页面加载前，你必须确认接受体育功能提示。",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "在没有提供商的情况下开启体育，或添加 Live TV、M3U 或 Xtream 源。",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "在没有提供商的情况下开启体育，或添加 Live TV、M3U 或 Xtream 源。",
   "Set up Live TV": "设置 Live TV",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "比分、赛程和积分榜无需提供商即可使用。Harbor 不提供直播流，因此观看比赛需要你自己的 Live TV、M3U 或 Xtream 源。",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "比分、赛程和积分榜来自公开体育数据，无需提供商。Harbor 不提供直播流：观看比赛仍需要你自己的 Live TV、M3U 或 Xtream 源。",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "比分、赛程和积分榜无需提供商即可使用。Harbor 不提供直播流，因此观看比赛需要你自己的 Live TV、M3U 或 Xtream 源。",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "比分、赛程和积分榜来自公开体育数据，无需提供商。Harbor 不提供直播流：观看比赛仍需要你自己的 Live TV、M3U 或 Xtream 源。",
   "Show Sports without a TV provider": "没有电视提供商时也显示体育",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "启用体育功能不代表接受提示。你的选择保留在此设备上，不会同步到你的账户。",

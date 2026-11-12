@@ -95,16 +95,9 @@ export function SetupButton({
   const base =
     "flex min-h-[56px] w-full items-center justify-center gap-2 rounded-xl px-5 text-[16px] font-semibold transition-[transform,opacity] duration-150 active:scale-[0.985] disabled:opacity-45 motion-reduce:active:scale-100";
   const skin =
-    variant === "primary"
-      ? "bg-accent text-canvas"
-      : "border border-edge bg-elevated text-ink";
+    variant === "primary" ? "bg-accent text-canvas" : "border border-edge bg-elevated text-ink";
   return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled || busy}
-      className={`${base} ${skin}`}
-    >
+    <button type={type} onClick={onClick} disabled={disabled || busy} className={`${base} ${skin}`}>
       {busy && <Loader2 size={18} className="animate-spin motion-reduce:animate-none" />}
       {children}
     </button>
@@ -119,7 +112,15 @@ export function SetupButton({
  * keeps the Tauri path, where the url has to go to the OS browser rather than
  * a webview tab.
  */
-export function SetupLinkOut({ href, label, detail }: { href: string; label: string; detail: string }) {
+export function SetupLinkOut({
+  href,
+  label,
+  detail,
+}: {
+  href: string;
+  label: string;
+  detail: string;
+}) {
   return (
     <a
       href={href}
@@ -254,15 +255,11 @@ export function SetupDeliveryError({
   }
   if (reject === "expired" || reject === "lockedOut" || reject === "noOffer") {
     return (
-      <SetupError>
-        {t("That code is no longer valid. Look at your TV for a new one.")}
-      </SetupError>
+      <SetupError>{t("That code is no longer valid. Look at your TV for a new one.")}</SetupError>
     );
   }
   if (reject === "boundElsewhere") {
-    return (
-      <SetupError>{t("Another phone is already setting this TV up.")}</SetupError>
-    );
+    return <SetupError>{t("Another phone is already setting this TV up.")}</SetupError>;
   }
   if (reject === "applyFailed") {
     return (

@@ -1,18 +1,21 @@
 export default {
   "games.download.relink.title": "تحديث رابط التنزيل",
-  "games.download.relink.intro": "اختر الملف نفسه من مصدره، أو الصق رابطًا مباشرًا جديدًا للملف. سيبقى مجلد الحفظ كما هو.",
+  "games.download.relink.intro":
+    "اختر الملف نفسه من مصدره، أو الصق رابطًا مباشرًا جديدًا للملف. سيبقى مجلد الحفظ كما هو.",
   "games.download.relink.source": "اختيار من المصدر",
   "games.download.relink.manual": "استخدام رابط ملف مباشر",
   "games.download.relink.url": "رابط الملف الجديد",
   "games.download.relink.review": "مراجعة الملف",
   "games.download.relink.saved": "المحفوظ: {size}",
-  "games.download.relink.note": "سينزّل Harbor الجزء المحفوظ مرة أخرى لمقارنته قبل إضافة بيانات جديدة.",
+  "games.download.relink.note":
+    "سينزّل Harbor الجزء المحفوظ مرة أخرى لمقارنته قبل إضافة بيانات جديدة.",
   "games.download.relink.apply": "تحديث الرابط والاستئناف",
   "games.download.relink.working": "جارٍ تحديث الرابط…",
   "games.download.relink.checking": "جارٍ فحص البيانات المحفوظة",
   "games.download.relink.single": "اختر ملفًا واحدًا لاستبدال رابط هذا التنزيل.",
   "games.download.relink.native": "أعد تشغيل Harbor بأحدث إصدار لتحديث هذا الرابط.",
-  "games.download.transfer_relink_mismatch": "اختر الملف نفسه بالاسم والحجم نفسيهما لمتابعة هذا التنزيل.",
+  "games.download.transfer_relink_mismatch":
+    "اختر الملف نفسه بالاسم والحجم نفسيهما لمتابعة هذا التنزيل.",
   "games.download.center.content.patch": "تحديث اللعبة",
   "games.download.center.content.mod": "محتوى التعديلات",
   "games.download.center.content.extra": "محتوى إضافي",
@@ -20,7 +23,8 @@ export default {
   "games.download.center.clearCompleted": "إخفاء التنزيلات المكتملة",
   "games.download.center.keepFiles": "إخفاء من هذه القائمة. تبقى الملفات والألعاب في المكتبة.",
   "games.download.center.dismiss": "إخفاء {name}",
-  "games.download.center.retention": "تنتقل التنزيلات المكتملة إلى السجل بعد 24 ساعة أو عند إخفائها. تُحفظ الملفات.",
+  "games.download.center.retention":
+    "تنتقل التنزيلات المكتملة إلى السجل بعد 24 ساعة أو عند إخفائها. تُحفظ الملفات.",
   "games.download.center.showHistory": "عرض سجل التنزيلات المكتملة ({count})",
   "games.download.center.hideHistory": "إخفاء سجل التنزيلات المكتملة",
   "games.download.center.contentInfo": "معلومات المحتوى",
@@ -48,5 +52,6 @@ export default {
   "games.download.center.readyToExtract": "جاهز للاستخراج",
   "games.download.center.downloadComplete": "اكتمل التنزيل",
   "games.download.center.installNote": "الملفات جاهزة. فك ضغط الأرشيف أو افتح مجلده للتثبيت.",
-  "games.download.center.diskNote": "الكتابة من هذا التنزيل، بما فيها ذاكرة التخزين المؤقت للنظام. لا يشمل التثبيت أو التطبيقات الأخرى."
+  "games.download.center.diskNote":
+    "الكتابة من هذا التنزيل، بما فيها ذاكرة التخزين المؤقت للنظام. لا يشمل التثبيت أو التطبيقات الأخرى.",
 };

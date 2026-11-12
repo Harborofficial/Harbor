@@ -75,12 +75,19 @@ function positionalMatch(entry: LibraryEntry, query: LibraryQuery): MatchInfo | 
     .map((f, idx) => ({ name: f.name, idx }))
     .filter((f) => VIDEO_EXT_RE.test(f.name) && !NON_EPISODE_RE.test(f.name));
   if (vids.length < 2) return null;
-  vids.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+  vids.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }),
+  );
   const pos = query.episode - 1;
   if (pos < 0 || pos >= vids.length) return null;
   const chosen = vids[pos];
   const p = parse(chosen.name);
-  return { fileIdx: chosen.idx, parsedTitle: p.title ?? chosen.name, resolution: p.resolution, codec: p.codec };
+  return {
+    fileIdx: chosen.idx,
+    parsedTitle: p.title ?? chosen.name,
+    resolution: p.resolution,
+    codec: p.codec,
+  };
 }
 
 function checkText(

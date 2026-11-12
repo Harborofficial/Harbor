@@ -5,11 +5,7 @@ import { SFX } from "@/lib/sfx";
 import { pushBpBack } from "../bp-back";
 import { useBpT } from "../bp-i18n";
 import { setBpFocus } from "../use-bp-focus";
-import {
-  blockSpaceActivate,
-  bpSurfaceVars,
-  ensureBpPlayerSurfaceTokens,
-} from "./bp-up-next";
+import { blockSpaceActivate, bpSurfaceVars, ensureBpPlayerSurfaceTokens } from "./bp-up-next";
 
 const ACTION =
   "flex shrink-0 items-center gap-[clamp(9px,0.9vw,16px)] rounded-[var(--bp-r-md)] px-[clamp(22px,2.1vw,44px)] text-[clamp(15px,2.05vh,26px)] font-bold";

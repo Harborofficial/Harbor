@@ -38,7 +38,9 @@ export async function fetchAnilistRecommendations(
 ): Promise<Meta[]> {
   if (seedIds.length === 0) return [];
   const ids = seedIds.slice(0, 40);
-  const data = await anilistRequest<RecsResponse>(RECS_QUERY, { ids }, undefined, true).catch(() => null);
+  const data = await anilistRequest<RecsResponse>(RECS_QUERY, { ids }, undefined, true).catch(
+    () => null,
+  );
   const media = data?.Page?.media ?? [];
   const scored = new Map<number, { weight: number; media: AnilistMedia }>();
   for (const src of media) {

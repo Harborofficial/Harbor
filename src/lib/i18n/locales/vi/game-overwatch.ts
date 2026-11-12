@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "Anh hùng Stadium",
   "games.overwatch.searchHeroes": "Tìm anh hùng",
   "games.overwatch.refresh": "Làm mới cẩm nang",
-  "games.overwatch.unavailable": "Không thể làm mới cẩm nang. Thông tin đã tải trước đó có thể vẫn hiển thị.",
+  "games.overwatch.unavailable":
+    "Không thể làm mới cẩm nang. Thông tin đã tải trước đó có thể vẫn hiển thị.",
   "games.overwatch.partial": "Một số mục không có sẵn.",
   "games.overwatch.checked": "Đã kiểm tra: {date}",
-  "games.overwatch.scope": "Thông tin anh hùng của Blizzard qua OverFast. Thay đổi cân bằng có thể đến với trò chơi trước khi cẩm nang cập nhật.",
-  "games.overwatch.mapsScope": "Thông tin bản đồ và chế độ từ OverFast. Bao gồm Arcade và bản đồ cũ; khả dụng tùy theo chế độ.",
+  "games.overwatch.scope":
+    "Thông tin anh hùng của Blizzard qua OverFast. Thay đổi cân bằng có thể đến với trò chơi trước khi cẩm nang cập nhật.",
+  "games.overwatch.mapsScope":
+    "Thông tin bản đồ và chế độ từ OverFast. Bao gồm Arcade và bản đồ cũ; khả dụng tùy theo chế độ.",
   "games.overwatch.empty": "Không có kết quả. Hãy thử tìm kiếm hoặc bộ lọc khác.",
   "games.overwatch.moreHeroes": "Thêm anh hùng",
   "games.overwatch.moreMaps": "Thêm bản đồ",
@@ -33,6 +36,5 @@ export default {
   "games.overwatch.videoFailed": "Không thể phát minh họa. Mở trang anh hùng chính thức để xem.",
   "games.overwatch.mode": "Chế độ chơi",
   "games.overwatch.allModes": "Mọi chế độ",
-  "games.overwatch.searchMaps": "Tìm bản đồ hoặc địa điểm"
+  "games.overwatch.searchMaps": "Tìm bản đồ hoặc địa điểm",
 };
-

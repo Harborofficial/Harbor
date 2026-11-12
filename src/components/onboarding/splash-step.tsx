@@ -19,9 +19,7 @@ export function SplashStep({ onAdvance }: { onAdvance: () => void }) {
       .then(([m, s]) => {
         if (cancelled) return;
         const all: Meta[] = [...m, ...s];
-        const urls = all
-          .map((x) => x.poster)
-          .filter((p): p is string => !!p);
+        const urls = all.map((x) => x.poster).filter((p): p is string => !!p);
         for (let i = urls.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [urls[i], urls[j]] = [urls[j], urls[i]];
@@ -45,7 +43,9 @@ export function SplashStep({ onAdvance }: { onAdvance: () => void }) {
   }, [onAdvance]);
 
   return (
-    <div className={`relative h-[528px] w-full overflow-hidden bg-canvas ${out ? "animate-splash-out" : ""}`}>
+    <div
+      className={`relative h-[528px] w-full overflow-hidden bg-canvas ${out ? "animate-splash-out" : ""}`}
+    >
       <div className="absolute inset-0 flex gap-2 px-2">
         {[0, 1, 2, 3, 4].map((col) => (
           <PosterColumn key={col} idx={col} posters={posters} />
@@ -60,19 +60,25 @@ export function SplashStep({ onAdvance }: { onAdvance: () => void }) {
         }}
       />
       <div className="relative flex h-full flex-col items-center justify-center gap-3 text-center">
-        <CustomArtwork role="launch" className="h-44 w-64" fallback={<h1 className="animate-splash-title flex items-center gap-3 font-display text-[88px] font-medium leading-none tracking-tight text-ink">
-          <HarborMark className="h-[1em] w-[1em] shrink-0" />
-          <span style={{ transform: "translateY(0.04em)" }}>
-            Harb
-            <span
-              className="inline-block"
-              style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}
-            >
-              o
-            </span>
-            r
-          </span>
-        </h1>} />
+        <CustomArtwork
+          role="launch"
+          className="h-44 w-64"
+          fallback={
+            <h1 className="animate-splash-title flex items-center gap-3 font-display text-[88px] font-medium leading-none tracking-tight text-ink">
+              <HarborMark className="h-[1em] w-[1em] shrink-0" />
+              <span style={{ transform: "translateY(0.04em)" }}>
+                Harb
+                <span
+                  className="inline-block"
+                  style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}
+                >
+                  o
+                </span>
+                r
+              </span>
+            </h1>
+          }
+        />
         <p
           className="animate-splash-title text-[14px] uppercase tracking-[0.42em] text-ink-muted"
           style={{ animationDelay: "260ms" }}

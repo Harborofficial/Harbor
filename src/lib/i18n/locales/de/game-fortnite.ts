@@ -5,7 +5,8 @@ export default {
   "games.fortnite.genre": "Genre",
   "games.fortnite.snapshot": "Rangliste vom {date}",
   "games.fortnite.failed": "Die Rangliste konnte nicht aktualisiert werden. Versuche es erneut.",
-  "games.fortnite.mediaFailed": "Einige Inselbilder und Beschreibungen konnten nicht geladen werden.",
+  "games.fortnite.mediaFailed":
+    "Einige Inselbilder und Beschreibungen konnten nicht geladen werden.",
   "games.fortnite.gap": "Epics Ranglisten sind vorübergehend nicht verfügbar.",
   "games.fortnite.empty": "In dieser Momentaufnahme sind keine Inseln aufgeführt.",
   "games.fortnite.players": "Bis zu {count} Spieler",
@@ -34,5 +35,5 @@ export default {
   "games.fortnite.genre.party-mini-games": "Party & Minispiele",
   "games.fortnite.genre.music-rhythm": "Musik & Rhythmus",
   "games.fortnite.genre.horror": "Horror",
-  "games.fortnite.genre.deathrun-platformer": "Deathrun & Jump ’n’ Run"
+  "games.fortnite.genre.deathrun-platformer": "Deathrun & Jump ’n’ Run",
 };

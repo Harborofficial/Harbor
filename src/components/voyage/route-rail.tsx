@@ -71,10 +71,7 @@ export function RouteRail({ voyage, onPlay }: { voyage: Voyage; onPlay?: (meta: 
                   </span>
                 )}
                 {progress > 0 && (
-                  <span
-                    aria-hidden
-                    className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/70"
-                  >
+                  <span aria-hidden className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/70">
                     <span
                       className="block h-full rounded-e-full transition-[width] duration-300"
                       style={{ width: `${Math.round(progress * 100)}%`, background: voyage.accent }}

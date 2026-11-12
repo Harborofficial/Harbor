@@ -16,28 +16,42 @@ export default {
   "games.patch.saveCopy": "Simpan salinan baru",
   "games.patch.verified": "File terverifikasi",
   "games.patch.ready": "Patch siap",
-  "games.patch.verifiedNote": "Gim asli, patch, dan salinan akhir cocok dengan checksum yang tersimpan dalam patch BPS.",
-  "games.patch.ipsNote": "IPS tidak memiliki checksum gim asli. Periksa versi gim yang diperlukan proyek sebelum menyimpan.",
+  "games.patch.verifiedNote":
+    "Gim asli, patch, dan salinan akhir cocok dengan checksum yang tersimpan dalam patch BPS.",
+  "games.patch.ipsNote":
+    "IPS tidak memiliki checksum gim asli. Periksa versi gim yang diperlukan proyek sebelum menyimpan.",
   "games.patch.output": "Salinan akhir",
   "games.patch.fingerprint": "Sidik jari file · SHA-256",
   "games.patch.fingerprints": "Sidik jari file · SHA-256",
   "games.patch.localNote": "Di perangkat kamu · BPS · IPS · UPS · Hingga 256 MB",
-  "games.patch.desktop": "Terapkan patch di aplikasi desktop Harbor untuk Windows, macOS, atau Linux. File tetap di perangkat kamu dan gim asli tidak diubah.",
+  "games.patch.desktop":
+    "Terapkan patch di aplikasi desktop Harbor untuk Windows, macOS, atau Linux. File tetap di perangkat kamu dan gim asli tidak diubah.",
   "games.patch.done": "Siap untuk petualangan baru",
   "games.patch.preserved": "Salinan hasil patch telah disimpan. Gim asli dan patch tidak diubah.",
-  "games.patch.patch_source_mismatch": "Patch ini memerlukan file atau versi gim asli yang berbeda. Periksa persyaratan proyek dan pilih file yang sesuai.",
-  "games.patch.patch_checksum_mismatch": "Checksum patch tidak cocok. File mungkin tidak lengkap; unduh salinan baru dari proyeknya.",
-  "games.patch.patch_target_mismatch": "Salinan akhir tidak cocok dengan checksum yang diharapkan. Tidak ada yang disimpan.",
+  "games.patch.patch_source_mismatch":
+    "Patch ini memerlukan file atau versi gim asli yang berbeda. Periksa persyaratan proyek dan pilih file yang sesuai.",
+  "games.patch.patch_checksum_mismatch":
+    "Checksum patch tidak cocok. File mungkin tidak lengkap; unduh salinan baru dari proyeknya.",
+  "games.patch.patch_target_mismatch":
+    "Salinan akhir tidak cocok dengan checksum yang diharapkan. Tidak ada yang disimpan.",
   "games.patch.patch_expired": "Persiapan ini sudah kedaluwarsa. Periksa patch lagi.",
-  "games.patch.patch_inputs_changed": "File yang dipilih berubah setelah verifikasi. Periksa patch lagi sebelum menyimpan.",
-  "games.patch.patch_output_exists": "File sudah ada di lokasi tersebut. Pilih nama lain; Harbor tidak menimpa file yang ada.",
-  "games.patch.patch_read_failed": "Salah satu file tidak dapat dibaca. Pastikan file masih tersedia lalu pilih lagi.",
-  "games.patch.patch_write_failed": "Salinan tidak dapat disimpan. Periksa folder dan ruang kosong, atau pilih lokasi lain.",
-  "games.patch.patch_too_large": "Gim asli, patch, dan salinan akhir masing-masing tidak boleh melebihi 256 MB.",
+  "games.patch.patch_inputs_changed":
+    "File yang dipilih berubah setelah verifikasi. Periksa patch lagi sebelum menyimpan.",
+  "games.patch.patch_output_exists":
+    "File sudah ada di lokasi tersebut. Pilih nama lain; Harbor tidak menimpa file yang ada.",
+  "games.patch.patch_read_failed":
+    "Salah satu file tidak dapat dibaca. Pastikan file masih tersedia lalu pilih lagi.",
+  "games.patch.patch_write_failed":
+    "Salinan tidak dapat disimpan. Periksa folder dan ruang kosong, atau pilih lokasi lain.",
+  "games.patch.patch_too_large":
+    "Gim asli, patch, dan salinan akhir masing-masing tidak boleh melebihi 256 MB.",
   "games.patch.patch_busy": "Patch lain sedang diproses. Coba lagi setelah selesai.",
-  "games.patch.patch_game_type": "Pilih file gim yang didukung, seperti GBA, GB, NES, SFC, NDS, atau ROM.",
-  "games.patch.patch_output_type": "Gunakan ekstensi file yang sama dengan gim asli saat menyimpan salinan.",
-  "games.patch.invalid": "Patch ini tidak dapat dibaca. Periksa file dan versi gim yang diperlukan proyek.",
+  "games.patch.patch_game_type":
+    "Pilih file gim yang didukung, seperti GBA, GB, NES, SFC, NDS, atau ROM.",
+  "games.patch.patch_output_type":
+    "Gunakan ekstensi file yang sama dengan gim asli saat menyimpan salinan.",
+  "games.patch.invalid":
+    "Patch ini tidak dapat dibaca. Periksa file dan versi gim yang diperlukan proyek.",
   "games.hub.spotlight": "Pilihan utama",
   "games.hub.watch": "Tonton gameplay",
   "games.hub.watchTitle": "Lihat aksinya",
@@ -49,7 +63,8 @@ export default {
   "games.hub.viewOriginal": "Lihat game asli",
   "games.hub.toolkitNote": "Unduh patch untuk game asli Anda.",
   "games.hub.baseVersion": "Gunakan versi dan wilayah game yang tepat sesuai petunjuk proyek.",
-  "games.hub.catalogNote": "Jelajahi ROM hack dan mod konsol. Filter berdasarkan sistem atau cari nama proyek.",
+  "games.hub.catalogNote":
+    "Jelajahi ROM hack dan mod konsol. Filter berdasarkan sistem atau cari nama proyek.",
   "games.hub.findVideos": "Cari gameplay",
   "games.hub.resources": "Komunitas ROM hacking",
   "games.patch.open": "Terapkan patch",
@@ -60,10 +75,12 @@ export default {
   "games.atlas.sort.rated": "Nilai tertinggi",
   "games.atlas.sort.newest": "Terbaru",
   "games.atlas.sort.oldest": "Terlama",
-  "games.hub.stepPatch": "Pilih game asli dan patch BPS, IPS, atau UPS. Harbor menyimpan salinan terpisah.",
-  "games.patch.description": "Pilih game asli dan patch BPS, IPS, atau UPS. Harbor menyimpan salinan terpisah.",
+  "games.hub.stepPatch":
+    "Pilih game asli dan patch BPS, IPS, atau UPS. Harbor menyimpan salinan terpisah.",
+  "games.patch.description":
+    "Pilih game asli dan patch BPS, IPS, atau UPS. Harbor menyimpan salinan terpisah.",
   "games.patch.choosePatch": "Pilih patch (BPS, IPS, UPS)",
   "games.patch.patch_unsupported": "File ini bukan patch BPS, IPS, atau UPS yang didukung.",
   "games.discovery.viewGame": "Lihat game",
-  "games.atlas.basedOn": "Berbasis game ini"
+  "games.atlas.basedOn": "Berbasis game ini",
 };

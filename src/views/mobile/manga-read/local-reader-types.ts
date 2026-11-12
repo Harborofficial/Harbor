@@ -29,7 +29,8 @@ export function mapLocalToDesktopMode(mode: LocalMode): DesktopMode {
 export function loadLocalMode(fallback: LocalMode): LocalMode {
   try {
     const v = localStorage.getItem(LOCAL_MODE_KEY);
-    if (v === "strip" || v === "strip-h" || v === "single" || v === "double" || v === "book") return v;
+    if (v === "strip" || v === "strip-h" || v === "single" || v === "double" || v === "book")
+      return v;
   } catch {
     return fallback;
   }

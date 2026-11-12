@@ -58,7 +58,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.keepExploring": "Continuer à explorer",
   "music.explore.forYou": "Au-delà de vos favoris",
   "music.explore.because": "Parce que vous écoutez {title} · {artist}",
-  "music.explore.listenHint": "Écoutez ou enregistrez des titres pour en découvrir d’autres similaires.",
+  "music.explore.listenHint":
+    "Écoutez ou enregistrez des titres pour en découvrir d’autres similaires.",
   "music.explore.sceneHint": "Explorez les sons et les scènes, sans frontières.",
   "music.explore.performance": "À voir",
   "music.explore.stage": "Scènes et sessions",
@@ -104,6 +105,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.limited":
     "Cette source propose une sélection qui peut ne pas couvrir tout le catalogue.",
   "music.rockHall.title": "Rock & Roll Hall of Fame",
-  "music.rockHall.subtitle": "Chaque promotion depuis 1986, en direct de Wikipédia"
+  "music.rockHall.subtitle": "Chaque promotion depuis 1986, en direct de Wikipédia",
 };
 export default musicTaste;

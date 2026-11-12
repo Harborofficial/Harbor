@@ -189,7 +189,8 @@ const catalogGI: Record<string, string> = {
   "Hand-tuned colors. Edit them in the section above.":
     "हाथ से सँवारे गए रंग। इन्हें ऊपर वाले सेक्शन में संपादित करें।",
   Handle: "हैंडल",
-  "Handles P2P playback and transcoding for this machine.": "इस मशीन के लिए P2P प्लेबैक और ट्रांसकोडिंग संभालता है।",
+  "Handles P2P playback and transcoding for this machine.":
+    "इस मशीन के लिए P2P प्लेबैक और ट्रांसकोडिंग संभालता है।",
   "Hang tight, won't be a sec.": "ज़रा रुकें, बस एक पल लगेगा।",
   "Hangout Comedy": "मेलजोल वाली कॉमेडी",
   Harbor: "Harbor",
@@ -308,7 +309,8 @@ const catalogGI: Record<string, string> = {
   "Harbor never hosts your books or source files.":
     "Harbor आपकी किताबों या स्रोत फ़ाइलों को कभी होस्ट नहीं करता।",
   "Harbor never hosts your books.": "Harbor आपकी किताबों को कभी होस्ट नहीं करता।",
-  "Harbor normally starts its P2P engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a P2P stream. Takes effect next launch.": "Harbor आम तौर पर लॉन्च होते ही अपना P2P इंजन शुरू करता है, ताकि पहली P2P स्ट्रीम तेज़ी से कनेक्ट हो। इससे DHT नोड चलता रहता है और नेटवर्क से संपर्क करता रहता है, भले ही आप कुछ न देख रहे हों। अगर आपका कनेक्शन मीटर्ड या सीमित है, तो इसे चालू करें: तब इंजन पहली बार वास्तव में कोई P2P स्ट्रीम चलाने पर शुरू होगा। यह अगले लॉन्च से प्रभावी होगा।",
+  "Harbor normally starts its P2P engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a P2P stream. Takes effect next launch.":
+    "Harbor आम तौर पर लॉन्च होते ही अपना P2P इंजन शुरू करता है, ताकि पहली P2P स्ट्रीम तेज़ी से कनेक्ट हो। इससे DHT नोड चलता रहता है और नेटवर्क से संपर्क करता रहता है, भले ही आप कुछ न देख रहे हों। अगर आपका कनेक्शन मीटर्ड या सीमित है, तो इसे चालू करें: तब इंजन पहली बार वास्तव में कोई P2P स्ट्रीम चलाने पर शुरू होगा। यह अगले लॉन्च से प्रभावी होगा।",
   "Harbor on other devices": "अन्य डिवाइसों पर Harbor",
   "Harbor on other devices (web app)": "अन्य डिवाइसों पर Harbor (वेब ऐप)",
   "Harbor on the server display": "सर्वर डिस्प्ले पर Harbor",
@@ -377,7 +379,8 @@ const catalogGI: Record<string, string> = {
     "Harbor मूल रूप से अंग्रेज़ी में बनाया गया था। बहुभाषी सपोर्ट अभी सीमित है, इसलिए Harbor के अपने फ़िल्टर से छूटी चीज़ें आम तौर पर आपके ऐडऑन पकड़ लेते हैं। अगर आप कोई दूसरी भाषा जानते हैं और मदद करना चाहते हैं, तो सोर्स कोड ओपन है।",
   "Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.":
     "आप जो पूरा देख लेंगे, Harbor उसे Simkl पर देखा हुआ चिह्नित करेगा और आपकी देखने की योजना वाली सूची सिंक करेगा।",
-  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.": "Harbor P2P इंजन शुरू नहीं करेगा, ट्रैकर से संपर्क नहीं करेगा और DHT नहीं चलाएगा। अगर आपको केवल डीब्रिड और सीधे लिंक चाहिए, तो इसका उपयोग करें। P2P स्ट्रीमिंग फिर से चालू करने के लिए इसे बंद करें।",
+  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.":
+    "Harbor P2P इंजन शुरू नहीं करेगा, ट्रैकर से संपर्क नहीं करेगा और DHT नहीं चलाएगा। अगर आपको केवल डीब्रिड और सीधे लिंक चाहिए, तो इसका उपयोग करें। P2P स्ट्रीमिंग फिर से चालू करने के लिए इसे बंद करें।",
   "Harbor will scrobble your playback to Trakt and sync your watchlist.":
     "Harbor आपके प्लेबैक को Trakt पर स्क्रॉबल करेगा और आपकी वॉचलिस्ट सिंक करेगा।",
   "Harbor would not be possible without Stremio. It is the foundation everything here is built on.":

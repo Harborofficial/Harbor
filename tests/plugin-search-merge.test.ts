@@ -9,7 +9,13 @@ const hit = (id: string, name = id): Meta => ({ id, type: "movie", name });
 test("the same item reached through two providers is one result", () => {
   // Two providers of the same plugin can both answer with the same title, and they arrive as
   // different Meta objects carrying the same id.
-  const merged = mergeHits([[hit("a"), hit("b")], [hit("b"), hit("c")]], 100);
+  const merged = mergeHits(
+    [
+      [hit("a"), hit("b")],
+      [hit("b"), hit("c")],
+    ],
+    100,
+  );
   assert.deepEqual(
     merged.map((m) => m.id),
     ["a", "b", "c"],
@@ -69,7 +75,11 @@ test("a plugin's providers are kept as their own shelves", () => {
     ],
     "one shelf per provider, in the order they were asked in",
   );
-  assert.deepEqual(group.metas.map((m) => m.id), ["a", "b", "c"], "and every hit kept");
+  assert.deepEqual(
+    group.metas.map((m) => m.id),
+    ["a", "b", "c"],
+    "and every hit kept",
+  );
 });
 
 test("one title on two providers is two results, because the links differ", () => {
@@ -83,7 +93,10 @@ test("one title on two providers is two results, because the links differ", () =
     ],
     100,
   );
-  assert.deepEqual(group?.metas.map((m) => m.id), ["vegamovies:1", "rogmovies:1"]);
+  assert.deepEqual(
+    group?.metas.map((m) => m.id),
+    ["vegamovies:1", "rogmovies:1"],
+  );
 });
 
 test("a provider that found nothing leaves no empty shelf", () => {
@@ -96,7 +109,10 @@ test("a provider that found nothing leaves no empty shelf", () => {
     ],
     100,
   );
-  assert.deepEqual(group?.providers.map((p) => p.providerName), ["VegaMovies"]);
+  assert.deepEqual(
+    group?.providers.map((p) => p.providerName),
+    ["VegaMovies"],
+  );
 });
 
 test("a plugin whose every provider found nothing gets no group at all", () => {
@@ -121,7 +137,10 @@ test("the cap is across a plugin's providers, not one per provider", () => {
     3,
   );
   assert.equal(group?.metas.length, 3);
-  assert.deepEqual(group?.metas.map((m) => m.id), ["a", "b", "c"]);
+  assert.deepEqual(
+    group?.metas.map((m) => m.id),
+    ["a", "b", "c"],
+  );
   assert.deepEqual(
     group?.providers.map((p) => p.metas.length),
     [2, 1],
@@ -131,7 +150,11 @@ test("the cap is across a plugin's providers, not one per provider", () => {
 
 test("a plugin that found nothing gets no group", () => {
   assert.equal(
-    searchGroups({ id: "p1", name: "One" }, [{ providerId: "x", providerName: "X", metas: [] }], 10),
+    searchGroups(
+      { id: "p1", name: "One" },
+      [{ providerId: "x", providerName: "X", metas: [] }],
+      10,
+    ),
     null,
   );
   const two = searchGroups(
@@ -139,7 +162,10 @@ test("a plugin that found nothing gets no group", () => {
     [{ providerId: "y", providerName: "Y", metas: [hit("b")] }],
     10,
   );
-  assert.deepEqual(two?.metas.map((m) => m.id), ["b"]);
+  assert.deepEqual(
+    two?.metas.map((m) => m.id),
+    ["b"],
+  );
 });
 
 test("a plugin's own results are still de-duplicated and capped", () => {
@@ -186,8 +212,8 @@ test("the title that was asked for scores above loose matches of the same words"
 test("sorting by relevance puts the answer first, whatever order the provider used", () => {
   const query = "india got latent";
   // What a provider's own search returns: the wanted title buried among looser matches.
-  const fromProvider = ["India", "Latent India", "India's Got Latent", "Best Of India"].map((name) =>
-    hit(name, name),
+  const fromProvider = ["India", "Latent India", "India's Got Latent", "Best Of India"].map(
+    (name) => hit(name, name),
   );
   const ordered = fromProvider
     .map((meta) => ({ meta, score: relevanceScore(meta.name, query) }))

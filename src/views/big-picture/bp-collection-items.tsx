@@ -40,10 +40,14 @@ export function BpCollectionItems({
   const boxRef = useRef<HTMLDivElement | null>(null);
   const metas = useMemo(() => open.items.map(toMeta), [open.items]);
 
-  useEffect(() => pushBpBack(() => {
-    onClose();
-    return true;
-  }), [onClose]);
+  useEffect(
+    () =>
+      pushBpBack(() => {
+        onClose();
+        return true;
+      }),
+    [onClose],
+  );
 
   useEffect(() => {
     markBpInteracted();
@@ -74,38 +78,38 @@ export function BpCollectionItems({
       className="absolute inset-0 z-30 flex flex-col gap-[clamp(11px,1.4vh,22px)] bg-[var(--bp-void)] px-[var(--bp-gutter)] pb-[var(--bp-hint-h)] pt-[var(--bp-page-top)] [animation:bp-fade_var(--bp-dur)_var(--bp-ease)_both] motion-reduce:[animation:none]"
     >
       <div data-bp-row className="shrink-0" style={HEADER_SCOPE}>
-      <div data-bp-scroll-x className="flex items-start gap-[clamp(12px,1.4vw,28px)]">
-        <div className="flex min-w-0 flex-1 flex-col gap-[clamp(5px,0.7vh,11px)]">
-          <span className="text-[clamp(11px,1.5vh,17px)] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-            {open.byline ?? t("My collection")}
-          </span>
-          <h1 className="text-[clamp(24px,4.4vh,54px)] font-bold leading-[1.05] tracking-[-0.02em] text-ink">
-            {open.name}
-          </h1>
-          <span className="text-[clamp(11.5px,1.55vh,18px)] font-semibold text-ink-muted">
-            {t("{count} items", { count: open.items.length + open.hidden })}
-          </span>
-          {open.hidden > 0 && (
-            <span className="text-[clamp(11.5px,1.55vh,18px)] font-medium text-ink-subtle">
-              {t("{count} manga items are not shown in Big Picture.", { count: open.hidden })}
+        <div data-bp-scroll-x className="flex items-start gap-[clamp(12px,1.4vw,28px)]">
+          <div className="flex min-w-0 flex-1 flex-col gap-[clamp(5px,0.7vh,11px)]">
+            <span className="text-[clamp(11px,1.5vh,17px)] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
+              {open.byline ?? t("My collection")}
             </span>
-          )}
+            <h1 className="text-[clamp(24px,4.4vh,54px)] font-bold leading-[1.05] tracking-[-0.02em] text-ink">
+              {open.name}
+            </h1>
+            <span className="text-[clamp(11.5px,1.55vh,18px)] font-semibold text-ink-muted">
+              {t("{count} items", { count: open.items.length + open.hidden })}
+            </span>
+            {open.hidden > 0 && (
+              <span className="text-[clamp(11.5px,1.55vh,18px)] font-medium text-ink-subtle">
+                {t("{count} manga items are not shown in Big Picture.", { count: open.hidden })}
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            data-bp-focusable
+            data-bp-chip
+            onClick={() => {
+              SFX.close();
+              onClose();
+            }}
+            aria-label={t("Close")}
+            className="flex h-[clamp(44px,5vh,58px)] shrink-0 items-center gap-2 rounded-full border border-[var(--bp-edge)] px-[clamp(14px,1.2vw,22px)] text-[clamp(12.5px,1.78vh,20px)] font-semibold text-ink-subtle transition-colors duration-[var(--bp-dur-fast)]"
+          >
+            <X size={17} strokeWidth={2.2} />
+            {t("Close")}
+          </button>
         </div>
-        <button
-          type="button"
-          data-bp-focusable
-          data-bp-chip
-          onClick={() => {
-            SFX.close();
-            onClose();
-          }}
-          aria-label={t("Close")}
-          className="flex h-[clamp(44px,5vh,58px)] shrink-0 items-center gap-2 rounded-full border border-[var(--bp-edge)] px-[clamp(14px,1.2vw,22px)] text-[clamp(12.5px,1.78vh,20px)] font-semibold text-ink-subtle transition-colors duration-[var(--bp-dur-fast)]"
-        >
-          <X size={17} strokeWidth={2.2} />
-          {t("Close")}
-        </button>
-      </div>
       </div>
 
       <BpGridScroller>

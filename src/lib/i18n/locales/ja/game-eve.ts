@@ -46,7 +46,8 @@ export default {
   "games.eve.avoid": "{name}を回避",
   "games.eve.less": "表示する地点を減らす",
   "games.eve.allStops": "すべての地点を表示",
-  "games.eve.activityNote": "活動報告は過去の情報で、ワームホール空間は含みません。セキュリティの優先設定は航路の安全を保証しません。",
+  "games.eve.activityNote":
+    "活動報告は過去の情報で、ワームホール空間は含みません。セキュリティの優先設定は航路の安全を保証しません。",
   "games.eve.noRoute": "スターゲート航路が見つかりませんでした。",
   "games.eve.incursions": "インカージョン",
   "games.eve.refreshIncursions": "インカージョンを更新",
@@ -60,5 +61,5 @@ export default {
   "games.eve.influence": "影響力",
   "games.eve.systems": "システム数 · {count}",
   "games.eve.boss": "ボス出現中",
-  "games.eve.routeThere": "ここへの航路"
+  "games.eve.routeThere": "ここへの航路",
 };

@@ -28,5 +28,5 @@ export default {
   "games.notes.export": "Eksportuj kopię",
   "games.notes.unsaved": "Niezapisane zmiany",
   "games.notes.local": "Zapisane w tym profilu Harbor",
-  "games.notes.importGuide": "Kopiuj do moich notatek"
+  "games.notes.importGuide": "Kopiuj do moich notatek",
 };

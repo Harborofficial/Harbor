@@ -1,6 +1,11 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { CompanionRequests } from "./companion-request";
-import { parseXboxAudience, xboxAudienceRequest, XBOX_AUDIENCE_API, XBOX_AUDIENCE_TTL } from "./xbox-audience";
+import {
+  parseXboxAudience,
+  xboxAudienceRequest,
+  XBOX_AUDIENCE_API,
+  XBOX_AUDIENCE_TTL,
+} from "./xbox-audience";
 import { matchXboxGames, xboxIdentityQuery } from "./xbox-audience-identity";
 import { queryIgdb } from "./atlas";
 
@@ -13,7 +18,12 @@ const requests = new CompanionRequests(async (url, signal) => {
 });
 
 export async function loadXboxAudience(signal: AbortSignal) {
-  const observation = await requests.get(XBOX_AUDIENCE_API, XBOX_AUDIENCE_TTL, parseXboxAudience, signal);
+  const observation = await requests.get(
+    XBOX_AUDIENCE_API,
+    XBOX_AUDIENCE_TTL,
+    parseXboxAudience,
+    signal,
+  );
   const rows = await queryIgdb(xboxIdentityQuery(observation.data), signal).catch(() => []);
   signal.throwIfAborted();
   return { ...observation, data: matchXboxGames(observation.data, rows) };

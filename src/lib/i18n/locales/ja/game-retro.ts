@@ -3,13 +3,15 @@ export default {
   "games.retro.player": "プレイヤー",
   "games.retro.keyboard": "キーボード",
   "games.retro.controller": "コントローラー",
-  "games.retro.keyboardOnly": "キーボード使用可能 · 接続するにはコントローラーのボタンを押してください",
+  "games.retro.keyboardOnly":
+    "キーボード使用可能 · 接続するにはコントローラーのボタンを押してください",
   "games.retro.resetControls": "割り当てをリセット",
   "games.retro.controlsSaved": "このプロフィールと機種に保存されます",
   "games.retro.pressKey": "キーを押してください。Escでキャンセル。F1、F2、F4はプレイヤー用です。",
   "games.retro.pressButton": "コントローラーのボタンを押すか、スティックを動かしてください。",
   "games.retro.disconnected": "コントローラーが切断されました。再接続してから再開してください。",
-  "games.retro.controlsSaveFailed": "このセッションでは使用できますが、割り当てを保存できませんでした。",
+  "games.retro.controlsSaveFailed":
+    "このセッションでは使用できますが、割り当てを保存できませんでした。",
   "games.retro.menuChord": "Select + Start：メニュー",
   "games.retro.pause": "一時停止",
   "games.retro.resume": "再開",
@@ -18,7 +20,8 @@ export default {
   "games.retro.controls": "操作設定",
   "games.retro.saveExit": "保存して終了",
   "games.retro.popout": "別ウィンドウ",
-  "games.retro.dock": "Harborに戻す",  "games.retro.mute": "ミュート",
+  "games.retro.dock": "Harborに戻す",
+  "games.retro.mute": "ミュート",
   "games.retro.unmute": "ミュート解除",
   "games.retro.volume": "音量",
   "games.retro.picture": "画質",
@@ -27,7 +30,8 @@ export default {
   "games.retro.fullscreen": "全画面",
   "games.retro.exitFullscreen": "全画面を終了",
   "games.retro.playInside": "Harborでプレイ",
-  "games.retro.setup": "{system}プレイヤーを一度インストールすると、ここで遊べます。ゲームはこの端末に保存されます。",
+  "games.retro.setup":
+    "{system}プレイヤーを一度インストールすると、ここで遊べます。ゲームはこの端末に保存されます。",
   "games.retro.install": "インストールしてプレイ · {size} MB",
   "games.retro.runtime": "EmulatorJS {version} · 一度ダウンロードすればオフラインで利用可能",
   "games.retro.aboutRuntime": "ソースコードとライセンス",
@@ -36,9 +40,11 @@ export default {
   "games.retro.saved": "ステートを保存しました",
   "games.retro.loaded": "ステートを読み込みました",
   "games.retro.noSave": "保存されたステートはありません",
-  "games.retro.saveFailed": "進行状況を保存できませんでした。「保存して終了」を再試行してください。",
+  "games.retro.saveFailed":
+    "進行状況を保存できませんでした。「保存して終了」を再試行してください。",
   "games.retro.saving": "進行状況を保存中…",
   "games.retro.exitWithoutSave": "保存せずに終了",
   "games.retro.moving": "ゲームを移動中…",
-  "games.retro.moveFailed": "プレイヤーを移動できませんでした。進行状況は保存済みです。「再開」を選んでください。",
+  "games.retro.moveFailed":
+    "プレイヤーを移動できませんでした。進行状況は保存済みです。「再開」を選んでください。",
 } satisfies Record<string, string>;

@@ -19,7 +19,8 @@ export default {
   "games.wow.weekly.shown": "इस सूची में रन: {count}",
   "games.wow.weekly.partial": "कुछ दर्ज रन सत्यापित नहीं हो सके।",
   "games.wow.weekly.empty": "इस रीसेट के लिए कोई रन दर्ज नहीं है।",
-  "games.wow.weekly.scope": "Raider.IO हर रीसेट में मौजूदा सीज़न की अधिकतम 10 सबसे ऊँची कीस्टोन दिखाता है। नए रन दिखने में समय लग सकता है।",
+  "games.wow.weekly.scope":
+    "Raider.IO हर रीसेट में मौजूदा सीज़न की अधिकतम 10 सबसे ऊँची कीस्टोन दिखाता है। नए रन दिखने में समय लग सकता है।",
   "games.helldivers.title": "आकाशगंगा युद्ध",
   "games.helldivers.intro": "अपनी अगली तैनाती चुनें।",
   "games.helldivers.refresh": "आकाशगंगा युद्ध रीफ़्रेश करें",
@@ -137,7 +138,8 @@ export default {
   "games.warframe.noMatches": "इन फ़िल्टर से कोई वर्तमान दरार मेल नहीं खाती।",
   "games.warframe.more": "और दिखाएँ",
   "games.warframe.snapshot": "स्नैपशॉट: {date}",
-  "games.warframe.scope": "साझा दुनिया का कार्यक्रम। पहुँच आपकी खोज प्रगति पर निर्भर करती है। मिशन के नाम अंग्रेज़ी में दिए जाते हैं।",
+  "games.warframe.scope":
+    "साझा दुनिया का कार्यक्रम। पहुँच आपकी खोज प्रगति पर निर्भर करती है। मिशन के नाम अंग्रेज़ी में दिए जाते हैं।",
   "games.warframe.world.cetus": "Plains of Eidolon",
   "games.warframe.world.vallis": "Orb Vallis",
   "games.warframe.world.cambion": "Cambion Drift",
@@ -178,7 +180,8 @@ export default {
   "games.rivals.heroRate": "हर विरोधी के विरुद्ध {hero} की जीत दर",
   "games.rivals.with": "साथियों के साथ",
   "games.rivals.duoRate": "जोड़ी की साझा जीत दर",
-  "games.rivals.scope": "सभी कौशल स्तरों के देखे गए प्रतिस्पर्धी 6 बनाम 6 मैच। हर हीरो के कम से कम 200 और हर जोड़ी के 100 मैच। जोड़ी के नतीजे टीम-अप क्षमता या अगले मैच की भविष्यवाणी नहीं हैं।",
+  "games.rivals.scope":
+    "सभी कौशल स्तरों के देखे गए प्रतिस्पर्धी 6 बनाम 6 मैच। हर हीरो के कम से कम 200 और हर जोड़ी के 100 मैच। जोड़ी के नतीजे टीम-अप क्षमता या अगले मैच की भविष्यवाणी नहीं हैं।",
   "games.rivals.snapshot": "डेटा: {date}",
   "games.rivals.noMatches": "इन फ़िल्टर से कोई हीरो मेल नहीं खाता।",
   "games.rivals.unavailable": "हीरो गाइड उपलब्ध नहीं है। रीफ़्रेश करें।",
@@ -205,7 +208,8 @@ export default {
   "games.darktide.empty": "नवीनतम डेटा में कोई चालू मिशन नहीं है।",
   "games.darktide.more": "और मिशन दिखाएँ",
   "games.darktide.checked": "जाँच: {date}",
-  "games.darktide.scope": "सामुदायिक डेटा। गेम में उपलब्धता और पुरस्कार अलग हो सकते हैं; यह आपके पात्र का मिशन बोर्ड नहीं है।",
+  "games.darktide.scope":
+    "सामुदायिक डेटा। गेम में उपलब्धता और पुरस्कार अलग हो सकते हैं; यह आपके पात्र का मिशन बोर्ड नहीं है।",
   "games.darktide.remaining": "{count} मिनट शेष",
   "games.darktide.credits": "ऑर्डो डॉकेट",
   "games.darktide.xp": "अनुभव",
@@ -245,7 +249,8 @@ export default {
   "games.companion.showAll": "सभी {count} हीरो दिखाएँ",
   "games.companion.noMatches": "आपकी खोज से कोई हीरो मेल नहीं खाता।",
   "games.companion.through": "{date} तक के मैच",
-  "games.companion.sampleNote": "सभी रैंक का सामुदायिक नमूना; हर हीरो के कम से कम 100 मैच। यह भविष्यवाणी नहीं है।",
+  "games.companion.sampleNote":
+    "सभी रैंक का सामुदायिक नमूना; हर हीरो के कम से कम 100 मैच। यह भविष्यवाणी नहीं है।",
   "games.companion.unavailable": "हीरो डेटा रीफ़्रेश नहीं हुआ। दिखाया गया डेटा पिछली जाँच का है।",
   "games.companion.statsUnavailable": "हीरो आँकड़े उपलब्ध नहीं हैं। आप हीरो गाइड देख सकते हैं।",
   "games.gw2.title": "जादूगर का खज़ाना",
@@ -257,7 +262,8 @@ export default {
   "games.gw2.partial": "कुछ आइटम की जानकारी उपलब्ध नहीं है। उनकी कीमतें फिर भी शामिल हैं।",
   "games.gw2.guide": "खज़ाने की गाइड",
   "games.gw2.checked": "{date} को जाँचा गया",
-  "games.gw2.scope": "इस Harbor प्रोफ़ाइल में सहेजा गया। हर चयन में एक ऑफ़र गिना जाता है; आपका बैलेंस, खरीद सीमा और विस्तारों की पहुँच नहीं जाँची जाती। उपलब्धता की पुष्टि करके गेम में खरीदें।",
+  "games.gw2.scope":
+    "इस Harbor प्रोफ़ाइल में सहेजा गया। हर चयन में एक ऑफ़र गिना जाता है; आपका बैलेंस, खरीद सीमा और विस्तारों की पहुँच नहीं जाँची जाती। उपलब्धता की पुष्टि करके गेम में खरीदें।",
   "games.gw2.total": "योजना का कुल खर्च",
   "games.gw2.currency": "Astral Acclaim",
   "games.gw2.selected": "{count} ऑफ़र चुने गए",
@@ -306,7 +312,8 @@ export default {
   "games.deadlockBuilds.copy": "बिल्ड ID कॉपी करें",
   "games.deadlockBuilds.use": "बिल्ड ID:",
   "games.deadlockBuilds.copyFailed": "कॉपी नहीं हो सका। मैन्युअल रूप से कॉपी करने के लिए ID चुनें।",
-  "games.deadlockBuilds.definitions": "आइटम के नाम और कीमतें नवीनतम ज्ञात गेम डेटा से हैं। पुरानी गाइड अलग हो सकती हैं; समूहों में विकल्प शामिल हो सकते हैं।",
+  "games.deadlockBuilds.definitions":
+    "आइटम के नाम और कीमतें नवीनतम ज्ञात गेम डेटा से हैं। पुरानी गाइड अलग हो सकती हैं; समूहों में विकल्प शामिल हो सकते हैं।",
   "games.deadlockBuilds.itemsFailed": "कुछ आइटम विवरण उपलब्ध नहीं हैं। लेखक की गाइड और आइटम ID दिखाई देंगे।",
   "games.deadlockBuilds.noItems": "इस बिल्ड में आइटम समूह नहीं हैं।",
   "games.deadlockBuilds.group": "समूह {number}",

@@ -500,7 +500,8 @@ const catalog10: Record<string, string> = {
   "The editor is a working copy of the player. Click any control on it to move, resize, restyle or hide that control.":
     "편집기에는 플레이어의 작업용 사본이 표시됩니다. 컨트롤을 클릭하여 이동하거나 크기와 스타일을 바꾸거나 숨기세요.",
   "The end time has to be after the start.": "종료 시간은 시작 시간보다 뒤여야 합니다.",
-  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.": "엔진은 로컬 포트에서 수신 대기하고 DHT에 참여하여 피어를 찾습니다. 활성 전송은 현재 열려 있는 스트림입니다.",
+  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.":
+    "엔진은 로컬 포트에서 수신 대기하고 DHT에 참여하여 피어를 찾습니다. 활성 전송은 현재 열려 있는 스트림입니다.",
   "The escape hatch for power users. One mpv option per line as key=value, exactly like mpv.conf. These apply last, so they override every dial above. Anything Harbor can't read is skipped, so a typo won't break playback. Restart playback to apply.":
     "고급 사용자를 위한 설정입니다. mpv.conf와 똑같이 한 줄에 하나의 mpv 옵션을 key=value 형식으로 입력하세요. 이 설정은 마지막에 적용되므로 위의 모든 다이얼 설정보다 우선합니다. Harbor에서 읽을 수 없는 항목은 건너뛰므로 오타가 있어도 재생이 중단되지 않습니다. 적용하려면 재생을 다시 시작하세요.",
   "The free tier is $0 for personal use. Just pick the first option, no payment needed.":
@@ -1020,7 +1021,8 @@ const catalog10: Record<string, string> = {
   "Torrent name": "토렌트 이름",
   "P2P streaming": "P2P 스트리밍",
   Torrents: "토렌트",
-  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.": "P2P가 비활성화되어 있습니다. 캐시되지 않은 스트림은 디브리드 서비스나 직접 링크에서 제공되지 않으면 재생할 수 없습니다. P2P를 사용하려면 이 옵션을 끄세요.",
+  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.":
+    "P2P가 비활성화되어 있습니다. 캐시되지 않은 스트림은 디브리드 서비스나 직접 링크에서 제공되지 않으면 재생할 수 없습니다. P2P를 사용하려면 이 옵션을 끄세요.",
   "Total Shots": "총 슈팅",
   "Total Technical Fouls": "총 테크니컬 파울",
   "Total Turnovers": "총 턴오버",

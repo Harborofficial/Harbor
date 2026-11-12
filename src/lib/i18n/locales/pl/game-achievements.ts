@@ -17,42 +17,57 @@ export default {
   "games.achievementManager.applying": "Stosowanie zmian…",
   "games.achievementManager.applied": "Steam potwierdził wszystkie zmiany: {count}.",
   "games.achievementManager.unconfirmed": "Niepotwierdzone",
-  "games.achievementManager.partial": "Steam potwierdził {count} z {total} zmian. Odśwież, aby sprawdzić pozostałe osiągnięcia.",
+  "games.achievementManager.partial":
+    "Steam potwierdził {count} z {total} zmian. Odśwież, aby sprawdzić pozostałe osiągnięcia.",
   "games.achievementManager.refresh": "Odśwież ze Steam",
   "games.achievementManager.back": "Edytuj dalej",
   "games.achievementManager.note": "Do Steam trafią tylko wymienione zmiany.",
   "games.achievementManager.error.noClient": "Nie znaleziono Steam na tym komputerze.",
-  "games.achievementManager.error.clientLoad": "Nie udało się połączyć z zainstalowanym klientem Steam.",
-  "games.achievementManager.error.clientVersion": "Ta wersja klienta Steam nie jest jeszcze obsługiwana.",
+  "games.achievementManager.error.clientLoad":
+    "Nie udało się połączyć z zainstalowanym klientem Steam.",
+  "games.achievementManager.error.clientVersion":
+    "Ta wersja klienta Steam nie jest jeszcze obsługiwana.",
   "games.achievementManager.error.offline": "Otwórz Steam, zaloguj się i spróbuj ponownie.",
-  "games.achievementManager.error.accountChanged": "Aktywne konto Steam zmieniło się. Odśwież przed edycją.",
+  "games.achievementManager.error.accountChanged":
+    "Aktywne konto Steam zmieniło się. Odśwież przed edycją.",
   "games.achievementManager.error.notOwned": "Aktywne konto Steam nie ma dostępu do tej gry.",
-  "games.achievementManager.error.timeout": "Steam nie zwrócił danych osiągnięć na czas. Spróbuj odświeżyć.",
+  "games.achievementManager.error.timeout":
+    "Steam nie zwrócił danych osiągnięć na czas. Spróbuj odświeżyć.",
   "games.achievementManager.error.unavailable": "Nie udało się odczytać osiągnięć gry ze Steam.",
-  "games.achievementManager.error.rejected": "Steam odrzucił zmianę. Odśwież, aby sprawdzić aktualny stan.",
-  "games.achievementManager.error.uncertain": "Steam nie potwierdził wyniku. Odśwież przed wprowadzeniem kolejnych zmian.",
-  "games.achievementManager.error.platform": "Zarządzanie osiągnięciami jest obecnie dostępne w Harbor na Windows x64.",
+  "games.achievementManager.error.rejected":
+    "Steam odrzucił zmianę. Odśwież, aby sprawdzić aktualny stan.",
+  "games.achievementManager.error.uncertain":
+    "Steam nie potwierdził wyniku. Odśwież przed wprowadzeniem kolejnych zmian.",
+  "games.achievementManager.error.platform":
+    "Zarządzanie osiągnięciami jest obecnie dostępne w Harbor na Windows x64.",
   "games.achievementManager.error.invalid": "Wybierz maksymalnie 2000 zmian naraz.",
-  "games.achievementManager.error.stale": "Te osiągnięcia zmieniły się w Steam. Odśwież przed edycją.",
-  "games.achievementManager.error.protected": "Gra zarządza tym osiągnięciem. Harbor nie może go edytować.",
-  "games.achievementManager.error.expired": "Ta weryfikacja wygasła. Odśwież przed zastosowaniem zmian.",
+  "games.achievementManager.error.stale":
+    "Te osiągnięcia zmieniły się w Steam. Odśwież przed edycją.",
+  "games.achievementManager.error.protected":
+    "Gra zarządza tym osiągnięciem. Harbor nie może go edytować.",
+  "games.achievementManager.error.expired":
+    "Ta weryfikacja wygasła. Odśwież przed zastosowaniem zmian.",
   "games.achievementManager.error.busy": "Inne żądanie dotyczące osiągnięć Steam jest w toku.",
   "games.details.achievementSearch": "Znajdź osiągnięcie",
   "games.details.achievementEmpty": "Żadne osiągnięcie nie pasuje do wyszukiwania.",
   "games.account.secretAchievement": "Ukryte osiągnięcie",
-  "games.account.secretNote": "Ukryte, dopóki go nie odblokujesz lub nie zdecydujesz się go ujawnić.",
+  "games.account.secretNote":
+    "Ukryte, dopóki go nie odblokujesz lub nie zdecydujesz się go ujawnić.",
   "games.account.moreAchievements": "Więcej osiągnięć",
   "games.account.revealSecrets": "Pokaż ukryte osiągnięcia",
   "games.discovery.about": "O grze",
   "games.discovery.steamCharts": "Rankingi Steam",
   "games.achievementManager.commit": "Zastosuj zmiany",
   "games.achievementManager.consentTitle": "Odblokuj osiągnięcia Steam",
-  "games.achievementManager.consentBody": "Odblokuj lub ponownie zablokuj osiągnięcia zalogowanego konta Steam. Wybór pozostaje wersją roboczą do chwili zastosowania zmian.",
-  "games.achievementManager.consentRules": "Harbor korzysta z interfejsu osiągnięć Steam bez wstrzykiwania kodu do gier. Nadal obowiązują zasady i wymagania nagród danej gry.",
+  "games.achievementManager.consentBody":
+    "Odblokuj lub ponownie zablokuj osiągnięcia zalogowanego konta Steam. Wybór pozostaje wersją roboczą do chwili zastosowania zmian.",
+  "games.achievementManager.consentRules":
+    "Harbor korzysta z interfejsu osiągnięć Steam bez wstrzykiwania kodu do gier. Nadal obowiązują zasady i wymagania nagród danej gry.",
   "games.achievementManager.consentSam": "Inspiracja: obsługa osiągnięć w SAM",
   "games.achievementManager.consentOnce": "Wyświetlane raz dla tego profilu Harbor.",
   "games.achievementManager.consentAccept": "Rozumiem",
-  "games.achievementManager.desktopOnly": "Aby zmieniać osiągnięcia, użyj Harbor w Windows z uruchomionym Steam.",
+  "games.achievementManager.desktopOnly":
+    "Aby zmieniać osiągnięcia, użyj Harbor w Windows z uruchomionym Steam.",
   "games.achievementManager.all": "Wszystkie",
   "games.achievementManager.filter": "Filtr osiągnięć",
   "games.achievementManager.rewards": "Nagrody rzeczowe",
@@ -67,12 +82,16 @@ export default {
   "games.achievementManager.rewardGame": "Przedmiot w {game}",
   "games.achievementManager.rewardVia": "za {achievement}",
   "games.achievementManager.rewardAction": "Odblokuj {item}",
-  "games.achievementManager.rewardNote": "Przedmioty przyznaje gra. Odblokowanie osiągnięcia nie potwierdza otrzymania przedmiotu. Odebrane nagrody nie są przyznawane ponownie.",
+  "games.achievementManager.rewardNote":
+    "Przedmioty przyznaje gra. Odblokowanie osiągnięcia nie potwierdza otrzymania przedmiotu. Odebrane nagrody nie są przyznawane ponownie.",
   "games.achievementManager.progressCount": "Zdobyto {count} z {total}",
   "games.achievementManager.progressLoading": "Wczytywanie postępu ze Steam…",
-  "games.achievementManager.progressUnavailable": "Twój postęp jest niedostępny. Otwórz Steam lub połącz konto Steam, a następnie odśwież.",
-  "games.achievementManager.progressReadOnly": "Twój postęp w Steam · Przeglądanie nie zmienia osiągnięć.",
-  "games.achievementManager.progressPublic": "Tylko statystyki globalne · Osobisty postęp jest niedostępny.",
+  "games.achievementManager.progressUnavailable":
+    "Twój postęp jest niedostępny. Otwórz Steam lub połącz konto Steam, a następnie odśwież.",
+  "games.achievementManager.progressReadOnly":
+    "Twój postęp w Steam · Przeglądanie nie zmienia osiągnięć.",
+  "games.achievementManager.progressPublic":
+    "Tylko statystyki globalne · Osobisty postęp jest niedostępny.",
   "games.achievementManager.status.steam": "Połącz ze Steam",
   "games.achievementManager.status.connection": "Połączenie ze Steam niedostępne",
   "games.achievementManager.status.refresh": "Sprawdź postępy na Steam",
@@ -88,23 +107,29 @@ export default {
   "games.achievementManager.status.filtered": "Brak pasujących wyników",
   "games.achievementManager.status.noGames": "Nie znaleziono gier Steam",
   "games.achievementManager.status.library": "Nie udało się odczytać biblioteki Steam",
-  "games.achievementManager.status.libraryNote": "Spróbuj przeskanować ponownie. Gry z połączonego konta Steam są nadal dostępne.",
+  "games.achievementManager.status.libraryNote":
+    "Spróbuj przeskanować ponownie. Gry z połączonego konta Steam są nadal dostępne.",
   "games.achievementManager.status.emptyNote": "Steam nie zwrócił osiągnięć dla {game}.",
   "games.achievementManager.status.store": "Zobacz na Steam",
-  "games.achievementManager.recentGamesNote": "Po tej operacji Steam pokaże {game} wśród ostatnio uruchamianych gier.",
+  "games.achievementManager.recentGamesNote":
+    "Po tej operacji Steam pokaże {game} wśród ostatnio uruchamianych gier.",
   "games.achievementManager.rewardOwned": "Już odblokowane",
   "games.achievementManager.pending": "Oczekujące",
   "games.achievementManager.managed": "Zarządzane",
   "games.achievementManager.clear": "Wyczyść zmiany",
-  "games.achievementManager.discardConfirm": "Odświeżenie ze Steam odrzuci wybrane zmiany: {count}.",
-  "games.achievementManager.schemaMissing": "Steam nie ma na tym komputerze zapisanych szczegółów osiągnięć tej gry, więc są one tutaj tylko do odczytu. Uruchom grę raz przez Steam, a potem odśwież.",
+  "games.achievementManager.discardConfirm":
+    "Odświeżenie ze Steam odrzuci wybrane zmiany: {count}.",
+  "games.achievementManager.schemaMissing":
+    "Steam nie ma na tym komputerze zapisanych szczegółów osiągnięć tej gry, więc są one tutaj tylko do odczytu. Uruchom grę raz przez Steam, a potem odśwież.",
   "games.achievementManager.pickGame": "Wybierz inną grę",
   "games.achievementManager.pickTitle": "Wybierz grę",
   "games.achievementManager.pickSearch": "Szukaj w swoich grach",
-  "games.achievementManager.pickNote": "Harbor może edytować osiągnięcia gry, gdy Steam zapisze je w pamięci podręcznej tego komputera.",
+  "games.achievementManager.pickNote":
+    "Harbor może edytować osiągnięcia gry, gdy Steam zapisze je w pamięci podręcznej tego komputera.",
   "games.achievementManager.pickInstalled": "Zainstalowana",
   "games.achievementManager.pickEmpty": "Brak gier pasujących do wyszukiwania.",
-  "games.achievementManager.pickUnavailable": "Nie znaleziono gier Steam. Zainstaluj grę przez Steam lub połącz konto Steam i spróbuj ponownie.",
+  "games.achievementManager.pickUnavailable":
+    "Nie znaleziono gier Steam. Zainstaluj grę przez Steam lub połącz konto Steam i spróbuj ponownie.",
   "games.achievementManager.pickMore": "Pokaż więcej gier",
   "games.achievementManager.status.getSteam": "Pobierz Steam",
   "games.achievementManager.showLockedDetails": "Pokaż ukryte szczegóły",

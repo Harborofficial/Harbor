@@ -12,5 +12,5 @@ export default {
   "games.titles.changes": "سيتم تغيير {count} من العناوين",
   "games.titles.applied": "تم تحديث {count} من العناوين.",
   "games.titles.unchanged": "لا توجد تغييرات في العناوين. لا يزال بإمكانك حفظ التفضيلات.",
-  "games.titles.conflict": "تغيّرت العناوين في مكان آخر. أغلق هذه المراجعة وافتحها مجددًا قبل الحفظ."
+  "games.titles.conflict": "تغيّرت العناوين في مكان آخر. أغلق هذه المراجعة وافتحها مجددًا قبل الحفظ.",
 };

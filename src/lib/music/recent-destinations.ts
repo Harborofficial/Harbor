@@ -40,7 +40,10 @@ export async function hydrateMusicDestinations(): Promise<void> {
   hydrated = true;
   const saved = await readLocalJson<MusicDestination[]>(STORE);
   if (Array.isArray(saved) && saved.length > 0) {
-    list = uniqueMusicRecents([...list, ...saved.filter((entry) => entry && entry.id && entry.name)], musicDestinationIdentity).slice(0, LIMIT);
+    list = uniqueMusicRecents(
+      [...list, ...saved.filter((entry) => entry && entry.id && entry.name)],
+      musicDestinationIdentity,
+    ).slice(0, LIMIT);
     writeLocalJson(STORE, list);
   }
   ready = true;
@@ -51,10 +54,10 @@ export function recordMusicDestination(entry: Omit<MusicDestination, "at">): voi
   const id = entry.id?.trim();
   const name = entry.name?.trim();
   if (!id || !name) return;
-  const next = uniqueMusicRecents([
-    { ...entry, id, name, at: Date.now() },
-    ...list,
-  ], musicDestinationIdentity).slice(0, LIMIT);
+  const next = uniqueMusicRecents(
+    [{ ...entry, id, name, at: Date.now() }, ...list],
+    musicDestinationIdentity,
+  ).slice(0, LIMIT);
   list = next;
   writeLocalJson(STORE, next);
   notify();

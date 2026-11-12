@@ -9,12 +9,16 @@ export function AdSkipTab() {
   return (
     <Section
       title={t("Injected ad skip (experimental)")}
-      subtitle={t("Some cam and new-release rips have ads spliced into the video itself. When the community has marked one, a Skip button appears. You can also report ads you spot for review. Off by default.")}
+      subtitle={t(
+        "Some cam and new-release rips have ads spliced into the video itself. When the community has marked one, a Skip button appears. You can also report ads you spot for review. Off by default.",
+      )}
     >
       <AdSkipShowcase />
       <ToggleRow
         label={t("Enable injected ad skip")}
-        sub={t("Show a Skip button when a known injected ad plays, and a small report button on new releases so you can mark ads for review.")}
+        sub={t(
+          "Show a Skip button when a known injected ad plays, and a small report button on new releases so you can mark ads for review.",
+        )}
         value={settings.adSkipEnabled}
         onChange={(v) => update({ adSkipEnabled: v })}
       />

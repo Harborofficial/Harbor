@@ -7,5 +7,26 @@ import "./game-official-download.css";
 
 export function GameOfficialDownload({ source }: { source: OfficialGameDownload }) {
   const t = useT();
-  return <a className="games-official-download" href={source.href} target="_blank" rel="noreferrer" onClick={e => { e.preventDefault(); void openUrl(source.href); }}><GameArt src={source.logo}/><span><strong>{source.launcher}</strong><small>{t("games.official.publisherSource")}</small></span><span className="games-official-action">{t("games.official.get", { launcher: source.launcher })}<ArrowUpRight size={18}/></span></a>;
+  return (
+    <a
+      className="games-official-download"
+      href={source.href}
+      target="_blank"
+      rel="noreferrer"
+      onClick={(e) => {
+        e.preventDefault();
+        void openUrl(source.href);
+      }}
+    >
+      <GameArt src={source.logo} />
+      <span>
+        <strong>{source.launcher}</strong>
+        <small>{t("games.official.publisherSource")}</small>
+      </span>
+      <span className="games-official-action">
+        {t("games.official.get", { launcher: source.launcher })}
+        <ArrowUpRight size={18} />
+      </span>
+    </a>
+  );
 }

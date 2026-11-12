@@ -14,14 +14,7 @@ type Props = {
   iconUrl?: string;
 };
 
-export function DownloadButton({
-  status,
-  onStart,
-  onCancel,
-  onReveal,
-  onReset,
-  iconUrl,
-}: Props) {
+export function DownloadButton({ status, onStart, onCancel, onReveal, onReset, iconUrl }: Props) {
   const t = useT();
   useEffect(() => {
     if (status.kind !== "done") return;
@@ -60,15 +53,27 @@ export function DownloadButton({
           <ProgressRing ratio={status.ratio} indeterminate={!determinate} />
           {determinate ? (
             <>
-              <Download size={10} strokeWidth={2.2} className="relative -mb-px opacity-70 transition-opacity group-hover:opacity-0" />
+              <Download
+                size={10}
+                strokeWidth={2.2}
+                className="relative -mb-px opacity-70 transition-opacity group-hover:opacity-0"
+              />
               <span className="relative text-[11px] font-bold leading-none tabular-nums transition-opacity group-hover:opacity-0">
                 {pct}%
               </span>
             </>
           ) : (
-            <Download size={20} strokeWidth={1.9} className="relative transition-opacity group-hover:opacity-0" />
+            <Download
+              size={20}
+              strokeWidth={1.9}
+              className="relative transition-opacity group-hover:opacity-0"
+            />
           )}
-          <X size={18} strokeWidth={2.4} className="absolute opacity-0 transition-opacity group-hover:opacity-100" />
+          <X
+            size={18}
+            strokeWidth={2.4}
+            className="absolute opacity-0 transition-opacity group-hover:opacity-100"
+          />
         </button>
       </Tooltip>
     );
@@ -100,7 +105,12 @@ export function DownloadButton({
   }
 
   return (
-    <BigButton onClick={onStart} ariaLabel={t("Download video")} tooltip={t("Download")} iconUrl={iconUrl}>
+    <BigButton
+      onClick={onStart}
+      ariaLabel={t("Download video")}
+      tooltip={t("Download")}
+      iconUrl={iconUrl}
+    >
       <Download size={22} strokeWidth={1.9} />
     </BigButton>
   );
@@ -115,13 +125,7 @@ function Dot({ delay }: { delay: number }) {
   );
 }
 
-function ProgressRing({
-  ratio,
-  indeterminate,
-}: {
-  ratio: number;
-  indeterminate: boolean;
-}) {
+function ProgressRing({ ratio, indeterminate }: { ratio: number; indeterminate: boolean }) {
   const r = 20;
   const c = 2 * Math.PI * r;
   const offset = c * (1 - Math.max(0, Math.min(1, ratio)));

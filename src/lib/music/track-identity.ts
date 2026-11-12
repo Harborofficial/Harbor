@@ -4,7 +4,9 @@ import type { MusicTrack } from "./types";
 
 /** An upload names itself "Artist - Song"; provenance says who the recording is really by. */
 export function musicTrackCredit(
-  track: Pick<MusicTrack, "title" | "artist"> & { collectionOrigin?: { title?: string; artist?: string } },
+  track: Pick<MusicTrack, "title" | "artist"> & {
+    collectionOrigin?: { title?: string; artist?: string };
+  },
 ): { title: string; artist: string } {
   return {
     title: track.collectionOrigin?.title?.trim() || track.title || "",
@@ -31,9 +33,9 @@ export function sameMusicTrack(
   return left.id === right.id || musicTrackIdentity(left) === musicTrackIdentity(right);
 }
 
-export function dedupeMusicTracks<T extends Pick<MusicTrack, "id" | "connectorId" | "title" | "artist">>(
-  tracks: readonly T[],
-): T[] {
+export function dedupeMusicTracks<
+  T extends Pick<MusicTrack, "id" | "connectorId" | "title" | "artist">,
+>(tracks: readonly T[]): T[] {
   const seen = new Set<string>();
   const out: T[] = [];
   for (const track of tracks) {

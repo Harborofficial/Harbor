@@ -1,14 +1,17 @@
 export default {
   "games.shortcuts.reviewLaunch": "Sprawdź uruchamianie",
   "games.shortcuts.state.local": "Dostępne uruchamianie bezpośrednie",
-  "games.shortcuts.shortcut_identity": "Steam nie nadał temu skrótowi prawidłowego identyfikatora. Sprawdź ustawienia i uruchom bezpośrednio lub zapisz skrót ponownie w Steam i odśwież.",
+  "games.shortcuts.shortcut_identity":
+    "Steam nie nadał temu skrótowi prawidłowego identyfikatora. Sprawdź ustawienia i uruchom bezpośrednio lub zapisz skrót ponownie w Steam i odśwież.",
 
   "games.shortcuts.activity.open": "Aktywność",
   "games.shortcuts.activity.title": "Aktywność skrótów",
-  "games.shortcuts.activity.note": "Ostatnie skanowania i uruchomienia dla tego profilu Harbor. Do 300 wpisów.",
+  "games.shortcuts.activity.note":
+    "Ostatnie skanowania i uruchomienia dla tego profilu Harbor. Do 300 wpisów.",
   "games.shortcuts.activity.remember": "Zachowuj między sesjami",
   "games.shortcuts.activity.detailed": "Uwzględniaj szczegóły skanowania",
-  "games.shortcuts.activity.storageError": "Nie można uzyskać dostępu do zapisanej aktywności. Wpisy z tej sesji są nadal widoczne.",
+  "games.shortcuts.activity.storageError":
+    "Nie można uzyskać dostępu do zapisanej aktywności. Wpisy z tej sesji są nadal widoczne.",
   "games.shortcuts.activity.empty": "Brak aktywności.",
   "games.shortcuts.activity.clear": "Wyczyść aktywność",
   "games.shortcuts.activity.duration": "{ms} ms",
@@ -25,9 +28,12 @@ export default {
 
   "games.shortcuts.launchDirect": "Uruchom bezpośrednio",
   "games.shortcuts.viaSteam": "Graj przez Steam",
-  "games.shortcuts.directNote": "Uruchamia ten plik wykonywalny z jego opcjami uruchamiania i folderem początkowym.",
-  "games.shortcuts.shortcut_changed": "Ten skrót zmienił się w Steam. Odśwież bibliotekę i sprawdź ustawienia uruchamiania.",
-  "games.shortcuts.shortcut_options": "Te opcje używają polecenia opakowującego Steam. Uruchom ten skrót przez Steam.",
+  "games.shortcuts.directNote":
+    "Uruchamia ten plik wykonywalny z jego opcjami uruchamiania i folderem początkowym.",
+  "games.shortcuts.shortcut_changed":
+    "Ten skrót zmienił się w Steam. Odśwież bibliotekę i sprawdź ustawienia uruchamiania.",
+  "games.shortcuts.shortcut_options":
+    "Te opcje używają polecenia opakowującego Steam. Uruchom ten skrót przez Steam.",
   "games.dock.shortcut": "Skróty Steam",
   "games.shortcuts.note": "Gry spoza Steam dodane do biblioteki Steam.",
   "games.shortcuts.chooseFolder": "Wybierz folder Steam",
@@ -35,7 +41,8 @@ export default {
   "games.shortcuts.accountNumber": "Konto {id}",
   "games.shortcuts.automatic": "Użyj wykrytego folderu",
   "games.shortcuts.pickerError": "Nie można otworzyć wyboru folderu. Spróbuj ponownie.",
-  "games.shortcuts.partial": "Nie można odczytać części skrótów. Odśwież po zakończeniu zapisu przez Steam.",
+  "games.shortcuts.partial":
+    "Nie można odczytać części skrótów. Odśwież po zakończeniu zapisu przez Steam.",
   "games.shortcuts.empty": "Nie znaleziono skrótów. Dodaj grę spoza Steam w Steam i odśwież.",
   "games.shortcuts.state.ready": "Gotowe do gry",
   "games.shortcuts.state.missing": "Brak pliku wykonywalnego",
@@ -47,9 +54,11 @@ export default {
   "games.shortcuts.tags": "Tagi",
   "games.shortcuts.storeError": "Nie można zapisać ustawień.",
   "games.shortcuts.shortcut_location": "Wybierz folder Steam lub jego folder userdata.",
-  "games.shortcuts.shortcut_account": "Otwórz Steam na koncie tego skrótu i odśwież. Harbor musi używać tej samej instalacji Steam.",
+  "games.shortcuts.shortcut_account":
+    "Otwórz Steam na koncie tego skrótu i odśwież. Harbor musi używać tej samej instalacji Steam.",
   "games.shortcuts.shortcut_missing": "Ten skrót już nie istnieje. Odśwież bibliotekę.",
-  "games.shortcuts.shortcut_executable": "Brakuje pliku wykonywalnego lub jego ścieżka bezwzględna nie jest obsługiwana.",
+  "games.shortcuts.shortcut_executable":
+    "Brakuje pliku wykonywalnego lub jego ścieżka bezwzględna nie jest obsługiwana.",
   "games.shortcuts.shortcut_launch": "Steam nie mógł otworzyć skrótu. Spróbuj ponownie.",
-  "games.shortcuts.shortcut_read": "Nie można odczytać skrótów Steam. Spróbuj odświeżyć."
+  "games.shortcuts.shortcut_read": "Nie można odczytać skrótów Steam. Spróbuj odświeżyć.",
 };

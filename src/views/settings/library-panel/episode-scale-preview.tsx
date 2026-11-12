@@ -91,7 +91,9 @@ export function EpisodeScalePreview() {
       </div>
 
       <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
-        {t("Only the card gets wider. The text stays the same size, so bigger cards mean bigger artwork and fewer of them on screen.")}
+        {t(
+          "Only the card gets wider. The text stays the same size, so bigger cards mean bigger artwork and fewer of them on screen.",
+        )}
       </p>
     </div>
   );

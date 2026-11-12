@@ -19,7 +19,8 @@ export default {
   "games.wow.weekly.shown": "Run dalam daftar ini: {count}",
   "games.wow.weekly.partial": "Beberapa run tercatat tidak dapat diverifikasi.",
   "games.wow.weekly.empty": "Belum ada run yang tercatat untuk reset ini.",
-  "games.wow.weekly.scope": "Raider.IO menampilkan hingga 10 keystone tertinggi dari musim saat ini per reset. Run baru mungkin memerlukan waktu untuk muncul.",
+  "games.wow.weekly.scope":
+    "Raider.IO menampilkan hingga 10 keystone tertinggi dari musim saat ini per reset. Run baru mungkin memerlukan waktu untuk muncul.",
   "games.helldivers.title": "Perang Galaksi",
   "games.helldivers.intro": "Pilih lokasi penerjunan berikutnya.",
   "games.helldivers.refresh": "Segarkan Perang Galaksi",
@@ -77,16 +78,19 @@ export default {
   "games.warhammer.all": "Semua",
   "games.warhammer.play": "Bermain sebagai",
   "games.warhammer.face": "Hadapi mereka",
-  "games.warhammer.unavailable": "Gim tidak dapat diperbarui. Entri yang sudah dimuat mungkin tetap ditampilkan.",
+  "games.warhammer.unavailable":
+    "Gim tidak dapat diperbarui. Entri yang sudah dimuat mungkin tetap ditampilkan.",
   "games.warhammer.partial": "Beberapa gim tidak tersedia.",
   "games.warhammer.empty": "Belum ada hubungan terverifikasi untuk peran ini.",
   "games.warhammer.scope": "Titik awal untuk setiap faksi. Jelajahi katalog lengkap di bawah.",
   "games.warhammer.evidence": "Informasi penerbit tentang {name}",
   "games.warhammer.crossover": "Crossover 40K / Age of Sigmar",
   "games.warhammer.faction.marines": "Space Marines",
-  "games.warhammer.lore.marines": "Para pelindung manusia berzirah yang terbagi dalam Chapter tersendiri.",
+  "games.warhammer.lore.marines":
+    "Para pelindung manusia berzirah yang terbagi dalam Chapter tersendiri.",
   "games.warhammer.faction.mechanicus": "Adeptus Mechanicus",
-  "games.warhammer.lore.mechanicus": "Kaum pendeta pemuja mesin di Imperium, penjaga teknologi kuno.",
+  "games.warhammer.lore.mechanicus":
+    "Kaum pendeta pemuja mesin di Imperium, penjaga teknologi kuno.",
   "games.warhammer.faction.necrons": "Necrons",
   "games.warhammer.lore.necrons": "Dinasti kuno yang bangkit dalam tubuh logam hidup.",
   "games.warhammer.faction.orks": "Orks",
@@ -94,13 +98,17 @@ export default {
   "games.warhammer.faction.tyranids": "Tyranids",
   "games.warhammer.lore.tyranids": "Armada sarang alien yang melahap seluruh dunia.",
   "games.warhammer.faction.chaos": "Pasukan Chaos",
-  "games.warhammer.lore.chaos": "Pengkhianat, pemuja sekte, dan iblis yang mengabdi pada kekuatan Warp.",
+  "games.warhammer.lore.chaos":
+    "Pengkhianat, pemuja sekte, dan iblis yang mengabdi pada kekuatan Warp.",
   "games.warframe.title": "Menjelajahi Sistem Origin",
   "games.warframe.intro": "Lihat yang tersedia sebelum misi berikutnya.",
   "games.warframe.refresh": "Segarkan jadwal dunia",
-  "games.warframe.unavailable": "Jadwal tidak dapat disegarkan. Detail yang ditampilkan berasal dari cuplikan sebelumnya.",
-  "games.warframe.stale": "Sumber terlambat. Ini status terakhir yang dilaporkan; entri kedaluwarsa disembunyikan.",
-  "games.warframe.expired": "Cuplikan ini terlalu lama. Daftar saat ini disembunyikan sampai data baru tersedia.",
+  "games.warframe.unavailable":
+    "Jadwal tidak dapat disegarkan. Detail yang ditampilkan berasal dari cuplikan sebelumnya.",
+  "games.warframe.stale":
+    "Sumber terlambat. Ini status terakhir yang dilaporkan; entri kedaluwarsa disembunyikan.",
+  "games.warframe.expired":
+    "Cuplikan ini terlalu lama. Daftar saat ini disembunyikan sampai data baru tersedia.",
   "games.warframe.partial": "Sebagian jadwal tidak tersedia.",
   "games.warframe.reported": "Terakhir dilaporkan",
   "games.warframe.waiting": "Menunggu data baru",
@@ -137,7 +145,8 @@ export default {
   "games.warframe.noMatches": "Tidak ada retakan saat ini yang cocok dengan filter ini.",
   "games.warframe.more": "Tampilkan lebih banyak",
   "games.warframe.snapshot": "Cuplikan: {date}",
-  "games.warframe.scope": "Jadwal dunia bersama. Akses bergantung pada kemajuan misi cerita. Nama misi disediakan dalam bahasa Inggris.",
+  "games.warframe.scope":
+    "Jadwal dunia bersama. Akses bergantung pada kemajuan misi cerita. Nama misi disediakan dalam bahasa Inggris.",
   "games.warframe.world.cetus": "Plains of Eidolon",
   "games.warframe.world.vallis": "Orb Vallis",
   "games.warframe.world.cambion": "Cambion Drift",
@@ -148,11 +157,14 @@ export default {
   "games.warframe.state.corpus": "Corpus",
   "games.warframe.state.grineer": "Grineer",
   "games.rivals.title": "Pilih heromu",
-  "games.rivals.intro": "Jelajahi hero, bandingkan lawan, dan temukan rekan untuk pertandingan berikutnya.",
+  "games.rivals.intro":
+    "Jelajahi hero, bandingkan lawan, dan temukan rekan untuk pertandingan berikutnya.",
   "games.rivals.refresh": "Segarkan panduan hero",
-  "games.rivals.statsFailed": "Statistik tidak dapat disegarkan. Angka yang ditampilkan berasal dari data sebelumnya.",
+  "games.rivals.statsFailed":
+    "Statistik tidak dapat disegarkan. Angka yang ditampilkan berasal dari data sebelumnya.",
   "games.rivals.artFailed": "Gambar dan peran resmi tidak dapat disegarkan.",
-  "games.rivals.stale": "Beberapa statistik berusia lebih dari dua hari. Periksa tanggal sebelum membandingkan.",
+  "games.rivals.stale":
+    "Beberapa statistik berusia lebih dari dua hari. Periksa tanggal sebelum membandingkan.",
   "games.rivals.partial": "Beberapa data tidak dapat dibaca. Sampel mungkin tidak lengkap.",
   "games.rivals.role": "Peran hero",
   "games.rivals.all": "Semua",
@@ -178,12 +190,15 @@ export default {
   "games.rivals.heroRate": "Rasio kemenangan {hero} melawan tiap musuh",
   "games.rivals.with": "Bersama rekan",
   "games.rivals.duoRate": "Rasio kemenangan bersama pasangan",
-  "games.rivals.scope": "Pertandingan kompetitif 6 lawan 6 yang diamati, semua tingkat kemampuan. Minimal 200 pertandingan per hero dan 100 per pasangan. Hasil pasangan tidak berarti kemampuan Team-Up atau memprediksi pertandingan berikutnya.",
+  "games.rivals.scope":
+    "Pertandingan kompetitif 6 lawan 6 yang diamati, semua tingkat kemampuan. Minimal 200 pertandingan per hero dan 100 per pasangan. Hasil pasangan tidak berarti kemampuan Team-Up atau memprediksi pertandingan berikutnya.",
   "games.rivals.snapshot": "Data: {date}",
   "games.rivals.noMatches": "Tidak ada hero yang sesuai dengan filter.",
   "games.rivals.unavailable": "Panduan hero tidak tersedia. Coba segarkan.",
-  "games.rivals.pairsFailed": "Data perbandingan tidak dapat disegarkan. Pasangan yang ditampilkan berasal dari data sebelumnya.",
-  "games.rivals.mismatch": "Musim data dari penyedia berbeda. Segarkan untuk membandingkan data yang sesuai.",
+  "games.rivals.pairsFailed":
+    "Data perbandingan tidak dapat disegarkan. Pasangan yang ditampilkan berasal dari data sebelumnya.",
+  "games.rivals.mismatch":
+    "Musim data dari penyedia berbeda. Segarkan untuk membandingkan data yang sesuai.",
   "games.rivals.sample": "{count} pertandingan",
   "games.darktide.scriptures": "Ambil kitab suci",
   "games.darktide.grimoires": "Ambil grimoire",
@@ -198,14 +213,17 @@ export default {
   "games.darktide.unknown": "Belum diklasifikasi",
   "games.darktide.difficulty": "Kesulitan",
   "games.darktide.search": "Cari peta",
-  "games.darktide.stale": "Pemeriksaan terakhir sudah kedaluwarsa. Segarkan untuk melihat misi yang tersedia.",
-  "games.darktide.failed": "Misi tidak dapat disegarkan. Misi yang ditampilkan berasal dari pemeriksaan terakhir.",
+  "games.darktide.stale":
+    "Pemeriksaan terakhir sudah kedaluwarsa. Segarkan untuk melihat misi yang tersedia.",
+  "games.darktide.failed":
+    "Misi tidak dapat disegarkan. Misi yang ditampilkan berasal dari pemeriksaan terakhir.",
   "games.darktide.partial": "Beberapa data misi tidak dapat dibaca.",
   "games.darktide.noMatches": "Tidak ada misi yang sesuai dengan filter.",
   "games.darktide.empty": "Tidak ada misi yang masih berlaku dalam data terbaru.",
   "games.darktide.more": "Tampilkan misi lainnya",
   "games.darktide.checked": "Diperiksa {date}",
-  "games.darktide.scope": "Data komunitas. Ketersediaan dan hadiah dalam game dapat berbeda; ini bukan papan misi karaktermu.",
+  "games.darktide.scope":
+    "Data komunitas. Ketersediaan dan hadiah dalam game dapat berbeda; ini bukan papan misi karaktermu.",
   "games.darktide.remaining": "Sisa {count} mnt",
   "games.darktide.credits": "Docket Ordo",
   "games.darktide.xp": "XP",
@@ -245,19 +263,24 @@ export default {
   "games.companion.showAll": "Lihat semua {count} hero",
   "games.companion.noMatches": "Tidak ada hero yang cocok.",
   "games.companion.through": "Pertandingan hingga {date}",
-  "games.companion.sampleNote": "Sampel komunitas, semua peringkat; minimal 100 pertandingan per hero. Bukan prediksi.",
-  "games.companion.unavailable": "Data hero gagal diperbarui. Data yang tampil berasal dari pemeriksaan sebelumnya.",
-  "games.companion.statsUnavailable": "Statistik hero tidak tersedia. Kamu masih dapat melihat daftar hero.",
+  "games.companion.sampleNote":
+    "Sampel komunitas, semua peringkat; minimal 100 pertandingan per hero. Bukan prediksi.",
+  "games.companion.unavailable":
+    "Data hero gagal diperbarui. Data yang tampil berasal dari pemeriksaan sebelumnya.",
+  "games.companion.statsUnavailable":
+    "Statistik hero tidak tersedia. Kamu masih dapat melihat daftar hero.",
   "games.gw2.title": "Brankas Penyihir",
   "games.gw2.intro": "Pilih hadiah dan rencanakan Astral Acclaim Anda.",
   "games.gw2.refresh": "Segarkan hadiah",
-  "games.gw2.unavailable": "Hadiah tidak dapat disegarkan. Informasi sebelumnya mungkin sudah usang.",
+  "games.gw2.unavailable":
+    "Hadiah tidak dapat disegarkan. Informasi sebelumnya mungkin sudah usang.",
   "games.gw2.ends": "Musim berakhir {date}",
   "games.gw2.expired": "Musim ini tidak aktif. Segarkan sebelum merencanakan hadiah.",
   "games.gw2.partial": "Beberapa detail item tidak tersedia. Harga hadiah tetap disertakan.",
   "games.gw2.guide": "Panduan brankas",
   "games.gw2.checked": "Diperiksa {date}",
-  "games.gw2.scope": "Disimpan di profil Harbor ini. Setiap pilihan menghitung satu penawaran; saldo, batas pembelian, dan akses ekspansi Anda tidak diperiksa. Pastikan ketersediaannya lalu beli di dalam gim.",
+  "games.gw2.scope":
+    "Disimpan di profil Harbor ini. Setiap pilihan menghitung satu penawaran; saldo, batas pembelian, dan akses ekspansi Anda tidak diperiksa. Pastikan ketersediaannya lalu beli di dalam gim.",
   "games.gw2.total": "Total rencana",
   "games.gw2.currency": "Astral Acclaim",
   "games.gw2.selected": "{count} penawaran dipilih",
@@ -287,14 +310,16 @@ export default {
   "games.gw2.quantity": "Jumlah: {count}",
   "games.deadlockBuilds.open": "Build komunitas",
   "games.deadlockBuilds.back": "Kembali ke build",
-  "games.deadlockBuilds.intro": "Panduan item dari komunitas. Periksa tanggal pembaruan sebelum memilih.",
+  "games.deadlockBuilds.intro":
+    "Panduan item dari komunitas. Periksa tanggal pembaruan sebelum memilih.",
   "games.deadlockBuilds.search": "Cari build",
   "games.deadlockBuilds.recent": "Baru diperbarui",
   "games.deadlockBuilds.popular": "Favorit mingguan",
   "games.deadlockBuilds.language": "Bahasa build",
   "games.deadlockBuilds.allLanguages": "Semua bahasa",
   "games.deadlockBuilds.refresh": "Segarkan build",
-  "games.deadlockBuilds.failed": "Build tidak dapat disegarkan. Panduan sebelumnya mungkin sudah usang.",
+  "games.deadlockBuilds.failed":
+    "Build tidak dapat disegarkan. Panduan sebelumnya mungkin sudah usang.",
   "games.deadlockBuilds.updated": "Diperbarui {date}",
   "games.deadlockBuilds.undated": "Tanggal pembaruan tidak tersedia",
   "games.deadlockBuilds.favorites": "{count} favorit mingguan",
@@ -306,8 +331,10 @@ export default {
   "games.deadlockBuilds.copy": "Salin ID build",
   "games.deadlockBuilds.use": "ID build:",
   "games.deadlockBuilds.copyFailed": "Gagal menyalin. Pilih ID untuk menyalinnya secara manual.",
-  "games.deadlockBuilds.definitions": "Nama dan biaya item memakai data game terbaru yang diketahui. Panduan lama mungkin berbeda; grup dapat berisi alternatif.",
-  "games.deadlockBuilds.itemsFailed": "Sebagian detail item tidak tersedia. Panduan penulis dan ID item tetap terlihat.",
+  "games.deadlockBuilds.definitions":
+    "Nama dan biaya item memakai data game terbaru yang diketahui. Panduan lama mungkin berbeda; grup dapat berisi alternatif.",
+  "games.deadlockBuilds.itemsFailed":
+    "Sebagian detail item tidak tersedia. Panduan penulis dan ID item tetap terlihat.",
   "games.deadlockBuilds.noItems": "Build ini tidak memiliki grup item.",
   "games.deadlockBuilds.group": "Grup {number}",
   "games.deadlockBuilds.optional": "Opsional",
@@ -329,7 +356,8 @@ export default {
   "games.rivals.guide.teamUp": "Kemampuan Team-Up",
   "games.rivals.guide.base": "Efek dasar",
   "games.rivals.guide.enhanced": "Efek ditingkatkan",
-  "games.rivals.guide.reference": "Referensi hero resmi · Bahasa Inggris. Nilai dapat berubah setelah pembaruan keseimbangan.",
+  "games.rivals.guide.reference":
+    "Referensi hero resmi · Bahasa Inggris. Nilai dapat berubah setelah pembaruan keseimbangan.",
   "games.rivals.guide.failed": "Panduan hero resmi tidak dapat dimuat.",
   "games.rivals.guide.partial": "Beberapa detail kemampuan tidak tersedia.",
   "games.rivals.guide.checked": "Diperiksa {date}",

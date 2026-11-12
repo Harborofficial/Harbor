@@ -119,6 +119,9 @@ test("useCwAdvance inspects unaired episodes and sets waitingForAir when timer m
     "utf8",
   );
   assert.match(advanceSrc, /const curEpInList = list\.find/);
-  assert.match(advanceSrc, /if \(curEpInList && !nextEpAired\(list, curEpInList, isAnime\)\)/);
+  assert.match(
+    advanceSrc,
+    /if \(curEpInList && !nextEpAired\(list, curEpInList, isAnime, effCur\.season\)\)/,
+  );
   assert.match(advanceSrc, /if \(animeCwEnd === "timer"\)/);
 });

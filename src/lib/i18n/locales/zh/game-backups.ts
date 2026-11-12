@@ -8,7 +8,8 @@ export default {
   "games.backups.result.keptCurrent": "当前存档未更改",
   "games.backups.resultNote.keptCurrent": "恢复已完成，此文件夹中的当前存档未被替换。",
   "games.backups.title": "存档备份",
-  "games.backups.intro": "保存一个可以随时回到的时刻。请选择此游戏的存档文件夹，以及单独的备份文件夹。备份或恢复前请关闭游戏。",
+  "games.backups.intro":
+    "保存一个可以随时回到的时刻。请选择此游戏的存档文件夹，以及单独的备份文件夹。备份或恢复前请关闭游戏。",
   "games.backups.desktop": "存档备份功能可在 Harbor 桌面应用中使用，使用你在电脑上选择的文件夹。",
   "games.backups.folder.source": "游戏存档",
   "games.backups.folder.vault": "备份文件夹",
@@ -30,7 +31,8 @@ export default {
   "games.backups.review": "检查",
   "games.backups.reviewNamed": "检查 {name}，{date}",
   "games.backups.reviewTitle": "检查恢复内容",
-  "games.backups.restoreNote": "此快照将替换下方存档文件夹的内容。创建快照后新增的文件将保留用于恢复。请在恢复完成前保持游戏关闭。",
+  "games.backups.restoreNote":
+    "此快照将替换下方存档文件夹的内容。创建快照后新增的文件将保留用于恢复。请在恢复完成前保持游戏关闭。",
   "games.backups.added": "要添加的文件",
   "games.backups.replaced": "要替换的文件",
   "games.backups.removed": "要移除的文件",
@@ -50,9 +52,12 @@ export default {
   "games.backups.result.rolledBack": "原始存档已还原",
   "games.backups.result.recoveryNeeded": "原始存档需要修复",
   "games.backups.result.notRestored": "快照未恢复",
-  "games.backups.resultNote.restored": "存档文件夹现已与此快照一致。恢复副本仍然保留，方便你回到之前的状态。",
-  "games.backups.resultNote.rolledBack": "恢复未能完成，因此 Harbor 已将原始存档文件夹放回原处。恢复快照也可在下方使用。",
-  "games.backups.resultNote.recoveryNeeded": "恢复失败后，Harbor 无法将原始文件夹放回原处。请保持游戏关闭。原始文件已保存在下方文件夹及恢复快照中。",
+  "games.backups.resultNote.restored":
+    "存档文件夹现已与此快照一致。恢复副本仍然保留，方便你回到之前的状态。",
+  "games.backups.resultNote.rolledBack":
+    "恢复未能完成，因此 Harbor 已将原始存档文件夹放回原处。恢复快照也可在下方使用。",
+  "games.backups.resultNote.recoveryNeeded":
+    "恢复失败后，Harbor 无法将原始文件夹放回原处。请保持游戏关闭。原始文件已保存在下方文件夹及恢复快照中。",
   "games.backups.resultNote.notRestored": "Harbor 无法将快照放入所选文件夹。备份仍然可用。",
   "games.backups.phase.scanning": "正在读取存档…",
   "games.backups.phase.copying": "正在复制存档文件…",
@@ -61,16 +66,19 @@ export default {
   "games.backups.progress": "存档操作进度",
   "games.backups.progressFiles": "已处理 {done} 个，共 {total} 个文件",
   "games.backups.save_folder": "此文件夹不可用。请选择已连接驱动器上的现有文件夹。",
-  "games.backups.save_links": "此文件夹包含链接或特殊文件。请选择仅包含普通文件和文件夹的存档文件夹。",
+  "games.backups.save_links":
+    "此文件夹包含链接或特殊文件。请选择仅包含普通文件和文件夹的存档文件夹。",
   "games.backups.save_record": "无法安全读取备份记录。文件已保留，请检查所选备份文件夹。",
   "games.backups.save_read": "Harbor 无法读取这些存档。请检查文件夹是否可用，并确保游戏已关闭。",
   "games.backups.save_write": "Harbor 未能完成存档写入。请检查文件夹是否可写，并确保游戏已关闭。",
   "games.backups.save_name": "无法保留某个文件名。请使用包含受支持文件名的文件夹。",
-  "games.backups.save_changed": "存档文件在操作过程中发生了变化。请关闭游戏，然后创建新备份或重新检查恢复内容。",
+  "games.backups.save_changed":
+    "存档文件在操作过程中发生了变化。请关闭游戏，然后创建新备份或重新检查恢复内容。",
   "games.backups.save_canceled": "已取消。原始存档未更改。",
   "games.backups.save_empty": "此文件夹还没有存档文件。请选择此游戏存放存档的文件夹。",
   "games.backups.save_busy": "另一项存档操作仍在进行。请等待完成后重试。",
-  "games.backups.save_limit": "此文件夹超出备份限制：每个游戏最多 2 GB、5,000 个文件或 300 个快照。请选择更小的存档文件夹或其他备份文件夹。",
+  "games.backups.save_limit":
+    "此文件夹超出备份限制：每个游戏最多 2 GB、5,000 个文件或 300 个快照。请选择更小的存档文件夹或其他备份文件夹。",
   "games.backups.save_nested": "存档和备份文件夹必须分开，不能互相包含。",
   "games.backups.save_integrity": "备份文件与记录的校验和不再一致。当前存档尚未被替换。",
   "games.backups.save_expired": "本次恢复检查已过期。请在恢复前重新检查快照。",

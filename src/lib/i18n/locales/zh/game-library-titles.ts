@@ -12,5 +12,5 @@ export default {
   "games.titles.changes": "将更改 {count} 个名称",
   "games.titles.applied": "已更新 {count} 个名称。",
   "games.titles.unchanged": "名称没有变化。仍可保存偏好设置。",
-  "games.titles.conflict": "名称已在其他位置更改。请关闭并重新打开此预览后再保存。"
+  "games.titles.conflict": "名称已在其他位置更改。请关闭并重新打开此预览后再保存。",
 };

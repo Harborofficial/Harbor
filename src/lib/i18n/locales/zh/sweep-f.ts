@@ -195,7 +195,8 @@ const sweepF: Record<string, string> = {
   "The draw is not published yet.": "签表尚未公布。",
   'The economy has "inflation". What\'s happening?': "经济出现了“通货膨胀”。这意味着什么？",
   "The end time has to be after the start.": "结束时间必须晚于开始时间。",
-  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.": "引擎会监听本地端口并加入 DHT 以查找对等节点。活动传输就是它当前打开的流。",
+  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.":
+    "引擎会监听本地端口并加入 DHT 以查找对等节点。活动传输就是它当前打开的流。",
   "the folder you pick": "您选择的文件夹",
   "The free tier is $0 for personal use. Just pick the first option, no payment needed.":
     "个人使用的免费方案费用为 $0。选择第一个选项即可，无需付款。",

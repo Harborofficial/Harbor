@@ -137,7 +137,8 @@ const catalog11: Record<string, string> = {
   "Same Wi-Fi as this computer": "Ta sama sieć Wi-Fi co ten komputer",
   "Same file": "Ten sam plik",
   "Same file as host": "Ten sam plik co u hosta",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Takie samo użycie tylko do odczytu jak w Real-Debrid. Umożliwia też kolejkowanie źródeł spoza pamięci podręcznej w oknie wyboru odtwarzania.",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Takie samo użycie tylko do odczytu jak w Real-Debrid. Umożliwia też kolejkowanie źródeł spoza pamięci podręcznej w oknie wyboru odtwarzania.",
   "Same-genre picks from your installed sources":
     "Propozycje z tego samego gatunku z zainstalowanych źródeł",
   "Sample title": "Przykładowy tytuł",
@@ -454,7 +455,8 @@ const catalog11: Record<string, string> = {
   "Select renderer": "Wybierz urządzenie odtwarzające",
   "Self-host": "Własny hosting",
   "Self-test": "Autotest",
-  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.": "Autotest jest niedostępny przy włączonym rygorystycznym zdalnym przesyłaniu strumieniowym. Pobiera mały plik testowy bezpośrednio od innych użytkowników na to urządzenie.",
+  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.":
+    "Autotest jest niedostępny przy włączonym rygorystycznym zdalnym przesyłaniu strumieniowym. Pobiera mały plik testowy bezpośrednio od innych użytkowników na to urządzenie.",
   Send: "Wyślij",
   "Send a bug report": "Wyślij zgłoszenie błędu",
   "Send a bug report straight to the Harbor team. Screenshots and screen recordings welcome.":

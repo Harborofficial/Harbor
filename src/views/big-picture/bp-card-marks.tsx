@@ -90,10 +90,7 @@ export function BpCardMarks({ meta }: { meta: Meta }) {
   const rerun = marks && cinema && isRerun(meta);
   const showCinema = marks && cinema && !rerun;
   const isNew =
-    marks &&
-    !cinema &&
-    !!meta.releaseInfo &&
-    meta.releaseInfo === String(new Date().getFullYear());
+    marks && !cinema && !!meta.releaseInfo && meta.releaseInfo === String(new Date().getFullYear());
 
   const animeWin = marks && isAnime ? bpAnimeAward(meta) : null;
   const classic = useClassicMark(meta, marks && !isAnime);

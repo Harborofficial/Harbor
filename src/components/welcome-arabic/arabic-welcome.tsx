@@ -135,7 +135,11 @@ export default function ArabicWelcome({ onFeedback }: { onFeedback?: () => void 
           <span lang="ar" dir="rtl" className="font-arabic text-[16px] font-semibold">
             {CTA_AR}
           </span>
-          <span lang="en" dir="ltr" className="text-[12px] font-medium tracking-wide text-canvas/70">
+          <span
+            lang="en"
+            dir="ltr"
+            className="text-[12px] font-medium tracking-wide text-canvas/70"
+          >
             {CTA_HELPER_EN}
           </span>
         </button>

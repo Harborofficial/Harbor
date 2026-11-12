@@ -11,13 +11,7 @@ import { useBpLive, useBpLiveArt, type NowItem } from "./use-bp-live";
 
 const HYDRATE_CAP = 16;
 
-export function BpLiveRow({
-  lead,
-  autofocusFirst,
-}: {
-  lead: BpRowLead;
-  autofocusFirst?: boolean;
-}) {
+export function BpLiveRow({ lead, autofocusFirst }: { lead: BpRowLead; autofocusFirst?: boolean }) {
   const live = useBpLive();
   const { settings } = useSettings();
   const favorites = useFavorites();

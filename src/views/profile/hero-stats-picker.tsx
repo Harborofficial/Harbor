@@ -16,7 +16,11 @@ import type { ProfileCounts, ProfileSummary } from "./profile-types";
 
 function watchLabel(minutes: number): string {
   const f = formatWatchTime(minutes);
-  const parts: Array<[number, string]> = [[f.aVal, f.a], [f.bVal, f.b], [f.cVal, f.c]];
+  const parts: Array<[number, string]> = [
+    [f.aVal, f.a],
+    [f.bVal, f.b],
+    [f.cVal, f.c],
+  ];
   const kept = parts.filter(([v]) => v > 0).slice(0, 2);
   if (!kept.length) return `0${f.c}`;
   return kept.map(([v, u]) => `${v}${u}`).join(" ");
@@ -60,7 +64,9 @@ function StatTile({
         </span>
       )}
       <span className={`flex flex-col items-center gap-1 ${visible ? "" : "opacity-45"}`}>
-        <span className="whitespace-nowrap text-[16px] font-semibold tabular-nums text-ink">{value}</span>
+        <span className="whitespace-nowrap text-[16px] font-semibold tabular-nums text-ink">
+          {value}
+        </span>
         <span className="line-clamp-2 text-center text-[11px] uppercase leading-tight tracking-[0.1em] text-ink-subtle">
           {label}
         </span>
@@ -113,7 +119,11 @@ export function HeroStatsPicker({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[185] flex items-center justify-center p-4" role="dialog" aria-modal>
+    <div
+      className="fixed inset-0 z-[185] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal
+    >
       <button aria-label={t("Close")} className="absolute inset-0 bg-black/55" onClick={onClose} />
       <div className="relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-surface ring-1 ring-edge">
         <div className="flex items-center justify-between border-b border-edge-soft px-6 py-4">
@@ -129,7 +139,9 @@ export function HeroStatsPicker({
 
         <div className="flex-1 overflow-y-auto px-6 py-5">
           <p className="pb-4 text-[13px] text-ink-muted">
-            {t("Pick the stats that show in the row at the top of your public profile. At least one has to stay visible.")}
+            {t(
+              "Pick the stats that show in the row at the top of your public profile. At least one has to stay visible.",
+            )}
           </p>
           <div className="grid grid-cols-3 gap-2.5">
             {STAT_ORDER.map((k) => {

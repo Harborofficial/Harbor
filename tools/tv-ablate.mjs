@@ -32,7 +32,12 @@ const argv = Object.fromEntries(
   }),
 );
 
-const sh = (c) => execSync(c, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 64 * 1024 * 1024 });
+const sh = (c) =>
+  execSync(c, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+    maxBuffer: 64 * 1024 * 1024,
+  });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Named arms. Each is a pair of JS expressions: apply and undo. Undo must fully
@@ -126,11 +131,13 @@ if (argv.list) {
 
 const get = (p) =>
   new Promise((res, rej) =>
-    http.get({ host: "127.0.0.1", port: PORT, path: p }, (s) => {
-      let d = "";
-      s.on("data", (c) => (d += c));
-      s.on("end", () => res(d));
-    }).on("error", rej),
+    http
+      .get({ host: "127.0.0.1", port: PORT, path: p }, (s) => {
+        let d = "";
+        s.on("data", (c) => (d += c));
+        s.on("end", () => res(d));
+      })
+      .on("error", rej),
   );
 
 // The Fire TV ambient screensaver steals the foreground; after that gfxinfo
@@ -138,10 +145,20 @@ const get = (p) =>
 function assertForeground() {
   const m = sh(`adb shell dumpsys activity activities`).match(/ResumedActivity.*?([\w.]+)\//);
   const fg = m ? m[1] : "?";
-  if (fg !== PKG) throw new Error(`${fg} is foreground, not ${PKG}. Screensaver? try: adb shell settings put secure screensaver_enabled 0`);
+  if (fg !== PKG)
+    throw new Error(
+      `${fg} is foreground, not ${PKG}. Screensaver? try: adb shell settings put secure screensaver_enabled 0`,
+    );
 }
 
-const COL = { Flags: 0, IntendedVsync: 1, HandleInputStart: 5, IssueDrawCommandsStart: 11, SwapBuffers: 12, FrameCompleted: 13 };
+const COL = {
+  Flags: 0,
+  IntendedVsync: 1,
+  HandleInputStart: 5,
+  IssueDrawCommandsStart: 11,
+  SwapBuffers: 12,
+  FrameCompleted: 13,
+};
 
 function readFrames() {
   const out = sh(`adb shell dumpsys gfxinfo ${PKG} framestats`);
@@ -157,11 +174,23 @@ function readFrames() {
   // measurement rather than a fast one.
   if (rows.length < 30) return null;
   const ms = (a, b) => (b - a) / 1e6;
-  const tot = rows.map((r) => ms(r[COL.IntendedVsync], r[COL.FrameCompleted])).sort((a, b) => a - b);
-  const iss = rows.map((r) => ms(r[COL.IssueDrawCommandsStart], r[COL.SwapBuffers])).sort((a, b) => a - b);
-  const del = rows.map((r) => ms(r[COL.IntendedVsync], r[COL.HandleInputStart])).sort((a, b) => a - b);
+  const tot = rows
+    .map((r) => ms(r[COL.IntendedVsync], r[COL.FrameCompleted]))
+    .sort((a, b) => a - b);
+  const iss = rows
+    .map((r) => ms(r[COL.IssueDrawCommandsStart], r[COL.SwapBuffers]))
+    .sort((a, b) => a - b);
+  const del = rows
+    .map((r) => ms(r[COL.IntendedVsync], r[COL.HandleInputStart]))
+    .sort((a, b) => a - b);
   const q = (a, f) => a[Math.min(a.length - 1, Math.floor(a.length * f))];
-  return { n: rows.length, p50: q(tot, 0.5), p90: q(tot, 0.9), issue50: q(iss, 0.5), delay50: q(del, 0.5) };
+  return {
+    n: rows.length,
+    p50: q(tot, 0.5),
+    p90: q(tot, 0.9),
+    issue50: q(iss, 0.5),
+    delay50: q(del, 0.5),
+  };
 }
 
 // Exact two-sided Mann-Whitney by enumeration for small n, normal approximation
@@ -181,7 +210,8 @@ function mannWhitney(a, b) {
       if (cur.length === n1) {
         const g1 = idx.filter((i) => !cur.includes(i));
         let u = 0;
-        for (const i of cur) for (const j of g1) u += all[i][0] > all[j][0] ? 1 : all[i][0] === all[j][0] ? 0.5 : 0;
+        for (const i of cur)
+          for (const j of g1) u += all[i][0] > all[j][0] ? 1 : all[i][0] === all[j][0] ? 0.5 : 0;
         total++;
         if (u >= U || u <= N - U) count++;
         return;
@@ -198,7 +228,11 @@ function mannWhitney(a, b) {
 }
 function erf(x) {
   const t = 1 / (1 + 0.3275911 * Math.abs(x));
-  const y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+  const y =
+    1 -
+    ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
+      t *
+      Math.exp(-x * x);
   return x >= 0 ? y : -y;
 }
 
@@ -224,14 +258,21 @@ const main = async () => {
       pend.set(i, r);
       ws.send(JSON.stringify({ id: i, method: m, params: p || {} }));
     });
-  const ev = async (e) => (await send("Runtime.evaluate", { expression: `(()=>{${e}})()`, returnByValue: true }))?.result?.value;
+  const ev = async (e) =>
+    (await send("Runtime.evaluate", { expression: `(()=>{${e}})()`, returnByValue: true }))?.result
+      ?.value;
   // Input over CDP, not adb: adb input was measured at +2.8s per press and would
   // dominate the sampled window.
   const press = async (k) => {
     const c = { right: 39, left: 37, down: 40, up: 38 }[k];
     const n = { right: "ArrowRight", left: "ArrowLeft", down: "ArrowDown", up: "ArrowUp" }[k];
     for (const t of ["keyDown", "keyUp"])
-      await send("Input.dispatchKeyEvent", { type: t, windowsVirtualKeyCode: c, nativeVirtualKeyCode: c, key: n });
+      await send("Input.dispatchKeyEvent", {
+        type: t,
+        windowsVirtualKeyCode: c,
+        nativeVirtualKeyCode: c,
+        key: n,
+      });
   };
 
   const vertical = argv.drive === "vertical";
@@ -266,10 +307,13 @@ const main = async () => {
   if (ok === false) throw new Error("arm setup failed: target element not found on this screen");
 
   console.log(`arm: ${arm.what}`);
-  console.log(`drive: ${vertical ? "vertical" : "horizontal"}, ${presses} presses, ${pairs} interleaved pairs\n`);
+  console.log(
+    `drive: ${vertical ? "vertical" : "horizontal"}, ${presses} presses, ${pairs} interleaved pairs\n`,
+  );
   console.log("pair    control p50   arm p50    control p90   arm p90");
 
-  const A = [], B = [];
+  const A = [],
+    B = [];
   for (let i = 0; i < pairs; i++) {
     await ev(arm.off);
     await wait(700);
@@ -296,11 +340,18 @@ const main = async () => {
   }
   const med = (rs, k) => rs.map((r) => r[k]).sort((x, y) => x - y)[Math.floor(rs.length / 2)];
   console.log(`\n            p50      p90    issue50   delay50`);
-  console.log(`control  ${med(A, "p50").toFixed(1).padStart(6)}  ${med(A, "p90").toFixed(1).padStart(7)}  ${med(A, "issue50").toFixed(1).padStart(7)}  ${med(A, "delay50").toFixed(1).padStart(7)}`);
-  console.log(`arm      ${med(B, "p50").toFixed(1).padStart(6)}  ${med(B, "p90").toFixed(1).padStart(7)}  ${med(B, "issue50").toFixed(1).padStart(7)}  ${med(B, "delay50").toFixed(1).padStart(7)}`);
+  console.log(
+    `control  ${med(A, "p50").toFixed(1).padStart(6)}  ${med(A, "p90").toFixed(1).padStart(7)}  ${med(A, "issue50").toFixed(1).padStart(7)}  ${med(A, "delay50").toFixed(1).padStart(7)}`,
+  );
+  console.log(
+    `arm      ${med(B, "p50").toFixed(1).padStart(6)}  ${med(B, "p90").toFixed(1).padStart(7)}  ${med(B, "issue50").toFixed(1).padStart(7)}  ${med(B, "delay50").toFixed(1).padStart(7)}`,
+  );
 
   for (const metric of ["p50", "p90"]) {
-    const { U, N, p } = mannWhitney(A.map((r) => r[metric]), B.map((r) => r[metric]));
+    const { U, N, p } = mannWhitney(
+      A.map((r) => r[metric]),
+      B.map((r) => r[metric]),
+    );
     const better = U / N;
     const verdict = p < 0.05 ? (better > 0.5 ? "ARM IS FASTER" : "ARM IS SLOWER") : "no effect";
     console.log(

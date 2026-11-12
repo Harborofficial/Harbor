@@ -103,7 +103,11 @@ export function BpOnboardField({
             aria-label={revealed ? t("Hide") : t("Show")}
             className="flex h-[clamp(54px,6.4vh,80px)] w-[clamp(54px,6.4vh,80px)] shrink-0 items-center justify-center rounded-[var(--bp-r-md)] border border-[var(--bp-edge-2)] text-ink"
           >
-            {revealed ? <EyeOff size={22} strokeWidth={2.1} /> : <Eye size={22} strokeWidth={2.1} />}
+            {revealed ? (
+              <EyeOff size={22} strokeWidth={2.1} />
+            ) : (
+              <Eye size={22} strokeWidth={2.1} />
+            )}
           </button>
         )}
       </div>

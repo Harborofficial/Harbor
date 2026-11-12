@@ -6,16 +6,19 @@ export default {
   "games.calendar.source": "Jogos salvos",
   "games.calendar.hint": "Datas de lançamento dos seus jogos salvos",
   "games.calendar.note": "Planeje o que jogar a seguir com os lançamentos dos seus jogos salvos.",
-  "games.calendar.empty": "Salve um jogo na seção Jogos para acompanhar os planos de lançamento aqui.",
+  "games.calendar.empty":
+    "Salve um jogo na seção Jogos para acompanhar os planos de lançamento aqui.",
   "games.calendar.search": "Buscar jogos salvos",
   "games.calendar.platform": "Plataforma de lançamento",
   "games.calendar.allPlatforms": "Todas as plataformas",
-  "games.calendar.dates": "As datas anunciadas pelas publicadoras podem mudar. As datas do Steam vêm da loja dos EUA; os registros do IGDB mostram a plataforma e a região.",
+  "games.calendar.dates":
+    "As datas anunciadas pelas publicadoras podem mudar. As datas do Steam vêm da loja dos EUA; os registros do IGDB mostram a plataforma e a região.",
   "games.calendar.noDays": "Nenhum jogo verificado tem um dia exato de lançamento em {month}.",
   "games.calendar.windows": "Períodos de lançamento",
   "games.calendar.windowsNote": "Esses planos abrangem este mês, mas não indicam um dia exato.",
   "games.calendar.undated": "Sem data confirmada",
-  "games.calendar.undatedNote": "Datas não anunciadas, indisponíveis ou ainda não verificadas ficam fora do calendário.",
+  "games.calendar.undatedNote":
+    "Datas não anunciadas, indisponíveis ou ainda não verificadas ficam fora do calendário.",
   "games.calendar.cancelled": "Registros de lançamentos cancelados excluídos: {count}.",
   "games.calendar.unchecked": "Data ainda não verificada",
   "games.watchlist.note": "Acompanhe os lançamentos dos seus jogos favoritos.",
@@ -34,9 +37,11 @@ export default {
   "games.watchlist.coverage": "{count} de {total} jogos consultados",
   "games.watchlist.refresh": "Atualizar datas de lançamento",
   "games.watchlist.unavailable": "Data de lançamento indisponível",
-  "games.watchlist.partial": "Não foi possível consultar algumas datas de lançamento. As informações salvas são exibidas quando disponíveis.",
+  "games.watchlist.partial":
+    "Não foi possível consultar algumas datas de lançamento. As informações salvas são exibidas quando disponíveis.",
   "games.watchlist.noMatch": "Nenhum favorito corresponde a estes filtros.",
-  "games.watchlist.dateNote": "As datas vêm do Steam e do IGDB. Os planos de lançamento podem mudar.",
+  "games.watchlist.dateNote":
+    "As datas vêm do Steam e do IGDB. Os planos de lançamento podem mudar.",
   "games.watchlist.remove": "Remover {name} dos Favoritos",
   "games.watchlist.saved": "Informações salvas",
   "games.owned.availability": "Neste dispositivo",
@@ -54,9 +59,12 @@ export default {
   "games.owned.pickHint": "Abra um jogo aleatório destes resultados.",
   "games.owned.clear": "Limpar filtros da biblioteca",
   "games.owned.scanning": "Verificando instalações locais…",
-  "games.owned.scanUnavailable": "O estado das instalações locais está indisponível. Atualize para verificar este dispositivo.",
-  "games.owned.partial": "Não foi possível verificar algumas pastas do Steam. Alguns jogos instalados podem não ter sido identificados.",
+  "games.owned.scanUnavailable":
+    "O estado das instalações locais está indisponível. Atualize para verificar este dispositivo.",
+  "games.owned.partial":
+    "Não foi possível verificar algumas pastas do Steam. Alguns jogos instalados podem não ter sido identificados.",
   "games.owned.results": "{count} de {total} jogos",
-  "games.owned.playtimeNote": "O histórico de jogo vem da última sincronização com o Steam. A ausência de tempo de jogo registrado não indica se um jogo foi concluído.",
-  "games.owned.resetAvailability": "Mostrar jogos com qualquer estado de instalação"
+  "games.owned.playtimeNote":
+    "O histórico de jogo vem da última sincronização com o Steam. A ausência de tempo de jogo registrado não indica se um jogo foi concluído.",
+  "games.owned.resetAvailability": "Mostrar jogos com qualquer estado de instalação",
 };

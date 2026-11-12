@@ -6,7 +6,7 @@ const TEXTS = [
   ["views/settings/player-panel/subtitle-section.tsx", "Change font only"],
   [
     "views/settings/player-panel/subtitle-section.tsx",
-    "Styled (ASS) subs keep their colors, size, and sign placement, but use your font.",
+    "Keeps the file's colors, size, and sign placement, but swaps in your font.",
   ],
   [
     "components/player/subtitle-menu/menu-body.tsx",

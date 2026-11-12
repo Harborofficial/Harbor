@@ -1,39 +1,51 @@
 export default {
-  "games.battlenet.changed": "Tài khoản Battle.net đã thay đổi. Hãy đăng nhập lại để thay thế các mục đã nhập của hồ sơ này.",
+  "games.battlenet.changed":
+    "Tài khoản Battle.net đã thay đổi. Hãy đăng nhập lại để thay thế các mục đã nhập của hồ sơ này.",
   "games.battlenet.connect": "Đăng nhập",
-  "games.battlenet.intro": "Đăng nhập Battle.net để nhập trò chơi. Kết nối này thuộc hồ sơ Harbor hiện tại của bạn.",
+  "games.battlenet.intro":
+    "Đăng nhập Battle.net để nhập trò chơi. Kết nối này thuộc hồ sơ Harbor hiện tại của bạn.",
   "games.battlenet.installed": "Hiển thị trò chơi đã cài đặt",
   "games.battlenet.uninstalled": "Hiển thị trò chơi trong tài khoản chưa được cài đặt",
-  "games.battlenet.partial": "Không thể làm mới một số dữ liệu tài khoản. Các trò chơi đã nhập trước đó vẫn hiển thị.",
-  "games.battlenet.unresolved": "Không thể xác định chính xác phiên bản của một số trò chơi trong tài khoản.",
-  "games.battlenet.expired": "Phiên Battle.net đã hết hạn. Hãy đăng nhập lại; các trò chơi đã nhập vẫn được giữ lại.",
+  "games.battlenet.partial":
+    "Không thể làm mới một số dữ liệu tài khoản. Các trò chơi đã nhập trước đó vẫn hiển thị.",
+  "games.battlenet.unresolved":
+    "Không thể xác định chính xác phiên bản của một số trò chơi trong tài khoản.",
+  "games.battlenet.expired":
+    "Phiên Battle.net đã hết hạn. Hãy đăng nhập lại; các trò chơi đã nhập vẫn được giữ lại.",
   "games.battlenet.timeout": "Battle.net không phản hồi kịp thời. Hãy thử lại.",
   "games.battlenet.busy": "Một thao tác tài khoản Battle.net đang được thực hiện.",
-  "games.battlenet.update": "Khởi động lại ứng dụng Harbor dành cho máy tính đã cập nhật để kết nối Battle.net.",
-  "games.battlenet.error": "Không thể cập nhật Battle.net. Thư viện được nhập gần nhất vẫn được giữ lại.",
+  "games.battlenet.update":
+    "Khởi động lại ứng dụng Harbor dành cho máy tính đã cập nhật để kết nối Battle.net.",
+  "games.battlenet.error":
+    "Không thể cập nhật Battle.net. Thư viện được nhập gần nhất vẫn được giữ lại.",
   "games.battlenet.disconnect": "Ngắt kết nối Battle.net",
-  "games.battlenet.removeNote": "Xóa các mục nhập từ tài khoản của hồ sơ này. Các tệp đã cài đặt và hồ sơ khác được giữ nguyên.",
+  "games.battlenet.removeNote":
+    "Xóa các mục nhập từ tài khoản của hồ sơ này. Các tệp đã cài đặt và hồ sơ khác được giữ nguyên.",
   "games.battlenet.signing": "Hoàn tất đăng nhập trong cửa sổ Battle.net.",
   "games.battlenet.cached": "{count} trò chơi trong tài khoản · Cập nhật lần cuối {date}",
 
   "games.launcherSession.waiting": "Đang chờ trò chơi",
   "games.launcherSession.unconfirmed": "Đang kiểm tra trạng thái trò chơi",
   "games.launcherSession.notStarted": "Trò chơi không khởi động",
-  "games.launcherSession.error": "Không thể ghi lại hoạt động trò chơi. Hãy mở lại Harbor để thử lại.",
+  "games.launcherSession.error":
+    "Không thể ghi lại hoạt động trò chơi. Hãy mở lại Harbor để thử lại.",
 
   "games.steamImport.importedTitle": "Trò chơi đã nhập",
   "games.steamImport.excluded": "Bị bỏ qua theo cài đặt nhập",
   "games.steamImport.ignoreSettings": "ID Steam bị bỏ qua ({count})",
   "games.steamImport.ignoreLabel": "ID Steam cần bỏ qua",
-  "games.steamImport.ignoreNote": "Bỏ qua các ID này khi nhập thủ công. Các mục thư viện và tệp hiện có vẫn được giữ nguyên. Xóa nội dung trường để ngừng bỏ qua.",
+  "games.steamImport.ignoreNote":
+    "Bỏ qua các ID này khi nhập thủ công. Các mục thư viện và tệp hiện có vẫn được giữ nguyên. Xóa nội dung trường để ngừng bỏ qua.",
   "games.steamImport.ignoreSave": "Lưu ID bị bỏ qua",
   "games.steamImport.ignoreSaved": "Đã lưu ID bị bỏ qua.",
   "games.steamImport.title": "Nhập trò chơi Steam",
-  "games.steamImport.note": "Lưu bản ghi trò chơi trong hồ sơ Harbor này. Quyền sở hữu và trạng thái cài đặt được kiểm tra riêng.",
+  "games.steamImport.note":
+    "Lưu bản ghi trò chơi trong hồ sơ Harbor này. Quyền sở hữu và trạng thái cài đặt được kiểm tra riêng.",
   "games.steamImport.input": "ID ứng dụng Steam hoặc URL cửa hàng",
   "games.steamImport.profile": "Chọn hồ sơ Depressurizer",
   "games.steamImport.count": "Đã chọn {selected} · {total} mục",
-  "games.steamImport.unavailableNote": "Các mục không có thông tin chưa được chọn. Chọn một mục để lưu ID và tải thông tin sau.",
+  "games.steamImport.unavailableNote":
+    "Các mục không có thông tin chưa được chọn. Chọn một mục để lưu ID và tải thông tin sau.",
   "games.steamImport.unknown": "Ứng dụng Steam {id}",
   "games.steamImport.ready": "Đã tìm thấy thông tin Steam",
   "games.steamImport.profileName": "Tên từ hồ sơ",
@@ -43,9 +55,12 @@ export default {
   "games.steamImport.invalid": "ID hoặc URL không hợp lệ",
   "games.steamImport.duplicate": "Mục trùng lặp",
   "games.steamImport.nonSteam": "Lối tắt ngoài Steam · đã bỏ qua",
-  "games.steamImport.limit": "Mỗi hồ sơ hỗ trợ tối đa 5.000 trò chơi đã nhập. Tệp phải nhỏ hơn 4 MB.",
-  "games.steamImport.inputError": "Nhập ID Steam hoặc URL cửa hàng hợp lệ, hoặc chọn hồ sơ Depressurizer hợp lệ.",
-  "games.steamImport.writeError": "Không thể lưu dữ liệu nhập. Các mục hiện có không thay đổi. Hãy thử lại.",
+  "games.steamImport.limit":
+    "Mỗi hồ sơ hỗ trợ tối đa 5.000 trò chơi đã nhập. Tệp phải nhỏ hơn 4 MB.",
+  "games.steamImport.inputError":
+    "Nhập ID Steam hoặc URL cửa hàng hợp lệ, hoặc chọn hồ sơ Depressurizer hợp lệ.",
+  "games.steamImport.writeError":
+    "Không thể lưu dữ liệu nhập. Các mục hiện có không thay đổi. Hãy thử lại.",
   "games.steamImport.readError": "Không thể đọc trò chơi đã nhập. Hãy thử lại trước khi thay đổi.",
   "games.steamImport.done": "Đã thêm vào thư viện: {count}",
   "games.steamImport.stop": "Dừng kiểm tra",
@@ -65,7 +80,8 @@ export default {
   "games.libraryStatus.finished": "Đã hoàn thành",
   "games.libraryStatus.onHold": "Tạm hoãn",
   "games.libraryStatus.stopped": "Đã ngừng chơi",
-  "games.libraryStatus.note": "Lựa chọn cho bản này được lưu trong hồ sơ Harbor hiện tại. Thời gian chơi và thành tích không tự thay đổi lựa chọn này.",
+  "games.libraryStatus.note":
+    "Lựa chọn cho bản này được lưu trong hồ sơ Harbor hiện tại. Thời gian chơi và thành tích không tự thay đổi lựa chọn này.",
 
   "games.unified.playtime": "Thời gian chơi",
   "games.unified.playtime.all": "Mọi thời gian chơi",
@@ -78,9 +94,12 @@ export default {
   "games.unified.playtime.steam": "{time} trên Steam",
   "games.unified.playtime.zeroSteam": "Chưa có thời gian chơi được ghi nhận trên Steam",
   "games.unified.playtime.zeroHarbor": "Chưa có thời gian chơi được ghi nhận trong Harbor",
-  "games.unified.playtime.unknownHint": "Không có dữ liệu thời gian chơi của tài khoản Steam hoặc nguồn này không cung cấp thời gian chơi.",
-  "games.unified.playtime.note": "Dùng tổng thời gian trên Steam và thời gian ghi nhận trong Harbor, gồm các chỉnh sửa của bạn. Dữ liệu thời gian không có được phân biệt riêng.",
-  "games.unified.note": "Thư viện Steam, trò chơi PC và ROM đã nhập của bạn trong cùng một chế độ xem.",
+  "games.unified.playtime.unknownHint":
+    "Không có dữ liệu thời gian chơi của tài khoản Steam hoặc nguồn này không cung cấp thời gian chơi.",
+  "games.unified.playtime.note":
+    "Dùng tổng thời gian trên Steam và thời gian ghi nhận trong Harbor, gồm các chỉnh sửa của bạn. Dữ liệu thời gian không có được phân biệt riêng.",
+  "games.unified.note":
+    "Thư viện Steam, trò chơi PC và ROM đã nhập của bạn trong cùng một chế độ xem.",
   "games.unified.allSources": "Tất cả nguồn",
   "games.unified.availability": "Trạng thái",
   "games.unified.anyState": "Mọi trạng thái",
@@ -94,10 +113,13 @@ export default {
   "games.unified.state.setup": "Cần thiết lập",
   "games.unified.state.unknown": "Chưa kiểm tra cài đặt",
   "games.unified.refresh": "Làm mới thư viện cục bộ",
-  "games.unified.scanNote": "Không thể kiểm tra một số thư viện. Trò chơi trong các thư viện đó vẫn ở đây với trạng thái không xác định hoặc không khả dụng.",
-  "games.unified.partial": "Không thể kiểm tra một số thư mục; một số bản cài đặt có thể chưa được nhận diện.",
+  "games.unified.scanNote":
+    "Không thể kiểm tra một số thư viện. Trò chơi trong các thư viện đó vẫn ở đây với trạng thái không xác định hoặc không khả dụng.",
+  "games.unified.partial":
+    "Không thể kiểm tra một số thư mục; một số bản cài đặt có thể chưa được nhận diện.",
   "games.unified.empty": "Tập hợp trò chơi của bạn",
-  "games.unified.emptyNote": "Kết nối Steam, thêm trò chơi PC hoặc nhập thư mục ROM để xem trò chơi của bạn tại đây.",
+  "games.unified.emptyNote":
+    "Kết nối Steam, thêm trò chơi PC hoặc nhập thư mục ROM để xem trò chơi của bạn tại đây.",
   "games.unified.pcGames": "Quản lý trò chơi PC",
   "games.unified.roms": "Quản lý ROM",
   "games.unified.steam": "Quản lý Steam",
@@ -117,5 +139,5 @@ export default {
   "games.libraryNews.failed": "Không thể tải tin tức trò chơi.",
   "games.libraryNews.hide": "Ẩn tin tức trò chơi",
   "games.libraryNews.show": "Hiện tin tức trò chơi",
-  "games.libraryNews.pending": "Đang kiểm tra tin tức trò chơi…"
+  "games.libraryNews.pending": "Đang kiểm tra tin tức trò chơi…",
 };

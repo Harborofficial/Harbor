@@ -75,7 +75,7 @@ fn crash_worker(fixture: &Fixture, bootstrap: bool) -> SetupJob {
     let mut worker = std::process::Command::new(std::env::current_exe().unwrap())
         .args([
             "--exact",
-            "setup::resume::tests::snapshot_worker",
+            &format!("{}::snapshot_worker", module_path!().split_once("::").unwrap().1),
             "--ignored",
             "--nocapture",
         ])

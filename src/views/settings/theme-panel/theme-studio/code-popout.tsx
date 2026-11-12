@@ -1,5 +1,6 @@
 import { BookOpen, Check, Copy, Download, Play, Redo2, Undo2, X } from "../../icons";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CodeEditor, type CodeLang } from "@/components/code-editor";
 import { downloadText } from "@/lib/download-text";
 import { useT } from "@/lib/i18n";
@@ -87,7 +88,7 @@ export function CodePopout({
     window.setTimeout(() => setCopied(false), 1300);
   };
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -99,7 +100,9 @@ export function CodePopout({
     >
       <header className="flex shrink-0 items-start gap-4 px-6 pb-5 pt-6">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{t("Code")}</span>
+          <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">
+            {t("Code")}
+          </span>
           <h2 className="truncate text-[17px] font-semibold tracking-tight text-ink">
             {themeName}
           </h2>
@@ -243,6 +246,7 @@ export function CodePopout({
       />
 
       {cheatOpen && <CheatSheet onClose={() => setCheatOpen(false)} />}
-    </div>
+    </div>,
+    document.body,
   );
 }

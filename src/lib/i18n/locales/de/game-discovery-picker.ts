@@ -1,6 +1,7 @@
 export default {
   "games.pick.title": "Was soll ich spielen?",
-  "games.pick.invite": "Finde etwas, das zu deiner Stimmung, deinen Favoriten und deinem Spielstil passt.",
+  "games.pick.invite":
+    "Finde etwas, das zu deiner Stimmung, deinen Favoriten und deinem Spielstil passt.",
   "games.pick.start": "Mein nächstes Spiel finden",
   "games.pick.steps": "Ein Spiel finden",
   "games.pick.mood": "Deine Stimmung",
@@ -9,9 +10,12 @@ export default {
   "games.pick.heading0": "Worauf hast du gerade Lust?",
   "games.pick.heading1": "Ein paar Lieblingsspiele helfen schon viel.",
   "games.pick.heading2": "Etwas, das sich zu spielen lohnt.",
-  "games.pick.note0": "Wähle, worauf du heute Lust hast. Genaue Stimmungstreffer kommen zuerst, danach die ähnlichsten Alternativen. Spielmodus und weitere Filter gelten weiterhin.",
-  "games.pick.note1": "Wähle bis zu fünf Favoriten. Wir berücksichtigen ihre Eigenschaften und deine letzte Aktivität.",
-  "games.pick.note2": "Eine Auswahl nach deinen Wünschen, gemeinsamen Interessen und Spielerbewertungen.",
+  "games.pick.note0":
+    "Wähle, worauf du heute Lust hast. Genaue Stimmungstreffer kommen zuerst, danach die ähnlichsten Alternativen. Spielmodus und weitere Filter gelten weiterhin.",
+  "games.pick.note1":
+    "Wähle bis zu fünf Favoriten. Wir berücksichtigen ihre Eigenschaften und deine letzte Aktivität.",
+  "games.pick.note2":
+    "Eine Auswahl nach deinen Wünschen, gemeinsamen Interessen und Spielerbewertungen.",
   "games.pick.company": "Mit wem spielst du?",
   "games.pick.refine": "Suche verfeinern",
   "games.pick.tagSearch": "Weitere Tags, Genres und Funktionen suchen…",
@@ -33,25 +37,30 @@ export default {
   "games.pick.searchError": "Einige Suchergebnisse konnten nicht geladen werden. Suche erneut.",
   "games.pick.noSearch": "Keine Spiele gefunden. Versuche einen kürzeren Titel.",
   "games.pick.favorites": "Deine Favoriten",
-  "games.pick.optional": "Optional, aber hilfreich. Beginne mit Spielen, zu denen du immer wieder zurückkehrst.",
+  "games.pick.optional":
+    "Optional, aber hilfreich. Beginne mit Spielen, zu denen du immer wieder zurückkehrst.",
   "games.pick.remove": "{name} aus den Favoriten entfernen",
   "games.pick.addFavorite": "{name} als Favorit verwenden",
   "games.pick.history": "Meine Bibliotheksaktivität verwenden",
-  "games.pick.historyNote": "Zuletzt gespielt, meistgespielt, neu hinzugefügt und gespeichert. Favoriten zählen stärker.",
+  "games.pick.historyNote":
+    "Zuletzt gespielt, meistgespielt, neu hinzugefügt und gespeichert. Favoriten zählen stärker.",
   "games.pick.signal.recent": "Zuletzt gespielt",
   "games.pick.signal.mostPlayed": "Meistgespielt",
   "games.pick.signal.added": "Neu hinzugefügt",
   "games.pick.signal.saved": "Gespeichert",
   "games.pick.hours": "Std.",
-  "games.pick.noHistory": "Noch keine Aktivität. Wähle Favoriten oder verbinde Steam in den Spieleinstellungen.",
+  "games.pick.noHistory":
+    "Noch keine Aktivität. Wähle Favoriten oder verbinde Steam in den Spieleinstellungen.",
   "games.pick.manualOnly": "Nur deine Favoriten und gewählten Filter bestimmen diese Auswahl.",
-  "games.pick.addedNote": "„Neu hinzugefügt“ bedeutet nach dem ersten Import in Harbor entdeckt, kein Kaufdatum.",
+  "games.pick.addedNote":
+    "„Neu hinzugefügt“ bedeutet nach dem ersten Import in Harbor entdeckt, kein Kaufdatum.",
   "games.pick.because": "Weil du {name} magst",
   "games.pick.matches": "Passt zu deiner Auswahl",
   "games.pick.steamCatalog": "Steam-Katalog",
   "games.pick.edit": "Auswahl ändern",
   "games.pick.finding": "Dein nächstes Spiel wird gesucht…",
-  "games.pick.partial": "Einige Spieldaten konnten nicht geladen werden. Diese Auswahl nutzt verfügbare Daten.",
+  "games.pick.partial":
+    "Einige Spieldaten konnten nicht geladen werden. Diese Auswahl nutzt verfügbare Daten.",
   "games.pick.cached": "Enthält gespeicherte Katalogdaten vom {date}.",
   "games.pick.startHere": "Hier anfangen",
   "games.pick.notForMe": "Nichts für mich",
@@ -59,12 +68,16 @@ export default {
   "games.pick.undo": "Rückgängig",
   "games.pick.resetHidden": "Ausgeblendete Spiele wieder zeigen",
   "games.pick.more": "Weitere Vorschläge finden",
-  "games.pick.rankingNote": "Sortiert nach gemeinsamen Steam-Tags, Aktivität, Aussagekraft der Rezensionen und Abwechslung. Punkte zeigen positive Steam-Rezensionen. Verfügbarkeit und Preise entsprechen dem US-Katalog.",
+  "games.pick.rankingNote":
+    "Sortiert nach gemeinsamen Steam-Tags, Aktivität, Aussagekraft der Rezensionen und Abwechslung. Punkte zeigen positive Steam-Rezensionen. Verfügbarkeit und Preise entsprechen dem US-Katalog.",
   "games.pick.error": "Dein nächstes Spiel muss kurz warten.",
-  "games.pick.errorNote": "Der Spielekatalog ist nicht erreichbar. Deine Auswahl bleibt gespeichert; versuche es erneut.",
+  "games.pick.errorNote":
+    "Der Spielekatalog ist nicht erreichbar. Deine Auswahl bleibt gespeichert; versuche es erneut.",
   "games.pick.noMatches": "Noch keine Spiele mit diesen Anforderungen gefunden.",
-  "games.pick.noMatchesNote": "Erweitere die Plattform-, Preis- oder Bibliotheksauswahl. Ähnliche Stimmungstreffer sind bereits eingeschlossen.",
-  "games.pick.saveError": "Die Auswahl gilt für diese Sitzung, konnte aber nicht auf diesem Gerät gespeichert werden.",
+  "games.pick.noMatchesNote":
+    "Erweitere die Plattform-, Preis- oder Bibliotheksauswahl. Ähnliche Stimmungstreffer sind bereits eingeschlossen.",
+  "games.pick.saveError":
+    "Die Auswahl gilt für diese Sitzung, konnte aber nicht auf diesem Gerät gespeichert werden.",
   "games.pick.selected": "{count} Tags ausgewählt",
   "games.pick.favoriteCount": "{count} von 5 Favoriten",
   "games.pick.resultsCount": "Bisher {count} Treffer",
@@ -74,7 +87,8 @@ export default {
   "games.pick.reviews": "{count} Rezensionen",
   "games.pick.unrated": "Keine Bewertung verfügbar",
   "games.pick.owned": "In deiner Bibliothek",
-  "games.pick.closest": "Ähnliche Treffer sind dabei. Spielmodus und weitere Filter gelten weiterhin.",
+  "games.pick.closest":
+    "Ähnliche Treffer sind dabei. Spielmodus und weitere Filter gelten weiterhin.",
   "games.pick.closeMatch": "Passt zu {count} von {total} Stimmungstags",
-  "games.pick.missing": "Nicht getaggt: {tags}"
+  "games.pick.missing": "Nicht getaggt: {tags}",
 };

@@ -12,12 +12,13 @@ export const gameLaunchHealth = {
   "games.launchHealth.checked": "检查于{date}",
   "games.launchHealth.desktop": "请打开桌面应用以检查本地启动文件。",
   "games.launchHealth.relocate": "请选择游戏当前的可执行文件。游戏库条目、合辑和游玩记录都会保留。",
-  "games.launchHealth.missing": "找不到游戏文件或启动文件夹。请重新连接其所在的驱动器，或更新下方路径。",
+  "games.launchHealth.missing":
+    "找不到游戏文件或启动文件夹。请重新连接其所在的驱动器，或更新下方路径。",
   "games.launchHealth.executable": "所选文件不是可用的可执行文件。请在下方选择游戏的启动文件。",
   "games.launchHealth.permission": "所选文件需要执行权限。请先检查文件权限，再重试。",
   "games.launchHealth.platform": "这些启动设置需要其他操作系统。请选择适用于此设备的设置。",
   "games.launchHealth.configuration": "请检查下方的可执行文件、启动文件夹和兼容性设置。",
-  "games.launchHealth.unknownNote": "此次检查未得到可用结果。游戏和已保存的设置均未更改。"
+  "games.launchHealth.unknownNote": "此次检查未得到可用结果。游戏和已保存的设置均未更改。",
 };
 
 export default gameLaunchHealth;

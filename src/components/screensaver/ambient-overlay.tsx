@@ -1,9 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  ScreensaverBrand,
-  ScreensaverClockFace,
-  useScreensaverClock,
-} from "./screensaver-clock";
+import { ScreensaverBrand, ScreensaverClockFace, useScreensaverClock } from "./screensaver-clock";
 
 export type AmbientItem = { bg: string; title: string; sub: string; logo?: string };
 
@@ -78,7 +74,9 @@ export function AmbientOverlay({
 }) {
   const { time, date } = useScreensaverClock();
   const [deep, setDeep] = useState(false);
-  const [layers, setLayers] = useState<Layer[]>(() => (items[0] ? [{ key: 0, item: items[0] }] : []));
+  const [layers, setLayers] = useState<Layer[]>(() =>
+    items[0] ? [{ key: 0, item: items[0] }] : [],
+  );
   const keyRef = useRef(1);
   const idxRef = useRef(0);
 
@@ -129,13 +127,21 @@ export function AmbientOverlay({
       }}
     >
       {layers.map((layer, i) => (
-        <AmbientSlide key={layer.key} src={layer.item.bg} out={i !== layers.length - 1} reduce={reduce} />
+        <AmbientSlide
+          key={layer.key}
+          src={layer.item.bg}
+          out={i !== layers.length - 1}
+          reduce={reduce}
+        />
       ))}
 
       {deep && (
         <div
           className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(125% 90% at 50% 26%, oklch(0.22 0.03 262 / 0.6), oklch(0.06 0.01 260) 72%)" }}
+          style={{
+            background:
+              "radial-gradient(125% 90% at 50% 26%, oklch(0.22 0.03 262 / 0.6), oklch(0.06 0.01 260) 72%)",
+          }}
         />
       )}
       {!deep && (

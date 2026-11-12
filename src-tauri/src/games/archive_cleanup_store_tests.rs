@@ -470,12 +470,13 @@ fn cleanup_recovery_child() {
 }
 fn kill_at(f: &Fixture, id: &str, point: &str, restore: bool) {
     let mut command = Command::new(std::env::current_exe().unwrap());
+    let module = module_path!().split_once("::").unwrap().1;
     command
         .args([
-            "archive_cleanup_store::tests::cleanup_recovery_child",
-            "--exact",
-            "--ignored",
-            "--nocapture",
+            format!("{module}::cleanup_recovery_child"),
+            "--exact".into(),
+            "--ignored".into(),
+            "--nocapture".into(),
         ])
         .env("HARBOR_CLEANUP_ROOT", &f.root)
         .env("HARBOR_CLEANUP_ID", id)

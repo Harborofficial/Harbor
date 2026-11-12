@@ -13,9 +13,13 @@ export default {
   "artwork.chooseLaunch": "Startlogo auswählen",
   "artwork.resetLoading": "Ladeanimation zurücksetzen",
   "artwork.resetLaunch": "Startlogo zurücksetzen",
-  "artwork.local": "Auf diesem Gerät gespeichert. Bei reduzierter Bewegung wird ein Standbild angezeigt.",
+  "artwork.local":
+    "Auf diesem Gerät gespeichert. Bei reduzierter Bewegung wird ein Standbild angezeigt.",
   "artwork.error.large": "Wähle eine kleinere Datei: bis zu 8 MB und 4096 × 4096 Pixel.",
-  "artwork.error.external": "Diese Animation verwendet externe Medien. Exportiere sie mit eingebetteten Bildern.",
-  "artwork.error.storage": "Die Datei konnte auf diesem Gerät nicht gespeichert werden. Die vorherige Auswahl bleibt erhalten.",
-  "artwork.error.invalid": "Die Datei konnte nicht gelesen werden. Wähle Lottie (.json oder .lottie), GIF, PNG, JPEG oder WebP."
+  "artwork.error.external":
+    "Diese Animation verwendet externe Medien. Exportiere sie mit eingebetteten Bildern.",
+  "artwork.error.storage":
+    "Die Datei konnte auf diesem Gerät nicht gespeichert werden. Die vorherige Auswahl bleibt erhalten.",
+  "artwork.error.invalid":
+    "Die Datei konnte nicht gelesen werden. Wähle Lottie (.json oder .lottie), GIF, PNG, JPEG oder WebP.",
 };

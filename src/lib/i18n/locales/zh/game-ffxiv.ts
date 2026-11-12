@@ -35,5 +35,5 @@ export default {
   "games.ffxiv.sold": "成交时间",
   "games.ffxiv.noSales": "此快照中没有最近成交记录。",
   "games.ffxiv.community": "社区上传的数据可能过时，物品可能已在上次更新后售出。",
-  "games.ffxiv.open": "在Universalis查看"
+  "games.ffxiv.open": "在Universalis查看",
 };

@@ -137,7 +137,8 @@ function yearOf(media: NonNullable<RawMedia>): number | undefined {
 }
 
 function ratedAtOf(updatedAt: number | null): number | undefined {
-  if (typeof updatedAt !== "number" || !Number.isFinite(updatedAt) || updatedAt <= 0) return undefined;
+  if (typeof updatedAt !== "number" || !Number.isFinite(updatedAt) || updatedAt <= 0)
+    return undefined;
   return Math.round(updatedAt) * 1000;
 }
 
@@ -212,8 +213,10 @@ function countsOf(me: ViewerPayload): ListCounts {
   const out: ListCounts = {};
   const anime = stats?.anime?.count;
   const manga = stats?.manga?.count;
-  if (typeof anime === "number" && Number.isFinite(anime)) out.anime = Math.max(0, Math.trunc(anime));
-  if (typeof manga === "number" && Number.isFinite(manga)) out.manga = Math.max(0, Math.trunc(manga));
+  if (typeof anime === "number" && Number.isFinite(anime))
+    out.anime = Math.max(0, Math.trunc(anime));
+  if (typeof manga === "number" && Number.isFinite(manga))
+    out.manga = Math.max(0, Math.trunc(manga));
   return out;
 }
 
@@ -261,7 +264,9 @@ async function collect(
     });
     if (!collection?.hasNextChunk) return;
   }
-  throw new Error(`AniList kept paging past ${MAX_CHUNKS} chunks of your ${label.toLowerCase()} list. Import stopped.`);
+  throw new Error(
+    `AniList kept paging past ${MAX_CHUNKS} chunks of your ${label.toLowerCase()} list. Import stopped.`,
+  );
 }
 
 function available(): boolean {

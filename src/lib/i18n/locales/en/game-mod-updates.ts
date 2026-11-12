@@ -11,12 +11,14 @@ export default {
   "games.mods.restore": "Restore previous",
   "games.mods.restored": "Previous version restored.",
   "games.mods.changeTitle": "Files to change",
-  "games.mods.backupNote": "Replaced versions stay in a local backup. Use Restore previous in Your setup to go back; dependency checks still apply.",
+  "games.mods.backupNote":
+    "Replaced versions stay in a local backup. Use Restore previous in Your setup to go back; dependency checks still apply.",
   "games.mods.currentVersion": "Installed: {version}",
   "games.mods.current": "Installed",
-  "games.mods.versionNote": "Choose a compatible release. Harbor reviews the changes and keeps the previous version locally. Close Minecraft before applying changes.",
+  "games.mods.versionNote":
+    "Choose a compatible release. Harbor reviews the changes and keeps the previous version locally. Close Minecraft before applying changes.",
   "games.mods.applyChanges": "Apply changes",
   "games.mods.reviewChanges": "Review changes",
   "games.mods.previousVersion": "Previous: {version}",
-  "games.mods.restoreConfirm": "Restore version {version}? Close Minecraft first."
+  "games.mods.restoreConfirm": "Restore version {version}? Close Minecraft first.",
 } satisfies Record<string, string>;

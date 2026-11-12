@@ -10,20 +10,27 @@ export default {
   "games.pokemon.mapView.grid": "Bilderraster",
   "games.pokemon.mapCount": "{count} Karten",
   "games.pokemon.mapNoMatch": "Keine Karten entsprechen diesen Filtern.",
-  "games.pokemon.bankUnreadable": "Einige Pokémon konnten nicht geladen werden ({count}). Ihre Dateien sind weiterhin auf diesem Gerät.",
-  "games.pokemon.bankTruncated": "Die ersten 10.000 Bankdateien werden angezeigt. Alle Dateien bleiben auf diesem Gerät.",
+  "games.pokemon.bankUnreadable":
+    "Einige Pokémon konnten nicht geladen werden ({count}). Ihre Dateien sind weiterhin auf diesem Gerät.",
+  "games.pokemon.bankTruncated":
+    "Die ersten 10.000 Bankdateien werden angezeigt. Alle Dateien bleiben auf diesem Gerät.",
   "games.pokemon.showBankFolder": "Bankordner anzeigen",
   "games.pokemon.noChoices": "Keine passenden Einträge.",
   "games.pokemon.detectedSaves": "Spielstände für dieses Spiel",
   "games.pokemon.refreshSaves": "Spielstände aktualisieren",
-  "games.pokemon.discoverFailed": "Spielstände konnten nicht gesucht werden. Aktualisiere die Liste oder wähle eine Datei.",
-  "games.pokemon.noDetectedSaves": "Noch kein Spielstand gefunden. Speichere zuerst im Spiel oder wähle eine Datei aus deinem Emulator.",
+  "games.pokemon.discoverFailed":
+    "Spielstände konnten nicht gesucht werden. Aktualisiere die Liste oder wähle eine Datei.",
+  "games.pokemon.noDetectedSaves":
+    "Noch kein Spielstand gefunden. Speichere zuerst im Spiel oder wähle eine Datei aus deinem Emulator.",
   "games.pokemon.saveOrigin.harbor": "In Harbor gespeichert",
   "games.pokemon.saveOrigin.adjacent": "Neben deiner ROM",
-  "games.pokemon.error.pokemon_hack_export": "Der Bankexport für diesen ROM-Hack ist noch nicht bereit: Die zusätzlichen Pokémon-Daten lassen sich noch nicht vollständig erhalten. Du kannst den Spielstand weiterhin ansehen und bearbeiten.",
-  "games.pokemon.error.pokemon_save_running": "Schließe dieses Spiel in Harbor, bevor du deine Änderungen speicherst. Deine Vorschau bleibt erhalten.",
+  "games.pokemon.error.pokemon_hack_export":
+    "Der Bankexport für diesen ROM-Hack ist noch nicht bereit: Die zusätzlichen Pokémon-Daten lassen sich noch nicht vollständig erhalten. Du kannst den Spielstand weiterhin ansehen und bearbeiten.",
+  "games.pokemon.error.pokemon_save_running":
+    "Schließe dieses Spiel in Harbor, bevor du deine Änderungen speicherst. Deine Vorschau bleibt erhalten.",
   "games.pokemon.title": "Dein Pokémon-Abenteuer",
-  "games.pokemon.intro": "Finde deine nächste Route. Stelle dein Team zusammen. Nimm deine Pokémon mit.",
+  "games.pokemon.intro":
+    "Finde deine nächste Route. Stelle dein Team zusammen. Nimm deine Pokémon mit.",
   "games.pokemon.browse": "Dieses Pokémon-Spiel erkunden",
   "games.pokemon.walkthrough": "Komplettlösung",
   "games.pokemon.walkthroughHint": "Schritt für Schritt ans Ziel",
@@ -40,50 +47,64 @@ export default {
   "games.pokemon.levelRange": "Lv. {min}–{max}",
   "games.pokemon.level": "Lv. {level}",
   "games.pokemon.levelLabel": "Level",
-  "games.pokemon.noEncounters": "Für diese genaue Edition sind keine Begegnungen erfasst. Geschenke, Tausch und besondere Events können fehlen.",
+  "games.pokemon.noEncounters":
+    "Für diese genaue Edition sind keine Begegnungen erfasst. Geschenke, Tausch und besondere Events können fehlen.",
   "games.pokemon.backDex": "Zurück zu den Pokémon",
   "games.pokemon.pokemonDetails": "Pokémon-Details",
   "games.pokemon.moves": "Attacken",
   "games.pokemon.evolution": "Entwicklung",
   "games.pokemon.stats": "Werte & Fähigkeiten",
-  "games.pokemon.editionMoves": "Attacken für diese Edition, einschließlich Levelaufstieg, Maschinen und Attackenlehrer.",
+  "games.pokemon.editionMoves":
+    "Attacken für diese Edition, einschließlich Levelaufstieg, Maschinen und Attackenlehrer.",
   "games.pokemon.noMoves": "Für diese Edition sind keine Attackendaten verfügbar.",
-  "games.pokemon.evolutionScope": "Die gesamte Entwicklungsfamilie aus aktuellen Pokémon-Daten. Spätere Entwicklungen und Methoden können in diesem Spiel fehlen.",
-  "games.pokemon.currentStats": "Aktuelle Artwerte und Fähigkeiten von PokeAPI. Ältere Editionen können abweichen. Die Typen oben entsprechen der Spielgeneration.",
-  "games.pokemon.dexScope": "Der regionale Pokédex dieses Spiels. Die Karten zeigen die Nummern des Nationalen Pokédex.",
+  "games.pokemon.evolutionScope":
+    "Die gesamte Entwicklungsfamilie aus aktuellen Pokémon-Daten. Spätere Entwicklungen und Methoden können in diesem Spiel fehlen.",
+  "games.pokemon.currentStats":
+    "Aktuelle Artwerte und Fähigkeiten von PokeAPI. Ältere Editionen können abweichen. Die Typen oben entsprechen der Spielgeneration.",
+  "games.pokemon.dexScope":
+    "Der regionale Pokédex dieses Spiels. Die Karten zeigen die Nummern des Nationalen Pokédex.",
   "games.pokemon.searchPokemon": "Pokémon oder Nummer suchen",
   "games.pokemon.loadMore": "Mehr anzeigen",
   "games.pokemon.noResults": "Keine Pokémon entsprechen deiner Suche.",
-  "games.pokemon.noRetailDex": "Für dieses Spiel gibt es noch keinen verifizierten Pokédex. ROM-Hacks und Ableger übernehmen keinen vermuteten Pokédex eines Hauptspiels.",
+  "games.pokemon.noRetailDex":
+    "Für dieses Spiel gibt es noch keinen verifizierten Pokédex. ROM-Hacks und Ableger übernehmen keinen vermuteten Pokédex eines Hauptspiels.",
   "games.pokemon.unavailable": "Diese Quelle ist gerade nicht verfügbar. Versuche es erneut.",
-  "games.pokemon.readProgress": "Wähle ein Kapitel. Deine Leseposition und abgeschlossenen Kapitel werden gespeichert.",
+  "games.pokemon.readProgress":
+    "Wähle ein Kapitel. Deine Leseposition und abgeschlossenen Kapitel werden gespeichert.",
   "games.pokemon.chapters": "Kapitel der Komplettlösung",
   "games.pokemon.overview": "Übersicht",
   "games.pokemon.completed": "Abgeschlossen",
   "games.pokemon.markComplete": "Als abgeschlossen markieren",
   "games.pokemon.nextChapter": "Nächstes Kapitel",
-  "games.pokemon.locationScope": "Erkunde die Orte dieser Region. Begegnungen werden nach dieser genauen Edition gefiltert.",
+  "games.pokemon.locationScope":
+    "Erkunde die Orte dieser Region. Begegnungen werden nach dieser genauen Edition gefiltert.",
   "games.pokemon.searchLocation": "Route oder Ort suchen",
   "games.pokemon.chooseLocation": "Wähle einen Ort, um seine Pokémon zu sehen.",
   "games.pokemon.noLocations": "Für dieses Spiel sind noch keine Ortsdaten verfügbar.",
-  "games.pokemon.mapScope": "Originalkarten aus dem Bulbagarden-Archiv. Bei gemeinsamen Archiven nennt der Bildtitel die Spielvariante.",
+  "games.pokemon.mapScope":
+    "Originalkarten aus dem Bulbagarden-Archiv. Bei gemeinsamen Archiven nennt der Bildtitel die Spielvariante.",
   "games.pokemon.searchMaps": "Geladene Karten durchsuchen",
   "games.pokemon.moreMaps": "Weitere Karten laden",
   "games.pokemon.noMaps": "Für dieses Spiel ist noch kein verifiziertes Kartenarchiv verbunden.",
   "games.pokemon.searchVideos": "Komplettlösungen und Tipps suchen",
-  "games.pokemon.noVideos": "Keine passenden Videos. Suche nach einer Route, einem Boss oder einem Pokémon.",
-  "games.pokemon.sources": "Pokémon-Daten: PokeAPI · Komplettlösungen: Bulbapedia · Karten: Bulbagarden Archives · Videos: YouTube. Die Abdeckung variiert je nach Spiel.",
-  "games.pokemon.bankIntro": "Öffne einen Spielstand, bearbeite dein Team und prüfe jede Änderung vor dem Speichern.",
+  "games.pokemon.noVideos":
+    "Keine passenden Videos. Suche nach einer Route, einem Boss oder einem Pokémon.",
+  "games.pokemon.sources":
+    "Pokémon-Daten: PokeAPI · Komplettlösungen: Bulbapedia · Karten: Bulbagarden Archives · Videos: YouTube. Die Abdeckung variiert je nach Spiel.",
+  "games.pokemon.bankIntro":
+    "Öffne einen Spielstand, bearbeite dein Team und prüfe jede Änderung vor dem Speichern.",
   "games.pokemon.openSave": "Spielstand öffnen",
   "games.pokemon.importPokemon": "Pokémon-Datei importieren",
-  "games.pokemon.engineMissing": "Die Pokémon-Engine ist in dieser Harbor-Version noch nicht installiert.",
+  "games.pokemon.engineMissing":
+    "Die Pokémon-Engine ist in dieser Harbor-Version noch nicht installiert.",
   "games.pokemon.bankError": "Diese Aktion konnte nicht abgeschlossen werden.",
   "games.pokemon.bankBrowse": "Deine Pokémon durchsuchen",
   "games.pokemon.gameSave": "Spielstand",
   "games.pokemon.myBank": "Meine Bank",
   "games.pokemon.readOnly": "Dieser Spielstand ist nur zum Ansehen geöffnet.",
   "games.pokemon.bankWelcome": "Ein Zuhause für deine Pokémon",
-  "games.pokemon.bankPrivacy": "Spielstände und Bank bleiben auf diesem Gerät. Öffne einen im Spiel gespeicherten Spielstand, keinen Emulator-Schnellspeicherstand. Schließe das Spiel vor Änderungen.",
+  "games.pokemon.bankPrivacy":
+    "Spielstände und Bank bleiben auf diesem Gerät. Öffne einen im Spiel gespeicherten Spielstand, keinen Emulator-Schnellspeicherstand. Schließe das Spiel vor Änderungen.",
   "games.pokemon.box": "Box auswählen",
   "games.pokemon.party": "Team",
   "games.pokemon.slot": "Platz {slot}",
@@ -96,14 +117,19 @@ export default {
   "games.pokemon.edited": "{name} bearbeitet",
   "games.pokemon.released": "{name} aus dem Spielstand entfernen",
   "games.pokemon.release": "Entfernung aus dem Spielstand vormerken",
-  "games.pokemon.chooseSlot": "Wähle ein Pokémon zum Ansehen oder Bearbeiten. Auf einem leeren Platz kannst du eines erstellen.",
-  "games.pokemon.bankCopies": "Beim Einlagern bleibt das Original im Spielstand. Auch bei Übertragungen bleibt die Bankkopie erhalten.",
-  "games.pokemon.emptyBank": "Deine Bank ist leer. Speichere ein Pokémon aus einem geöffneten Spielstand oder importiere eine Pokémon-Datei.",
-  "games.pokemon.transferHint": "Wähle einen leeren Zielplatz im Spielstand und prüfe dann die Übertragung dieses Pokémon.",
+  "games.pokemon.chooseSlot":
+    "Wähle ein Pokémon zum Ansehen oder Bearbeiten. Auf einem leeren Platz kannst du eines erstellen.",
+  "games.pokemon.bankCopies":
+    "Beim Einlagern bleibt das Original im Spielstand. Auch bei Übertragungen bleibt die Bankkopie erhalten.",
+  "games.pokemon.emptyBank":
+    "Deine Bank ist leer. Speichere ein Pokémon aus einem geöffneten Spielstand oder importiere eine Pokémon-Datei.",
+  "games.pokemon.transferHint":
+    "Wähle einen leeren Zielplatz im Spielstand und prüfe dann die Übertragung dieses Pokémon.",
   "games.pokemon.previewTransfer": "Übertragung in den Spielstand prüfen",
   "games.pokemon.imported": "Pokémon aus der Bank importiert",
   "games.pokemon.review": "Änderungen prüfen",
-  "games.pokemon.reviewNote": "Diese Änderungen sind vorgemerkt. Halte das Spiel geschlossen. Vor dem Speichern wird das Original gesichert.",
+  "games.pokemon.reviewNote":
+    "Diese Änderungen sind vorgemerkt. Halte das Spiel geschlossen. Vor dem Speichern wird das Original gesichert.",
   "games.pokemon.discard": "Änderungen verwerfen",
   "games.pokemon.commit": "Sichern & speichern",
   "games.pokemon.savedBackup": "Gespeichert. Das Original wurde gesichert.",
@@ -112,7 +138,8 @@ export default {
   "games.pokemon.localEngine": "Lokale Spielstand-Engine · GPL-3.0-or-later",
   "games.pokemon.create": "Pokémon erstellen",
   "games.pokemon.showdown": "Pokémon-Showdown-Set",
-  "games.pokemon.createNote": "Wähle Pokémon und Level. Die Engine sucht eine passende Begegnung für dieses Spiel und lehnt nicht unterstützte Kombinationen ab. Du kannst unten auch ein Showdown-Set einfügen.",
+  "games.pokemon.createNote":
+    "Wähle Pokémon und Level. Die Engine sucht eine passende Begegnung für dieses Spiel und lehnt nicht unterstützte Kombinationen ab. Du kannst unten auch ein Showdown-Set einfügen.",
   "games.pokemon.previewCreate": "Pokémon prüfen",
   "games.pokemon.nickname": "Spitzname",
   "games.pokemon.nature": "Wesen",
@@ -122,17 +149,24 @@ export default {
   "games.pokemon.move": "Attacke {number}",
   "games.pokemon.training": "Individuelle Werte & Fleißpunkte",
   "games.pokemon.previewEdits": "Änderungen prüfen",
-  "games.pokemon.error.pokemon_engine_missing": "Die Pokémon-Engine ist in dieser Harbor-Version noch nicht installiert.",
+  "games.pokemon.error.pokemon_engine_missing":
+    "Die Pokémon-Engine ist in dieser Harbor-Version noch nicht installiert.",
   "games.pokemon.error.pokemon_engine_start": "Die Pokémon-Engine konnte nicht gestartet werden.",
-  "games.pokemon.error.pokemon_engine_timeout": "Die Engine brauchte zu lange. Dein Spielstand wurde nicht verändert.",
+  "games.pokemon.error.pokemon_engine_timeout":
+    "Die Engine brauchte zu lange. Dein Spielstand wurde nicht verändert.",
   "games.pokemon.error.pokemon_read": "Die ausgewählte Datei konnte nicht gelesen werden.",
   "games.pokemon.error.pokemon_file": "Wähle eine unterstützte Spielstand- oder Pokémon-Datei.",
-  "games.pokemon.error.pokemon_save_changed": "Der Spielstand wurde außerhalb von Harbor verändert. Öffne ihn erneut, bevor du fortfährst.",
-  "games.pokemon.error.pokemon_review_changed": "Diese Vorschau ist veraltet. Prüfe die Änderungen erneut.",
-  "games.pokemon.error.pokemon_write": "Die Datei konnte nicht gespeichert werden. Deine Sicherung bleibt verfügbar.",
-  "games.pokemon.error.pokemon_export_exists": "Am Ziel existiert bereits eine Datei. Wähle einen neuen Dateinamen.",
+  "games.pokemon.error.pokemon_save_changed":
+    "Der Spielstand wurde außerhalb von Harbor verändert. Öffne ihn erneut, bevor du fortfährst.",
+  "games.pokemon.error.pokemon_review_changed":
+    "Diese Vorschau ist veraltet. Prüfe die Änderungen erneut.",
+  "games.pokemon.error.pokemon_write":
+    "Die Datei konnte nicht gespeichert werden. Deine Sicherung bleibt verfügbar.",
+  "games.pokemon.error.pokemon_export_exists":
+    "Am Ziel existiert bereits eine Datei. Wähle einen neuen Dateinamen.",
   "games.pokemon.error.pokemon_session": "Öffne den Spielstand erneut, um fortzufahren.",
-  "games.pokemon.error.pokemon_session_limit": "Schließe einen anderen Pokémon-Spielstand, bevor du diesen öffnest.",
+  "games.pokemon.error.pokemon_session_limit":
+    "Schließe einen anderen Pokémon-Spielstand, bevor du diesen öffnest.",
   "games.pokemon.allBoxes": "Alle Boxen",
   "games.pokemon.boxNumber": "Box {number}",
   "games.pokemon.moveToBox": "In Box verschieben",
@@ -163,11 +197,16 @@ export default {
   "games.pokemon.field.stats": "Werte",
   "games.pokemon.field.currentHp": "Aktuelle KP",
   "games.pokemon.field.statusCondition": "Status",
-  "games.pokemon.error.generic": "Die Aktion ist fehlgeschlagen. Dein ausgewählter Spielstand wurde nicht überschrieben.",
-  "games.pokemon.error.pokemon_save_open": "Dieser Spielstand ist bereits in einem anderen Pokémon-Arbeitsbereich geöffnet.",
-  "games.pokemon.error.pokemon_draft_limit": "Speichere oder verwirf diese Änderungen, bevor du weitere vornimmst.",
-  "games.pokemon.error.pokemon_draft_changed": "Ein älterer Entwurf konnte nicht fortgesetzt werden, weil der Spielstand geändert wurde oder der Entwurf nicht lesbar war. Er bleibt im lokalen Wiederherstellungsspeicher erhalten.",
-  "games.pokemon.draftKept": "Vorgemerkte Änderungen bleiben auf diesem Gerät. Öffne denselben Spielstand erneut, um deinen Entwurf fortzusetzen.",
+  "games.pokemon.error.generic":
+    "Die Aktion ist fehlgeschlagen. Dein ausgewählter Spielstand wurde nicht überschrieben.",
+  "games.pokemon.error.pokemon_save_open":
+    "Dieser Spielstand ist bereits in einem anderen Pokémon-Arbeitsbereich geöffnet.",
+  "games.pokemon.error.pokemon_draft_limit":
+    "Speichere oder verwirf diese Änderungen, bevor du weitere vornimmst.",
+  "games.pokemon.error.pokemon_draft_changed":
+    "Ein älterer Entwurf konnte nicht fortgesetzt werden, weil der Spielstand geändert wurde oder der Entwurf nicht lesbar war. Er bleibt im lokalen Wiederherstellungsspeicher erhalten.",
+  "games.pokemon.draftKept":
+    "Vorgemerkte Änderungen bleiben auf diesem Gerät. Öffne denselben Spielstand erneut, um deinen Entwurf fortzusetzen.",
   "games.pokemon.operation.edit": "Pokémon bearbeiten",
   "games.pokemon.operation.import": "Aus der Bank übertragen",
   "games.pokemon.operation.create": "Pokémon erstellen",
@@ -193,7 +232,8 @@ export default {
   "games.pokemon.evolution.min_beauty": "Mindestschönheit",
   "games.pokemon.evolution.min_affection": "Mindestzutrauen",
   "games.pokemon.evolution.gender": "Geschlecht (1 weiblich, 2 männlich)",
-  "games.pokemon.evolution.relative_physical_stats": "Angriff zu Verteidigung (−1 niedriger, 0 gleich, 1 höher)",
+  "games.pokemon.evolution.relative_physical_stats":
+    "Angriff zu Verteidigung (−1 niedriger, 0 gleich, 1 höher)",
   "games.pokemon.evolution.time_of_day": "Tageszeit",
   "games.pokemon.evolution.needs_overworld_rain": "Regen erforderlich",
   "games.pokemon.evolution.turn_upside_down": "Gerät auf den Kopf drehen",
@@ -201,6 +241,7 @@ export default {
   "games.pokemon.searchBank": "Bank durchsuchen",
   "games.pokemon.movePokemon": "Innerhalb dieses Spielstands verschieben",
   "games.pokemon.destinationSlot": "Zielplatz auswählen",
-  "games.pokemon.swapHint": "Bei einem belegten Zielplatz werden die beiden Pokémon getauscht. Prüfe den Vorgang vor dem Speichern.",
-  "games.pokemon.previewMove": "Verschieben prüfen"
+  "games.pokemon.swapHint":
+    "Bei einem belegten Zielplatz werden die beiden Pokémon getauscht. Prüfe den Vorgang vor dem Speichern.",
+  "games.pokemon.previewMove": "Verschieben prüfen",
 };

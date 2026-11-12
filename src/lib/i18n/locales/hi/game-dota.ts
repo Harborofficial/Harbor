@@ -18,7 +18,8 @@ export default {
   "games.dota.attribute.agi": "फुर्ती",
   "games.dota.attribute.int": "बुद्धिमत्ता",
   "games.dota.attribute.all": "सार्वभौमिक",
-  "games.dota.trendsScope": "OpenDota नमूना: आज सहित सात UTC दिन। रैंक मैच का औसत है; Turbo और पेशेवर मैच अलग हैं।",
+  "games.dota.trendsScope":
+    "OpenDota नमूना: आज सहित सात UTC दिन। रैंक मैच का औसत है; Turbo और पेशेवर मैच अलग हैं।",
   "games.dota.wins": "जीत दर",
   "games.dota.picks": "{count} बार चुना गया",
   "games.dota.noSample": "नमूना नहीं",
@@ -26,7 +27,8 @@ export default {
   "games.dota.moreHeroes": "और हीरो",
   "games.dota.matchups": "पेशेवर मुकाबले",
   "games.dota.refreshMatchups": "मुकाबले रीफ़्रेश करें",
-  "games.dota.matchupsScope": "पिछले साल के दर्ज पेशेवर मैचों में हर विरोधी के ख़िलाफ़ {hero} की जीत। पुराने पैच शामिल हैं; रैंक फ़िल्टर लागू नहीं होता।",
+  "games.dota.matchupsScope":
+    "पिछले साल के दर्ज पेशेवर मैचों में हर विरोधी के ख़िलाफ़ {hero} की जीत। पुराने पैच शामिल हैं; रैंक फ़िल्टर लागू नहीं होता।",
   "games.dota.opponent": "विरोधी खोजें",
   "games.dota.minimum": "न्यूनतम मैच",
   "games.dota.minGames": "{count}+ मैच",
@@ -48,5 +50,5 @@ export default {
   "games.dota.sample.5": "लेजेंड",
   "games.dota.sample.6": "एंशिएंट",
   "games.dota.sample.7": "डिवाइन",
-  "games.dota.sample.8": "इमॉर्टल"
+  "games.dota.sample.8": "इमॉर्टल",
 };

@@ -211,7 +211,8 @@ const surfaces2: Record<string, string> = {
   "Report sent": "Bericht gesendet",
   "Reset to original": "Auf Original zurücksetzen",
   "Resolving manifest": "Manifest wird aufgelöst",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Gleiche schreibgeschützte Nutzung wie bei Real-Debrid. Du kannst außerdem nicht zwischengespeicherte Quellen über die Wiedergabeauswahl in die Warteschlange stellen.",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Gleiche schreibgeschützte Nutzung wie bei Real-Debrid. Du kannst außerdem nicht zwischengespeicherte Quellen über die Wiedergabeauswahl in die Warteschlange stellen.",
   "Saved to your library.": "In deiner Mediathek gespeichert.",
   "Say a title, actor, or genre": "Nenne einen Titel, Schauspieler oder ein Genre",
   "See all winners": "Alle Gewinner ansehen",
@@ -265,7 +266,8 @@ const surfaces2: Record<string, string> = {
     'Verwende den "personal"-Schlüssel, nicht den Projektschlüssel.',
   "Use the v3 key, not the read access token.":
     "Verwende den v3-Schlüssel, nicht das Token für den Lesezugriff.",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "Wird zum Prüfen des Caches und Entsperren von Links verwendet. Harbor fügt deinem Konto niemals selbstständig etwas hinzu oder entfernt etwas daraus.",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "Wird zum Prüfen des Caches und Entsperren von Links verwendet. Harbor fügt deinem Konto niemals selbstständig etwas hinzu oder entfernt etwas daraus.",
   "Uses the directdl endpoint, which skips queueing for anything already cached.":
     "Verwendet den directdl-Endpunkt, der bei bereits zwischengespeicherten Inhalten die Warteschlange überspringt.",
   "Uses up to 150 MB": "Verwendet bis zu 150 MB",

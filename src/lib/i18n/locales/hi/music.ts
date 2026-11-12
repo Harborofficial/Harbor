@@ -109,21 +109,27 @@ const music: Record<string, string> = {
   "music.broadcast.output": "आउटपुट",
   "music.broadcast.stop": "रोकें",
   "music.broadcast.start": "शुरू करें",
-  "music.broadcast.blurb": "जो बज रहा है उसे वर्चुअल माइक्रोफ़ोन पर भेजें ताकि कॉल पर दोस्त सुन सकें। आपको यह अपने स्पीकर पर सुनाई देता रहेगा।",
+  "music.broadcast.blurb":
+    "जो बज रहा है उसे वर्चुअल माइक्रोफ़ोन पर भेजें ताकि कॉल पर दोस्त सुन सकें। आपको यह अपने स्पीकर पर सुनाई देता रहेगा।",
   "music.broadcast.title": "वॉइस चैट पर प्रसारित करें",
-  "music.cable.mac.installNeeded": "Harbor अपना वर्चुअल माइक्रोफ़ोन इंस्टॉल कर सकता है। macOS आपका एडमिनिस्ट्रेटर पासवर्ड माँगेगा, फिर Core Audio दोबारा शुरू होगा।",
+  "music.cable.mac.installNeeded":
+    "Harbor अपना वर्चुअल माइक्रोफ़ोन इंस्टॉल कर सकता है। macOS आपका एडमिनिस्ट्रेटर पासवर्ड माँगेगा, फिर Core Audio दोबारा शुरू होगा।",
   "music.cable.mac.installMissing": "Harbor के इस बिल्ड में वर्चुअल माइक्रोफ़ोन ड्राइवर शामिल नहीं है।",
   "music.cable.mac.installCancelled": "इंस्टॉलेशन रद्द कर दिया गया।",
   "music.cable.mac.installFailed": "वर्चुअल माइक्रोफ़ोन इंस्टॉल नहीं हो सका।",
-  "music.cable.mac.restartNeeded": "वर्चुअल माइक्रोफ़ोन इंस्टॉल है, लेकिन Core Audio ने इसे अभी तक नहीं पहचाना। पूरा करने के लिए Mac दोबारा शुरू करें।",
-  "music.cable.mac.updateAvailable": "Harbor के इस संस्करण के साथ नया वर्चुअल माइक्रोफ़ोन आता है। केबल चलता रहे इसके लिए इसे इंस्टॉल करें।",
+  "music.cable.mac.restartNeeded":
+    "वर्चुअल माइक्रोफ़ोन इंस्टॉल है, लेकिन Core Audio ने इसे अभी तक नहीं पहचाना। पूरा करने के लिए Mac दोबारा शुरू करें।",
+  "music.cable.mac.updateAvailable":
+    "Harbor के इस संस्करण के साथ नया वर्चुअल माइक्रोफ़ोन आता है। केबल चलता रहे इसके लिए इसे इंस्टॉल करें।",
   "music.cable.title": "Harbor वर्चुअल माइक",
-  "music.cable.blurb": "Harbor वर्चुअल माइक्रोफ़ोन खुद तैयार कर देता है। न कुछ डाउनलोड करना, न कुछ इंस्टॉल करना।",
+  "music.cable.blurb":
+    "Harbor वर्चुअल माइक्रोफ़ोन खुद तैयार कर देता है। न कुछ डाउनलोड करना, न कुछ इंस्टॉल करना।",
   "music.cable.create": "वर्चुअल माइक बनाएँ",
   "music.cable.remove": "वर्चुअल माइक हटाएँ",
   "music.cable.spec": "{rate}, {depth}",
   "music.cable.perfect": "कोई रीसैंपलिंग नहीं",
-  "music.cable.resampledGraph": "PipeWire अपना ग्राफ़ {graph} पर चला रहा है, इसलिए यहाँ रीसैंपलिंग हो रही है",
+  "music.cable.resampledGraph":
+    "PipeWire अपना ग्राफ़ {graph} पर चला रहा है, इसलिए यहाँ रीसैंपलिंग हो रही है",
   "music.cable.resampledServer": "ऑडियो सर्वर ने {requested} की जगह {rate} चुना",
   "music.cable.resampledFormat": "ऑडियो सर्वर 32-बिट फ़्लोट नहीं ले जा रहा",
   "music.cable.resampledOther": "ऑडियो रास्ते में कहीं रीसैंपलिंग हो रही है",
@@ -192,7 +198,8 @@ const music: Record<string, string> = {
   "music.speed.pitch": "पिच",
   "music.speed.reverb": "रीवर्ब",
   "music.speed.keepPitch": "मूल की बनाए रखें",
-  "music.speed.keepPitchHelp": "चालू करने पर टेम्पो बदलता है, की नहीं। बंद रखने पर nightcore और slowed वाली आवाज़ मिलती है।",
+  "music.speed.keepPitchHelp":
+    "चालू करने पर टेम्पो बदलता है, की नहीं। बंद रखने पर nightcore और slowed वाली आवाज़ मिलती है।",
   "music.speed.reset": "रीसेट",
   "music.speed.normal": "सामान्य",
   "music.speed.nightcore": "नाइटकोर",
@@ -357,7 +364,8 @@ const music: Record<string, string> = {
   "music.explore.scene": "सीन से",
   "music.artist.inPlaylists": "{name} वाली प्लेलिस्ट",
   "music.audio.preferredSource": "पसंदीदा स्रोत",
-  "music.audio.preferredSourceHint": "Harbor पहले यहाँ से चलाता है, फिर किसी भी चलने वाले स्रोत पर जाता है.",
+  "music.audio.preferredSourceHint":
+    "Harbor पहले यहाँ से चलाता है, फिर किसी भी चलने वाले स्रोत पर जाता है.",
   "music.spotify.connect": "Spotify Premium",
   "music.spotify.connectDetail": "मूल, विज्ञापन-मुक्त प्लेबैक के लिए एक बार कनेक्ट करें।",
   "music.spotify.connectAction": "कनेक्ट करें",
@@ -518,7 +526,8 @@ const music: Record<string, string> = {
   "music.row.scrobbleWaiting": "Last.fm कनेक्टेड है। उसने अभी तक कोई टैग शेल्फ़ नहीं भेजी।",
   "music.connect.scrobbleBody": "Last.fm कनेक्ट करें और यह शेल्फ़ उन्हीं टैग से बनेगी जो आप वाकई सुनते हैं।",
   "music.connect.serverName": "कोई मीडिया सर्वर या फ़ोल्डर",
-  "music.connect.serverBody": "Harbor को किसी फ़ोल्डर, Plex, Jellyfin, Navidrome या Subsonic पर लगाएँ और यह शेल्फ़ आपके पास पहले से मौजूद एल्बमों से भर जाएगी।",
+  "music.connect.serverBody":
+    "Harbor को किसी फ़ोल्डर, Plex, Jellyfin, Navidrome या Subsonic पर लगाएँ और यह शेल्फ़ आपके पास पहले से मौजूद एल्बमों से भर जाएगी।",
   "music.row.recents": "जहाँ छोड़ा था वहीं से शुरू करें",
   "music.row.fresh": "आपके सुने कलाकारों से नया",
   "music.row.freshSubtitle": "आपके सुनने के इतिहास के कलाकारों की हालिया रिलीज़",
@@ -583,7 +592,8 @@ const music: Record<string, string> = {
   "music.quickListen.loop": "प्रीव्यू दोहराएँ",
   "music.quickListen.mute": "झलक म्यूट करें",
   "music.quickListen.unmute": "आवाज़ चालू करें",
-  "music.quickListen.empty": "कोई ऐसा गाना नहीं मिला जो आपने न सुना हो। और संगीत खोजने के बाद फिर कोशिश करें।",
+  "music.quickListen.empty":
+    "कोई ऐसा गाना नहीं मिला जो आपने न सुना हो। और संगीत खोजने के बाद फिर कोशिश करें।",
   "music.quickListen.finding": "ऐसे गाने खोज रहे हैं जो आपने अभी तक नहीं सुने…",
   "music.quickListen.more": "और विकल्प",
   "music.playlist.search": "प्लेलिस्ट खोजें",

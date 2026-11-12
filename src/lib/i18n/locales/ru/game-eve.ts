@@ -22,7 +22,8 @@ export default {
   "games.eve.avoiding": "Исключённые",
   "games.eve.allow": "Разрешить {name}",
   "games.eve.clear": "Очистить всё",
-  "games.eve.stargates": "Только маршруты через звёздные врата. Червоточины и прыжковые мосты не учитываются.",
+  "games.eve.stargates":
+    "Только маршруты через звёздные врата. Червоточины и прыжковые мосты не учитываются.",
   "games.eve.saveFailed": "Не удалось запомнить маршрут на этом устройстве.",
   "games.eve.routeFailed": "Не удалось загрузить маршрут. Повторите попытку.",
   "games.eve.ready": "Выберите пункт назначения и проложите маршрут.",
@@ -46,7 +47,8 @@ export default {
   "games.eve.avoid": "Исключить {name}",
   "games.eve.less": "Меньше остановок",
   "games.eve.allStops": "Все остановки",
-  "games.eve.activityNote": "Активность отражает прошлые события и не включает пространство червоточин. Настройка безопасности не гарантирует безопасный маршрут.",
+  "games.eve.activityNote":
+    "Активность отражает прошлые события и не включает пространство червоточин. Настройка безопасности не гарантирует безопасный маршрут.",
   "games.eve.noRoute": "Маршрут через звёздные врата не найден.",
   "games.eve.incursions": "Вторжения",
   "games.eve.refreshIncursions": "Обновить вторжения",
@@ -60,5 +62,5 @@ export default {
   "games.eve.influence": "Влияние",
   "games.eve.systems": "Систем: {count}",
   "games.eve.boss": "Босс присутствует",
-  "games.eve.routeThere": "Маршрут сюда"
+  "games.eve.routeThere": "Маршрут сюда",
 };

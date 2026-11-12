@@ -90,14 +90,7 @@ export function EpisodeReviewsDialog({
       }
     };
 
-    let page = await fetchEpisodeReviews(
-      seriesImdbId,
-      season,
-      episode,
-      cursor,
-      undefined,
-      sort,
-    );
+    let page = await fetchEpisodeReviews(seriesImdbId, season, episode, cursor, undefined, sort);
     addReviews(page.reviews);
     let next = page.next;
     let failed = page.failed;
@@ -106,14 +99,7 @@ export function EpisodeReviewsDialog({
     // presenting that order. Every successful page must advance the cursor.
     while (sort === "longest" && !failed.length && next) {
       const current = next;
-      page = await fetchEpisodeReviews(
-        seriesImdbId,
-        season,
-        episode,
-        current,
-        undefined,
-        sort,
-      );
+      page = await fetchEpisodeReviews(seriesImdbId, season, episode, current, undefined, sort);
       addReviews(page.reviews);
       next = page.next;
       failed = page.failed;

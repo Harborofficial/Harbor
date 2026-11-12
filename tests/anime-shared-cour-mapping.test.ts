@@ -10,8 +10,18 @@ import { sharedCourRedirectTarget } from "../src/lib/providers/anime-mapping.ts"
 // (278043) are claimed by both Kitsu 49372 (S1) and Kitsu 50634 (S2).
 // AniZip answers the shared id with the S2 mapping (kitsu_id: null), which
 // used to flip TMDB detail pages onto S2E1 while calling it S1E1.
-const S2_MAPPING = { kitsu_id: null, anidb_id: 19983, imdb_id: "tt36034547", themoviedb_id: 278043 };
-const S1_MAPPING = { kitsu_id: 49372, anidb_id: 19010, imdb_id: "tt36034547", themoviedb_id: 278043 };
+const S2_MAPPING = {
+  kitsu_id: null,
+  anidb_id: 19983,
+  imdb_id: "tt36034547",
+  themoviedb_id: 278043,
+};
+const S1_MAPPING = {
+  kitsu_id: 49372,
+  anidb_id: 19010,
+  imdb_id: "tt36034547",
+  themoviedb_id: 278043,
+};
 
 test("shared IMDb id redirects a later cour to the earlier cour", () => {
   assert.equal(sharedCourRedirectTarget(S2_MAPPING, 50634, 49372, S1_MAPPING), 49372);
@@ -19,24 +29,17 @@ test("shared IMDb id redirects a later cour to the earlier cour", () => {
 
 test("shared TMDB id redirects even without an IMDb match", () => {
   assert.equal(
-    sharedCourRedirectTarget(
-      { kitsu_id: null, themoviedb_id: 278043 },
-      50634,
-      49372,
-      { kitsu_id: 49372, themoviedb_id: 278043 },
-    ),
+    sharedCourRedirectTarget({ kitsu_id: null, themoviedb_id: 278043 }, 50634, 49372, {
+      kitsu_id: 49372,
+      themoviedb_id: 278043,
+    }),
     49372,
   );
 });
 
 test("explicit kitsu_id hits are trusted (later cour with its own IMDb id)", () => {
   assert.equal(
-    sharedCourRedirectTarget(
-      { kitsu_id: 50634, imdb_id: "tt36034547" },
-      50634,
-      49372,
-      S1_MAPPING,
-    ),
+    sharedCourRedirectTarget({ kitsu_id: 50634, imdb_id: "tt36034547" }, 50634, 49372, S1_MAPPING),
     null,
   );
 });
@@ -53,12 +56,10 @@ test("no redirect when the earlier cour does not share the provider id", () => {
     null,
   );
   assert.equal(
-    sharedCourRedirectTarget(
-      { kitsu_id: null, themoviedb_id: 278043 },
-      50634,
-      11111,
-      { kitsu_id: 11111, themoviedb_id: 999 },
-    ),
+    sharedCourRedirectTarget({ kitsu_id: null, themoviedb_id: 278043 }, 50634, 11111, {
+      kitsu_id: 11111,
+      themoviedb_id: 999,
+    }),
     null,
   );
 });

@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import {
-  selectedVisibleIds, toggleDownloadGroupSelection, toggleDownloadSelection,
+  selectedVisibleIds,
+  toggleDownloadGroupSelection,
+  toggleDownloadSelection,
 } from "../src/views/downloads/selection.ts";
 
 test("selecting movie or episode rows toggles only those downloads", () => {

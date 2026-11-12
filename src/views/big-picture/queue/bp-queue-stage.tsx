@@ -11,8 +11,7 @@ const SLIDE_MS = 700;
 const PRUNE_MS = 900;
 const EDGE = "clamp(52px,6.2vh,78px)";
 
-const FIELD =
-  "radial-gradient(120% 90% at 28% 62%, var(--bp-panel-2) 0%, transparent 62%)";
+const FIELD = "radial-gradient(120% 90% at 28% 62%, var(--bp-panel-2) 0%, transparent 62%)";
 
 const VEIL = "color-mix(in oklab, var(--bp-void) 22%, transparent)";
 
@@ -40,15 +39,7 @@ function useReducedMotion(): boolean {
 // second declaration silently replaces the first: the same shear bp-ambient
 // paid for at bp-ambient-layers.tsx:124. The box is deliberately oversized so a
 // 2.2% slide can never expose a sliver of void at the screen edge.
-function BpQueueArtLayer({
-  layer,
-  top,
-  reduce,
-}: {
-  layer: Layer;
-  top: boolean;
-  reduce: boolean;
-}) {
+function BpQueueArtLayer({ layer, top, reduce }: { layer: Layer; top: boolean; reduce: boolean }) {
   const [armed, setArmed] = useState(false);
   const { art } = layer;
 

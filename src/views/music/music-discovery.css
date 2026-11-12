@@ -220,8 +220,13 @@
   padding-inline: 12px;
   border-radius: 6px;
 }
-.music-genre-artists-more button:hover:not(:disabled) { background: var(--color-elevated); color: var(--color-ink); }
-.music-genre-artists-more button:disabled { opacity: .6; }
+.music-genre-artists-more button:hover:not(:disabled) {
+  background: var(--color-elevated);
+  color: var(--color-ink);
+}
+.music-genre-artists-more button:disabled {
+  opacity: 0.6;
+}
 .music-genre-scene-card {
   position: relative;
   isolation: isolate;
@@ -239,19 +244,110 @@
   color: white;
   background: var(--color-elevated);
 }
-.music-genre-scene-card::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg,#0004,#000c); }
-.music-genre-scene-card img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; transition: transform 200ms ease-out; }
-.music-genre-scene-card:hover img { transform: scale(1.04); }
-.music-genre-scene-card > svg { width: 28px; height: 28px; }
-.music-genre-scene-card strong { font-size: 17px; font-weight: 600; line-height: 1.25; }
-.music-genre-artist-picker { display: flex; min-width: 0; align-items: center; gap: 8px; margin-block: 0 20px; }
-.music-genre-artist-picker > button { display: grid; place-items: center; width: 32px; height: 36px; flex-shrink: 0; color: var(--color-ink-muted); border-radius: 6px; }
-.music-genre-artist-picker > button:disabled { opacity: .3; }
-.music-genre-artist-picker > button:hover:not(:disabled) { background: var(--color-elevated); color: var(--color-ink); }
-.music-genre-video-artists { display: flex; min-width: 0; flex: 1; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 4px; }
-.music-genre-video-artists button { display: inline-flex; flex-shrink: 0; align-items: center; gap: 8px; min-height: 40px; max-width: 220px; padding: 5px 12px; border-radius: 999px; background: var(--color-elevated); color: var(--color-ink-muted); font-size: 12px; }
-.music-genre-video-artists button[aria-pressed="true"] { background: var(--color-ink); color: var(--color-canvas); }
-.music-genre-video-artists img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
-.music-genre-video-artists .music-genre-filter-avatar { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; background: var(--color-surface); color: var(--color-ink-muted); }
-.music-genre-video-artists span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (prefers-reduced-motion: reduce) { .music-genre-scene-card img { transition: none; } .music-genre-scene-card:hover img { transform: none; } }
+.music-genre-scene-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, #0004, #000c);
+}
+.music-genre-scene-card img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 200ms ease-out;
+}
+.music-genre-scene-card:hover img {
+  transform: scale(1.04);
+}
+.music-genre-scene-card > svg {
+  width: 28px;
+  height: 28px;
+}
+.music-genre-scene-card strong {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.music-genre-artist-picker {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  margin-block: 0 20px;
+}
+.music-genre-artist-picker > button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 36px;
+  flex-shrink: 0;
+  color: var(--color-ink-muted);
+  border-radius: 6px;
+}
+.music-genre-artist-picker > button:disabled {
+  opacity: 0.3;
+}
+.music-genre-artist-picker > button:hover:not(:disabled) {
+  background: var(--color-elevated);
+  color: var(--color-ink);
+}
+.music-genre-video-artists {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 4px;
+}
+.music-genre-video-artists button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  max-width: 220px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--color-elevated);
+  color: var(--color-ink-muted);
+  font-size: 12px;
+}
+.music-genre-video-artists button[aria-pressed="true"] {
+  background: var(--color-ink);
+  color: var(--color-canvas);
+}
+.music-genre-video-artists img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.music-genre-video-artists .music-genre-filter-avatar {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+}
+.music-genre-video-artists span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-genre-scene-card img {
+    transition: none;
+  }
+  .music-genre-scene-card:hover img {
+    transform: none;
+  }
+}

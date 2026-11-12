@@ -1,14 +1,4 @@
-import {
-  Check,
-  ChevronDown,
-  Download,
-  Pencil,
-  Plus,
-  RotateCcw,
-  Trash2,
-  Upload,
-  X,
-} from "../icons";
+import { Check, ChevronDown, Download, Pencil, Plus, RotateCcw, Trash2, Upload, X } from "../icons";
 import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from "react";
 import { createPortal } from "react-dom";
 import type { LayoutProfile } from "@/lib/player-chrome-profiles";
@@ -17,8 +7,7 @@ import { getDirection, isBackKey, navOwnsFocus } from "@/lib/keyboard-navigation
 import { useT } from "@/lib/i18n";
 import { ROW_ACTION, ROW_ACTION_DANGER, ROW_ACTION_PRIMARY, ROW_DESC } from "../kit";
 
-const OVERLAY_LABEL =
-  "text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]";
+const OVERLAY_LABEL = "text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]";
 const MENU_ITEM =
   "flex min-h-11 w-full items-center gap-2.5 rounded-md px-3 py-2 text-start text-[15.5px] leading-[22px] transition-colors";
 
@@ -105,7 +94,9 @@ export function ProfilePicker({
   }, [open]);
 
   const menuItems = () =>
-    Array.from(menuRef.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])") ?? []);
+    Array.from(
+      menuRef.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])") ?? [],
+    );
   const holdsFocus = () => !!menuRef.current?.contains(document.activeElement);
   const close = (restore: boolean) => {
     setOpen(false);
@@ -449,11 +440,7 @@ function LayoutDialog({ dialog, onClose }: { dialog: Dialog; onClose: () => void
           )}
         </div>
         <div className="flex items-center justify-end gap-2 px-6 pb-6">
-          <button
-            type="button"
-            onClick={onClose}
-            className={ROW_ACTION}
-          >
+          <button type="button" onClick={onClose} className={ROW_ACTION}>
             {t("Cancel")}
           </button>
           <button

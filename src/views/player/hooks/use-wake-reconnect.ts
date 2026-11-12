@@ -37,7 +37,9 @@ export function useWakeReconnect(params: {
 
       const pos = getPlaybackPosition();
       const live = isLivePlaybackSrc(s);
-      console.warn(`[player] system resumed after ${Math.round(gap / 1000)}s asleep — reconnecting stream`);
+      console.warn(
+        `[player] system resumed after ${Math.round(gap / 1000)}s asleep — reconnecting stream`,
+      );
       void b.load({
         url: s.url,
         subtitles: s.subtitles,

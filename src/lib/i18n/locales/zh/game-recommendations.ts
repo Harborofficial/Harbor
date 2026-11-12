@@ -6,7 +6,8 @@ export default {
   "games.recommend.filterTitle": "从推荐中排除",
   "games.recommend.hideLibrary": "游戏库中的游戏",
   "games.recommend.hideSaved": "已收藏的游戏",
-  "games.recommend.libraryNote": "游戏库匹配依据包括已检测到的游戏、已关联的导入条目和上次Steam同步的信息。",
+  "games.recommend.libraryNote":
+    "游戏库匹配依据包括已检测到的游戏、已关联的导入条目和上次Steam同步的信息。",
   "games.recommend.steamSynced": "Steam游戏库已同步：{date}",
   "games.recommend.steamUnavailable": "无法获取Steam游戏拥有情况。仍会匹配本地游戏库中的游戏。",
   "games.recommend.inLibrary": "已在你的游戏库中",
@@ -33,7 +34,8 @@ export default {
   "games.recommend.caughtUp": "换个方向探索吧。",
   "games.recommend.caughtUpNote": "试试关闭筛选条件、恢复隐藏的推荐，或再收藏一款喜爱的游戏。",
   "games.recommend.finding": "正在寻找与你的游戏相关的作品…",
-  "games.recommend.source": "根据你的游戏库，从 Steam 标签和 IGDB 中挑选的推荐。隐藏设置仅适用于当前个人资料。",
+  "games.recommend.source":
+    "根据你的游戏库，从 Steam 标签和 IGDB 中挑选的推荐。隐藏设置仅适用于当前个人资料。",
   "games.recommend.retrySome": "重试缺失的关联信息",
   "games.recommend.saveError": "无法在此设备上保存你的探索偏好。请重试。",
   "games.recommend.influences": "影响推荐的游戏",
@@ -50,6 +52,5 @@ export default {
   "games.recommend.allExcluded": "所有推荐依据均已排除。",
   "games.recommend.allExcludedNote": "在“调整推荐”中恢复一款游戏，或再收藏一款喜爱的游戏。",
   "games.recommend.saved": "已收藏的游戏",
-  "games.recommend.close": "关闭推荐设置"
+  "games.recommend.close": "关闭推荐设置",
 };
-

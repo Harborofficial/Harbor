@@ -32,7 +32,10 @@ test("a namesake from another sport is refused rather than shown", () => {
 
 test("a disambiguation or missing page is never treated as a person", () => {
   assert.equal(wikipediaAthletePortrait({ ...BECK, type: "disambiguation" }, request), null);
-  assert.equal(wikipediaAthletePortrait({ type: "standard", title: "Laetitia Beck" }, request), null);
+  assert.equal(
+    wikipediaAthletePortrait({ type: "standard", title: "Laetitia Beck" }, request),
+    null,
+  );
 });
 
 test("a different person with the requested sport is still refused on the name", () => {
@@ -45,7 +48,9 @@ test("a tennis player is read from the tennis wording, not golf's", () => {
     title: "Erika Andreeva",
     description: "Russian tennis player (born 2004)",
     extract: "",
-    thumbnail: { source: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/A.jpg/330px.jpg" },
+    thumbnail: {
+      source: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/A.jpg/330px.jpg",
+    },
     content_urls: { desktop: { page: "https://en.wikipedia.org/wiki/Erika_Andreeva" } },
   };
   const tennis = { path: "tennis/wta", id: "1", name: "Erika Andreeva" };
@@ -73,9 +78,21 @@ test("winter disciplines and swimming resolve portraits without matching an unre
   ]) {
     const request = { path, group, id: "", name: person.title };
     assert.ok(wikipediaAthletePortrait({ ...person, description }, request));
-    assert.equal(wikipediaAthletePortrait({ ...person, description: "German footballer" }, request), null);
+    assert.equal(
+      wikipediaAthletePortrait({ ...person, description: "German footballer" }, request),
+      null,
+    );
   }
-  assert.equal(wikipediaAthletePortrait({ ...person, description: "French biathlete" }, {
-    path: "5625", group: "winter", id: "", name: person.title,
-  }), null);
+  assert.equal(
+    wikipediaAthletePortrait(
+      { ...person, description: "French biathlete" },
+      {
+        path: "5625",
+        group: "winter",
+        id: "",
+        name: person.title,
+      },
+    ),
+    null,
+  );
 });

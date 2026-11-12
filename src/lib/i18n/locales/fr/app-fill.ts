@@ -741,7 +741,7 @@ const appFill: Record<string, string> = {
   "{time} left": "{time} restantes",
   "“Cached” just means your addon thinks that file is already saved on your debrid, ready to play instantly. That flag isn’t always right: sometimes the file isn’t actually there yet. When that happens the source won’t start, or it plays a short broken clip. It’s not a Harbor problem: pick another source, or give it a minute to finish caching and try again.":
     "« En cache » signifie simplement que votre extension pense que ce fichier est déjà enregistré sur votre service de débridage et peut être lu instantanément. Cette indication n’est pas toujours fiable : parfois, le fichier n’y est pas encore réellement. Dans ce cas, la source ne démarre pas ou ne lit qu’un court extrait défectueux. Ce n’est pas un problème lié à Harbor : choisissez une autre source, ou attendez une minute que la mise en cache se termine, puis réessayez.",
-  "Dismiss": "Ignorer",
+  Dismiss: "Ignorer",
 };
 
 export default appFill;

@@ -18,7 +18,8 @@ export default {
   "games.dota.attribute.agi": "Agility",
   "games.dota.attribute.int": "Intelligence",
   "games.dota.attribute.all": "Universal",
-  "games.dota.trendsScope": "OpenDota sample: seven UTC days including today. Rank is the match’s average rank; Turbo and pro games are separate.",
+  "games.dota.trendsScope":
+    "OpenDota sample: seven UTC days including today. Rank is the match’s average rank; Turbo and pro games are separate.",
   "games.dota.wins": "win rate",
   "games.dota.picks": "{count} picks",
   "games.dota.noSample": "No sample",
@@ -26,7 +27,8 @@ export default {
   "games.dota.moreHeroes": "More heroes",
   "games.dota.matchups": "Pro matchups",
   "games.dota.refreshMatchups": "Refresh matchups",
-  "games.dota.matchupsScope": "{hero}’s wins against each opponent in recorded professional games from the past year. Includes older patches; independent of the rank filter.",
+  "games.dota.matchupsScope":
+    "{hero}’s wins against each opponent in recorded professional games from the past year. Includes older patches; independent of the rank filter.",
   "games.dota.opponent": "Find an opponent",
   "games.dota.minimum": "Minimum games",
   "games.dota.minGames": "{count}+ games",
@@ -48,5 +50,5 @@ export default {
   "games.dota.sample.5": "Legend",
   "games.dota.sample.6": "Ancient",
   "games.dota.sample.7": "Divine",
-  "games.dota.sample.8": "Immortal"
+  "games.dota.sample.8": "Immortal",
 };
