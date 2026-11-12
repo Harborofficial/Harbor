@@ -6,7 +6,22 @@ import { useT } from "@/lib/i18n";
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 function hasVapoursynth(v: unknown): boolean {
-  return typeof v === "string" && v.toLowerCase().includes("vapoursynth");
+  if (typeof v === "string") return v.toLowerCase().includes("vapoursynth");
+  if (Array.isArray(v)) {
+    return v.some((item) => {
+      if (typeof item === "string") return item.toLowerCase().includes("vapoursynth");
+      if (item && typeof item === "object") {
+        const name = (item as { name?: unknown }).name;
+        if (typeof name === "string" && name.toLowerCase().includes("vapoursynth")) return true;
+        return JSON.stringify(item).toLowerCase().includes("vapoursynth");
+      }
+      return false;
+    });
+  }
+  if (v && typeof v === "object") {
+    return JSON.stringify(v).toLowerCase().includes("vapoursynth");
+  }
+  return false;
 }
 
 export function SvpIndicator({

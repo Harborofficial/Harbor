@@ -52,6 +52,11 @@ export type PlayerOverlayLayersProps = {
   subShowInPip: boolean;
   subAssNative: boolean;
   showStats: boolean;
+  statsPage?: 0 | 1 | 2 | 3 | 4 | 5;
+  onStatsPageChange?: (page: 0 | 1 | 2 | 3 | 4 | 5) => void;
+  onCloseStats?: () => void;
+  showConsole?: boolean;
+  onCloseConsole?: () => void;
   holdSpeedActive: boolean;
   subtitleOffsetSec: number | null;
   volumeIndicator: VolumeIndicatorState;
@@ -228,6 +233,12 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         subShowInPip={p.subShowInPip}
         subAssNative={p.subAssNative}
         showStats={p.showStats}
+        statsPage={p.statsPage}
+        onStatsPageChange={p.onStatsPageChange}
+        onCloseStats={p.onCloseStats}
+        showConsole={p.showConsole}
+        onCloseConsole={p.onCloseConsole}
+        engineStats={p.engineStats}
         holdSpeedActive={p.holdSpeedActive}
         subtitleOffsetSec={p.subtitleOffsetSec}
         volumeIndicator={p.volumeIndicator}

@@ -293,6 +293,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let snap: PlayerSnapshot = initialPlayerSnapshot();
   let profileAf = "";
   let hdrToSdr = mpvOptions?.hdrToSdr ?? true;
+  let appliedHdrToSdr: { on: boolean; oled: boolean } | null = null;
   const applyAudioFilters = () => {
     const parts: string[] = [];
     if (snap.audioNormalize) parts.push("dynaudnorm=f=500:g=31:p=0.9:m=4:b=1");
@@ -1608,35 +1609,43 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       applyAudioFilters();
     },
     setHdrToSdr(on, oled) {
+      const isOled = Boolean(oled);
+      if (appliedHdrToSdr && appliedHdrToSdr.on === on && appliedHdrToSdr.oled === isOled) return;
+      appliedHdrToSdr = { on, oled: isOled };
       hdrToSdr = on;
-      const properties: Array<[string, string]> = on
-        ? [
-            ["tone-mapping", "spline"],
-            ["gamut-mapping-mode", "perceptual"],
-            ["hdr-compute-peak", "yes"],
-            ["hdr-contrast-recovery", "0.30"],
-            ["hdr-peak-percentile", "99.995"],
-            ["dither-depth", "auto"],
-            ["target-trc", "bt.1886"],
-            ["target-prim", "bt.709"],
-            ["target-contrast", oled ? "inf" : "auto"],
-          ]
-        : [
-            ["tone-mapping", "auto"],
-            ["gamut-mapping-mode", "auto"],
-            ["hdr-compute-peak", "auto"],
-            ["hdr-contrast-recovery", "0"],
-            ["hdr-peak-percentile", "0"],
-            ["dither-depth", "auto"],
-            ["target-trc", "auto"],
-            ["target-prim", "auto"],
-            ["target-contrast", "auto"],
-          ];
-      if (isWindowsDesktop() || isMacDesktop()) {
-        properties.push(["target-colorspace-hint", "yes"]);
-      }
-      for (const [name, value] of properties) {
-        void invoke("mpv_set_property", { name, value }).catch(() => {});
+      if (on) {
+        const properties: Array<[string, string]> = [
+          ["tone-mapping", "spline"],
+          ["gamut-mapping-mode", "perceptual"],
+          ["hdr-compute-peak", "yes"],
+          ["hdr-contrast-recovery", "0.30"],
+          ["hdr-peak-percentile", "99.995"],
+          ["dither-depth", "auto"],
+          ["target-trc", "bt.1886"],
+          ["target-prim", "bt.709"],
+          ["target-contrast", isOled ? "inf" : "auto"],
+        ];
+        if (isWindowsDesktop() || isMacDesktop()) {
+          properties.push(["target-colorspace-hint", "yes"]);
+        }
+        for (const [name, value] of properties) {
+          void invoke("mpv_set_property", { name, value }).catch(() => {});
+        }
+      } else {
+        const properties: Array<[string, string]> = [
+          ["tone-mapping", "auto"],
+          ["gamut-mapping-mode", "auto"],
+          ["hdr-compute-peak", "auto"],
+          ["hdr-contrast-recovery", "0"],
+          ["hdr-peak-percentile", "0"],
+          ["dither-depth", "auto"],
+          ["target-trc", "auto"],
+          ["target-prim", "auto"],
+          ["target-contrast", "auto"],
+        ];
+        for (const [name, value] of properties) {
+          void invoke("mpv_set_property", { name, value }).catch(() => {});
+        }
       }
     },
     setAudioDevice(name) {
@@ -1671,6 +1680,11 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     },
     async exitFullscreen() {
       await invoke("mpv_set_property", { name: "fullscreen", value: false }).catch(() => {});
+    },
+    sendKeypress(key: string) {
+      invoke("mpv_keypress", { key }).catch((e) =>
+        console.warn("[mpv] sendKeypress failed", key, e),
+      );
     },
     capabilities(): PlayerCapabilities {
       return {

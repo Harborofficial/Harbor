@@ -44,6 +44,7 @@ export function CinemaHero({
   eyebrow?: string;
 }) {
   const t = useT();
+  const { settings } = useSettings();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -67,9 +68,21 @@ export function CinemaHero({
 
   useEffect(() => {
     if (paused || dragging || !inViewport || !pageVisible || slides.length < 2) return;
-    const id = setInterval(() => setActive((a) => (a + 1) % slides.length), ROTATE_MS);
+    const trailerDelayMs = settings.heroTrailers
+      ? Math.max(0, Math.min(30, settings.heroTrailerStartTime ?? 1)) * 1000
+      : 0;
+    const rotateInterval = Math.max(ROTATE_MS, trailerDelayMs + 8000);
+    const id = setInterval(() => setActive((a) => (a + 1) % slides.length), rotateInterval);
     return () => clearInterval(id);
-  }, [paused, dragging, inViewport, pageVisible, slides.length]);
+  }, [
+    paused,
+    dragging,
+    inViewport,
+    pageVisible,
+    slides.length,
+    settings.heroTrailers,
+    settings.heroTrailerStartTime,
+  ]);
 
   useEffect(() => {
     if (active >= slides.length) setActive(0);
@@ -238,8 +251,31 @@ function CinemaSlide({
   } | null>(null);
   const trailerInfo = trailerResult?.quality === trailerQuality ? trailerResult.info : null;
   const pageVisible = usePageVisible();
+  const [lingered, setLingered] = useState(false);
+  useEffect(() => {
+    if (!active || !inViewport || !pageVisible || !settings.heroTrailers) {
+      setLingered(false);
+      return;
+    }
+    const delaySec = Math.max(0, Math.min(30, settings.heroTrailerStartTime ?? 1));
+    if (delaySec === 0) {
+      setLingered(true);
+      return;
+    }
+    setLingered(false);
+    const id = window.setTimeout(() => setLingered(true), delaySec * 1000);
+    return () => window.clearTimeout(id);
+  }, [
+    active,
+    inViewport,
+    pageVisible,
+    settings.heroTrailers,
+    meta.id,
+    settings.heroTrailerStartTime,
+  ]);
+
   const wantsPlayback =
-    active && !!trailerInfo && pageVisible && inViewport && settings.heroTrailers;
+    active && !!trailerInfo && pageVisible && inViewport && settings.heroTrailers && lingered;
   const { slot, ready: videoReady } = useTrailerVideo({
     src: trailerInfo ? trailerSrc(trailerInfo) : null,
     active: !!wantsPlayback,

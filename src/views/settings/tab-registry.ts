@@ -35,7 +35,7 @@ export const SECTION_TABS: Partial<Record<SectionId, TabEntry[]>> = {
     { id: "quality", label: "Quality", icon: "Gauge" },
     { id: "picture", label: "Picture", icon: "Image" },
     { id: "network", label: "Network", icon: "Wifi" },
-    { id: "advanced", label: "mpv.conf", icon: "FileCode" },
+    { id: "advanced", label: "Engine & Scripts", icon: "FileCode" },
   ],
   shaders: [
     { id: "anime4k", label: "Anime Shaders", icon: "Sparkles" },

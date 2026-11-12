@@ -60,12 +60,34 @@ export function svpMpvLines(s: Settings, svpActive: boolean): string {
   );
 }
 
+export function customShadersMpvLines(s: Settings): string {
+  const enabled = (s.customGlslShaders || []).filter((sh) => sh.enabled && sh.path?.trim());
+  if (enabled.length === 0) return "";
+  const paths = enabled.map((sh) => sh.path.replace(/\\/g, "/")).join(";");
+  return `glsl-shaders=${paths}`;
+}
+
+export function customScriptsMpvLines(s: Settings): string {
+  const enabled = (s.customMpvScripts || []).filter((sc) => sc.enabled && sc.path?.trim());
+  if (enabled.length === 0) return "";
+  const lines = [
+    "load-scripts=yes",
+    ...enabled.map((sc) => `load-script=${sc.path.replace(/\\/g, "/")}`),
+  ];
+  return lines.join("\n");
+}
+
 export function mergeMpvOptions(
   s: Settings,
   svpActive: boolean,
   opts?: { anime4k?: boolean; totalPhysBytes?: number },
 ): string | undefined {
-  const merged = [compileMpvOptions(s, opts), svpMpvLines(s, svpActive), s.mpvExtraOptions || ""]
+  const merged = [
+    compileMpvOptions(s, opts),
+    svpMpvLines(s, svpActive),
+    customScriptsMpvLines(s),
+    s.mpvExtraOptions || "",
+  ]
     .filter((p) => p.trim())
     .join("\n");
   return merged.trim() ? merged : undefined;
@@ -122,4 +144,125 @@ export function validateMpvOptions(raw: string): MpvLineCheck {
     }
   }
   return { valid, skipped, risky };
+}
+
+export const KNOWN_MPV_COMMANDS = new Set([
+  "seek",
+  "revert-seek",
+  "quit",
+  "quit-watch-later",
+  "stop",
+  "frame-step",
+  "frame-back-step",
+  "playlist-next",
+  "playlist-prev",
+  "playlist-clear",
+  "playlist-remove",
+  "playlist-move",
+  "playlist-shuffle",
+  "sub-step",
+  "sub-seek",
+  "sub-reload",
+  "sub-remove",
+  "sub-add",
+  "audio-add",
+  "print-text",
+  "show-text",
+  "show-progress",
+  "rescan-external-files",
+  "screenshot",
+  "screenshot-to-file",
+  "screenshot-raw",
+  "loadfile",
+  "loadlist",
+  "run",
+  "set",
+  "add",
+  "cycle",
+  "multiply",
+  "cycle-values",
+  "enable-section",
+  "disable-section",
+  "define-section",
+  "ab-loop",
+  "drop-buffers",
+  "script-binding",
+  "script-message",
+  "script-message-to",
+  "hook-add",
+  "hook-ack",
+  "keypress",
+  "keydown",
+  "keyup",
+  "apply-profile",
+  "load-script",
+  "script-reload",
+  "change-list",
+  "ignore",
+  "write-watch-later-config",
+  "dump-cache",
+  "osd-msg1",
+  "osd-msg2",
+  "osd-msg3",
+  "osd-auto",
+]);
+
+export const MPV_KEY_PATTERN =
+  /^(?:(?:ctrl|alt|shift|meta)\+)*(?:[a-z0-9_+\-.,/\\`~=[\]';<>?:"{}!@#$%^&*()]|f\d+|kp\d+|kp_[a-z]+|mbtn_[a-z]+|wheel_[a-z]+|space|enter|tab|bs|del|ins|home|end|pgup|pgdwn|esc|right|left|up|down|sharp)$/i;
+
+export type InputConfCheck = { valid: number; skipped: number };
+
+export function validateInputConf(raw: string): InputConfCheck {
+  let valid = 0;
+  let skipped = 0;
+  for (const rawLine of raw.split("\n")) {
+    let t = rawLine.trim();
+    if (!t || t.startsWith("#")) continue;
+    // Strip optional section prefix e.g. {section} and input flags
+    t = t
+      .replace(/^\{[^}]+\}\s+/, "")
+      .replace(/^(?:repeatable|non-repeatable)\s+/i, "")
+      .trim();
+    // Input conf format: <KEY> <COMMAND> [ARGS...]
+    const m = t.match(/^([^\s#]+)\s+([^#]+)/);
+    if (!m || !m[1] || !m[2]?.trim()) {
+      skipped++;
+      continue;
+    }
+
+    const keyToken = m[1].trim();
+    const commandPart = m[2].trim();
+
+    // Check key format
+    if (!MPV_KEY_PATTERN.test(keyToken)) {
+      skipped++;
+      continue;
+    }
+
+    // Extract first command token, ignoring mpv command prefixes like repeatable, sync, etc.
+    const tokens = commandPart.split(/\s+/).filter(Boolean);
+    let cmdIdx = 0;
+    while (
+      cmdIdx < tokens.length &&
+      /^(?:repeatable|non-repeatable|sync|async|raw)$/i.test(tokens[cmdIdx])
+    ) {
+      cmdIdx++;
+    }
+
+    if (cmdIdx >= tokens.length) {
+      skipped++;
+      continue;
+    }
+
+    const firstCmd = tokens[cmdIdx].toLowerCase();
+    // Support compound commands separated by semicolon (e.g. cycle pause; show-text "\")
+    const baseCmd = firstCmd.split(";")[0].trim();
+
+    if (KNOWN_MPV_COMMANDS.has(baseCmd)) {
+      valid++;
+    } else {
+      skipped++;
+    }
+  }
+  return { valid, skipped };
 }

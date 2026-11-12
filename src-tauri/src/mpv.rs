@@ -412,6 +412,7 @@ pub async fn mpv_probe(_app: AppHandle) -> MpvProbe {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn supports_vapoursynth_filter() -> bool {
     force_c_numeric_locale();
     Mpv::new()
@@ -631,11 +632,20 @@ fn apply_pre_init(
     set("input-default-bindings", "no");
     set("input-media-keys", "no");
     set("input-cursor", "no");
-    // `osc` is provided by mpv's optional on-screen-controller script. Some
+    // osc is provided by mpv's optional on-screen-controller script. Some
     // libmpv builds, including the Flatpak build, do not ship that script, so
     // its option is unavailable. Harbor supplies its own controls either way.
     let _ = set("osc", "no");
+    // Enable scripts by default so user Lua/JS scripts can load and run
+    set("load-scripts", "yes");
+    // Keep native MPV OSD completely hidden so Harbor's styled HUD exclusively renders
     set("osd-level", "0");
+    set("osd-bar", "no");
+    set("osd-font-size", "0");
+    set("osd-color", "#00000000");
+    set("osd-border-size", "0");
+    set("osd-shadow-offset", "0");
+    set("osd-back-color", "#00000000");
     set("cursor-autohide", "200");
     set("volume-max", "600");
     set("sub-codepage", "utf-8");
@@ -691,13 +701,28 @@ fn apply_pre_init(
             eprintln!("[harbor::mpv] pre-init option {k} rejected: {e}");
         }
     };
+    let all_user_pairs = args
+        .extra_options
+        .as_deref()
+        .map(parse_extra_option_lines)
+        .unwrap_or_default();
+    let has_user = |key: &str| all_user_pairs.iter().any(|(k, _)| k.eq_ignore_ascii_case(key));
+
     if rtx {
         opt("gpu-api", "d3d11");
-        opt("target-colorspace-hint", "yes");
-        opt("target-peak", "10000");
-    } else if args.hdr_to_sdr.unwrap_or(false) {
-        opt("tone-mapping", "spline");
-        opt("gamut-mapping-mode", "perceptual");
+        if !has_user("target-colorspace-hint") {
+            opt("target-colorspace-hint", "yes");
+        }
+        if !has_user("target-peak") {
+            opt("target-peak", "10000");
+        }
+    } else if args.hdr_to_sdr.unwrap_or(false) && !has_user("target-trc") && !has_user("target-prim") {
+        if !has_user("tone-mapping") {
+            opt("tone-mapping", "spline");
+        }
+        if !has_user("gamut-mapping-mode") {
+            opt("gamut-mapping-mode", "perceptual");
+        }
         opt("hdr-compute-peak", "yes");
         opt("hdr-contrast-recovery", "0.30");
         opt("hdr-peak-percentile", "99.995");
@@ -705,7 +730,9 @@ fn apply_pre_init(
         opt("target-trc", "bt.1886");
         opt("target-prim", "bt.709");
         #[cfg(any(windows, target_os = "macos"))]
-        opt("target-colorspace-hint", "yes");
+        if !has_user("target-colorspace-hint") {
+            opt("target-colorspace-hint", "yes");
+        }
         // VSR still needs the D3D11 backend even while tonemapping HDR to SDR.
         #[cfg(windows)]
         if rtx_vsr {
@@ -714,14 +741,18 @@ fn apply_pre_init(
     } else {
         #[cfg(windows)]
         {
-            opt("target-colorspace-hint", "yes");
+            if !has_user("target-colorspace-hint") {
+                opt("target-colorspace-hint", "yes");
+            }
             if embed_hwnd.is_some() || rtx_vsr {
                 opt("gpu-api", "d3d11");
             }
         }
         #[cfg(target_os = "macos")]
         {
-            opt("target-colorspace-hint", "yes");
+            if !has_user("target-colorspace-hint") {
+                opt("target-colorspace-hint", "yes");
+            }
         }
     }
 
@@ -744,6 +775,21 @@ fn apply_pre_init(
         }
     }
     for (key, value) in &joined_init_only {
+        set(key, value);
+    }
+    // Also apply all valid user extra options pre-init so properties like
+    // d3d11-output-csp, d3d11-output-format, target-trc, target-prim, etc.
+    // configure the VO and swapchain before mpv_initialize() runs.
+    for (key, value) in &all_user_pairs {
+        if is_init_only_key(key) {
+            continue;
+        }
+        if is_disk_cache_option(key) {
+            continue;
+        }
+        if key == "glsl-shaders" && args.anime4k_shaders.as_ref().map_or(false, |s| !s.is_empty()) {
+            continue;
+        }
         set(key, value);
     }
     Ok(())
@@ -778,7 +824,16 @@ fn parse_extra_option_lines(raw: &str) -> Vec<(String, String)> {
 /// Extra-option keys that only take effect before mpv initializes. Scripts
 /// and script options must be present when mpv_initialize runs; setting them
 /// afterwards is rejected or silently ignored.
-const EXTRA_INIT_ONLY_KEYS: &[&str] = &["scripts", "script-opts", "load-scripts", "load-script"];
+const EXTRA_INIT_ONLY_KEYS: &[&str] = &[
+    "scripts",
+    "scripts-append",
+    "script",
+    "script-opts",
+    "script-opts-append",
+    "load-scripts",
+    "load-script",
+    "input-conf",
+];
 
 fn is_init_only_key(key: &str) -> bool {
     EXTRA_INIT_ONLY_KEYS
@@ -787,16 +842,18 @@ fn is_init_only_key(key: &str) -> bool {
 }
 
 /// Splits parsed extra options into (init_only, rest), preserving the order
-/// within each bucket. `load-script` entries are folded into the `scripts`
-/// bucket so every script path is joined and applied together pre-init.
+/// within each bucket. `load-script` and `script` entries are folded into the
+/// `scripts` bucket so every script path is joined and applied together pre-init.
 fn split_extra_option_pairs(raw: &str) -> (Vec<(String, String)>, Vec<(String, String)>) {
     let mut init_only = Vec::new();
     let mut rest = Vec::new();
     for (key, value) in parse_extra_option_lines(raw) {
         if is_init_only_key(&key) {
             let key = key.to_ascii_lowercase();
-            let key = if key == "load-script" {
+            let key = if key == "load-script" || key == "scripts-append" || key == "script" {
                 "scripts".to_string()
+            } else if key == "script-opts-append" {
+                "script-opts".to_string()
             } else {
                 key
             };
@@ -809,17 +866,26 @@ fn split_extra_option_pairs(raw: &str) -> (Vec<(String, String)>, Vec<(String, S
 }
 
 /// Joins init-only pairs into single option values. `scripts` entries are
-/// joined with ';' on Windows and ':' elsewhere (empty entries rejected),
+/// joined with ';' on Windows and ':' elsewhere (empty and duplicate entries rejected),
 /// `script-opts` with ',', and `load-scripts` keeps the last non-empty value.
 fn join_init_only_pairs(pairs: &[(String, String)]) -> Vec<(String, String)> {
     let mut scripts: Vec<String> = Vec::new();
+    let mut seen_scripts = std::collections::HashSet::new();
     let mut script_opts: Vec<String> = Vec::new();
     let mut load_scripts: Option<String> = None;
+    let mut input_conf: Option<String> = None;
+    let sep = if cfg!(windows) { ';' } else { ':' };
     for (key, value) in pairs {
         match key.as_str() {
             "scripts" => {
-                if !value.is_empty() {
-                    scripts.push(value.clone());
+                for part in value.split(sep) {
+                    let part = part.trim();
+                    if !part.is_empty() {
+                        let cleaned = part.replace('\\', "/");
+                        if seen_scripts.insert(cleaned.clone()) {
+                            scripts.push(cleaned);
+                        }
+                    }
                 }
             }
             "script-opts" => {
@@ -832,19 +898,27 @@ fn join_init_only_pairs(pairs: &[(String, String)]) -> Vec<(String, String)> {
                     load_scripts = Some(value.clone());
                 }
             }
+            "input-conf" => {
+                if !value.is_empty() {
+                    input_conf = Some(value.clone());
+                }
+            }
             _ => {}
         }
     }
     let mut out = Vec::new();
+    if let Some(v) = load_scripts {
+        out.push(("load-scripts".to_string(), v));
+    }
     if !scripts.is_empty() {
-        let sep = if cfg!(windows) { ";" } else { ":" };
-        out.push(("scripts".to_string(), scripts.join(sep)));
+        let sep_str = if cfg!(windows) { ";" } else { ":" };
+        out.push(("scripts".to_string(), scripts.join(sep_str)));
     }
     if !script_opts.is_empty() {
         out.push(("script-opts".to_string(), script_opts.join(",")));
     }
-    if let Some(v) = load_scripts {
-        out.push(("load-scripts".to_string(), v));
+    if let Some(v) = input_conf {
+        out.push(("input-conf".to_string(), v));
     }
     out
 }
@@ -867,6 +941,12 @@ fn apply_extra_mpv_options(mpv: &Mpv, raw: &str) {
                 "[harbor::mpv] extra option {} skipped (disk caching is disabled)",
                 key
             );
+            continue;
+        }
+        if key == "glsl-shaders-append" || key == "glsl-shader" {
+            if let Err(e) = mpv_argv_command(mpv, &["change-list", "glsl-shaders", "append", value.as_str()]) {
+                eprintln!("[harbor::mpv] glsl-shader append failed: {}", e);
+            }
             continue;
         }
         match mpv.set_property(&key, value.as_str()) {
@@ -2885,13 +2965,53 @@ const MPV_ALLOWED_COMMANDS: &[&str] = &[
     "frame-back-step",
     "loadfile",
     "ao-reload",
+    "load-script",
+    "script-reload",
+    "change-list",
+    "keypress",
+    "keydown",
+    "keyup",
+    "show-text",
+    "show-progress",
     // Auto-sync's live tap writes the buffered minute to a temp file.
     "dump-cache",
     // Writes a line into mpv's log, which is the only log a release build keeps.
     // The player uses it to name the control behind each pause/play so a user's
     // log explains itself.
     "print-text",
+    "script-binding",
+    "script-message",
+    "script-message-to",
+    "add",
+    "cycle",
+    "cycle-values",
+    "multiply",
+    "set",
+    "osd-msg1",
+    "osd-msg2",
+    "osd-msg3",
+    "osd-auto",
 ];
+
+#[tauri::command]
+pub async fn mpv_keypress(state: State<'_, MpvState>, key: String) -> Result<(), String> {
+    let mpv = {
+        let g = state.inner.lock().await;
+        let s = g.as_ref().ok_or_else(|| "mpv not started".to_string())?;
+        s.mpv.clone()
+    };
+    mpv_argv_command(&mpv, &["keypress", key.as_str()])
+}
+
+#[tauri::command]
+pub async fn mpv_write_input_conf(app: AppHandle, content: String) -> Result<String, String> {
+    use tauri::Manager;
+    let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let path = dir.join("harbor-input.conf");
+    std::fs::write(&path, &content).map_err(|e| e.to_string())?;
+    Ok(path.to_string_lossy().replace('\\', "/"))
+}
 
 fn mpv_property_blocked(name: &str) -> bool {
     let n = name.to_ascii_lowercase();
@@ -2980,13 +3100,43 @@ pub async fn mpv_get_property(state: State<'_, MpvState>, name: String) -> Resul
             .map(|s| s.mpv.clone())
             .ok_or_else(|| "mpv not started".to_string())?
     };
-    let s = mpv
-        .get_property::<String>(&name)
-        .map_err(|e| format!("get {}: {}", name, e))?;
-    Ok(match s.parse::<f64>() {
-        Ok(n) if n.is_finite() => serde_json::json!(n),
-        _ => Value::String(s),
-    })
+    if let Ok(node) = mpv.get_property::<MpvNode>(&name) {
+        let val = mpv_node_to_json(node);
+        if val != Value::Null {
+            return Ok(val);
+        }
+    }
+    if let Ok(s) = mpv.get_property::<String>(&name) {
+        return Ok(match s.parse::<f64>() {
+            Ok(n) if n.is_finite() => serde_json::json!(n),
+            _ => Value::String(s),
+        });
+    }
+    Err(format!("get {}: property unavailable", name))
+}
+
+#[tauri::command]
+pub async fn mpv_get_property_osd(
+    state: State<'_, MpvState>,
+    name: String,
+) -> Result<String, String> {
+    let mpv = {
+        let g = state.inner.lock().await;
+        g.as_ref()
+            .map(|s| s.mpv.clone())
+            .ok_or_else(|| "mpv not started".to_string())?
+    };
+    let name_c = CString::new(name.as_str()).map_err(|e| e.to_string())?;
+    let ptr = unsafe { libmpv2_sys::mpv_get_property_osd_string(mpv.ctx.as_ptr(), name_c.as_ptr()) };
+    if !ptr.is_null() {
+        let s = unsafe { std::ffi::CStr::from_ptr(ptr) }.to_string_lossy().into_owned();
+        unsafe { libmpv2_sys::mpv_free(ptr as *mut _) };
+        return Ok(s);
+    }
+    if let Ok(s) = mpv.get_property::<String>(&name) {
+        return Ok(s);
+    }
+    Err(format!("property {} unavailable", name))
 }
 
 /// Read structured seekable cache ranges from mpv as a real node array.
@@ -5333,7 +5483,7 @@ mod script_pre_init_tests {
     #[test]
     fn split_is_case_insensitive_and_folds_load_script_into_scripts() {
         let (init_only, rest) = split_extra_option_pairs(
-            "Scripts=a.lua\nLOAD-SCRIPT=b.lua\nload-script=c.lua\nscale=bilinear\n",
+            "Scripts=a.lua\nLOAD-SCRIPT=b.lua\nload-script=c.lua\nscript=d.lua\nscale=bilinear\n",
         );
         assert_eq!(
             init_only,
@@ -5341,20 +5491,25 @@ mod script_pre_init_tests {
                 ("scripts".to_string(), "a.lua".to_string()),
                 ("scripts".to_string(), "b.lua".to_string()),
                 ("scripts".to_string(), "c.lua".to_string()),
+                ("scripts".to_string(), "d.lua".to_string()),
             ]
         );
         assert_eq!(rest, vec![("scale".to_string(), "bilinear".to_string())]);
     }
 
     #[test]
-    fn join_scripts_uses_platform_separator_and_rejects_empty_entries() {
-        let (init_only, _) =
-            split_extra_option_pairs("scripts=a.lua\nscripts=\nload-script=b.lua\n");
-        let joined = join_init_only_pairs(&init_only);
+    fn join_scripts_uses_platform_separator_deduplicates_and_rejects_empty_entries() {
         let sep = if cfg!(windows) { ";" } else { ":" };
+        let (init_only, _) = split_extra_option_pairs(
+            &format!("scripts=a.lua\nscripts=\nload-script=b.lua\nscript=a.lua\nscripts=b.lua{}c.lua\n", sep),
+        );
+        let joined = join_init_only_pairs(&init_only);
         assert_eq!(
             joined,
-            vec![("scripts".to_string(), format!("a.lua{}b.lua", sep))]
+            vec![(
+                "scripts".to_string(),
+                format!("a.lua{}b.lua{}c.lua", sep, sep)
+            )]
         );
     }
 

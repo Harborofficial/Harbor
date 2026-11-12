@@ -7,7 +7,7 @@ import { ToggleRow } from "../shared";
 import { ChoiceBlock, Tag } from "./choice";
 import { DisplayPanelSelector } from "./display-panel-selector";
 
-type HdrMode = "sdr" | "hdrWindow" | "hdrEmbedded";
+type HdrMode = "default" | "sdr" | "hdrWindow" | "hdrEmbedded";
 
 const MODE_FLAGS: Record<
   HdrMode,
@@ -17,15 +17,21 @@ const MODE_FLAGS: Record<
     playerHdrStage: "auto" | "off" | "always";
   }
 > = {
+  default: { playerHdrToSdr: false, playerHdrOpaqueWindow: false, playerHdrStage: "off" },
   sdr: { playerHdrToSdr: true, playerHdrOpaqueWindow: false, playerHdrStage: "off" },
   hdrWindow: { playerHdrToSdr: false, playerHdrOpaqueWindow: true, playerHdrStage: "off" },
   hdrEmbedded: { playerHdrToSdr: false, playerHdrOpaqueWindow: false, playerHdrStage: "auto" },
 };
 
-function deriveMode(s: { playerHdrToSdr: boolean; playerHdrOpaqueWindow: boolean }): HdrMode {
+function deriveMode(s: {
+  playerHdrToSdr: boolean;
+  playerHdrOpaqueWindow: boolean;
+  playerHdrStage?: "auto" | "off" | "always";
+}): HdrMode {
   if (s.playerHdrOpaqueWindow) return "hdrWindow";
   if (s.playerHdrToSdr) return "sdr";
-  return "hdrEmbedded";
+  if (s.playerHdrStage && s.playerHdrStage !== "off") return "hdrEmbedded";
+  return "default";
 }
 
 export function HdrModePicker() {
@@ -44,6 +50,13 @@ export function HdrModePicker() {
     recommended?: boolean;
     experimental?: boolean;
   }> = [
+    {
+      id: "default",
+      label: t("Default"),
+      sub: t(
+        "Runs vanilla mpv color management without Harbor tonemapping or window overrides. Lets custom HDR shaders, 3DLUTs, and mpv.conf take full control.",
+      ),
+    },
     {
       id: "sdr",
       label: t("Tonemap to SDR"),

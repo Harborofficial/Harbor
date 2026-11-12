@@ -89,6 +89,8 @@ export type PlayerSnapshot = {
   errorMessage: string | null;
   errorCode: "decode" | "codec" | "network" | "source" | "unknown" | null;
   noAudio?: boolean;
+  osdText?: string;
+  osdSeq?: number;
 };
 
 export type PlayerSource = {
@@ -182,6 +184,7 @@ export type PlayerBridge = {
   capabilities: () => PlayerCapabilities;
   subscribe: (listener: (snap: PlayerSnapshot) => void) => () => void;
   destroy: () => void;
+  sendKeypress?: (key: string) => void;
 };
 
 export type PlayerCapabilities = {
@@ -221,6 +224,8 @@ export const emptySnapshot: PlayerSnapshot = {
   hdrGamma: "",
   errorMessage: null,
   errorCode: null,
+  osdText: "",
+  osdSeq: 0,
 };
 
 /** Snapshot seeded with the persisted volume/mute preference instead of the 1.0/100% default. */

@@ -284,13 +284,19 @@ export const Hero = memo(function Hero({
   }, [audioHero]);
 
   useEffect(() => {
-    if (!onScreen) {
+    if (!onScreen || !playTrailer) {
       setLingered(false);
       return;
     }
-    const id = window.setTimeout(() => setLingered(true), 1000);
+    const delaySec = Math.max(0, Math.min(30, settings.heroTrailerStartTime ?? 1));
+    if (delaySec === 0) {
+      setLingered(true);
+      return;
+    }
+    setLingered(false);
+    const id = window.setTimeout(() => setLingered(true), delaySec * 1000);
     return () => window.clearTimeout(id);
-  }, [onScreen]);
+  }, [onScreen, playTrailer, meta.id, settings.heroTrailerStartTime]);
 
   const actionRadius = playSquare ? "rounded-md" : "rounded-full";
 

@@ -23,7 +23,7 @@ export function MpvPanel() {
           { id: "quality", label: t("Quality") },
           { id: "picture", label: t("Picture") },
           { id: "network", label: t("Network") },
-          { id: "advanced", label: t("mpv.conf") },
+          { id: "advanced", label: t("Engine & Scripts") },
         ]
       : [],
     tab,
