@@ -537,14 +537,13 @@ async function fetchPage1(): Promise<string> {
     getMpvProp<string>("path"),
     getMpvProp<string>("media-title"),
     getMpvProp<number>("chapter"),
-    getMpvProp<number>("chapter-list/count") || getMpvProp<number>("chapters"),
-    getMpvProp<string>("chapter-metadata/title") ||
-      getMpvProp<string>("chapter-list/by-current/title"),
+    getMpvPropWithFallback<number>("chapter-list/count", "chapters"),
+    getMpvPropWithFallback<string>("chapter-metadata/title", "chapter-list/by-current/title"),
     getMpvProp<number>("file-size"),
     getMpvProp<string>("file-format"),
     getMpvProp<number>("demuxer-cache-duration"),
     getMpvProp<Record<string, unknown>>("demuxer-cache-state"),
-    getMpvProp<string>("current-vo") || getMpvProp<string>("vo"),
+    getMpvPropWithFallback<string>("current-vo", "vo"),
     getMpvProp<unknown>("current-gpu-context"),
     getMpvProp<unknown>("gpu-context"),
     getMpvProp<unknown>("display-names"),
@@ -558,13 +557,12 @@ async function fetchPage1(): Promise<string> {
     getMpvPropWithFallback<number>("vo-delayed-frame-count", "delayed-frame-count"),
     getMpvProp<Record<string, unknown>>("video-target-params"),
     getMpvProp<Record<string, unknown>>("osd-dimensions"),
-    getMpvProp<string>("video-target-params/aspect-name") ||
-      getMpvProp<string>("video-params/aspect-name"),
+    getMpvPropWithFallback<string>("video-target-params/aspect-name", "video-params/aspect-name"),
     getMpvProp<Record<string, unknown>>("video-params"),
     getMpvProp<Record<string, unknown>>("video-out-params"),
     getMpvProp<string>("video-codec"),
-    getMpvProp<string>("video-codec-profile") || getMpvProp<string>("video-format"),
-    getMpvProp<string>("hwdec-current") || getMpvProp<string>("hwdec"),
+    getMpvPropWithFallback<string>("video-codec-profile", "video-format"),
+    getMpvPropWithFallback<string>("hwdec-current", "hwdec"),
     getMpvProp<number>("video-bitrate"),
     getMpvProp<unknown>("vf"),
     getMpvOsdProp("vf"),
@@ -573,7 +571,7 @@ async function fetchPage1(): Promise<string> {
     getMpvProp<string>("tone-mapping"),
     getMpvProp<string>("audio-codec"),
     getMpvProp<string>("audio-codec-name"),
-    getMpvProp<string>("current-ao") || getMpvProp<string>("ao"),
+    getMpvPropWithFallback<string>("current-ao", "ao"),
     getMpvProp<string>("audio-device"),
     getMpvProp<number>("ao-volume"),
     getMpvProp<Record<string, unknown>>("audio-params"),
@@ -595,8 +593,8 @@ async function fetchPage1(): Promise<string> {
     getMpvProp<number>("video-out-params/max-cll"),
     getMpvProp<number>("video-out-params/max-fall"),
     getMpvProp<number>("video-out-params/sig-peak"),
-    getMpvProp<number>("video-out-params/max-pq-y") || getMpvProp<number>("video-params/max-pq-y"),
-    getMpvProp<number>("video-out-params/avg-pq-y") || getMpvProp<number>("video-params/avg-pq-y"),
+    getMpvPropWithFallback<number>("video-out-params/max-pq-y", "video-params/max-pq-y"),
+    getMpvPropWithFallback<number>("video-out-params/avg-pq-y", "video-params/avg-pq-y"),
     getMpvProp<string | number>("video-params/dovi-profile"),
     getMpvProp<string | number>("video-params/dovi-level"),
     getMpvProp<boolean>("video-params/dovi-rpu-present"),
@@ -1223,8 +1221,7 @@ async function fetchPage5(): Promise<string> {
     getMpvProp<string>("path"),
     getMpvProp<string>("media-title"),
     getMpvProp<number>("duration"),
-    getMpvProp<string>("chapter-metadata/title") ||
-      getMpvProp<string>("chapter-list/by-current/title"),
+    getMpvPropWithFallback<string>("chapter-metadata/title", "chapter-list/by-current/title"),
     getMpvProp<number>("file-size"),
     getMpvProp<string>("file-format"),
     getMpvProp<TrackEntry[]>("track-list"),
@@ -1650,6 +1647,10 @@ export const KeybindStatsOverlay = memo(function KeybindStatsOverlay({
   const [activePage, setActivePage] = useState<number | null>(showStats ? (page ?? 1) : null);
   const [pageContent, setPageContent] = useState<string>("");
   const pollTimerRef = useRef<number | null>(null);
+  const inFlightRef = useRef(false);
+  const currentRequestIdRef = useRef(0);
+  const activePageRef = useRef<number | null>(activePage);
+  activePageRef.current = activePage;
 
   // Sync with player showStats / page props
   useEffect(() => {
@@ -1665,6 +1666,8 @@ export const KeybindStatsOverlay = memo(function KeybindStatsOverlay({
 
   const handleTabClick = useCallback(
     (id: 0 | 1 | 2 | 3 | 4 | 5) => {
+      currentRequestIdRef.current++;
+      inFlightRef.current = false;
       setActivePage(id);
       onPageChange?.(id);
     },
@@ -1672,6 +1675,9 @@ export const KeybindStatsOverlay = memo(function KeybindStatsOverlay({
   );
 
   const fetchCurrentPage = useCallback(async (page: number) => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+    const reqId = ++currentRequestIdRef.current;
     let text = "";
     try {
       if (page === 0) text = await fetchPage0();
@@ -1683,8 +1689,12 @@ export const KeybindStatsOverlay = memo(function KeybindStatsOverlay({
       else text = await fetchPage1();
     } catch (e) {
       text = `Error loading Page ${page}: ${String(e)}`;
+    } finally {
+      inFlightRef.current = false;
     }
-    setPageContent(text);
+    if (reqId === currentRequestIdRef.current && activePageRef.current === page) {
+      setPageContent(text);
+    }
   }, []);
 
   // Listen for keybind events dispatched by use-keyboard-shortcuts
@@ -1693,6 +1703,8 @@ export const KeybindStatsOverlay = memo(function KeybindStatsOverlay({
       if (!settings.mpvDetailedStats) return;
       const ce = e as CustomEvent<{ page?: number }>;
       const targetPage = ce.detail?.page ?? 1;
+      currentRequestIdRef.current++;
+      inFlightRef.current = false;
       setActivePage((prev) => (prev === targetPage ? null : targetPage));
       if (targetPage >= 0 && targetPage <= 5) {
         onPageChange?.(targetPage as 0 | 1 | 2 | 3 | 4 | 5);

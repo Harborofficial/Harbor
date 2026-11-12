@@ -102,7 +102,7 @@ export const StageOverlays = memo(function StageOverlays({
         )}
       {!pipMode &&
         showStats &&
-        (settings.mpvDetailedStats ? (
+        (settings.mpvDetailedStats && engine === "mpv" ? (
           <KeybindStatsOverlay
             snap={snap}
             engine={engine}

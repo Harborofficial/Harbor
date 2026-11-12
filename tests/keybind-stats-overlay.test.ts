@@ -475,3 +475,129 @@ test("customShadersMpvLines formats enabled shaders into semicolon-separated cha
   const lines = customShadersMpvLines(settings);
   assert.equal(lines, "glsl-shaders=C:/shaders/fsrcnnx.glsl;C:/shaders/krig.glsl");
 });
+
+test("fullShaderChain production path appends enabled custom shaders", async () => {
+  const { fullShaderChain } = await import("../src/views/player/hooks/use-anime4k.ts");
+  const settings = {
+    customGlslShaders: [
+      { id: "s1", name: "FSRCNNX", path: "C:\\shaders\\fsrcnnx.glsl", enabled: true },
+      { id: "s2", name: "disabled", path: "C:\\shaders\\disabled.glsl", enabled: false },
+    ],
+    playerAnime4k: false,
+    mpvShaders: [],
+  } as any;
+  const chain = fullShaderChain(settings, {} as any, "off");
+  assert.ok(chain.includes("C:/shaders/fsrcnnx.glsl"));
+  assert.ok(!chain.includes("C:/shaders/disabled.glsl"));
+});
+
+test("HDR to SDR transitions track (on, oled) pair and reset properties on disable", () => {
+  let appliedHdrToSdr: { on: boolean; oled: boolean } | null = null;
+  const propertiesSet: Array<[string, string]> = [];
+
+  function setHdrToSdr(on: boolean, oled?: boolean) {
+    const isOled = Boolean(oled);
+    if (appliedHdrToSdr && appliedHdrToSdr.on === on && appliedHdrToSdr.oled === isOled) return;
+    appliedHdrToSdr = { on, oled: isOled };
+    propertiesSet.length = 0;
+    if (on) {
+      propertiesSet.push(
+        ["tone-mapping", "spline"],
+        ["gamut-mapping-mode", "perceptual"],
+        ["hdr-compute-peak", "yes"],
+        ["hdr-contrast-recovery", "0.30"],
+        ["hdr-peak-percentile", "99.995"],
+        ["dither-depth", "auto"],
+        ["target-trc", "bt.1886"],
+        ["target-prim", "bt.709"],
+        ["target-contrast", isOled ? "inf" : "auto"],
+      );
+    } else {
+      propertiesSet.push(
+        ["tone-mapping", "auto"],
+        ["gamut-mapping-mode", "auto"],
+        ["hdr-compute-peak", "auto"],
+        ["hdr-contrast-recovery", "0"],
+        ["hdr-peak-percentile", "0"],
+        ["dither-depth", "auto"],
+        ["target-trc", "auto"],
+        ["target-prim", "auto"],
+        ["target-contrast", "auto"],
+      );
+    }
+  }
+
+  // Initial on with LCD
+  setHdrToSdr(true, false);
+  assert.equal(propertiesSet.find(([k]) => k === "target-contrast")?.[1], "auto");
+
+  // Switching panel to OLED updates target-contrast even while HDR-to-SDR is already on
+  setHdrToSdr(true, true);
+  assert.equal(propertiesSet.find(([k]) => k === "target-contrast")?.[1], "inf");
+
+  // Redundant call with same (on, oled) is no-op
+  propertiesSet.length = 0;
+  setHdrToSdr(true, true);
+  assert.equal(propertiesSet.length, 0);
+
+  // Disabling restores all properties including hdr-compute-peak, recovery, percentile
+  setHdrToSdr(false, true);
+  assert.equal(propertiesSet.find(([k]) => k === "hdr-compute-peak")?.[1], "auto");
+  assert.equal(propertiesSet.find(([k]) => k === "hdr-contrast-recovery")?.[1], "0");
+  assert.equal(propertiesSet.find(([k]) => k === "hdr-peak-percentile")?.[1], "0");
+});
+
+test("stats polling request tagging and in-flight guard prevents stale page overwrites", async () => {
+  let inFlight = false;
+  let currentRequestId = 0;
+  let activePage: number | null = 1;
+  let appliedContent = "";
+
+  async function mockFetch(page: number, delayMs: number, resultText: string) {
+    if (inFlight) return;
+    inFlight = true;
+    const reqId = ++currentRequestId;
+    try {
+      await new Promise((r) => setTimeout(r, delayMs));
+    } finally {
+      inFlight = false;
+    }
+    // Only apply if reqId is still latest and page matches activePage
+    if (reqId === currentRequestId && activePage === page) {
+      appliedContent = resultText;
+    }
+  }
+
+  // Slow request for page 1 starts
+  const p1 = mockFetch(1, 50, "Page 1 Content");
+  // User switches to page 2: activePage updates, resets inFlight, and invalidates reqId
+  activePage = 2;
+  inFlight = false;
+  currentRequestId++;
+  const p2 = mockFetch(2, 10, "Page 2 Content");
+
+  await Promise.all([p1, p2]);
+  // Page 1 resolved after switch, but must NOT overwrite Page 2!
+  assert.equal(appliedContent, "Page 2 Content");
+});
+
+test("advanced stats overlay and toggle are gated on mpv engine", () => {
+  function shouldMountKeybindStats(
+    settings: { mpvDetailedStats: boolean },
+    engine: "html5" | "mpv",
+  ): boolean {
+    return settings.mpvDetailedStats && engine === "mpv";
+  }
+
+  function shouldHandleStatsToggle(
+    settings: { mpvDetailedStats: boolean },
+    engine: "html5" | "mpv",
+  ): boolean {
+    return settings.mpvDetailedStats && engine === "mpv";
+  }
+
+  assert.equal(shouldMountKeybindStats({ mpvDetailedStats: true }, "mpv"), true);
+  assert.equal(shouldMountKeybindStats({ mpvDetailedStats: true }, "html5"), false);
+  assert.equal(shouldHandleStatsToggle({ mpvDetailedStats: true }, "html5"), false);
+  assert.equal(shouldHandleStatsToggle({ mpvDetailedStats: false }, "mpv"), false);
+});

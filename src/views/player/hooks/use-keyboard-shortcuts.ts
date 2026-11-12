@@ -41,56 +41,6 @@ function parseInputConf(raw?: string): Map<string, InputConfBinding> {
   return map;
 }
 
-function splitMpvCommands(cmdStr: string): string[] {
-  const commands: string[] = [];
-  let current = "";
-  let inDouble = false;
-  let inSingle = false;
-
-  for (let i = 0; i < cmdStr.length; i++) {
-    const ch = cmdStr[i];
-    if (ch === '"' && !inSingle) {
-      inDouble = !inDouble;
-      current += ch;
-    } else if (ch === "'" && !inDouble) {
-      inSingle = !inSingle;
-      current += ch;
-    } else if (ch === ";" && !inDouble && !inSingle) {
-      if (current.trim()) commands.push(current.trim());
-      current = "";
-    } else {
-      current += ch;
-    }
-  }
-  if (current.trim()) commands.push(current.trim());
-  return commands;
-}
-
-function tokenizeMpvCommand(cmd: string): string[] {
-  const tokens: string[] = [];
-  let current = "";
-  let inDouble = false;
-  let inSingle = false;
-
-  for (let i = 0; i < cmd.length; i++) {
-    const ch = cmd[i];
-    if (ch === '"' && !inSingle) {
-      inDouble = !inDouble;
-    } else if (ch === "'" && !inDouble) {
-      inSingle = !inSingle;
-    } else if (/\s/.test(ch) && !inDouble && !inSingle) {
-      if (current) {
-        tokens.push(current);
-        current = "";
-      }
-    } else {
-      current += ch;
-    }
-  }
-  if (current) tokens.push(current);
-  return tokens;
-}
-
 function formatMpvProperty(val: unknown): string {
   if (val == null) return "";
   if (typeof val === "string") return val;
@@ -278,6 +228,53 @@ export function useKeyboardShortcuts(params: {
     return parseInputConf(settings.mpvInputConf);
   }, [settings.mpvInputConf]);
 
+  const showStatsRef = useRef(showStats);
+  showStatsRef.current = showStats;
+  const showConsoleRef = useRef(Boolean(showConsole));
+  showConsoleRef.current = Boolean(showConsole);
+  const mpvConsoleRef = useRef(Boolean(settings.mpvConsole));
+  mpvConsoleRef.current = Boolean(settings.mpvConsole);
+  const mpvDetailedStatsRef = useRef(Boolean(settings.mpvDetailedStats));
+  mpvDetailedStatsRef.current = Boolean(settings.mpvDetailedStats);
+  const inputConfMapRef = useRef(inputConfMap);
+  inputConfMapRef.current = inputConfMap;
+
+  const nativeBindingsRef = useRef<Map<string, string>>(new Map());
+  useEffect(() => {
+    if (bridgeRef.current?.capabilities().engine !== "mpv") {
+      nativeBindingsRef.current.clear();
+      return;
+    }
+    let cancelled = false;
+    const fetchBindings = async () => {
+      try {
+        const { invoke } = await import("@tauri-apps/api/core");
+        const list = await invoke<Array<{ key?: string; cmd?: string }>>("mpv_get_property", {
+          name: "input-bindings",
+        });
+        if (!cancelled && Array.isArray(list)) {
+          const map = new Map<string, string>();
+          for (const item of list) {
+            if (item?.key && item?.cmd) {
+              map.set(item.key.toLowerCase(), item.cmd);
+            }
+          }
+          nativeBindingsRef.current = map;
+        }
+      } catch {
+        // mpv may not have loaded or property not ready yet
+      }
+    };
+    void fetchBindings();
+    const interval = window.setInterval(() => {
+      if (nativeBindingsRef.current.size === 0) void fetchBindings();
+    }, 1500);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [bridgeRef, settings.mpvInputConf]);
+
   const overrides = settings.hotkeys ?? {};
   const seekBackStepSec = settings.seekBackStepSec;
   const seekForwardStepSec = settings.seekForwardStepSec;
@@ -345,42 +342,17 @@ export function useKeyboardShortcuts(params: {
         window.dispatchEvent(new CustomEvent("harbor:stats-hide"));
       }
 
-      if (showStats) {
+      if (showStatsRef.current) {
         if (e.key === "Escape") {
           e.preventDefault();
           setShowStats(() => false);
           return;
         }
-        if (settings.mpvDetailedStats && bridgeRef.current?.capabilities().engine === "mpv") {
+        if (mpvDetailedStatsRef.current && bridgeRef.current?.capabilities().engine === "mpv") {
           if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-            if (e.key === "0") {
+            if (e.key >= "0" && e.key <= "5") {
               e.preventDefault();
-              setStatsPage(0);
-              return;
-            }
-            if (e.key === "1") {
-              e.preventDefault();
-              setStatsPage(1);
-              return;
-            }
-            if (e.key === "2") {
-              e.preventDefault();
-              setStatsPage(2);
-              return;
-            }
-            if (e.key === "3") {
-              e.preventDefault();
-              setStatsPage(3);
-              return;
-            }
-            if (e.key === "4") {
-              e.preventDefault();
-              setStatsPage(4);
-              return;
-            }
-            if (e.key === "5") {
-              e.preventDefault();
-              setStatsPage(5);
+              setStatsPage(parseInt(e.key, 10) as 0 | 1 | 2 | 3 | 4 | 5);
               return;
             }
           }
@@ -388,15 +360,15 @@ export function useKeyboardShortcuts(params: {
       }
 
       if (e.key === "`" || e.key === "~") {
-        if (showStats) return;
-        if (settings.mpvConsole && bridgeRef.current?.capabilities().engine === "mpv") {
+        if (showStatsRef.current) return;
+        if (mpvConsoleRef.current && bridgeRef.current?.capabilities().engine === "mpv") {
           e.preventDefault();
           setShowConsole?.((v) => !v);
           return;
         }
       }
 
-      if (showConsole) {
+      if (showConsoleRef.current) {
         if (e.key === "Escape" || e.key === "`" || e.key === "~") {
           e.preventDefault();
           setShowConsole?.(() => false);
@@ -404,15 +376,21 @@ export function useKeyboardShortcuts(params: {
         }
       }
 
-      if (inputConfMap.size > 0 && bridgeRef.current?.capabilities().engine === "mpv") {
+      if (bridgeRef.current?.capabilities().engine === "mpv") {
         const mpvKey = eventToMpvKey(e);
-        const matched =
-          inputConfMap.get(mpvKey.toLowerCase()) || inputConfMap.get(e.key.toLowerCase());
-        if (matched) {
+        const lowerKey = mpvKey.toLowerCase();
+        const lowerDomKey = e.key.toLowerCase();
+        const matchedCmd =
+          nativeBindingsRef.current.get(lowerKey) ||
+          nativeBindingsRef.current.get(lowerDomKey) ||
+          inputConfMapRef.current.get(lowerKey)?.cmd ||
+          inputConfMapRef.current.get(lowerDomKey)?.cmd;
+
+        if (matchedCmd) {
           e.preventDefault();
 
           // 1. Check for stats page commands (e.g. script-binding stats/display-page-1, display-stats, etc.)
-          const statsMatch = matched.cmd.match(
+          const statsMatch = matchedCmd.match(
             /stats\/(?:display-page-(\d+)|display-stats(?:-toggle)?)/i,
           );
           if (statsMatch) {
@@ -423,35 +401,14 @@ export function useKeyboardShortcuts(params: {
             return;
           }
 
-          const hasShowText = /show-text/i.test(matched.cmd);
-          if (hasShowText) {
-            // Semicolon-separated commands in input.conf (e.g. cycle-values ... ; show-text ...)
-            // Execute the action commands WITHOUT show-text so MPV does not render ugly native text on the video canvas
-            const allCmds = splitMpvCommands(matched.cmd);
-            for (const sub of allCmds) {
-              if (!/^\s*show-text\b/i.test(sub)) {
-                const tokens = tokenizeMpvCommand(sub);
-                if (tokens.length > 0) {
-                  void invoke("mpv_command", { cmd: tokens }).catch(() => {});
-                }
-              }
-            }
-            // Exclusively trigger Harbor's styled OSD HUD
-            void triggerHarborOsd(matched.cmd);
-          } else {
-            // Execute action commands without explicit show-text
-            const allCmds = splitMpvCommands(matched.cmd);
-            for (const sub of allCmds) {
-              const tokens = tokenizeMpvCommand(sub);
-              if (tokens.length > 0) {
-                void invoke("mpv_command", { cmd: tokens }).catch(() => {});
-              }
-            }
-            // If the command cycles values or modifies property, trigger Harbor's OSD banner
-            if (/cycle-values\b/i.test(matched.cmd)) {
-              void triggerHarborOsd(matched.cmd);
-            }
+          // 2. Harbor styled OSD HUD for show-text or cycle-values
+          if (/show-text|cycle-values\b/i.test(matchedCmd)) {
+            void triggerHarborOsd(matchedCmd);
           }
+
+          // 3. Forward matched key through native mpv_keypress so mpv handles
+          // comments, sections, prefixes (repeatable), and commands outside allowlists
+          void invoke("mpv_keypress", { key: mpvKey }).catch(() => {});
           return;
         }
       }
@@ -836,7 +793,8 @@ export function useKeyboardShortcuts(params: {
       if (holdRef.current.key != null) releaseHold();
     };
     const onToggleStatsPage = (e: Event) => {
-      if (!settings.mpvDetailedStats) return;
+      if (!mpvDetailedStatsRef.current || bridgeRef.current?.capabilities().engine !== "mpv")
+        return;
       const ce = e as CustomEvent<{ page?: number }>;
       const targetPage = ce.detail?.page ?? 1;
       setShowStats((prev) => {

@@ -293,6 +293,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let snap: PlayerSnapshot = initialPlayerSnapshot();
   let profileAf = "";
   let hdrToSdr = mpvOptions?.hdrToSdr ?? true;
+  let appliedHdrToSdr: { on: boolean; oled: boolean } | null = null;
   const applyAudioFilters = () => {
     const parts: string[] = [];
     if (snap.audioNormalize) parts.push("dynaudnorm=f=500:g=31:p=0.9:m=4:b=1");
@@ -1025,10 +1026,6 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
       if (name === "volume" && typeof data === "number") snap.volume = data / 100;
       if (name === "mute" && typeof data === "boolean") snap.muted = data;
-      if (name === "osd-text" && typeof data === "string") {
-        snap.osdText = data;
-        snap.osdSeq = (snap.osdSeq || 0) + 1;
-      }
       if (name === "audio-device-list") {
         const sig = audioDeviceListSig(data);
         if (sig == null) {
@@ -1612,7 +1609,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       applyAudioFilters();
     },
     setHdrToSdr(on, oled) {
-      if (hdrToSdr === on) return;
+      const isOled = Boolean(oled);
+      if (appliedHdrToSdr && appliedHdrToSdr.on === on && appliedHdrToSdr.oled === isOled) return;
+      appliedHdrToSdr = { on, oled: isOled };
       hdrToSdr = on;
       if (on) {
         const properties: Array<[string, string]> = [
@@ -1624,7 +1623,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
           ["dither-depth", "auto"],
           ["target-trc", "bt.1886"],
           ["target-prim", "bt.709"],
-          ["target-contrast", oled ? "inf" : "auto"],
+          ["target-contrast", isOled ? "inf" : "auto"],
         ];
         if (isWindowsDesktop() || isMacDesktop()) {
           properties.push(["target-colorspace-hint", "yes"]);
@@ -1636,6 +1635,10 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         const properties: Array<[string, string]> = [
           ["tone-mapping", "auto"],
           ["gamut-mapping-mode", "auto"],
+          ["hdr-compute-peak", "auto"],
+          ["hdr-contrast-recovery", "0"],
+          ["hdr-peak-percentile", "0"],
+          ["dither-depth", "auto"],
           ["target-trc", "auto"],
           ["target-prim", "auto"],
           ["target-contrast", "auto"],

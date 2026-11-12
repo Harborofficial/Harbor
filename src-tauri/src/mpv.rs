@@ -826,6 +826,7 @@ fn parse_extra_option_lines(raw: &str) -> Vec<(String, String)> {
 const EXTRA_INIT_ONLY_KEYS: &[&str] = &[
     "scripts",
     "scripts-append",
+    "script",
     "script-opts",
     "script-opts-append",
     "load-scripts",
@@ -840,15 +841,15 @@ fn is_init_only_key(key: &str) -> bool {
 }
 
 /// Splits parsed extra options into (init_only, rest), preserving the order
-/// within each bucket. `load-script` entries are folded into the `scripts`
-/// bucket so every script path is joined and applied together pre-init.
+/// within each bucket. `load-script` and `script` entries are folded into the
+/// `scripts` bucket so every script path is joined and applied together pre-init.
 fn split_extra_option_pairs(raw: &str) -> (Vec<(String, String)>, Vec<(String, String)>) {
     let mut init_only = Vec::new();
     let mut rest = Vec::new();
     for (key, value) in parse_extra_option_lines(raw) {
         if is_init_only_key(&key) {
             let key = key.to_ascii_lowercase();
-            let key = if key == "load-script" || key == "scripts-append" {
+            let key = if key == "load-script" || key == "scripts-append" || key == "script" {
                 "scripts".to_string()
             } else if key == "script-opts-append" {
                 "script-opts".to_string()
@@ -864,18 +865,26 @@ fn split_extra_option_pairs(raw: &str) -> (Vec<(String, String)>, Vec<(String, S
 }
 
 /// Joins init-only pairs into single option values. `scripts` entries are
-/// joined with ';' on Windows and ':' elsewhere (empty entries rejected),
+/// joined with ';' on Windows and ':' elsewhere (empty and duplicate entries rejected),
 /// `script-opts` with ',', and `load-scripts` keeps the last non-empty value.
 fn join_init_only_pairs(pairs: &[(String, String)]) -> Vec<(String, String)> {
     let mut scripts: Vec<String> = Vec::new();
+    let mut seen_scripts = std::collections::HashSet::new();
     let mut script_opts: Vec<String> = Vec::new();
     let mut load_scripts: Option<String> = None;
     let mut input_conf: Option<String> = None;
+    let sep = if cfg!(windows) { ';' } else { ':' };
     for (key, value) in pairs {
         match key.as_str() {
             "scripts" => {
-                if !value.is_empty() {
-                    scripts.push(value.clone());
+                for part in value.split(sep) {
+                    let part = part.trim();
+                    if !part.is_empty() {
+                        let cleaned = part.replace('\\', "/");
+                        if seen_scripts.insert(cleaned.clone()) {
+                            scripts.push(cleaned);
+                        }
+                    }
                 }
             }
             "script-opts" => {
@@ -901,9 +910,8 @@ fn join_init_only_pairs(pairs: &[(String, String)]) -> Vec<(String, String)> {
         out.push(("load-scripts".to_string(), v));
     }
     if !scripts.is_empty() {
-        let sep = if cfg!(windows) { ";" } else { ":" };
-        let cleaned: Vec<String> = scripts.iter().map(|s| s.replace('\\', "/")).collect();
-        out.push(("scripts".to_string(), cleaned.join(sep)));
+        let sep_str = if cfg!(windows) { ";" } else { ":" };
+        out.push(("scripts".to_string(), scripts.join(sep_str)));
     }
     if !script_opts.is_empty() {
         out.push(("script-opts".to_string(), script_opts.join(",")));
@@ -922,34 +930,7 @@ fn is_disk_cache_option(key: &str) -> bool {
 }
 
 fn apply_extra_mpv_options(mpv: &Mpv, raw: &str) {
-    let mut loaded_scripts = std::collections::HashSet::new();
     for (key, value) in parse_extra_option_lines(raw) {
-        if key == "load-script" || key == "script" {
-            let cleaned = value.replace('\\', "/");
-            if loaded_scripts.insert(cleaned.clone()) {
-                eprintln!("[harbor::mpv] loading script via mpv command: {}", cleaned);
-                if let Err(e) = mpv_argv_command(mpv, &["load-script", cleaned.as_str()]) {
-                    eprintln!("[harbor::mpv] load-script command failed for {}: {}", cleaned, e);
-                }
-            }
-            continue;
-        }
-        if key == "scripts" || key == "scripts-append" {
-            let sep = if cfg!(windows) { ';' } else { ':' };
-            for part in value.split(sep) {
-                let part = part.trim();
-                if !part.is_empty() {
-                    let cleaned = part.replace('\\', "/");
-                    if loaded_scripts.insert(cleaned.clone()) {
-                        eprintln!("[harbor::mpv] loading script via mpv command: {}", cleaned);
-                        if let Err(e) = mpv_argv_command(mpv, &["load-script", cleaned.as_str()]) {
-                            eprintln!("[harbor::mpv] load-script command failed for {}: {}", cleaned, e);
-                        }
-                    }
-                }
-            }
-            continue;
-        }
         if is_init_only_key(&key) {
             eprintln!("[harbor::mpv] extra option {} skipped (init-only)", key);
             continue;
@@ -5483,7 +5464,7 @@ mod script_pre_init_tests {
     #[test]
     fn split_is_case_insensitive_and_folds_load_script_into_scripts() {
         let (init_only, rest) = split_extra_option_pairs(
-            "Scripts=a.lua\nLOAD-SCRIPT=b.lua\nload-script=c.lua\nscale=bilinear\n",
+            "Scripts=a.lua\nLOAD-SCRIPT=b.lua\nload-script=c.lua\nscript=d.lua\nscale=bilinear\n",
         );
         assert_eq!(
             init_only,
@@ -5491,20 +5472,25 @@ mod script_pre_init_tests {
                 ("scripts".to_string(), "a.lua".to_string()),
                 ("scripts".to_string(), "b.lua".to_string()),
                 ("scripts".to_string(), "c.lua".to_string()),
+                ("scripts".to_string(), "d.lua".to_string()),
             ]
         );
         assert_eq!(rest, vec![("scale".to_string(), "bilinear".to_string())]);
     }
 
     #[test]
-    fn join_scripts_uses_platform_separator_and_rejects_empty_entries() {
-        let (init_only, _) =
-            split_extra_option_pairs("scripts=a.lua\nscripts=\nload-script=b.lua\n");
+    fn join_scripts_uses_platform_separator_deduplicates_and_rejects_empty_entries() {
+        let (init_only, _) = split_extra_option_pairs(
+            "scripts=a.lua\nscripts=\nload-script=b.lua\nscript=a.lua\nscripts=b.lua;c.lua\n",
+        );
         let joined = join_init_only_pairs(&init_only);
         let sep = if cfg!(windows) { ";" } else { ":" };
         assert_eq!(
             joined,
-            vec![("scripts".to_string(), format!("a.lua{}b.lua", sep))]
+            vec![(
+                "scripts".to_string(),
+                format!("a.lua{}b.lua{}c.lua", sep, sep)
+            )]
         );
     }
 

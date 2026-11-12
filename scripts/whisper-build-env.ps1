@@ -7,14 +7,6 @@
 # checks for presence, not its value, so remove the entry through the provider.
 Remove-Item Env:WHISPER_DONT_GENERATE_BINDINGS -ErrorAction SilentlyContinue
 
-# Direct Cargo build artifacts to user profile directory to prevent Windows / Antivirus LNK1104 / Access Denied locks
-if (-not $env:CARGO_TARGET_DIR) {
-  $env:CARGO_TARGET_DIR = "$env:USERPROFILE\.cargo_target\harbor"
-}
-if (-not (Test-Path -LiteralPath $env:CARGO_TARGET_DIR)) {
-  New-Item -ItemType Directory -Path $env:CARGO_TARGET_DIR -Force | Out-Null
-}
-
 $vswhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
 $vs = $null
 if (Test-Path -LiteralPath $vswhere) {
@@ -51,66 +43,18 @@ $clangCandidates += $cachedClang
 $clangDll = $clangCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
 
 if (-not $clangDll) {
+  if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+    throw 'Whisper requires libclang to build. Install LLVM or Python to fetch the portable compiler bindings.'
+  }
   Write-Host 'Downloading portable libclang build dependency (one-time, Windows only)...' -ForegroundColor Cyan
   New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null
-  $wheel = Get-ChildItem -LiteralPath $cacheDir -Filter 'libclang-18.1.1-*.whl' -File | Select-Object -First 1
-
-  if (-not $wheel) {
-    $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'win_arm64' } else { 'win_amd64' }
-    $wheelUrl = $null
-    $wheelName = "libclang-18.1.1-py2.py3-none-$arch.whl"
-
-    try {
-      $ProgressPreference = 'SilentlyContinue'
-      $info = Invoke-RestMethod -Uri 'https://pypi.org/pypi/libclang/18.1.1/json' -UseBasicParsing -TimeoutSec 15
-      $rel = $info.urls | Where-Object { $_.filename -like "*$arch.whl" } | Select-Object -First 1
-      if ($rel) {
-        $wheelUrl = $rel.url
-        $wheelName = $rel.filename
-      }
-    } catch {}
-
-    if (-not $wheelUrl) {
-      if ($arch -eq 'win_arm64') {
-        $wheelUrl = 'https://files.pythonhosted.org/packages/71/cf/e01dc4cc79779cd82d77888a88ae2fa424d93b445ad4f6c02bfc18335b70/libclang-18.1.1-py2.py3-none-win_arm64.whl'
-      } else {
-        $wheelUrl = 'https://files.pythonhosted.org/packages/0b/2d/3f480b1e1d31eb3d6de5e3ef641954e5c67430d5ac93b7fa7e07589576c7/libclang-18.1.1-py2.py3-none-win_amd64.whl'
-      }
-    }
-
-    $targetFile = Join-Path $cacheDir $wheelName
-    try {
-      $ProgressPreference = 'SilentlyContinue'
-      Invoke-WebRequest -Uri $wheelUrl -OutFile $targetFile -UseBasicParsing
-    } catch {
-      if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
-        & curl.exe -sSL -o $targetFile $wheelUrl
-      }
-    }
-
-    if (Test-Path -LiteralPath $targetFile) {
-      $wheel = Get-Item -LiteralPath $targetFile
-    } else {
-      # Fallback to python pip if available and functional (not a Windows Store stub)
-      $hasWorkingPython = $false
-      try {
-        $testPython = & python -c "print('ok')" 2>$null
-        if ($testPython -eq 'ok') { $hasWorkingPython = $true }
-      } catch {}
-
-      if ($hasWorkingPython) {
-        & python -m pip download --disable-pip-version-check --no-deps --only-binary=:all: --dest $cacheDir libclang==18.1.1
-        if ($LASTEXITCODE -eq 0) {
-          $wheel = Get-ChildItem -LiteralPath $cacheDir -Filter 'libclang-18.1.1-*.whl' -File | Select-Object -First 1
-        }
-      }
-    }
+  & python -m pip download --disable-pip-version-check --no-deps --only-binary=:all: --dest $cacheDir libclang==18.1.1
+  if ($LASTEXITCODE -ne 0) {
+    throw 'Could not fetch libclang. Install LLVM and set LIBCLANG_PATH, then rebuild.'
   }
-
-  if (-not $wheel) {
-    throw 'Could not fetch libclang. Install LLVM and set LIBCLANG_PATH, or ensure internet access to download portable libclang.'
-  }
-
+  $wheel = Get-ChildItem -LiteralPath $cacheDir -Filter 'libclang-18.1.1-*.whl' -File |
+    Select-Object -First 1
+  if (-not $wheel) { throw 'Downloaded libclang wheel not found.' }
   Add-Type -AssemblyName System.IO.Compression.FileSystem
   # A previous interrupted extraction may have left partial wheel contents.
   foreach ($name in @('libclang-18.1.1.data', 'libclang-18.1.1.dist-info')) {

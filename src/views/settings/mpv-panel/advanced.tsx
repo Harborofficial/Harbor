@@ -17,7 +17,13 @@ import {
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { RowNote, Section, useSettingsActiveContext } from "../shared";
-import { compileMpvOptions, validateMpvOptions, validateInputConf } from "@/lib/player/mpv-tuning";
+import {
+  compileMpvOptions,
+  validateMpvOptions,
+  validateInputConf,
+  customShadersMpvLines,
+  customScriptsMpvLines,
+} from "@/lib/player/mpv-tuning";
 import type { CustomFileItem } from "@/lib/settings/types";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -674,8 +680,7 @@ UP add volume 2`}
             </button>
             {showShaderCompiled && (
               <pre className="mt-1.5 overflow-x-auto whitespace-pre-wrap rounded-[10px] bg-elevated px-4 py-3 font-mono text-[13.5px] leading-[20px] text-ink-muted border border-edge-soft/50">
-                {`# Example generated shader directive:
-glsl-shaders="~~/shaders/Anime4K_Restore_CNN_M.glsl;~~/shaders/FSRCNNX_x2_8-0-4-1.glsl"`}
+                {customShadersMpvLines(settings) || t("# No custom shaders enabled")}
               </pre>
             )}
           </div>
@@ -802,9 +807,7 @@ glsl-shaders="~~/shaders/Anime4K_Restore_CNN_M.glsl;~~/shaders/FSRCNNX_x2_8-0-4-
             </button>
             {showScriptCompiled && (
               <pre className="mt-1.5 overflow-x-auto whitespace-pre-wrap rounded-[10px] bg-elevated px-4 py-3 font-mono text-[13.5px] leading-[20px] text-ink-muted border border-edge-soft/50">
-                {`# Example generated script directives:
-load-scripts=yes
-load-script="~~/scripts/autocrop.lua"`}
+                {customScriptsMpvLines(settings) || t("# No custom scripts enabled")}
               </pre>
             )}
           </div>
