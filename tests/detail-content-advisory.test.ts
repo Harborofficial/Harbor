@@ -335,10 +335,10 @@ test("imdb advisory notes: parses totalItems count when guideItems exceeds fetch
 test("detail view: avoids unnecessary IMDb resolution lookups and eliminates page-level advisory requests", () => {
   const detail = read("src/views/detail.tsx");
 
-  // Reuses existing IMDb ID directly from meta/detail/episodes
+  // Reuses existing IMDb ID directly from meta/detail for the open title
   assert.match(
     detail,
-    /const existingImdbId =\s*\(meta\.id\.startsWith\("tt"\) \? meta\.id : null\) \?\?\s*detail\?\.imdbId \?\?\s*animeEpisodes\.find\(\(e\) => e\.imdbId\)\?\.imdbId \?\?\s*null;/,
+    /const existingImdbId =\s*\(meta\.id\.startsWith\("tt"\) \? meta\.id : null\) \?\? detail\?\.imdbId \?\? null;/,
   );
 
   // useImdbId is only enabled when no existing IMDb ID is found and Content Advisory is not hidden

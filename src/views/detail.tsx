@@ -445,11 +445,7 @@ export function DetailView({
   const { toggle: toggleFavorite } = useMediaFavorites();
   const isFav = useIsFavorite(meta.id, [detail?.imdbId]);
   const isParentsGuideHidden = loadDetailCustomization().hidden.includes("parentsGuide");
-  const existingImdbId =
-    (meta.id.startsWith("tt") ? meta.id : null) ??
-    detail?.imdbId ??
-    animeEpisodes.find((e) => e.imdbId)?.imdbId ??
-    null;
+  const existingImdbId = (meta.id.startsWith("tt") ? meta.id : null) ?? detail?.imdbId ?? null;
   const inferredImdb = useImdbId(meta, settings.tmdbKey, {
     enabled: !existingImdbId && !isParentsGuideHidden,
   });
