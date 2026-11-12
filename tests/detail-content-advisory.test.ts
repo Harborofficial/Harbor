@@ -112,7 +112,7 @@ test("imdb advisory cache: transient HTTP failures are not cached permanently", 
   };
 
   const res = await fetchImdbParentsGuide("tt1234567", mockTransientFetch as any);
-  assert.equal(res, null);
+  assert.equal(res, "error");
 
   // The cache entry must NOT be stored for transient failures
   const entry = getParentsGuideCacheEntry("tt1234567");
@@ -247,7 +247,7 @@ test("imdb advisory cache: HTTP 200 GraphQL error responses are treated as trans
   };
 
   const res = await fetchImdbParentsGuide("tt2222222", mockGraphQLErrorFetch as any);
-  assert.equal(res, null);
+  assert.equal(res, "error");
   assert.equal(callCount, 1);
 
   // Must NOT cache null or an entry for GraphQL errors returning HTTP 200
@@ -353,7 +353,7 @@ test("detail view: avoids unnecessary IMDb resolution lookups and eliminates pag
   // In rail sections, parentsGuide is mounted via ParentsGuidePanel without passing eager page-level guide data
   assert.match(
     detail,
-    /if \(resolvedParentsGuideImdb && !isParentsGuideHidden\) \{\s*railSections\.push\(\{\s*key: "parentsGuide",\s*label: t\("Content Advisory"\),\s*minHeight: 60,\s*node: <ParentsGuidePanel imdbId=\{resolvedParentsGuideImdb\} \/>,\s*\}\);/,
+    /if \(resolvedParentsGuideImdb\) \{\s*railSections\.push\(\{\s*key: "parentsGuide",\s*label: t\("Content Advisory"\),\s*minHeight: 60,\s*node: <ParentsGuidePanel imdbId=\{resolvedParentsGuideImdb\} \/>,\s*\}\);/,
   );
 });
 
@@ -367,7 +367,10 @@ test("useParentsGuide hook: binds fetched data strictly to IMDb ID preventing st
   );
 
   // Strictly returns guide only when matching the normalized ID
-  assert.match(hook, /const guide = state\.id === normalizedId \? state\.guide : null;/);
+  assert.match(
+    hook,
+    /const guide = (?:isMatch|state\.id === normalizedId) \? state\.guide : null;/,
+  );
 
   // Accepts enabled option to prevent eager fetching when section is collapsed
   assert.match(
@@ -416,4 +419,73 @@ test("parents guide panel: implements full keyboard and focus accessibility with
   // Category accordion container has inert and aria-hidden when not expanded
   assert.match(panel, /inert=\{!expanded \? true : undefined\}/);
   assert.match(panel, /aria-hidden=\{!expanded \? true : undefined\}/);
+});
+
+test("imdb advisory cache: partial data accompanied by GraphQL errors is rejected from positive cache", async () => {
+  clearParentsGuideCache();
+
+  const mockPartialErrorFetch: typeof fetch = async () => {
+    return new Response(
+      JSON.stringify({
+        errors: [{ message: "Some fields failed to resolve" }],
+        data: {
+          title: {
+            parentsGuide: {
+              categories: [
+                {
+                  category: { id: "violence", text: "Violence & Gore" },
+                  severity: { text: "Severe", votedFor: 10 },
+                  totalSeverityVotes: 12,
+                  guideItems: { total: 1, edges: [] },
+                },
+              ],
+            },
+          },
+        },
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  };
+
+  const res = await fetchImdbParentsGuide("tt4444444", mockPartialErrorFetch as any);
+  assert.equal(res, "error");
+
+  // Positive cache must NOT contain this partial result
+  const entry = getParentsGuideCacheEntry("tt4444444");
+  assert.equal(entry, undefined);
+
+  clearParentsGuideCache();
+});
+
+test("settings panel: Content advisory theme selector is rendered independently of toast toggle", () => {
+  const settingsPanel = read("src/views/settings/player-layout-panel/index.tsx");
+
+  // The Segmented control for theme is not wrapped in {settings.contentAdvisoryToast && (
+  assert.match(
+    settingsPanel,
+    /<ToggleRow\s*label=\{t\("Content advisory on start"\)\}[\s\S]*?\/>\s*<Segmented\s*label=\{t\("Content advisory theme"\)\}/,
+  );
+});
+
+test("arabic locale: content advisory description uses full key including detail page effect", () => {
+  const ar = read("src/lib/i18n/locales/ar/settings.ts");
+
+  assert.match(
+    ar,
+    /"Choose whether the content advisory appears in full color or a restrained monochrome tone\. Also affects the Content Advisory section on detail pages\.":\s*"اختر ما إذا كان التنبيه بالمحتوى سيظهر بألوان كاملة أو بنمط أحادي اللون هادئ\. يؤثر أيضاً على قسم التنبيه بالمحتوى في صفحات التفاصيل\."/,
+  );
+});
+
+test("safe-fetch: app.harborstremio.com proxies IMDb GraphQL requests with narrowly scoped rule", () => {
+  const safeFetch = read("src/lib/safe-fetch.ts");
+
+  assert.match(
+    safeFetch,
+    /const isHarborStremio = \/\(\^\|\\\.\)harborstremio\\\.com\$\/i\.test\(window\.location\.hostname\);/,
+  );
+  assert.match(
+    safeFetch,
+    /const isImdbGraphql =\s*parsed\.hostname === "api\.graphql\.imdb\.com" \|\| parsed\.hostname === "graphql\.imdb\.com";/,
+  );
+  assert.match(safeFetch, /\(isHarborStremio && isImdbGraphql\)/);
 });

@@ -12,22 +12,26 @@ export function useParentsGuide(
   guide: ParentsGuideResult | null;
   loading: boolean;
   hasData: boolean;
+  error: boolean;
+  retry: () => void;
 } {
   const enabled = options?.enabled ?? true;
   const normalizedId = imdbId && /^tt\d+$/.test(imdbId.trim()) ? imdbId.trim() : null;
+  const [retryNonce, setRetryNonce] = useState(0);
 
   const [state, setState] = useState<{
     id: string | null;
     guide: ParentsGuideResult | null;
+    error: boolean;
   }>(() => {
     if (!enabled || !normalizedId) {
-      return { id: null, guide: null };
+      return { id: null, guide: null, error: false };
     }
     const cached = getParentsGuideCacheEntry(normalizedId);
     if (cached && cached.expiresAt > Date.now()) {
-      return { id: normalizedId, guide: cached.data };
+      return { id: normalizedId, guide: cached.data, error: false };
     }
-    return { id: null, guide: null };
+    return { id: null, guide: null, error: false };
   });
 
   const [loading, setLoading] = useState<boolean>(() => {
@@ -38,14 +42,14 @@ export function useParentsGuide(
 
   useEffect(() => {
     if (!enabled || !normalizedId) {
-      setState({ id: null, guide: null });
+      setState({ id: null, guide: null, error: false });
       setLoading(false);
       return;
     }
 
     const cached = getParentsGuideCacheEntry(normalizedId);
     if (cached && cached.expiresAt > Date.now()) {
-      setState({ id: normalizedId, guide: cached.data });
+      setState({ id: normalizedId, guide: cached.data, error: false });
       setLoading(false);
       return;
     }
@@ -56,13 +60,17 @@ export function useParentsGuide(
     fetchImdbParentsGuide(normalizedId)
       .then((res) => {
         if (!cancelled) {
-          setState({ id: normalizedId, guide: res });
+          if (res === "error") {
+            setState({ id: normalizedId, guide: null, error: true });
+          } else {
+            setState({ id: normalizedId, guide: res, error: false });
+          }
           setLoading(false);
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setState({ id: normalizedId, guide: null });
+          setState({ id: normalizedId, guide: null, error: true });
           setLoading(false);
         }
       });
@@ -70,11 +78,15 @@ export function useParentsGuide(
     return () => {
       cancelled = true;
     };
-  }, [normalizedId, enabled]);
+  }, [normalizedId, enabled, retryNonce]);
 
   // Associate fetched results with their IMDb ID: only expose data matching currently resolved title
-  const guide = state.id === normalizedId ? state.guide : null;
+  const isMatch = state.id === normalizedId;
+  const guide = isMatch ? state.guide : null;
+  const error = isMatch ? state.error : false;
   const hasData = Boolean(guide && guide.categories.length > 0);
 
-  return { guide, loading, hasData };
+  const retry = () => setRetryNonce((n) => n + 1);
+
+  return { guide, loading, hasData, error, retry };
 }

@@ -8,6 +8,7 @@ import {
   Info,
   Loader2,
   MessageSquareWarning,
+  RotateCcw,
   Swords,
   Wine,
 } from "lucide-react";
@@ -184,6 +185,18 @@ export function ParentsGuidePanel({
               <div className="flex items-center gap-2 py-6 text-[13px] text-ink-subtle">
                 <Loader2 size={14} className="animate-spin" />
                 {t("Loading Content Advisory…")}
+              </div>
+            ) : internalData.error && !guide ? (
+              <div className="flex items-center justify-between py-4 text-[13px] text-ink-muted">
+                <span>{t("Failed to load Content Advisory.")}</span>
+                <button
+                  type="button"
+                  onClick={internalData.retry}
+                  className="flex items-center gap-1.5 rounded-lg bg-white/[0.06] px-3 py-1.5 text-[12px] font-medium text-ink transition-colors hover:bg-white/[0.10] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <RotateCcw size={12} />
+                  <span>{t("Retry")}</span>
+                </button>
               </div>
             ) : !guide || guide.categories.length === 0 ? (
               <div className="py-4 text-[13px] text-ink-muted">

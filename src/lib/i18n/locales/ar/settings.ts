@@ -4,8 +4,8 @@ const settings: Record<string, string> = {
   "Syncing display name…": "جارٍ مزامنة اسم العرض…",
   "Display name saved to your Harbor account.": "تم حفظ اسم العرض في حسابك في هاربور.",
   "Content advisory theme": "سمة التنبيه بالمحتوى",
-  "Choose whether the content advisory appears in full color or a restrained monochrome tone.":
-    "اختر ما إذا كان التنبيه بالمحتوى سيظهر بألوان كاملة أو بنمط أحادي اللون هادئ.",
+  "Choose whether the content advisory appears in full color or a restrained monochrome tone. Also affects the Content Advisory section on detail pages.":
+    "اختر ما إذا كان التنبيه بالمحتوى سيظهر بألوان كاملة أو بنمط أحادي اللون هادئ. يؤثر أيضاً على قسم التنبيه بالمحتوى في صفحات التفاصيل.",
   Monochrome: "أحادي اللون",
   "Press Enter or Space to type": "اضغط Enter أو Space للكتابة",
   "Text mode — Esc to exit": "وضع الكتابة — Esc للخروج",

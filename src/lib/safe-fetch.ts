@@ -172,8 +172,14 @@ function rewriteForWeb(url: string, init?: RequestInit): { url: string; init?: R
     PROXY_HOSTS.has(parsed.hostname) || PROXY_SUFFIXES.some((s) => parsed.hostname.endsWith(s));
   if (!proxiable) return { url, init };
   const localDev = /^(?:localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
-  if (!webProxyAvailable() && !(localDev && DEV_PROXY_HOSTS.has(parsed.hostname)))
-    return { url, init };
+  const isHarborStremio = /(^|\.)harborstremio\.com$/i.test(window.location.hostname);
+  const isImdbGraphql =
+    parsed.hostname === "api.graphql.imdb.com" || parsed.hostname === "graphql.imdb.com";
+  const proxyAllowed =
+    webProxyAvailable() ||
+    (localDev && DEV_PROXY_HOSTS.has(parsed.hostname)) ||
+    (isHarborStremio && isImdbGraphql);
+  if (!proxyAllowed) return { url, init };
 
   const proxied = `/api-proxy/${parsed.hostname}${parsed.pathname}${parsed.search}`;
   if (!init?.headers) return { url: proxied, init };

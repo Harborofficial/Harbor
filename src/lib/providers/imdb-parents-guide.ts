@@ -26,8 +26,10 @@ export type CacheEntry = {
   expiresAt: number;
 };
 
+export type ParentsGuideResponse = ParentsGuideResult | null | "error";
+
 const guideCache = new Map<string, CacheEntry>();
-const guideInflight = new Map<string, Promise<ParentsGuideResult | null>>();
+const guideInflight = new Map<string, Promise<ParentsGuideResponse>>();
 
 export const POSITIVE_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 export const NEGATIVE_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes (genuinely unavailable/empty)
@@ -185,7 +187,7 @@ export function severityColorStyle(
 export async function fetchImdbParentsGuide(
   imdbId: string,
   fetchImpl: typeof safeFetch = safeFetch,
-): Promise<ParentsGuideResult | null> {
+): Promise<ParentsGuideResponse> {
   const cleanId = imdbId.trim();
   if (!/^tt\d+$/.test(cleanId)) return null;
 
@@ -200,7 +202,7 @@ export async function fetchImdbParentsGuide(
   const pending = guideInflight.get(cleanId);
   if (pending) return pending;
 
-  const request = (async (): Promise<ParentsGuideResult | null> => {
+  const request = (async (): Promise<ParentsGuideResponse> => {
     try {
       const res = await fetchImpl(GRAPHQL_ENDPOINT, {
         method: "POST",
@@ -224,8 +226,9 @@ export async function fetchImdbParentsGuide(
             { data: null, expiresAt: Date.now() + NEGATIVE_CACHE_TTL_MS },
             150,
           );
+          return null;
         }
-        return null;
+        return "error";
       }
 
       type RawEdge = {
@@ -258,17 +261,18 @@ export async function fetchImdbParentsGuide(
 
       const json = (await res.json()) as ImdbResponse;
       const hasErrors = Array.isArray(json.errors) && json.errors.length > 0;
-      const rawCategories = json.data?.title?.parentsGuide?.categories;
+      if (hasErrors) {
+        return "error";
+      }
 
+      const rawCategories = json.data?.title?.parentsGuide?.categories;
       if (!rawCategories || !Array.isArray(rawCategories) || rawCategories.length === 0) {
-        if (!hasErrors) {
-          lruSet(
-            guideCache,
-            cleanId,
-            { data: null, expiresAt: Date.now() + NEGATIVE_CACHE_TTL_MS },
-            150,
-          );
-        }
+        lruSet(
+          guideCache,
+          cleanId,
+          { data: null, expiresAt: Date.now() + NEGATIVE_CACHE_TTL_MS },
+          150,
+        );
         return null;
       }
 
@@ -306,14 +310,12 @@ export async function fetchImdbParentsGuide(
       }
 
       if (categories.length === 0) {
-        if (!hasErrors) {
-          lruSet(
-            guideCache,
-            cleanId,
-            { data: null, expiresAt: Date.now() + NEGATIVE_CACHE_TTL_MS },
-            150,
-          );
-        }
+        lruSet(
+          guideCache,
+          cleanId,
+          { data: null, expiresAt: Date.now() + NEGATIVE_CACHE_TTL_MS },
+          150,
+        );
         return null;
       }
 
@@ -326,7 +328,7 @@ export async function fetchImdbParentsGuide(
       );
       return result;
     } catch {
-      return null;
+      return "error";
     } finally {
       guideInflight.delete(cleanId);
     }

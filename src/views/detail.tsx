@@ -3309,7 +3309,7 @@ export function DetailView({
             });
           }
 
-          if (resolvedParentsGuideImdb && !isParentsGuideHidden) {
+          if (resolvedParentsGuideImdb) {
             railSections.push({
               key: "parentsGuide",
               label: t("Content Advisory"),
