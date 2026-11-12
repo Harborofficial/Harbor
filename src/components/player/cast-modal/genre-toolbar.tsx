@@ -173,7 +173,7 @@ export function GenreToolbar({
       <GenreChips mediaType={mediaType} genreName={genreName} onGenre={onGenre} />
 
       <div className="flex flex-wrap items-center gap-2 border-t border-white/[0.07] pt-3.5">
-        <span className="me-0.5 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/35">
+        <span className="mr-0.5 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/35">
           <SlidersHorizontal size={13} strokeWidth={2.2} />
           {t("Refine")}
         </span>
