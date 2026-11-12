@@ -399,8 +399,11 @@ test("parents guide panel: defers fetching until section is expanded and renders
     /const internalData = useParentsGuide\(propGuide === undefined \? imdbId : null, \{\s*enabled: isFetchEnabled,\s*\}\);/,
   );
 
-  // Collapsed section does not render category rows
-  assert.match(panel, /\{!sectionCollapsed && \(/);
+  // Collapsed section does not render category rows (scoped to the content area)
+  assert.match(
+    panel,
+    /id="parents-guide-content"[\s\S]{0,500}!\s*sectionCollapsed\s*&&\s*\n?\s*\(/,
+  );
 
   // CategoryRow only renders detailed notes and spoilers when expanded
   assert.match(panel, /\{expanded && \(\s*<div\s*className="flex flex-col gap-2\.5/);

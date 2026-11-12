@@ -25,6 +25,7 @@ import { useParentsGuide } from "./use-parents-guide";
 const KEEP_EXPANDED_KEY = "harbor.content-advisory.keep-expanded";
 
 const SEV_RANK: Record<string, number> = {
+  unrated: -1,
   none: 0,
   mild: 1,
   moderate: 2,
@@ -274,7 +275,7 @@ function CategoryRow({
           <span
             className={`rounded-md border px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider ${color.badgeClass}`}
           >
-            {category.severity.toUpperCase()}
+            {category.severity.toLowerCase() === "unrated" ? "—" : category.severity.toUpperCase()}
           </span>
 
           {/* 3-Segment Visual Boxy Meter */}
@@ -311,7 +312,7 @@ function CategoryRow({
         <div className="overflow-hidden">
           {expanded && (
             <div className="flex flex-col gap-2.5 border-t border-edge-soft/40 bg-white/[0.02] px-4 py-3.5 opacity-100 transition-opacity duration-200">
-              {category.totalVotes > 0 && (
+              {category.totalVotes > 0 && category.severity.toLowerCase() !== "unrated" && (
                 <div className="text-[11.5px] font-medium text-ink-subtle">
                   {t("{votedFor} of {totalVotes} users rated {severity}", {
                     votedFor: category.severityVotes,

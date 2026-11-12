@@ -10,7 +10,7 @@ export type ParentsGuideItem = {
 export type ParentsGuideCategory = {
   id: string;
   label: string;
-  severity: "None" | "Mild" | "Moderate" | "Severe" | string;
+  severity: "Unrated" | "None" | "Mild" | "Moderate" | "Severe" | string;
   severityVotes: number;
   totalVotes: number;
   totalItems: number;
@@ -135,6 +135,7 @@ export function severityColorStyle(
           glowClass: "",
         };
       case "none":
+      case "unrated":
       default:
         return {
           badgeClass: "bg-white/[0.04] text-white/40 border-white/10",
@@ -173,6 +174,7 @@ export function severityColorStyle(
         glowClass: "",
       };
     case "none":
+    case "unrated":
     default:
       return {
         badgeClass: "bg-white/[0.03] text-white/35 border-white/[0.08]",
@@ -301,7 +303,7 @@ export async function fetchImdbParentsGuide(
         categories.push({
           id: cat?.id ?? "",
           label: cat?.text ?? "",
-          severity: (sev?.text ?? "None") as "None" | "Mild" | "Moderate" | "Severe",
+          severity: (sev?.text ?? "Unrated") as "Unrated" | "None" | "Mild" | "Moderate" | "Severe",
           severityVotes: Number(sev?.votedFor) || 0,
           totalVotes: Number(raw.totalSeverityVotes) || 0,
           totalItems,
