@@ -448,9 +448,9 @@ function Header({
           id={tabsMenuId}
           role="group"
           aria-labelledby={tabsMenuLabelId}
-          className="animate-menu-pop overflow-hidden rounded-md bg-elevated shadow-[0_18px_44px_-18px_rgba(0,0,0,0.85)]"
+          className="animate-menu-pop flex min-h-0 flex-col overflow-hidden rounded-md bg-elevated shadow-[0_18px_44px_-18px_rgba(0,0,0,0.85)]"
         >
-          <div className="px-3 pt-2.5 pb-1.5">
+          <div className="shrink-0 px-3 pt-2.5 pb-1.5">
             <span
               id={tabsMenuLabelId}
               className="text-[10.5px] font-medium uppercase tracking-wider text-ink-subtle"
@@ -458,7 +458,7 @@ function Header({
               {t("Show tabs")}
             </span>
           </div>
-          <div className="max-h-[352px] overflow-y-auto pb-1">
+          <div className="max-h-[352px] min-h-0 overflow-y-auto pb-1">
             {tabs
               .filter((entry) => entry.id !== "library")
               .map((entry) => {
