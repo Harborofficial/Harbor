@@ -107,11 +107,12 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
   // Listen to live mpv events (including warn/error/log events)
   useEffect(() => {
     if (!isTauri) return;
+    let disposed = false;
     let unlisten: (() => void) | undefined;
 
     const setupListener = async () => {
       try {
-        unlisten = await listen<{
+        const fn = await listen<{
           event: string;
           prefix?: string;
           level?: string;
@@ -119,6 +120,7 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
           name?: string;
           reason?: string;
         }>("mpv://event", (ev) => {
+          if (disposed) return;
           const payload = ev.payload;
           if (!payload) return;
 
@@ -168,6 +170,11 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
             ]);
           }
         });
+        if (disposed) {
+          fn();
+        } else {
+          unlisten = fn;
+        }
       } catch {
         // Listener fallback
       }
@@ -175,6 +182,7 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
 
     void setupListener();
     return () => {
+      disposed = true;
       if (unlisten) unlisten();
     };
   }, []);

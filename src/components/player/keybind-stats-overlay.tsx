@@ -3,6 +3,16 @@ import { invoke } from "@tauri-apps/api/core";
 import { X } from "lucide-react";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { useSettings } from "@/lib/settings";
+import {
+  parseString,
+  parseNumber,
+  pqEotf,
+  formatCanvasResolution,
+  formatVideoResolution,
+  formatBytes,
+  formatDuration,
+  tokenizeStatsLine,
+} from "@/lib/player/mpv-stats-format";
 
 export const PAGE_METAS: Record<number, { title: string }> = {
   0: { title: "Internal Performance Info" },
@@ -21,62 +31,6 @@ const STATS_TABS: Array<{ id: 0 | 1 | 2 | 3 | 4 | 5; label: string }> = [
   { id: 5, label: "Tracks Info" },
   { id: 0, label: "Internal" },
 ];
-
-function parseString(val: unknown, fallback = ""): string {
-  if (val == null) return fallback;
-  if (typeof val === "string") {
-    const trimmed = val.trim();
-    if (!trimmed || trimmed === "[object Object]") return fallback;
-    return trimmed;
-  }
-  if (typeof val === "number" || typeof val === "boolean") return String(val);
-  if (Array.isArray(val)) {
-    const list = val.map((x) => parseString(x)).filter((s) => s && s !== "[object Object]");
-    return list.length > 0 ? list.join(", ") : fallback;
-  }
-  if (typeof val === "object") {
-    const obj = val as Record<string, unknown>;
-    const preferredKeys = ["current", "name", "value", "id", "title", "text", "desc", "label"];
-    for (const key of preferredKeys) {
-      if (typeof obj[key] === "string" && obj[key] && obj[key] !== "[object Object]") {
-        return (obj[key] as string).trim();
-      }
-    }
-    for (const v of Object.values(obj)) {
-      if (typeof v === "string" && v && v !== "[object Object]") {
-        return v.trim();
-      }
-      if (typeof v === "number" || typeof v === "boolean") {
-        return String(v);
-      }
-    }
-    return fallback;
-  }
-  return fallback;
-}
-
-function parseNumber(val: unknown): number | undefined {
-  if (typeof val === "number" && Number.isFinite(val)) return val;
-  if (typeof val === "string") {
-    const n = parseFloat(val);
-    if (Number.isFinite(n)) return n;
-  }
-  return undefined;
-}
-
-function pqEotf(x: number | null | undefined): number {
-  if (x == null || isNaN(x) || x <= 0) return 0;
-  const PQ_M1 = (2610.0 / 4096) * (1.0 / 4);
-  const PQ_M2 = (2523.0 / 4096) * 128;
-  const PQ_C1 = 3424.0 / 4096;
-  const PQ_C2 = (2413.0 / 4096) * 32;
-  const PQ_C3 = (2392.0 / 4096) * 32;
-  const y = Math.pow(x, 1.0 / PQ_M2);
-  const num = Math.max(y - PQ_C1, 0.0);
-  const den = PQ_C2 - PQ_C3 * y;
-  const z = den > 0 ? num / den : 0;
-  return Math.pow(z, 1.0 / PQ_M1) * 10000.0;
-}
 
 type FilterEntry = {
   name?: string;
@@ -126,118 +80,6 @@ function formatFilters(raw: unknown): string[] {
     return [trimmed];
   }
   return ["none"];
-}
-
-function getAspectName(aspect: number): string | null {
-  if (Math.abs(aspect - 1.777) < 0.03 || Math.abs(aspect - 16 / 9) < 0.03) return "16:9";
-  if (Math.abs(aspect - 1.333) < 0.03 || Math.abs(aspect - 4 / 3) < 0.03) return "4:3";
-  if (aspect >= 1.65 && aspect <= 1.76) return "Early 35mm Widescreen Ratio";
-  if (Math.abs(aspect - 1.85) < 0.03) return "Flat (1.85:1)";
-  if (Math.abs(aspect - 2.35) < 0.03) return "Anamorphic Scope (2.35:1)";
-  if (Math.abs(aspect - 2.39) < 0.04 || Math.abs(aspect - 2.4) < 0.04) return "Scope (2.39:1)";
-  if (Math.abs(aspect - 1.375) < 0.02) return "Academy Ratio (1.37:1)";
-  if (Math.abs(aspect - 2.0) < 0.03) return "Univisium (2:1)";
-  return null;
-}
-
-function formatCanvasResolution(
-  r: Record<string, unknown> | null,
-  od?: Record<string, unknown> | null,
-  directAspectName?: string | null,
-): string | null {
-  // If osd-dimensions is present, it gives the exact canvas window metrics matching stats.lua
-  const odW = parseNumber(od?.w);
-  const odH = parseNumber(od?.h);
-  const w = odW ?? parseNumber(r?.w);
-  const h = odH ?? parseNumber(r?.h);
-  if (!w || !h) return null;
-
-  let res = `${w} x ${h}`;
-
-  const aspect = parseNumber(od?.aspect) ?? (h > 0 ? w / h : undefined) ?? parseNumber(r?.aspect);
-  const aspectName =
-    parseString(directAspectName) ||
-    parseString(r?.["aspect-name"]) ||
-    (aspect != null ? getAspectName(aspect) : null);
-
-  if (aspect) {
-    res += `  ${aspect.toFixed(2)}:1`;
-    if (aspectName) {
-      res += ` (${aspectName})`;
-    }
-  } else if (aspectName) {
-    res += ` (${aspectName})`;
-  }
-
-  // Crop calculation from osd-dimensions matching mpv's stats.lua:
-  // r["crop-x"] = od["ml"]
-  // r["crop-y"] = od["mt"]
-  // r["crop-w"] = od["w"] - od["ml"] - od["mr"]
-  // r["crop-h"] = od["h"] - od["mt"] - od["mb"]
-  const ml = parseNumber(od?.ml);
-  const mr = parseNumber(od?.mr);
-  const mt = parseNumber(od?.mt);
-  const mb = parseNumber(od?.mb);
-
-  let cropX = parseNumber(r?.["crop-x"]);
-  let cropY = parseNumber(r?.["crop-y"]);
-  let cropW = parseNumber(r?.["crop-w"]);
-  let cropH = parseNumber(r?.["crop-h"]);
-
-  if (ml != null && mr != null && mt != null && mb != null && odW != null && odH != null) {
-    cropX = ml;
-    cropY = mt;
-    cropW = odW - ml - mr;
-    cropH = odH - mt - mb;
-  }
-
-  // crop_noop check: only display crop rectangle if it differs from (0, 0, w, h)
-  const isNoop = cropX === 0 && cropY === 0 && cropW === w && cropH === h;
-  if (!isNoop && cropW != null && cropH != null) {
-    res += `  [x: ${cropX ?? 0}, y: ${cropY ?? 0}, w: ${cropW}, h: ${cropH}]`;
-  }
-
-  return res;
-}
-
-function formatVideoResolution(
-  vParams: Record<string, unknown> | null,
-  fallbackW?: number,
-  fallbackH?: number,
-): string {
-  const w = parseNumber(vParams?.w) ?? fallbackW;
-  const h = parseNumber(vParams?.h) ?? fallbackH;
-  if (!w || !h) return "—";
-
-  let res = `${w} x ${h}`;
-  const aspect = parseNumber(vParams?.aspect) ?? (h > 0 ? w / h : undefined);
-  const aspectName =
-    parseString(vParams?.["aspect-name"]) || (aspect != null ? getAspectName(aspect) : null);
-  if (aspect) {
-    res += `  ${aspect.toFixed(2)}:1`;
-    if (aspectName) {
-      res += ` (${aspectName})`;
-    }
-  } else if (aspectName) {
-    res += ` (${aspectName})`;
-  }
-  return res;
-}
-
-function formatBytes(bytes: number | null | undefined): string {
-  if (bytes == null || isNaN(bytes) || bytes <= 0) return "0.00 MiB";
-  const mib = bytes / (1024 * 1024);
-  if (mib >= 1024) return `${(mib / 1024).toFixed(3)} GiB`;
-  return `${mib.toFixed(2)} MiB`;
-}
-
-function formatDuration(sec: number | null | undefined): string {
-  if (sec == null || isNaN(sec) || sec < 0) return "00:00:00";
-  const total = Math.floor(sec);
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
 async function getMpvProp<T>(name: string): Promise<T | null> {
@@ -624,9 +466,9 @@ async function fetchPage1(): Promise<string> {
   }
 
   // Clean context resolution: stringified, never [object Object]
-  const contextName = parseString(currentGpuContext) || parseString(gpuContext) || "d3d11";
-  const displayStr = parseString(displayNames, "\\\\.\\DISPLAY1");
-  const voName = parseString(vo, "gpu-next");
+  const contextName = parseString(currentGpuContext) || parseString(gpuContext) || "—";
+  const displayStr = parseString(displayNames, "—");
+  const voName = parseString(vo, "—");
   const display = `${voName} (${displayStr})  Context: ${contextName}`;
 
   // A-V sync matching native mpv: e.g. "A-V: +0"
@@ -636,7 +478,7 @@ async function fetchPage1(): Promise<string> {
         ? `+${(avsync * 1000).toFixed(0)}`
         : `${(avsync * 1000).toFixed(0)}`
       : "+0";
-  const refresh = `${(displayFps || 60).toFixed(0)} Hz (specified)`;
+  const refresh = displayFps ? `${displayFps.toFixed(0)} Hz` : "—";
   const decDropsCount = parseNumber(decDrops) || 0;
   const voDropsCount = parseNumber(voDrops) || 0;
   const mistimedCount = parseNumber(mistimedDrops) || 0;
@@ -1176,12 +1018,10 @@ async function fetchPage4(): Promise<string> {
     rawList.push(...bindingList);
   }
 
-  // Combine with official mpv defaults
+  // Display active bindings from mpv; fallback to official defaults only if none reported
   const keyMap = new Map<string, BindingEntry>();
-  for (const b of OFFICIAL_MPV_KEYBINDS) {
-    if (b.key) keyMap.set(b.key, b);
-  }
-  for (const b of rawList) {
+  const source = rawList.length > 0 ? rawList : OFFICIAL_MPV_KEYBINDS;
+  for (const b of source) {
     if (b.key && b.cmd) keyMap.set(b.key, b);
   }
 
@@ -1379,38 +1219,6 @@ async function fetchPage0(): Promise<string> {
   }
 
   return lines.join("\n");
-}
-
-export type LineToken = {
-  type: "key" | "val";
-  text: string;
-};
-
-export function tokenizeStatsLine(line: string): LineToken[] {
-  // Matches keys at line start (with optional indentation), after 2+ spaces, or after prefix keys
-  const regex = /(?:^(\s*)|(\s{2,})|(?<=(?:HDR10|PQ\(Y\)):\s+))([A-Za-z0-9_#/@()[\]\-+ /]+:)/g;
-  let lastIndex = 0;
-  const tokens: LineToken[] = [];
-  let match: RegExpExecArray | null;
-
-  while ((match = regex.exec(line)) !== null) {
-    const fullMatch = match[0];
-    const key = match[3];
-    const matchStart = match.index;
-    const keyStart = matchStart + (fullMatch.length - key.length);
-
-    if (keyStart > lastIndex) {
-      tokens.push({ type: "val", text: line.slice(lastIndex, keyStart) });
-    }
-    tokens.push({ type: "key", text: key });
-    lastIndex = regex.lastIndex;
-  }
-
-  if (lastIndex < line.length) {
-    tokens.push({ type: "val", text: line.slice(lastIndex) });
-  }
-
-  return tokens.length > 0 ? tokens : [{ type: "val", text: line }];
 }
 
 function renderFormattedValue(prevKey: string | null, text: string) {
@@ -1690,7 +1498,9 @@ export const KeybindStatsOverlay = memo(function KeybindStatsOverlay({
     } catch (e) {
       text = `Error loading Page ${page}: ${String(e)}`;
     } finally {
-      inFlightRef.current = false;
+      if (reqId === currentRequestIdRef.current) {
+        inFlightRef.current = false;
+      }
     }
     if (reqId === currentRequestIdRef.current && activePageRef.current === page) {
       setPageContent(text);
@@ -1705,7 +1515,13 @@ export const KeybindStatsOverlay = memo(function KeybindStatsOverlay({
       const targetPage = ce.detail?.page ?? 1;
       currentRequestIdRef.current++;
       inFlightRef.current = false;
-      setActivePage((prev) => (prev === targetPage ? null : targetPage));
+      setActivePage((prev) => {
+        if (prev === targetPage) {
+          onClose?.();
+          return null;
+        }
+        return targetPage;
+      });
       if (targetPage >= 0 && targetPage <= 5) {
         onPageChange?.(targetPage as 0 | 1 | 2 | 3 | 4 | 5);
       }
@@ -1755,6 +1571,13 @@ export const KeybindStatsOverlay = memo(function KeybindStatsOverlay({
     if (activePage == null || !settings.mpvDetailedStats) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target) {
+        const tag = target.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable) {
+          return;
+        }
+      }
       if (e.key === "Escape") {
         e.preventDefault();
         e.stopPropagation();

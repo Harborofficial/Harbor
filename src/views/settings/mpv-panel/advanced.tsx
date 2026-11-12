@@ -323,6 +323,7 @@ export function AdvancedMpvSection() {
             : "flex flex-col gap-10"
         }
         aria-disabled={isLocked}
+        inert={isLocked ? true : undefined}
       >
         {/* Caution & Redirect: Default HDR with mpv.conf and Shaders */}
         <div className="flex flex-col gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4.5 text-amber-200 shadow-sm backdrop-blur-sm">
@@ -549,7 +550,9 @@ export function AdvancedMpvSection() {
             </button>
             {showInputCompiled && (
               <pre className="mt-1.5 overflow-x-auto whitespace-pre-wrap rounded-[10px] bg-elevated px-4 py-3 font-mono text-[13.5px] leading-[20px] text-ink-muted border border-edge-soft/50">
-                {`# Example input configuration (input.conf):
+                {settings.mpvInputConf?.trim()
+                  ? settings.mpvInputConf
+                  : `# Example input configuration (input.conf):
 SPACE cycle pause
 RIGHT seek 5
 UP add volume 2`}
@@ -821,6 +824,7 @@ UP add volume 2`}
         <CodeEditorModal
           item={editingItem.item}
           type={editingItem.type}
+          hasActiveConfirmation={!!removingItem}
           onClose={() => setEditingItem(null)}
           onRemoveRequest={() => setRemovingItem(editingItem)}
         />
@@ -829,56 +833,89 @@ UP add volume 2`}
       {/* ------------------------------------------------------------- */}
       {/* REMOVAL CONFIRMATION MODAL                                    */}
       {/* ------------------------------------------------------------- */}
-      {removingItem &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-[250] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in"
-            onClick={() => setRemovingItem(null)}
-          >
-            <div
-              className="flex w-full max-w-[420px] flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas p-6 shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-400">
-                  <Trash2 size={20} />
-                </div>
-                <div className="flex flex-col">
-                  <h3 className="text-[16px] font-bold text-ink">{t("Remove from Harbor?")}</h3>
-                  <span className="text-[12px] text-ink-muted truncate max-w-[280px]">
-                    {removingItem.item.name}
-                  </span>
-                </div>
-              </div>
-
-              <p className="text-[13.5px] leading-relaxed text-ink-muted">
-                {t(
-                  "This will remove the file reference from Harbor's settings. The real file on your disk will remain completely untouched.",
-                )}
-              </p>
-
-              <div className="flex items-center justify-end gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setRemovingItem(null)}
-                  className="rounded-xl px-4 py-2 text-[13.5px] font-medium text-ink-muted transition hover:bg-surface hover:text-ink"
-                >
-                  {t("Cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={confirmRemove}
-                  className="rounded-xl bg-rose-500 px-4 py-2 text-[13.5px] font-semibold text-white transition hover:bg-rose-600 shadow-md"
-                >
-                  {t("Remove")}
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body,
-        )}
+      {removingItem && (
+        <RemovalConfirmationModal
+          itemName={removingItem.item.name}
+          onCancel={() => setRemovingItem(null)}
+          onConfirm={confirmRemove}
+        />
+      )}
     </div>
+  );
+}
+
+// -------------------------------------------------------------
+// REMOVAL CONFIRMATION MODAL
+// -------------------------------------------------------------
+function RemovalConfirmationModal({
+  itemName,
+  onCancel,
+  onConfirm,
+}: {
+  itemName: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const t = useT();
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        onCancel();
+      }
+    };
+    window.addEventListener("keydown", onKey, { capture: true });
+    return () => window.removeEventListener("keydown", onKey, { capture: true });
+  }, [onCancel]);
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[250] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in"
+      onClick={onCancel}
+    >
+      <div
+        className="flex w-full max-w-[420px] flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-400">
+            <Trash2 size={20} />
+          </div>
+          <div className="flex flex-col">
+            <h3 className="text-[16px] font-bold text-ink">{t("Remove from Harbor?")}</h3>
+            <span className="text-[12px] text-ink-muted truncate max-w-[280px]">{itemName}</span>
+          </div>
+        </div>
+
+        <p className="text-[13.5px] leading-relaxed text-ink-muted">
+          {t(
+            "This will remove the file reference from Harbor's settings. The real file on your disk will remain completely untouched.",
+          )}
+        </p>
+
+        <div className="flex items-center justify-end gap-2.5 pt-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-xl px-4 py-2 text-[13.5px] font-medium text-ink-muted transition hover:bg-surface hover:text-ink"
+          >
+            {t("Cancel")}
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="rounded-xl bg-rose-500 px-4 py-2 text-[13.5px] font-semibold text-white transition hover:bg-rose-600 shadow-md"
+          >
+            {t("Remove")}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -890,11 +927,13 @@ function CodeEditorModal({
   type,
   onClose,
   onRemoveRequest,
+  hasActiveConfirmation,
 }: {
   item: CustomFileItem;
   type: "shader" | "script";
   onClose: () => void;
   onRemoveRequest: () => void;
+  hasActiveConfirmation?: boolean;
 }) {
   const t = useT();
   const [code, setCode] = useState<string>("");
@@ -933,7 +972,7 @@ function CodeEditorModal({
 
   // Save code to disk
   const handleSave = async () => {
-    if (saving) return;
+    if (saving || loading || error !== null) return;
     try {
       setSaving(true);
       const { writeTextFile } = await import("@tauri-apps/plugin-fs");
@@ -954,13 +993,14 @@ function CodeEditorModal({
         e.preventDefault();
         void handleSave();
       } else if (e.key === "Escape") {
+        if (hasActiveConfirmation) return;
         e.preventDefault();
         onClose();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [code, saving]);
+  }, [code, saving, loading, error, hasActiveConfirmation, onClose, t]);
 
   const handleCopyPath = async () => {
     try {
@@ -1087,7 +1127,7 @@ function CodeEditorModal({
             <button
               type="button"
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || loading || !!error}
               className="flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-1.5 font-sans text-[12px] font-semibold text-black transition hover:bg-accent/90 disabled:opacity-50"
             >
               <span>{saving ? t("Saving...") : t("Save (Ctrl+S)")}</span>

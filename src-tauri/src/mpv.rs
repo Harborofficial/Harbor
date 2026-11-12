@@ -412,6 +412,7 @@ pub async fn mpv_probe(_app: AppHandle) -> MpvProbe {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn supports_vapoursynth_filter() -> bool {
     force_c_numeric_locale();
     Mpv::new()
@@ -780,7 +781,7 @@ fn apply_pre_init(
     // d3d11-output-csp, d3d11-output-format, target-trc, target-prim, etc.
     // configure the VO and swapchain before mpv_initialize() runs.
     for (key, value) in &all_user_pairs {
-        if key == "load-script" || key == "script" || key == "scripts" || key == "scripts-append" {
+        if is_init_only_key(key) {
             continue;
         }
         if is_disk_cache_option(key) {
@@ -5498,11 +5499,11 @@ mod script_pre_init_tests {
 
     #[test]
     fn join_scripts_uses_platform_separator_deduplicates_and_rejects_empty_entries() {
+        let sep = if cfg!(windows) { ";" } else { ":" };
         let (init_only, _) = split_extra_option_pairs(
-            "scripts=a.lua\nscripts=\nload-script=b.lua\nscript=a.lua\nscripts=b.lua;c.lua\n",
+            &format!("scripts=a.lua\nscripts=\nload-script=b.lua\nscript=a.lua\nscripts=b.lua{}c.lua\n", sep),
         );
         let joined = join_init_only_pairs(&init_only);
-        let sep = if cfg!(windows) { ";" } else { ":" };
         assert_eq!(
             joined,
             vec![(

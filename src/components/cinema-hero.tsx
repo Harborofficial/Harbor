@@ -44,6 +44,7 @@ export function CinemaHero({
   eyebrow?: string;
 }) {
   const t = useT();
+  const { settings } = useSettings();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -67,9 +68,21 @@ export function CinemaHero({
 
   useEffect(() => {
     if (paused || dragging || !inViewport || !pageVisible || slides.length < 2) return;
-    const id = setInterval(() => setActive((a) => (a + 1) % slides.length), ROTATE_MS);
+    const trailerDelayMs = settings.heroTrailers
+      ? Math.max(0, Math.min(30, settings.heroTrailerStartTime ?? 1)) * 1000
+      : 0;
+    const rotateInterval = Math.max(ROTATE_MS, trailerDelayMs + 8000);
+    const id = setInterval(() => setActive((a) => (a + 1) % slides.length), rotateInterval);
     return () => clearInterval(id);
-  }, [paused, dragging, inViewport, pageVisible, slides.length]);
+  }, [
+    paused,
+    dragging,
+    inViewport,
+    pageVisible,
+    slides.length,
+    settings.heroTrailers,
+    settings.heroTrailerStartTime,
+  ]);
 
   useEffect(() => {
     if (active >= slides.length) setActive(0);

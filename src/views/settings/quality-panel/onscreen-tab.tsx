@@ -10,8 +10,11 @@ const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window
 export function OnScreenTab() {
   const t = useT();
   const { settings, update } = useSettings();
-  const isMpvAvailable = settings.playerEngine === "mpv" || (settings.playerEngine === "auto" && isTauri);
-  const mpvLockReason = !isMpvAvailable ? t("Available only when using the MPV video engine.") : undefined;
+  const isMpvAvailable =
+    isTauri && (settings.playerEngine === "mpv" || settings.playerEngine === "auto");
+  const mpvLockReason = !isMpvAvailable
+    ? t("Available only when using the MPV video engine.")
+    : undefined;
   return (
     <div className="hset-onscreen hset-form-page">
       <Section title={t("Stream quality in player")}>
@@ -63,7 +66,7 @@ export function OnScreenTab() {
         <ToggleRow
           label={t("MPV Playback Statistics")}
           sub={t(
-            "Display detailed playback metrics, GPU shader render timings, demuxer cache, and stream color pipelines when pressing I."
+            "Display detailed playback metrics, GPU shader render timings, demuxer cache, and stream color pipelines when pressing I.",
           )}
           value={settings.mpvDetailedStats}
           onChange={(v) => update({ mpvDetailedStats: v })}
@@ -72,7 +75,7 @@ export function OnScreenTab() {
         <ToggleRow
           label={t("MPV Console & Log")}
           sub={t(
-            "Show mpv's interactive console, live render logs, and command prompt when pressing ` or ~ during playback."
+            "Show mpv's interactive console, live render logs, and command prompt when pressing ` or ~ during playback.",
           )}
           value={settings.mpvConsole}
           onChange={(v) => update({ mpvConsole: v })}

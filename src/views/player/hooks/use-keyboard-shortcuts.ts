@@ -27,14 +27,18 @@ function parseInputConf(raw?: string): Map<string, InputConfBinding> {
   const map = new Map<string, InputConfBinding>();
   if (!raw) return map;
   for (const line of raw.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("//")) continue;
-    const firstSpace = trimmed.search(/\s/);
+    let t = line.trim();
+    if (!t || t.startsWith("#") || t.startsWith("//")) continue;
+    t = t
+      .replace(/^\{[^}]+\}\s+/, "")
+      .replace(/^(?:repeatable|non-repeatable)\s+/i, "")
+      .trim();
+    const firstSpace = t.search(/\s/);
     if (firstSpace > 0) {
-      const key = trimmed.slice(0, firstSpace).trim();
-      const cmd = trimmed.slice(firstSpace).trim();
+      const key = t.slice(0, firstSpace).trim();
+      const cmd = t.slice(firstSpace).trim();
       if (key && cmd) {
-        map.set(key.toLowerCase(), { key, cmd });
+        map.set(key, { key, cmd });
       }
     }
   }
@@ -241,21 +245,22 @@ export function useKeyboardShortcuts(params: {
 
   const nativeBindingsRef = useRef<Map<string, string>>(new Map());
   useEffect(() => {
-    if (bridgeRef.current?.capabilities().engine !== "mpv") {
-      nativeBindingsRef.current.clear();
-      return;
-    }
     let cancelled = false;
     const fetchBindings = async () => {
+      if (bridgeRef.current?.capabilities().engine !== "mpv") {
+        nativeBindingsRef.current.clear();
+        return;
+      }
       try {
         const { invoke } = await import("@tauri-apps/api/core");
         const list = await invoke<Array<{ key?: string; cmd?: string }>>("mpv_get_property", {
           name: "input-bindings",
         });
-        if (!cancelled && Array.isArray(list)) {
+        if (!cancelled && Array.isArray(list) && list.length > 0) {
           const map = new Map<string, string>();
           for (const item of list) {
             if (item?.key && item?.cmd) {
+              map.set(item.key, item.cmd);
               map.set(item.key.toLowerCase(), item.cmd);
             }
           }
@@ -381,8 +386,10 @@ export function useKeyboardShortcuts(params: {
         const lowerKey = mpvKey.toLowerCase();
         const lowerDomKey = e.key.toLowerCase();
         const matchedCmd =
+          nativeBindingsRef.current.get(mpvKey) ||
           nativeBindingsRef.current.get(lowerKey) ||
           nativeBindingsRef.current.get(lowerDomKey) ||
+          inputConfMapRef.current.get(mpvKey)?.cmd ||
           inputConfMapRef.current.get(lowerKey)?.cmd ||
           inputConfMapRef.current.get(lowerDomKey)?.cmd;
 
