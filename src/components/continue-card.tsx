@@ -708,7 +708,11 @@ export const ContinueCard = memo(function ContinueCard({
     if (src.homeServer) return false;
     const resumeEntry = readResumeEntry(meta.id, episode?.season, episode?.episode);
     const useResume = Boolean(
-      resumeEntry && (resumeEntry.t > actual.playedAt || resumeEntry.ms > actual.positionMs),
+      resumeEntry &&
+      (resumeEntry.t && actual.playedAt
+        ? resumeEntry.t > actual.playedAt ||
+          (resumeEntry.t === actual.playedAt && resumeEntry.ms > actual.positionMs)
+        : resumeEntry.ms > actual.positionMs),
     );
     const resumeMs = useResume && resumeEntry ? resumeEntry.ms : actual.positionMs;
     if (actual.requiresSourceRefresh || src.streamRef?.infoHash) {

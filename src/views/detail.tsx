@@ -1162,9 +1162,16 @@ export function DetailView({
                     nextSeason = nextSeasonObj.seasonNumber;
                     nextEpisode = 1;
                   } else if (hasCinemetaNextSeason) {
-                    const nextVid = cinemetaFull?.videos?.find((v) => (v.season ?? 1) > curSeason);
+                    const laterVideos = (cinemetaFull?.videos ?? [])
+                      .filter((v) => (v.season ?? 1) > curSeason)
+                      .sort(
+                        (a, b) =>
+                          (a.season ?? 1) - (b.season ?? 1) ||
+                          (a.episode ?? a.number ?? 1) - (b.episode ?? b.number ?? 1),
+                      );
+                    const nextVid = laterVideos[0];
                     nextSeason = nextVid?.season ?? curSeason + 1;
-                    nextEpisode = 1;
+                    nextEpisode = nextVid?.episode ?? nextVid?.number ?? 1;
                   } else {
                     seriesCompleted = true;
                   }
@@ -2187,7 +2194,16 @@ export function DetailView({
       return false;
     };
 
-    if (allOrdered.length > 0 && allOrdered.every((v) => isWatched(v.season, v.episode))) {
+    const hasUnlistedCandidate = candidates.some(
+      (c) =>
+        !allOrdered.some((v) => v.season === c.season && v.episode === c.episode) &&
+        !isWatched(c.season, c.episode),
+    );
+    if (
+      !hasUnlistedCandidate &&
+      allOrdered.length > 0 &&
+      allOrdered.every((v) => isWatched(v.season, v.episode))
+    ) {
       return null;
     }
 
@@ -2239,14 +2255,9 @@ export function DetailView({
             (v) => v.season > top.season && !isWatched(v.season, v.episode),
           );
           if (nextSeasonEp) return nextSeasonEp;
-          return null; // Series fully finished!
         }
         if (highestWatchedIdx >= 0 && highestWatchedIdx + 1 < allOrdered.length) {
           return allOrdered[highestWatchedIdx + 1];
-        }
-        if (allOrdered.length > 0) {
-          const maxKnownSeason = allOrdered.reduce((m, v) => Math.max(m, v.season), 0);
-          if (top.season > maxKnownSeason) return null;
         }
         return { season: top.season, episode: top.episode };
       }

@@ -48,7 +48,7 @@ import {
   isNuvioProviderActive,
   resolveNuvioProfileIndex,
 } from "@/lib/nuvio/nuvio-sync";
-import { isNuvioSignedIn, loadNuvioState } from "@/lib/nuvio/nuvio-client";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
 import { useAuth } from "@/lib/auth";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { type Meta } from "@/lib/cinemeta";
@@ -766,15 +766,11 @@ export function Home({
       return true;
     });
 
-    const nuvioLastSyncedAt = isNuvioProvider ? (loadNuvioState().lastSyncedAt ?? 0) : 0;
     const cwBase = isNuvioProvider
       ? [
           ...externalAllowed,
           ...localCwItems.filter(
-            (l) =>
-              l.external === "nuvio" &&
-              !externalAllowed.some((e) => sameCwCard(e, l)) &&
-              cwSortKey(l) > nuvioLastSyncedAt,
+            (l) => l.external === "nuvio" && !externalAllowed.some((e) => sameCwCard(e, l)),
           ),
         ]
       : hideSharedCw

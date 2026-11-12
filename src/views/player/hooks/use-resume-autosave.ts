@@ -300,21 +300,26 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
           void syncSeriesWatchedToStremio(s.meta, rv ? rid : null);
         }
         if (isNuvioSignedIn() && isNuvioProviderActive()) {
-          const slot = resolveNuvioProfileIndex();
+          const slot = resolveNuvioProfileIndex(current.ownerId);
           const idVariants = getNuvioContentIdVariants(id);
+          const targetEpisodes = covered.length ? covered : [ep];
           void pushWatchedItemToNuvio(
             slot,
-            idVariants.map((cid) => ({
-              contentId: cid,
-              contentType: "series" as const,
-              title: s.meta.name,
-              season: cs,
-              episode: ep,
-              watchedAt: Date.now(),
-            })),
+            targetEpisodes.flatMap((targetEp) =>
+              idVariants.map((cid) => ({
+                contentId: cid,
+                contentType: "series" as const,
+                title: s.meta.name,
+                season: cs,
+                episode: targetEp,
+                watchedAt: Date.now(),
+              })),
+            ),
           );
-          for (const cid of idVariants) {
-            void deleteEpisodeWatchProgressFromNuvio(slot, cid, cs, ep);
+          for (const targetEp of targetEpisodes) {
+            for (const cid of idVariants) {
+              void deleteEpisodeWatchProgressFromNuvio(slot, cid, cs, targetEp);
+            }
           }
         }
 
@@ -396,7 +401,7 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
             clearLocalCw(id, current.ownerId);
             clearResume(id, undefined, undefined, current.ownerId);
             if (isNuvioSignedIn() && isNuvioProviderActive()) {
-              const slot = resolveNuvioProfileIndex();
+              const slot = resolveNuvioProfileIndex(current.ownerId);
               const idVariants = getNuvioContentIdVariants(id);
               for (const cid of idVariants) {
                 void deleteWatchProgressFromNuvio(slot, cid);
@@ -414,13 +419,12 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
         clearLocalCw(id, current.ownerId);
         clearResume(id, undefined, undefined, current.ownerId);
         const authKey = readActiveStremioAuthKey();
-        const imdbId = rid ?? (id.startsWith("tt") ? id : undefined);
-        const cid = authKey ? cloudWriteId(id, imdbId ?? null, !!imdbId) : null;
+        const cid = authKey ? cloudWriteId(id, rid ?? null, Boolean(rv)) : null;
         if (authKey && cid && !isNuvioProviderActive()) {
           void markMovieWatchedStremio(authKey, s.meta, cid, true);
         }
         if (isNuvioSignedIn() && isNuvioProviderActive()) {
-          const slot = resolveNuvioProfileIndex();
+          const slot = resolveNuvioProfileIndex(current.ownerId);
           const idVariants = getNuvioContentIdVariants(id);
           void pushWatchedItemToNuvio(
             slot,
