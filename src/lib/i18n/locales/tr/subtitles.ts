@@ -5,6 +5,8 @@ const subtitles: Record<string, string> = {
     "Biçimlendirilmiş (ASS) altyazılar renklerini, boyutlarını ve ekran yazılarının konumunu korur, ancak kendi yazı tipinizi kullanır.",
   "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.":
     "Harbor altyazılarını mpv'nize gönderir. mpv'nin kendi altyazı menüsünden birini seçin.",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "Biçimlendirilmiş (ASS) altyazılar renklerini, boyutlarını ve ekran yazılarının konumunu korur, ancak kendi yazı tipinizi kullanır.",
 };
 
 export default subtitles;

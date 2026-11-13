@@ -18,12 +18,15 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "Rozgrywki twórców",
   "games.roms.watchVideo": "Obejrzyj film",
   "games.roms.noVideos": "Brak filmów dla tych gier.",
-  "games.roms.libraryNote": "Dodaj własne gry. Importuj pliki, wybierz emulator i zbierz kolekcję w jednym miejscu.",
+  "games.roms.libraryNote":
+    "Dodaj własne gry. Importuj pliki, wybierz emulator i zbierz kolekcję w jednym miejscu.",
   "games.roms.openLibrary": "Otwórz bibliotekę",
   "games.roms.downloadCharts": "Najczęściej pobierane mody ROM",
-  "games.roms.downloadChartsNote": "Łączna liczba pobrań łatek w Romhack Plaza. Otwórz projekt, aby sprawdzić autora, wersję i wymagania.",
+  "games.roms.downloadChartsNote":
+    "Łączna liczba pobrań łatek w Romhack Plaza. Otwórz projekt, aby sprawdzić autora, wersję i wymagania.",
   "games.roms.downloadCount": "{count} pobrań",
-  "games.roms.chartUnavailable": "Ranking pobrań jest chwilowo niedostępny. Nadal możesz odwiedzić Romhack Plaza.",
+  "games.roms.chartUnavailable":
+    "Ranking pobrań jest chwilowo niedostępny. Nadal możesz odwiedzić Romhack Plaza.",
   "games.roms.allPlatforms": "Wszystkie platformy",
   "games.roms.moreReleases": "Pokaż więcej wydań",
   "games.roms.fewerReleases": "Pokaż mniej wydań",
@@ -59,14 +62,16 @@ const gameRoms: Record<string, string> = {
   "games.roms.noCollection": "Na wybranej konsoli nie ma jeszcze gier pasujących do tej kolekcji.",
   "games.roms.community": "Tworzone przez społeczność",
   "games.roms.hacksTitle": "Znana gra. Inna przygoda.",
-  "games.roms.hacksNote": "Odkrywaj modyfikacje ROM-ów, znajdź ich oryginalne gry i przygotuj swoją zmodyfikowaną kopię do gry.",
+  "games.roms.hacksNote":
+    "Odkrywaj modyfikacje ROM-ów, znajdź ich oryginalne gry i przygotuj swoją zmodyfikowaną kopię do gry.",
   "games.roms.catalogNote": "Przeglądaj katalog według konsoli, gatunku, okresu wydania i serii.",
   "games.roms.genre": "Gatunek",
   "games.roms.allGenres": "Wszystkie gatunki",
   "games.roms.era": "Okres wydania",
   "games.roms.reset": "Resetuj filtry",
   "games.roms.empty": "Spróbuj innego tytułu lub poszerz filtry dla tej konsoli.",
-  "games.roms.source": "Metadane gier i powiązania pochodzą z IGDB. Importuj lokalne pliki, aby grać w obsługiwane gry w Harbor.",
+  "games.roms.source":
+    "Metadane gier i powiązania pochodzą z IGDB. Importuj lokalne pliki, aby grać w obsługiwane gry w Harbor.",
   "games.roms.playerScore": "Ocena graczy IGDB · liczba ocen: {count}",
   "games.roms.combinedScore": "Łączna ocena IGDB · liczba ocen: {count}",
   "games.roms.sort.discussed": "Najwięcej ocen",

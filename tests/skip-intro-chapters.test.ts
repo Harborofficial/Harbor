@@ -30,7 +30,10 @@ test("an untitled opening chapter of theme length is detected", () => {
 });
 
 test("OP1 and ED2 are read as titles despite the trailing digit", () => {
-  const segments = chaptersToSegments([at(0, "A"), at(30, "OP1"), at(120, "B"), at(1380, "ED2")], EPISODE);
+  const segments = chaptersToSegments(
+    [at(0, "A"), at(30, "OP1"), at(120, "B"), at(1380, "ED2")],
+    EPISODE,
+  );
   assert.equal(segments.find((s) => s.startSec === 30)?.kind, "intro");
   assert.equal(segments.find((s) => s.startSec === 1380)?.kind, "outro");
 });
@@ -55,12 +58,18 @@ test("several late theme-length chapters produce no ending", () => {
     [at(0, ""), at(600, ""), at(EPISODE - 200, ""), at(EPISODE - 100, ""), at(EPISODE - 50, "")],
     EPISODE,
   );
-  assert.equal(segments.some((s) => s.kind === "outro"), false);
+  assert.equal(
+    segments.some((s) => s.kind === "outro"),
+    false,
+  );
 });
 
 test("a feature-length file is left alone", () => {
   const film = 110 * 60;
-  const segments = chaptersToSegments([at(0, ""), at(60, ""), at(150, ""), at(film - 90, "")], film);
+  const segments = chaptersToSegments(
+    [at(0, ""), at(60, ""), at(150, ""), at(film - 90, "")],
+    film,
+  );
   assert.deepEqual(segments, []);
 });
 
@@ -86,7 +95,10 @@ test("segments come back in playback order", () => {
     EPISODE,
   );
   const starts = segments.map((s) => s.startSec);
-  assert.deepEqual([...starts].sort((a, b) => a - b), starts);
+  assert.deepEqual(
+    [...starts].sort((a, b) => a - b),
+    starts,
+  );
 });
 
 test("no chapters means no segments", () => {

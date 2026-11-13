@@ -8,18 +8,13 @@ import {
   type PmdbListOptions,
 } from "./lists";
 import type { Meta } from "@/lib/cinemeta";
-import type {
-  PmdbListItem,
-  PmdbTarget,
-} from "./types";
+import type { PmdbListItem, PmdbTarget } from "./types";
 
 export function clearPmdbWatchlistCache(): void {
   clearPmdbListsCache();
 }
 
-export async function fetchPmdbWatchlist(
-  options: PmdbListOptions = {},
-): Promise<PmdbListItem[]> {
+export async function fetchPmdbWatchlist(options: PmdbListOptions = {}): Promise<PmdbListItem[]> {
   options.assertCurrent?.();
   if (!isAuthenticated()) {
     if (options.strict) throw new Error("PublicMetaDB is disconnected.");

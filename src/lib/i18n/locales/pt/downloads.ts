@@ -1,11 +1,13 @@
 const downloads: Record<string, string> = {
-  "Saved movies and episodes for offline watching": "Filmes e episódios salvos para assistir offline",
+  "Saved movies and episodes for offline watching":
+    "Filmes e episódios salvos para assistir offline",
   "1 item": "1 item",
   "{count} items": "{count} itens",
   "{count} downloading": "{count} baixando",
   "{size} saved": "{size} salvos",
   "No downloads yet": "Ainda sem downloads",
-  "Open any movie or show, hover an episode, and click the download icon. Pick the exact source you want and it saves here for offline watching.": "Abra qualquer filme ou série, passe o mouse sobre um episódio e clique no ícone de download. Escolha a fonte exata que quiser e ela será salva aqui para assistir offline.",
+  "Open any movie or show, hover an episode, and click the download icon. Pick the exact source you want and it saves here for offline watching.":
+    "Abra qualquer filme ou série, passe o mouse sobre um episódio e clique no ícone de download. Escolha a fonte exata que quiser e ela será salva aqui para assistir offline.",
   "Failed: {error}": "Falhou: {error}",
   "Interrupted: re-download to finish": "Interrompido: baixe novamente para concluir",
   "Cancel download": "Cancelar download",
@@ -44,11 +46,13 @@ const downloads: Record<string, string> = {
   "Same file": "Mesmo arquivo",
   "{shown} of {total} file from your computer": "{shown} de {total} arquivo do seu computador",
   "{shown} of {total} files from your computer": "{shown} de {total} arquivos do seu computador",
-  "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.": "Aponte o Harbor para uma pasta. Nós a escaneamos em busca de filmes e séries, extraímos os títulos dos nomes dos arquivos e os enriquecemos com o TMDB para que fiquem iguais a tudo o mais aqui. Só guardamos o caminho; nada é copiado ou movido.",
+  "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.":
+    "Aponte o Harbor para uma pasta. Nós a escaneamos em busca de filmes e séries, extraímos os títulos dos nomes dos arquivos e os enriquecemos com o TMDB para que fiquem iguais a tudo o mais aqui. Só guardamos o caminho; nada é copiado ou movido.",
   "No video files found in that folder.": "Nenhum arquivo de vídeo encontrado nessa pasta.",
   "Couldn't scan that folder.": "Não foi possível escanear essa pasta.",
   "Couldn't open this file": "Não foi possível abrir este arquivo",
-  "This file is in OneDrive. If \"Files On-Demand\" is on, the file is a cloud placeholder until it's downloaded. Right-click it in Explorer and pick": "Este arquivo está no OneDrive. Se \"Files On-Demand\" estiver ativado, o arquivo é apenas um espaço reservado na nuvem até ser baixado. Clique com o botão direito nele no Explorer e escolha",
+  'This file is in OneDrive. If "Files On-Demand" is on, the file is a cloud placeholder until it\'s downloaded. Right-click it in Explorer and pick':
+    'Este arquivo está no OneDrive. Se "Files On-Demand" estiver ativado, o arquivo é apenas um espaço reservado na nuvem até ser baixado. Clique com o botão direito nele no Explorer e escolha',
   ", then try again.": ", depois tente novamente.",
   "You're offline": "Você está offline",
   "You're offline. Your downloads still play.": "Você está offline. Seus downloads ainda tocam.",

@@ -197,7 +197,8 @@ const catalog07: Record<string, string> = {
     "브라우저에서 Stremio를 엽니다. 이메일, Facebook 및 Apple 계정으로 이용할 수 있습니다.",
   "Opens Stremio in your browser. Works with email, Facebook, and Apple. Harbor never sees your password.":
     "브라우저에서 Stremio를 엽니다. 이메일, Facebook 및 Apple로 이용할 수 있습니다. Harbor는 비밀번호를 확인하지 않습니다.",
-  "Opens the folder holding the DHT cache and active transfer data.": "DHT 캐시와 활성 전송 데이터가 들어 있는 폴더를 엽니다.",
+  "Opens the folder holding the DHT cache and active transfer data.":
+    "DHT 캐시와 활성 전송 데이터가 들어 있는 폴더를 엽니다.",
   "Opens the free signup page": "무료 가입 페이지를 엽니다",
   "Opens your API settings page": "API 설정 페이지를 엽니다",
   Optional: "선택 사항",
@@ -398,7 +399,8 @@ const catalog07: Record<string, string> = {
   Peacock: "Peacock",
   "Peers, speed and progress chip on the player during torrent playback. Turn off to keep the player clean.":
     "토렌트 재생 중 플레이어에 피어, 속도 및 진행률 칩을 표시합니다. 플레이어를 깔끔하게 유지하려면 끄세요.",
-  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.": "P2P 스트림 재생 중 플레이어에 피어, 속도 및 진행률을 표시합니다. 종료 버튼을 가리지 않도록 왼쪽 상단에 배치됩니다.",
+  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.":
+    "P2P 스트림 재생 중 플레이어에 피어, 속도 및 진행률을 표시합니다. 종료 버튼을 가리지 않도록 왼쪽 상단에 배치됩니다.",
   "Peers, speed and progress while a torrent streams. Sits clear of the exit button, top left.":
     "토렌트 스트리밍 중 피어, 속도 및 진행률을 표시합니다. 왼쪽 상단의 나가기 버튼을 가리지 않습니다.",
   "Penalty Goals": "페널티킥 득점",
@@ -680,7 +682,8 @@ const catalog07: Record<string, string> = {
   "Pluto TV": "Pluto TV",
   "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.":
     "Harbor에서 사용할 폴더를 지정하세요. 폴더에서 영화와 시리즈를 검색하고 파일 이름에서 제목을 분석한 뒤 TMDB 정보로 보강하여 다른 항목과 동일하게 표시합니다. 경로만 기억하며 아무것도 복사하거나 이동하지 않습니다.",
-  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.": "홈 서버의 Stremio 서비스처럼 다른 기기의 스트리밍 서버를 Harbor에 연결합니다. P2P 스트림은 이 기기 대신 해당 기기에서 다운로드되고 재생됩니다.",
+  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.":
+    "홈 서버의 Stremio 서비스처럼 다른 기기의 스트리밍 서버를 Harbor에 연결합니다. P2P 스트림은 이 기기 대신 해당 기기에서 다운로드되고 재생됩니다.",
   "Point Harbor at your self-hosted library to browse and install sources":
     "Harbor를 직접 호스팅하는 라이브러리에 연결하여 소스를 탐색하고 설치하세요",
   "Point Harbor's built-in scraper at any HTML site with a config":

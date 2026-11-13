@@ -90,4 +90,3 @@ export function updateSessionUsername(username: string): void {
 export function isAuthenticated(): boolean {
   return !!getSession()?.apiKey;
 }
-

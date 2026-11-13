@@ -65,7 +65,11 @@ export function ReaderTopbar({
           onClick={() => onTogglePreview(!showPreview)}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-muted transition-transform active:scale-90 motion-reduce:transition-none"
         >
-          {showPreview ? <Eye size={20} strokeWidth={2.2} /> : <EyeOff size={20} strokeWidth={2.2} />}
+          {showPreview ? (
+            <Eye size={20} strokeWidth={2.2} />
+          ) : (
+            <EyeOff size={20} strokeWidth={2.2} />
+          )}
         </button>
       </div>
       <div className="mt-2.5 flex justify-center px-3">

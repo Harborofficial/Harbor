@@ -21,7 +21,8 @@ const gameRoms: Record<string, string> = {
   "games.roms.libraryNote": "带上你自己的游戏。导入文件、选择模拟器，将收藏集中管理。",
   "games.roms.openLibrary": "打开游戏库",
   "games.roms.downloadCharts": "下载最多的 ROM 改版",
-  "games.roms.downloadChartsNote": "Romhack Plaza 的补丁累计下载量。打开项目查看作者、版本和所需条件。",
+  "games.roms.downloadChartsNote":
+    "Romhack Plaza 的补丁累计下载量。打开项目查看作者、版本和所需条件。",
   "games.roms.downloadCount": "{count} 次下载",
   "games.roms.chartUnavailable": "暂时无法加载下载榜。你仍可前往 Romhack Plaza 浏览。",
   "games.roms.allPlatforms": "所有平台",
@@ -66,7 +67,8 @@ const gameRoms: Record<string, string> = {
   "games.roms.era": "发行年代",
   "games.roms.reset": "重置筛选",
   "games.roms.empty": "请尝试其他游戏名，或放宽此游戏机的筛选条件。",
-  "games.roms.source": "游戏资料及关联信息来自 IGDB。导入本地文件，即可在 Harbor 中游玩支持的游戏。",
+  "games.roms.source":
+    "游戏资料及关联信息来自 IGDB。导入本地文件，即可在 Harbor 中游玩支持的游戏。",
   "games.roms.playerScore": "IGDB 玩家评分 · {count} 条评分",
   "games.roms.combinedScore": "IGDB 综合评分 · {count} 条评分",
   "games.roms.sort.discussed": "评分数量最多",

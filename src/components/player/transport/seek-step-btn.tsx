@@ -134,7 +134,9 @@ export function SeekStepBtn({
           }}
           aria-label={t("{word} {n} seconds. Hold for options", { word, n: seconds })}
           className={`relative flex h-14 w-14 items-center justify-center rounded-full transition-[background-color,transform] duration-150 active:scale-90 motion-reduce:active:scale-100 ${
-            pickerOpen ? "bg-white/15 text-white" : "text-white/85 hover:bg-white/10 hover:text-white"
+            pickerOpen
+              ? "bg-white/15 text-white"
+              : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
           {numberedOk ? (

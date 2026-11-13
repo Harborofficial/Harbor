@@ -28,5 +28,5 @@ export default {
   "games.notes.export": "Ekspor cadangan",
   "games.notes.unsaved": "Perubahan belum disimpan",
   "games.notes.local": "Disimpan di profil Harbor ini",
-  "games.notes.importGuide": "Salin ke catatan saya"
+  "games.notes.importGuide": "Salin ke catatan saya",
 };

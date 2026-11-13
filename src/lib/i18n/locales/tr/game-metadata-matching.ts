@@ -15,12 +15,14 @@ export default {
   "games.metadata.type.fork": "Türev",
   "games.metadata.type.pack": "İçerik paketi",
   "games.metadata.type.update": "Güncelleme",
-  "games.metadata.note": "Oyunun görsellerini ve ayrıntılarını seçin. Başlatıcısı ve dosyaları değişmez.",
-  "games.metadata.conflict": "Bu oyunun eşleşmesi başka bir pencerede değişti. Son seçimi incelemek için kapatıp yeniden açın.",
+  "games.metadata.note":
+    "Oyunun görsellerini ve ayrıntılarını seçin. Başlatıcısı ve dosyaları değişmez.",
+  "games.metadata.conflict":
+    "Bu oyunun eşleşmesi başka bir pencerede değişti. Son seçimi incelemek için kapatıp yeniden açın.",
   "games.match.title": "Görsel ve ayrıntı bul",
   "games.match.use": "Bu oyunu kullan",
   "games.match.remove": "Eşleşmeyi kaldır",
   "games.match.source": "IGDB görselleri ve ayrıntıları",
   "games.match.note": "Dosyanızla eşleşen sürümü seçin. Harbor özgün dosyayı ve dosya adını korur.",
-  "games.match.empty": "Oyun adını bölge veya revizyon etiketleri olmadan deneyin."
+  "games.match.empty": "Oyun adını bölge veya revizyon etiketleri olmadan deneyin.",
 };

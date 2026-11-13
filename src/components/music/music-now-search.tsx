@@ -23,10 +23,7 @@ import "./music-now-search.css";
 
 const MODES: NowSearchMode[] = ["songs", "videos"];
 
-async function fetchSearchMode(
-  value: string,
-  limit: number,
-): Promise<MusicTrack[]> {
+async function fetchSearchMode(value: string, limit: number): Promise<MusicTrack[]> {
   const found = await searchTyped(value, limit);
   const ranked = rankMusicSearch(found, value);
   return (ranked?.tracks ?? found.tracks) as MusicTrack[];
@@ -78,9 +75,10 @@ export function MusicNowSearch({ onClose }: { onClose: () => void }) {
     } else setMore(true);
     let live = true;
     const run = () => {
-      const request = mode === "videos"
-        ? searchMusicVideoPage(value, false, videoCursors.current.get(limit) ?? null)
-        : fetchSearchMode(value, limit).then(tracks => ({ tracks, next: null }));
+      const request =
+        mode === "videos"
+          ? searchMusicVideoPage(value, false, videoCursors.current.get(limit) ?? null)
+          : fetchSearchMode(value, limit).then((tracks) => ({ tracks, next: null }));
       void request
         .then(({ tracks: found, next }) => {
           if (!live) return;
@@ -272,7 +270,9 @@ export function MusicNowSearch({ onClose }: { onClose: () => void }) {
                     ratio="square"
                     className="w-full [--poster-radius:0px]"
                     lazy
-                  ><MusicTrackPlaybackMark track={track}/></Poster>
+                  >
+                    <MusicTrackPlaybackMark track={track} />
+                  </Poster>
                   <span className="music-now-search-meta">
                     <strong>{track.title}</strong>
                     <span className="music-now-search-sub">

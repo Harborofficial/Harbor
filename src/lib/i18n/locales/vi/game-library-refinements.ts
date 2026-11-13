@@ -7,6 +7,7 @@ export default {
   "games.playtime.days": "Ngày",
   "games.playtime.seconds": "Giây",
   "games.playtime.preciseDuration": "{hours} giờ {minutes} phút {seconds} giây",
-  "games.playtime.decimalInvalid": "Nhập số không âm, không dùng dấu phân cách hàng nghìn, tối đa tổng cộng 1.000.000 giờ.",
-  "games.playtime.decimalHint": "Có thể nhập số thập phân. Tổng được làm tròn đến giây gần nhất."
+  "games.playtime.decimalInvalid":
+    "Nhập số không âm, không dùng dấu phân cách hàng nghìn, tối đa tổng cộng 1.000.000 giờ.",
+  "games.playtime.decimalHint": "Có thể nhập số thập phân. Tổng được làm tròn đến giây gần nhất.",
 };

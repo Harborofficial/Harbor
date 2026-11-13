@@ -201,7 +201,9 @@ function golfRef(value: unknown): string {
     if (
       !["https:", "http:"].includes(url.protocol) ||
       url.hostname !== "sports.core.api.espn.com" ||
-      url.port || url.username || url.password
+      url.port ||
+      url.username ||
+      url.password
     ) {
       return "";
     }
@@ -214,16 +216,18 @@ function golfRef(value: unknown): string {
 /** Golf's common /stats endpoint fails; its log identifies seasons with published tour stats. */
 export function golfStatSeasons(raw: unknown, tour: string, athleteId: string): string[] {
   const prefix = `/v2/sports/golf/leagues/${tour}/seasons/`;
-  const seasons = list(object(raw).entries).slice(0, 100).flatMap((entry) => {
-    const item = object(entry),
-      ref = golfRef(item.season);
-    const year = ref.startsWith(prefix) ? ref.slice(prefix.length) : "";
-    if (!/^\d{4}$/.test(year)) return [];
-    const expected = `${prefix}${year}/types/2/athletes/${athleteId}/statistics/0`;
-    return list(item.statistics).some((stat) => golfRef(object(stat).statistics) === expected)
-      ? [year]
-      : [];
-  });
+  const seasons = list(object(raw).entries)
+    .slice(0, 100)
+    .flatMap((entry) => {
+      const item = object(entry),
+        ref = golfRef(item.season);
+      const year = ref.startsWith(prefix) ? ref.slice(prefix.length) : "";
+      if (!/^\d{4}$/.test(year)) return [];
+      const expected = `${prefix}${year}/types/2/athletes/${athleteId}/statistics/0`;
+      return list(item.statistics).some((stat) => golfRef(object(stat).statistics) === expected)
+        ? [year]
+        : [];
+    });
   return [...new Set(seasons)].sort((a, b) => Number(b) - Number(a));
 }
 
@@ -250,21 +254,25 @@ export function parseGolfAthleteSeason(
       .map(object)
       .map((stat) => [text(stat.name), stat]),
   );
-  const stats = golfMetrics.map((name) => available.get(name)).filter((stat): stat is Json => {
-    if (!stat) return false;
-    if (typeof stat.value === "number" && Number.isFinite(stat.value)) return true;
-    const display = text(stat.displayValue);
-    return !!display && !/^(?:0(?:\.0+)?|—|--|-)$/.test(display);
-  });
+  const stats = golfMetrics
+    .map((name) => available.get(name))
+    .filter((stat): stat is Json => {
+      if (!stat) return false;
+      if (typeof stat.value === "number" && Number.isFinite(stat.value)) return true;
+      const display = text(stat.displayValue);
+      return !!display && !/^(?:0(?:\.0+)?|—|--|-)$/.test(display);
+    });
   return stats.length
-    ? [{
-        name: "Stats",
-        season,
-        labels: stats.map((stat) => text(stat.abbreviation) || text(stat.name)),
-        descriptions: stats.map((stat) => text(stat.displayName) || text(stat.name)),
-        totals: stats.map((stat) => cell(text(stat.displayValue) || stat.value)),
-        rows: [],
-      }]
+    ? [
+        {
+          name: "Stats",
+          season,
+          labels: stats.map((stat) => text(stat.abbreviation) || text(stat.name)),
+          descriptions: stats.map((stat) => text(stat.displayName) || text(stat.name)),
+          totals: stats.map((stat) => cell(text(stat.displayValue) || stat.value)),
+          rows: [],
+        },
+      ]
     : [];
 }
 
@@ -348,14 +356,18 @@ export function createAthleteCareerClient(request: RequestJson) {
           const tour = path.split("/")[1];
           const core = `https://sports.core.api.espn.com/v2/sports/golf/leagues/${tour}`;
           const log = await abortable(
-            request(`${core}/athletes/${athleteId}/statisticslog`, deadline), deadline,
+            request(`${core}/athletes/${athleteId}/statisticslog`, deadline),
+            deadline,
           );
           golf = [];
           // A listed season can have disappeared or be empty. Try at most three published seasons.
           for (const season of golfStatSeasons(log, tour, athleteId).slice(0, 3)) {
             deadline.throwIfAborted();
             const stats = await abortable(
-              request(`${core}/seasons/${season}/types/2/athletes/${athleteId}/statistics/0`, deadline),
+              request(
+                `${core}/seasons/${season}/types/2/athletes/${athleteId}/statistics/0`,
+                deadline,
+              ),
               deadline,
             );
             golf = parseGolfAthleteSeason(stats, tour, athleteId, season);
@@ -372,13 +384,13 @@ export function createAthleteCareerClient(request: RequestJson) {
       }
     }
     deadline.throwIfAborted();
-    const data = golf ?? (
-      path.startsWith("mma/")
+    const data =
+      golf ??
+      (path.startsWith("mma/")
         ? parseMmaAthleteCareer(raw, athleteId)
         : path.startsWith("tennis/")
           ? parseCoreAthleteCareer(raw)
-          : parseWebAthleteCareer(raw)
-    );
+          : parseWebAthleteCareer(raw));
     if (cache.size >= 30) cache.delete(cache.keys().next().value!);
     cache.set(key, { at: Date.now(), data });
     return data;

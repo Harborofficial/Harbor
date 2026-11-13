@@ -1,3 +1,4 @@
+import { addonResourceUrl } from "@/lib/addon-url";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createAddonCatalogFetcher, type AddonCatalogCursor, type CatalogDef } from "@/lib/addons";
 import { fetchManifestAt, loadInstalled } from "@/lib/addon-store";
@@ -49,7 +50,7 @@ export function useBpAddonCatalogs(base: string): {
     if (seed.length > 0) return;
     let alive = true;
     setLoading(true);
-    void fetchManifestAt(`${base}/manifest.json`)
+    void fetchManifestAt(addonResourceUrl(base, "manifest.json"))
       .then((manifest) => {
         if (alive) setFetched(toCatalogs(base, bpUsableCatalogs(manifest)));
       })
@@ -92,8 +93,7 @@ export function useBpAddonFeed(cursor: AddonCatalogCursor | undefined): {
     if (!cursor) return;
     let alive = true;
     setLoading(true);
-    void fetcher
-      .current!(1, 0)
+    void fetcher.current!(1, 0)
       .then((page) => {
         if (!alive) return;
         loaded.current = page.length;

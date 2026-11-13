@@ -3,7 +3,8 @@ export default {
   "games.wow.equipment.none": "記録なし",
   "games.wow.equipment.detailsUnavailable": "詳細を取得できません",
   "games.wow.equipment.unavailable": "このキャラクターの装備情報はありません。",
-  "games.wow.equipment.note": "Raider.IOの最終更新時点の装備です。現在の装備はゲーム内で確認してください。",
+  "games.wow.equipment.note":
+    "Raider.IOの最終更新時点の装備です。現在の装備はゲーム内で確認してください。",
   "games.wow.equipment.partial": "一部の装備アイテムを読み取れませんでした。",
   "games.wow.equipment.level": "アイテムレベル {level}",
   "games.wow.equipment.gems": "宝石",
@@ -25,5 +26,5 @@ export default {
   "games.wow.equipment.mainhand": "メインハンド",
   "games.wow.equipment.offhand": "オフハンド",
   "games.wow.equipment.shirt": "シャツ",
-  "games.wow.equipment.tabard": "タバード"
+  "games.wow.equipment.tabard": "タバード",
 };

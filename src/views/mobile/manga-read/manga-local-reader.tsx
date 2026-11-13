@@ -9,7 +9,19 @@ import { ModePaged } from "./mode-paged";
 import { ModeBook } from "./mode-book";
 import type { BookApi } from "@/views/manga/manga-reader/book-view";
 import { useLocalPager } from "./hooks/use-local-pager";
-import { loadLocalMode, loadLocalRtl, loadLocalZoom, loadStripPreview, mapDesktopMode, mapLocalToDesktopMode, saveLocalMode, saveLocalRtl, saveLocalZoom, saveStripPreview, type LocalMode } from "./local-reader-types";
+import {
+  loadLocalMode,
+  loadLocalRtl,
+  loadLocalZoom,
+  loadStripPreview,
+  mapDesktopMode,
+  mapLocalToDesktopMode,
+  saveLocalMode,
+  saveLocalRtl,
+  saveLocalZoom,
+  saveStripPreview,
+  type LocalMode,
+} from "./local-reader-types";
 
 export function MangaLocalReader({ onExit }: { onExit: () => void }) {
   const { snapshot, sendCommand } = useMobileRemote();

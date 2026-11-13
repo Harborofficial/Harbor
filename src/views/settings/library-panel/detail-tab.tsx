@@ -25,9 +25,7 @@ export function DetailTab() {
         />
         <ToggleRow
           label={t("Remember your place on show pages")}
-          sub={t(
-            "Reopen a show at the position where you left it, including its episode list.",
-          )}
+          sub={t("Reopen a show at the position where you left it, including its episode list.")}
           value={settings.resumeDetailScroll}
           onChange={(v) => update({ resumeDetailScroll: v })}
         />
@@ -64,40 +62,40 @@ export function DetailTab() {
         {settings.hideSpoilers && (
           <SettingsWorkbench preview={<SpoilerPreview />}>
             <Nested>
-            <SettingGroup label={t("What gets blurred")}>
-              <ToggleRow
-                label={t("Blur thumbnails")}
-                sub={t("Frosts the still image on each unwatched episode in the list.")}
-                value={settings.spoilerHideThumbnails}
-                onChange={(v) => update({ spoilerHideThumbnails: v })}
-              />
-              <ToggleRow
-                label={t("Blur titles")}
-                sub={t("Hides the episode name, which often gives the twist away on its own.")}
-                value={settings.spoilerHideTitles}
-                onChange={(v) => update({ spoilerHideTitles: v })}
-              />
-              <ToggleRow
-                label={t("Blur descriptions")}
-                sub={t("Hides the synopsis text under each unwatched episode.")}
-                value={settings.spoilerHideDescriptions}
-                onChange={(v) => update({ spoilerHideDescriptions: v })}
-              />
-              <ToggleRow
-                label={t("Blur episode images on detail page")}
-                sub={t(
-                  "Blurs the hero image and stills on the episode detail page until you click reveal.",
-                )}
-                value={!!settings.blurEpisodes}
-                onChange={(v) => update({ blurEpisodes: v })}
-              />
-              <ToggleRow
-                label={t("Keep the next episode visible")}
-                sub={t("Leave the episode you are up to clear and only blur the ones after it.")}
-                value={settings.spoilerSkipNext}
-                onChange={(v) => update({ spoilerSkipNext: v })}
-              />
-            </SettingGroup>
+              <SettingGroup label={t("What gets blurred")}>
+                <ToggleRow
+                  label={t("Blur thumbnails")}
+                  sub={t("Frosts the still image on each unwatched episode in the list.")}
+                  value={settings.spoilerHideThumbnails}
+                  onChange={(v) => update({ spoilerHideThumbnails: v })}
+                />
+                <ToggleRow
+                  label={t("Blur titles")}
+                  sub={t("Hides the episode name, which often gives the twist away on its own.")}
+                  value={settings.spoilerHideTitles}
+                  onChange={(v) => update({ spoilerHideTitles: v })}
+                />
+                <ToggleRow
+                  label={t("Blur descriptions")}
+                  sub={t("Hides the synopsis text under each unwatched episode.")}
+                  value={settings.spoilerHideDescriptions}
+                  onChange={(v) => update({ spoilerHideDescriptions: v })}
+                />
+                <ToggleRow
+                  label={t("Blur episode images on detail page")}
+                  sub={t(
+                    "Blurs the hero image and stills on the episode detail page until you click reveal.",
+                  )}
+                  value={!!settings.blurEpisodes}
+                  onChange={(v) => update({ blurEpisodes: v })}
+                />
+                <ToggleRow
+                  label={t("Keep the next episode visible")}
+                  sub={t("Leave the episode you are up to clear and only blur the ones after it.")}
+                  value={settings.spoilerSkipNext}
+                  onChange={(v) => update({ spoilerSkipNext: v })}
+                />
+              </SettingGroup>
             </Nested>
           </SettingsWorkbench>
         )}
@@ -146,9 +144,7 @@ export function DetailTab() {
           <EpisodeScalePreview />
           <ToggleRow
             label={t("High-quality episode images")}
-            sub={t(
-              "Use sharper artwork for large cards. Uses more data and may load more slowly.",
-            )}
+            sub={t("Use sharper artwork for large cards. Uses more data and may load more slowly.")}
             value={settings.hdEpisodeImages}
             onChange={(v) => update({ hdEpisodeImages: v })}
             preview={<EpisodeCardPreview kind="hd" />}

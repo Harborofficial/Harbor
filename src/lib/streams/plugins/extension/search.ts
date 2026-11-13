@@ -48,7 +48,8 @@ async function searchOne(
   );
   return settled
     .filter(
-      (result): result is PromiseFulfilledResult<ProviderSearchGroup> => result.status === "fulfilled",
+      (result): result is PromiseFulfilledResult<ProviderSearchGroup> =>
+        result.status === "fulfilled",
     )
     .map((result) => result.value);
 }
@@ -199,8 +200,11 @@ export async function searchPluginPage(
         type: providerMetaType(provider.types ?? []),
         row: wanted,
       };
-      const found = await gated(plugin, `${wanted} page ${page}`, budget(plugin, SEARCH_TIMEOUT_MS), () =>
-        bridgeSearch(provider.id, wanted, provider.hasQuickSearch, page),
+      const found = await gated(
+        plugin,
+        `${wanted} page ${page}`,
+        budget(plugin, SEARCH_TIMEOUT_MS),
+        () => bridgeSearch(provider.id, wanted, provider.hasQuickSearch, page),
       );
       return found.items
         .map((item) => metaFor(cat, item))

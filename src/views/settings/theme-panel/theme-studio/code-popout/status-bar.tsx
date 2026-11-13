@@ -18,7 +18,11 @@ export function StatusBar({
   return (
     <footer
       className="flex h-11 shrink-0 items-center gap-4 whitespace-nowrap px-4 text-[15.5px] font-normal leading-[22px]"
-      style={{ background: IDE.panel, borderBlockStart: `1px solid ${IDE.border}`, color: IDE.textDim }}
+      style={{
+        background: IDE.panel,
+        borderBlockStart: `1px solid ${IDE.border}`,
+        color: IDE.textDim,
+      }}
     >
       <span
         className="inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]"

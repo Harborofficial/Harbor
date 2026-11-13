@@ -34,6 +34,7 @@ export default {
   "games.ffxiv.sales": "Recent sales",
   "games.ffxiv.sold": "Sold",
   "games.ffxiv.noSales": "No recent sales in this snapshot.",
-  "games.ffxiv.community": "Community uploads can be old. Listings may have sold since the last update.",
-  "games.ffxiv.open": "View on Universalis"
+  "games.ffxiv.community":
+    "Community uploads can be old. Listings may have sold since the last update.",
+  "games.ffxiv.open": "View on Universalis",
 };

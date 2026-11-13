@@ -41,11 +41,20 @@ export function useMusicPlaylistPicker(): PickerValue {
  * Saving a track to a playlist from any list in the app. The track rows already carry an
  * "add to playlist" entry; this is what that entry opens.
  */
-export function MusicPlaylistPickerProvider({ children, active = true }: { children: ReactNode; active?: boolean }) {
+export function MusicPlaylistPickerProvider({
+  children,
+  active = true,
+}: {
+  children: ReactNode;
+  active?: boolean;
+}) {
   const [track, setTrack] = useState<MusicTrack | null>(null);
-  const openPlaylistPicker = useCallback((next: MusicTrack) => {
-    if (active) setTrack(next);
-  }, [active]);
+  const openPlaylistPicker = useCallback(
+    (next: MusicTrack) => {
+      if (active) setTrack(next);
+    },
+    [active],
+  );
   useEffect(() => {
     if (!active) setTrack(null);
   }, [active]);
@@ -54,7 +63,13 @@ export function MusicPlaylistPickerProvider({ children, active = true }: { child
   return (
     <Context.Provider value={value}>
       {children}
-      {active && track && <PickerModal key={`${track.connectorId}:${track.id}`} track={track} onDismiss={() => setTrack(null)} />}
+      {active && track && (
+        <PickerModal
+          key={`${track.connectorId}:${track.id}`}
+          track={track}
+          onDismiss={() => setTrack(null)}
+        />
+      )}
     </Context.Provider>
   );
 }
@@ -75,7 +90,7 @@ function PickerModal({ track, onDismiss }: { track: MusicTrack; onDismiss: () =>
   const root = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const titleId = useId();
-  const filtered = playlists.filter(playlist => matchesPlaylistSearch(playlist.name, query));
+  const filtered = playlists.filter((playlist) => matchesPlaylistSearch(playlist.name, query));
   const [destination, setDestination] = useState<"harbor" | "spotify">("harbor");
   const { openConnections } = useMusicConnections();
   const listScroll = useScrollPreserved(list);
@@ -105,10 +120,7 @@ function PickerModal({ track, onDismiss }: { track: MusicTrack; onDismiss: () =>
   const save = async (playlistId: string, allowDuplicate = false) => {
     if (busy || saved || closing) return;
     const playlist = playlists.find((item) => item.id === playlistId);
-    if (
-      !allowDuplicate &&
-      playlist?.tracks.some((existing) => sameMusicTrack(existing, track))
-    ) {
+    if (!allowDuplicate && playlist?.tracks.some((existing) => sameMusicTrack(existing, track))) {
       setDuplicateTarget(playlist);
       return;
     }
@@ -149,18 +161,43 @@ function PickerModal({ track, onDismiss }: { track: MusicTrack; onDismiss: () =>
 
   return (
     <ModalShell closing={closing} onDismiss={close} width={820} labelledBy={titleId}>
-      <div ref={root} className="music-playlist-picker" onKeyDown={event => {
-        if (event.key !== "Tab") return;
-        const targets = [...root.current!.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled)')].filter(node => node.getClientRects().length);
-        if (event.shiftKey && document.activeElement === targets[0]) { event.preventDefault(); targets.at(-1)?.focus(); }
-        else if (!event.shiftKey && document.activeElement === targets.at(-1)) { event.preventDefault(); targets[0]?.focus(); }
-      }}>
-        <div className="flex items-start justify-between gap-3"><div className="min-w-0">
-          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-subtle">
-            {t("music.playlist.add")}
-          </p>
-          <h2 id={titleId} className="mt-1 truncate text-[18px] text-ink">{track.title}</h2>
-        </div><button type="button" onClick={close} className="music-playlist-picker-close" aria-label={t("common.close")}><X size={20} /></button></div>
+      <div
+        ref={root}
+        className="music-playlist-picker"
+        onKeyDown={(event) => {
+          if (event.key !== "Tab") return;
+          const targets = [
+            ...root.current!.querySelectorAll<HTMLElement>(
+              "button:not(:disabled), input:not(:disabled)",
+            ),
+          ].filter((node) => node.getClientRects().length);
+          if (event.shiftKey && document.activeElement === targets[0]) {
+            event.preventDefault();
+            targets.at(-1)?.focus();
+          } else if (!event.shiftKey && document.activeElement === targets.at(-1)) {
+            event.preventDefault();
+            targets[0]?.focus();
+          }
+        }}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-subtle">
+              {t("music.playlist.add")}
+            </p>
+            <h2 id={titleId} className="mt-1 truncate text-[18px] text-ink">
+              {track.title}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={close}
+            className="music-playlist-picker-close"
+            aria-label={t("common.close")}
+          >
+            <X size={20} />
+          </button>
+        </div>
 
         <div
           className="grid grid-cols-2 gap-2"
@@ -198,8 +235,14 @@ function PickerModal({ track, onDismiss }: { track: MusicTrack; onDismiss: () =>
           />
         ) : (
           <>
-            <span role="status" className="sr-only">{saved ? t("music.similar.saved") : ""}</span>
-            {error && <p role="alert" className="text-[13px] text-danger">{error}</p>}
+            <span role="status" className="sr-only">
+              {saved ? t("music.similar.saved") : ""}
+            </span>
+            {error && (
+              <p role="alert" className="text-[13px] text-danger">
+                {error}
+              </p>
+            )}
             {duplicateTarget && (
               <MusicPlaylistDuplicateConfirm
                 title={track.title}
@@ -216,14 +259,24 @@ function PickerModal({ track, onDismiss }: { track: MusicTrack; onDismiss: () =>
                 {t("common.loading")}
               </span>
             ) : (
-              <ul ref={list} className="music-playlist-destination-list" onScroll={listScroll.onScroll}>
+              <ul
+                ref={list}
+                className="music-playlist-destination-list"
+                onScroll={listScroll.onScroll}
+              >
                 {filtered.map((playlist) => (
                   <li key={playlist.id}>
                     <button
                       type="button"
                       disabled={busy || !!saved || !!duplicateTarget}
                       aria-busy={busy && target === playlist.id}
-                      data-music-action-state={saved === playlist.id ? "done" : busy && target === playlist.id ? "busy" : "idle"}
+                      data-music-action-state={
+                        saved === playlist.id
+                          ? "done"
+                          : busy && target === playlist.id
+                            ? "busy"
+                            : "idle"
+                      }
                       onClick={() => void save(playlist.id)}
                       className="music-action-button music-playlist-destination-cell"
                     >
@@ -239,7 +292,17 @@ function PickerModal({ track, onDismiss }: { track: MusicTrack; onDismiss: () =>
                           {t("music.card.trackCount", { count: playlist.tracks.length })}
                         </small>
                       </span>
-                      <MusicActionGlyph state={saved === playlist.id ? "done" : busy && target === playlist.id ? "busy" : "idle"} idle={null} size={16} />
+                      <MusicActionGlyph
+                        state={
+                          saved === playlist.id
+                            ? "done"
+                            : busy && target === playlist.id
+                              ? "busy"
+                              : "idle"
+                        }
+                        idle={null}
+                        size={16}
+                      />
                     </button>
                   </li>
                 ))}
@@ -267,11 +330,19 @@ function PickerModal({ track, onDismiss }: { track: MusicTrack; onDismiss: () =>
                 type="button"
                 disabled={busy || !!saved || !!duplicateTarget || name.trim().length === 0}
                 aria-busy={busy && target === null}
-                data-music-action-state={saved && target === null ? "done" : busy && target === null ? "busy" : "idle"}
+                data-music-action-state={
+                  saved && target === null ? "done" : busy && target === null ? "busy" : "idle"
+                }
                 onClick={() => void createAndSave()}
                 className="music-action-button inline-flex shrink-0 items-center gap-1 rounded-md px-3 py-2 text-[13px] text-ink transition-colors hover:bg-elevated disabled:opacity-50"
               >
-                <MusicActionGlyph state={saved && target === null ? "done" : busy && target === null ? "busy" : "idle"} idle={<Plus size={16} />} size={16} />
+                <MusicActionGlyph
+                  state={
+                    saved && target === null ? "done" : busy && target === null ? "busy" : "idle"
+                  }
+                  idle={<Plus size={16} />}
+                  size={16}
+                />
                 {t(saved && target === null ? "music.similar.saved" : "music.playlist.create")}
               </button>
             </div>

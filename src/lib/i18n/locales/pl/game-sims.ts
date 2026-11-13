@@ -1,14 +1,19 @@
 export default {
-  "games.sims.catalogUpdateRequired": "Zaktualizuj i uruchom ponownie Harbor, aby przeglądać pliki do The Sims 2 i The Sims 3.",
+  "games.sims.catalogUpdateRequired":
+    "Zaktualizuj i uruchom ponownie Harbor, aby przeglądać pliki do The Sims 2 i The Sims 3.",
   "games.sims.creatorNotesTitle": "Linki autora · {count}",
   "games.sims.creatorNotesNote": "Linki z uwag autora. Otwórz stronę, aby przeczytać instrukcje.",
   "games.sims.ccBuildTitle": "Zawartość tej budowli",
-  "games.sims.ccBuildNote": "Pliki powiązane z tą budowlą. Nadal mogą być potrzebne dodatkowe siatki lub tekstury.",
+  "games.sims.ccBuildNote":
+    "Pliki powiązane z tą budowlą. Nadal mogą być potrzebne dodatkowe siatki lub tekstury.",
   "games.sims.ccBuildObjects": "Odczytane umieszczone obiekty: {count}",
-  "games.sims.ccBuildPartial": "Niektórych szczegółów budowli i powiązanej zawartości nie można jeszcze sprawdzić.",
+  "games.sims.ccBuildPartial":
+    "Niektórych szczegółów budowli i powiązanej zawartości nie można jeszcze sprawdzić.",
   "games.sims.creatorCcTitle": "Lista CC autora · {count}",
-  "games.sims.creatorCcNote": "Informacje od autora. Zawartość plików i instalacja są sprawdzane osobno.",
-  "games.sims.creatorCcPartial": "Nie udało się odczytać niektórych wpisów. Więcej informacji może być na stronie autora.",
+  "games.sims.creatorCcNote":
+    "Informacje od autora. Zawartość plików i instalacja są sprawdzane osobno.",
+  "games.sims.creatorCcPartial":
+    "Nie udało się odczytać niektórych wpisów. Więcej informacji może być na stronie autora.",
   "games.sims.creatorCcEmpty": "Na tej stronie nie znaleziono uporządkowanej listy CC.",
   "games.sims.creatorCcIncluded": "Autor oznaczył jako dołączone",
   "games.sims.creatorCcSeparate": "Autor oznaczył jako osobny plik do pobrania",
@@ -19,12 +24,15 @@ export default {
   "games.sims.creatorCcBack": "Wróć do {name}",
   "games.sims.ccCheck": "Sprawdź używaną zawartość",
   "games.sims.ccTitle": "Zawartość tej rodziny",
-  "games.sims.ccNote": "Pliki powiązane z tą rodziną. Nadal mogą być potrzebne dodatkowe siatki lub tekstury.",
+  "games.sims.ccNote":
+    "Pliki powiązane z tą rodziną. Nadal mogą być potrzebne dodatkowe siatki lub tekstury.",
   "games.sims.ccCoverage": "Sprawdzone pakiety: {files} · Odwołania do zawartości: {references}",
   "games.sims.ccPartial": "Nie udało się sprawdzić niektórych plików. Wyniki są niepełne.",
-  "games.sims.ccUnresolved": "Nierozpoznane elementy: {count}. Część może pochodzić z gry lub jej pakietów.",
+  "games.sims.ccUnresolved":
+    "Nierozpoznane elementy: {count}. Część może pochodzić z gry lub jej pakietów.",
   "games.sims.ccLocal": "Pliki zawartości niestandardowej",
-  "games.sims.ccNoMods": "Podczas tego sprawdzania nie znaleziono pasujących plików zawartości niestandardowej.",
+  "games.sims.ccNoMods":
+    "Podczas tego sprawdzania nie znaleziono pasujących plików zawartości niestandardowej.",
   "games.sims.ccGame": "Pliki gry · {count}",
   "games.sims.ccNoGame": "Wybierz instalację The Sims 4, aby uwzględnić jej zawartość.",
   "games.sims.ccCreator": "Lista zawartości twórcy",
@@ -36,24 +44,30 @@ export default {
   "games.sims.packsLaunchChecked": "Opcje uruchamiania: {source}",
   "games.sims.packsLaunchClear": "Żaden pakiet nie jest wyłączony w tych opcjach uruchamiania.",
   "games.sims.packsLaunchDisabled": "Wyłączone pakiety: {packs}",
-  "games.sims.packsLaunchUnknown": "Opcje uruchamiania są niepotwierdzone. Sprawdź launcher lub własne opcje uruchamiania.",
+  "games.sims.packsLaunchUnknown":
+    "Opcje uruchamiania są niepotwierdzone. Sprawdź launcher lub własne opcje uruchamiania.",
   "games.sims.packsLaunchConflict": "Opcje uruchamiania różnią się między kopiami lub kontami.",
-  "games.sims.depsPackMissing": "Wybierz instalację powyżej, aby sprawdzić wymagania zależne od pakietów.",
+  "games.sims.depsPackMissing":
+    "Wybierz instalację powyżej, aby sprawdzić wymagania zależne od pakietów.",
   "games.sims.depsPackUsing": "Warunki dotyczące pakietów sprawdzono dla {path}.",
-  "games.sims.depsPackError": "Nie udało się sprawdzić wybranej instalacji. Wymagania zależne od pakietów pozostają niepotwierdzone.",
+  "games.sims.depsPackError":
+    "Nie udało się sprawdzić wybranej instalacji. Wymagania zależne od pakietów pozostają niepotwierdzone.",
   "games.sims.packsLibrary": "Instalacje w twojej bibliotece",
   "games.sims.packsUse": "Sprawdź dodatki w tej instalacji",
   "games.sims.packsManual": "Dodano ręcznie",
   "games.sims.packsTitle": "Twoje pakiety gry",
-  "games.sims.packsIntro": "Wybierz folder gry The Sims 4, aby porównać wymagania twórcy z lokalnymi plikami pakietów.",
+  "games.sims.packsIntro":
+    "Wybierz folder gry The Sims 4, aby porównać wymagania twórcy z lokalnymi plikami pakietów.",
   "games.sims.packsChoose": "Wybierz folder gry",
   "games.sims.packsChange": "Zmień folder gry",
   "games.sims.packsRefresh": "Sprawdź pakiety ponownie",
   "games.sims.packsChecking": "Sprawdzanie plików pakietów…",
   "games.sims.packsChecked": "Sprawdzono: {date}",
-  "games.sims.packsPartial": "Nie udało się sprawdzić niektórych folderów. Brakujące pakiety pozostają niepotwierdzone.",
+  "games.sims.packsPartial":
+    "Nie udało się sprawdzić niektórych folderów. Brakujące pakiety pozostają niepotwierdzone.",
   "games.sims.packsEmpty": "Nie potwierdzono żadnych plików pakietów.",
-  "games.sims.packsScope": "Tylko pliki lokalne i opcje uruchamiania; nie potwierdza to zgodności w grze.",
+  "games.sims.packsScope":
+    "Tylko pliki lokalne i opcje uruchamiania; nie potwierdza to zgodności w grze.",
   "games.sims.packsFound": "Znaleziono pliki",
   "games.sims.packsMissing": "Nie znaleziono",
   "games.sims.packsUnchecked": "Niepotwierdzone",
@@ -89,19 +103,23 @@ export default {
   "games.sims.mtsCatTraits": "Cechy",
   "games.sims.mtsCatMisc": "Różne",
   "games.sims.mtsCatTools": "Narzędzia",
-  "games.sims.mtsIntro": "Importuj mody lub zawartość niestandardową do Harbor. Wklej stronę pobierania dla The Sims 4 i wybierz plik.",
+  "games.sims.mtsIntro":
+    "Importuj mody lub zawartość niestandardową do Harbor. Wklej stronę pobierania dla The Sims 4 i wybierz plik.",
   "games.sims.mtsPage": "Strona pobierania",
   "games.sims.mtsLoad": "Znajdź pliki",
   "games.sims.mtsBrowse": "Przeglądaj Mod The Sims",
   "games.sims.mtsFile": "Plik do instalacji",
-  "games.sims.mtsZip": "Wybierz ZIP do bezpośredniego importu. Inne formaty pobierz ze strony autora i najpierw rozpakuj mod.",
+  "games.sims.mtsZip":
+    "Wybierz ZIP do bezpośredniego importu. Inne formaty pobierz ze strony autora i najpierw rozpakuj mod.",
   "games.sims.mtsPageError": "Użyj publicznej strony pobierania Mod The Sims dla The Sims 4.",
   "games.sims.depsTitle": "Wymagania modów",
-  "games.sims.depsNote": "Szuka wymaganych plików modów na podstawie metadanych autora i sprawdza warunki dotyczące pakietów w wybranej instalacji. Nie weryfikuje zgodności w grze.",
+  "games.sims.depsNote":
+    "Szuka wymaganych plików modów na podstawie metadanych autora i sprawdza warunki dotyczące pakietów w wybranej instalacji. Nie weryfikuje zgodności w grze.",
   "games.sims.depsScan": "Sprawdź wymagania",
   "games.sims.depsNone": "W sprawdzonych plikach nie znaleziono zadeklarowanych wymagań modów.",
   "games.sims.depsCoverage": "Sprawdzono {count} plików · {manifests} z metadanymi",
-  "games.sims.depsPartial": "Nie udało się sprawdzić części plików lub wymagań. Niepotwierdzone wyniki pozostają oznaczone jako niesprawdzone.",
+  "games.sims.depsPartial":
+    "Nie udało się sprawdzić części plików lub wymagań. Niepotwierdzone wyniki pozostają oznaczone jako niesprawdzone.",
   "games.sims.depsFound": "Znaleziono wymagane pliki",
   "games.sims.depsMissing": "Brak wymaganej zawartości",
   "games.sims.depsUnchecked": "Niesprawdzone",
@@ -122,19 +140,22 @@ export default {
   "games.sims.infoFeatures": "Wymagane funkcje:",
 
   "games.sims.duplicatesTitle": "Duplikaty plików",
-  "games.sims.duplicatesNote": "Znajdź identyczne kopie w folderze Mods. To nie sprawdza różnych wersji ani innych konfliktów modów.",
+  "games.sims.duplicatesNote":
+    "Znajdź identyczne kopie w folderze Mods. To nie sprawdza różnych wersji ani innych konfliktów modów.",
   "games.sims.duplicatesScan": "Znajdź duplikaty",
   "games.sims.duplicatesAgain": "Sprawdź ponownie",
   "games.sims.duplicatesFound": "Grupy identycznych plików: {count}",
   "games.sims.duplicatesNonePartial": "Nie znaleziono duplikatów w sprawdzonych plikach.",
   "games.sims.duplicatesNone": "Nie znaleziono duplikatów plików.",
   "games.sims.duplicatesChecked": "Sprawdzone pliki: {count} · {time}",
-  "games.sims.duplicatesPartial": "Nie udało się sprawdzić części plików. Wyniki nie obejmują całego folderu.",
+  "games.sims.duplicatesPartial":
+    "Nie udało się sprawdzić części plików. Wyniki nie obejmują całego folderu.",
   "games.sims.duplicatesCopies": "Identyczne kopie: {count}",
   "games.sims.duplicatesShow": "Pokaż plik",
   "games.sims.duplicatesDisable": "Przejrzyj wyłączenie grupy",
   "games.sims.lotCached": "Katalog zapisano {date}. Sprawdź aktualne wydanie na stronie twórcy.",
-  "games.sims.lotManual": "Bezpośrednie pobieranie jest niedostępne. Pobierz plik od twórcy, a następnie zaimportuj go tutaj.",
+  "games.sims.lotManual":
+    "Bezpośrednie pobieranie jest niedostępne. Pobierz plik od twórcy, a następnie zaimportuj go tutaj.",
 
   "games.sims.lotTitle": "Więcej możliwości w The Sims",
   "games.sims.lotSearch": "Znajdź mod",
@@ -143,16 +164,23 @@ export default {
   "games.sims.lotPacks": "Wymagania gry: {packs}",
   "games.sims.lotGuide": "Poradnik twórcy",
   "games.sims.lotNew": "Nowa instalacja",
-  "games.sims.lotCompatibility": "Przed zastosowaniem tej wersji przeczytaj uwagi twórcy o zgodności.",
-  "games.sims.lotDependencyError": "Aktywny mod wymaga zweryfikowanej instalacji Core Library. Wymagana wersja musi pozostać zainstalowana i włączona.",
-  "games.sims.lotTargetError": "Ta grupa nie pasuje do wydania twórcy. Wybierz właściwą grupę lub zainstaluj je osobno.",
+  "games.sims.lotCompatibility":
+    "Przed zastosowaniem tej wersji przeczytaj uwagi twórcy o zgodności.",
+  "games.sims.lotDependencyError":
+    "Aktywny mod wymaga zweryfikowanej instalacji Core Library. Wymagana wersja musi pozostać zainstalowana i włączona.",
+  "games.sims.lotTargetError":
+    "Ta grupa nie pasuje do wydania twórcy. Wybierz właściwą grupę lub zainstaluj je osobno.",
 
   "games.sims.creatorExisting": "Istniejąca instalacja",
   "games.sims.creatorManage": "Sprawdź istniejące pliki",
-  "games.sims.creatorAdoptNote": "Najpierw przejmij zarządzanie tymi plikami w Harbor. Następnie wybierz wydanie autora, aby je zaktualizować.",
-  "games.sims.creatorLinkNote": "Sprawdź aktualizację tej grupy. Harbor zachowa poprzednie pliki i Twoje ustawienia.",
-  "games.sims.creatorTarget": "Ta grupa zawiera pliki modów spoza wybranego wydania. Przenieś je do osobnej grupy przed aktualizacją MCCC.",
-  "games.sims.creatorExistingError": "Pliki MCCC już istnieją. Obejmij je zarządzaniem przed dodaniem wydania autora.",
+  "games.sims.creatorAdoptNote":
+    "Najpierw przejmij zarządzanie tymi plikami w Harbor. Następnie wybierz wydanie autora, aby je zaktualizować.",
+  "games.sims.creatorLinkNote":
+    "Sprawdź aktualizację tej grupy. Harbor zachowa poprzednie pliki i Twoje ustawienia.",
+  "games.sims.creatorTarget":
+    "Ta grupa zawiera pliki modów spoza wybranego wydania. Przenieś je do osobnej grupy przed aktualizacją MCCC.",
+  "games.sims.creatorExistingError":
+    "Pliki MCCC już istnieją. Obejmij je zarządzaniem przed dodaniem wydania autora.",
   "games.sims.creatorRefresh": "Odśwież wersje",
   "games.sims.creatorTitle": "Od twórcy",
   "games.sims.creatorIntro": "Większa kontrola nad Simami i sąsiedztwem.",
@@ -161,11 +189,14 @@ export default {
   "games.sims.creatorInstalled": "Zainstalowano",
   "games.sims.creatorReview": "Pobierz i sprawdź",
   "games.sims.creatorChanges": "Informacje o wersji",
-  "games.sims.creatorNetwork": "Nie udało się wczytać wersji od twórcy. Spróbuj ponownie za chwilę.",
+  "games.sims.creatorNetwork":
+    "Nie udało się wczytać wersji od twórcy. Spróbuj ponownie za chwilę.",
   "games.sims.creatorChoose": "Wybierz folder The Sims 4, aby zaimportować wersję.",
-  "games.sims.creatorPatch": "Twoja gra jest starsza od przetestowanej aktualizacji. Sprawdź wcześniejszą wersję lub zaktualizuj grę.",
+  "games.sims.creatorPatch":
+    "Twoja gra jest starsza od przetestowanej aktualizacji. Sprawdź wcześniejszą wersję lub zaktualizuj grę.",
   "games.sims.creatorReviewNote": "Przed instalacją sprawdzisz pliki.",
-  "games.sims.creatorChanged": "Ta wersja lub zarządzany mod uległy zmianie. Odśwież i spróbuj ponownie.",
+  "games.sims.creatorChanged":
+    "Ta wersja lub zarządzany mod uległy zmianie. Odśwież i spróbuj ponownie.",
   "games.sims.creatorDownloading": "Pobieranie od twórcy…",
   "games.sims.keptFiles": "Pliki zachowane po odzyskiwaniu",
   "games.sims.keptNote": "Niekompletne lub zmienione pliki zostały zachowane tutaj do sprawdzenia.",
@@ -176,60 +207,81 @@ export default {
   "games.sims.trayImport": "Importuj budowlę lub rodzinę",
   "games.sims.trayRemove": "Usuń z biblioteki",
   "games.sims.trayRestore": "Przywróć do biblioteki",
-  "games.sims.trayNote": "Importuj pobrane parcele, pokoje lub rodziny. Harbor przechowuje ich powiązane pliki razem w folderze Tray.",
-  "games.sims.trayReviewNote": "Pliki Tray trafiają bezpośrednio do folderu biblioteki. Dołączona zawartość zmodyfikowana tworzy osobną grupę modów.",
-  "games.sims.trayRemoveNote": "Zaimportowane pliki zostaną usunięte z biblioteki, a ich kopia zachowana. Dołączona zawartość zmodyfikowana pozostanie zainstalowana.",
-  "games.sims.trayDone": "Pliki biblioteki zostały zaktualizowane. Otwórz Moją bibliotekę w The Sims 4 i w razie potrzeby włącz uwzględnianie zawartości zmodyfikowanej.",
-  "games.sims.trayPlayNote": "Otwórz Moją bibliotekę w grze. Wymagane pakiety i zawartość zmodyfikowana muszą być zainstalowane.",
+  "games.sims.trayNote":
+    "Importuj pobrane parcele, pokoje lub rodziny. Harbor przechowuje ich powiązane pliki razem w folderze Tray.",
+  "games.sims.trayReviewNote":
+    "Pliki Tray trafiają bezpośrednio do folderu biblioteki. Dołączona zawartość zmodyfikowana tworzy osobną grupę modów.",
+  "games.sims.trayRemoveNote":
+    "Zaimportowane pliki zostaną usunięte z biblioteki, a ich kopia zachowana. Dołączona zawartość zmodyfikowana pozostanie zainstalowana.",
+  "games.sims.trayDone":
+    "Pliki biblioteki zostały zaktualizowane. Otwórz Moją bibliotekę w The Sims 4 i w razie potrzeby włącz uwzględnianie zawartości zmodyfikowanej.",
+  "games.sims.trayPlayNote":
+    "Otwórz Moją bibliotekę w grze. Wymagane pakiety i zawartość zmodyfikowana muszą być zainstalowane.",
   "games.sims.trayCc": "Dołączona zawartość zmodyfikowana jest zarządzana osobno.",
   "games.sims.trayEmpty": "Importuj pobraną kreację, aby nią tutaj zarządzać.",
-  "games.sims.trayFormat": "Wybierz obsługiwany ZIP lub pełny eksport Tray. Zachowaj oryginalne nazwy plików.",
-  "games.sims.traySet": "Wybierz wszystkie pliki jednej kreacji, w tym wpis Tray, zawartość i obrazy.",
-  "games.sims.trayExists": "Ta kreacja lub jeden z jej plików jest już w bibliotece albo kopiach zapasowych. Przywróć ją tutaj lub najpierw usuń duplikat.",
+  "games.sims.trayFormat":
+    "Wybierz obsługiwany ZIP lub pełny eksport Tray. Zachowaj oryginalne nazwy plików.",
+  "games.sims.traySet":
+    "Wybierz wszystkie pliki jednej kreacji, w tym wpis Tray, zawartość i obrazy.",
+  "games.sims.trayExists":
+    "Ta kreacja lub jeden z jej plików jest już w bibliotece albo kopiach zapasowych. Przywróć ją tutaj lub najpierw usuń duplikat.",
   "games.sims.trayInstalled": "W bibliotece",
   "games.sims.trayRemoved": "Usunięto · zachowano kopię",
   "games.sims.trayLot": "Parcela",
   "games.sims.trayRoom": "Pokój",
   "games.sims.trayHousehold": "Rodzina",
   "games.sims.trayName": "Nazwa kreacji",
-  "games.sims.testActive": "Zakończ aktywny test modów i przywróć konfigurację początkową, zanim zmienisz inne mody.",
+  "games.sims.testActive":
+    "Zakończ aktywny test modów i przywróć konfigurację początkową, zanim zmienisz inne mody.",
   "games.sims.testTitle": "Znajdź problematyczny mod",
   "games.sims.startTest": "Rozpocznij test",
   "games.sims.answerTest": "Sprawdź następny krok",
   "games.sims.restoreTest": "Przywróć konfigurację początkową",
   "games.sims.testIntro": "Testuj zarządzane grupy partiami, aby zawęzić źródło problemu.",
-  "games.sims.testPlayNote": "Sprawdź problem w grze, a potem wyjdź bez zapisywania. Zamknij The Sims 4 przed podaniem wyniku.",
+  "games.sims.testPlayNote":
+    "Sprawdź problem w grze, a potem wyjdź bez zapisywania. Zamknij The Sims 4 przed podaniem wyniku.",
   "games.sims.testRound": "Test {count}",
   "games.sims.testBaseline": "Zacznij bez wybranych modów",
   "games.sims.testBaselineNote": "Te grupy są wyłączone. Czy ten sam problem nadal występuje?",
   "games.sims.testBatch": "Sprawdź tę partię",
   "games.sims.testBatchNote": "Te wybrane grupy są włączone w tym teście. Czy problem wraca?",
   "games.sims.testSuspect": "Sprawdź tę grupę",
-  "games.sims.testSuspectNote": "Problem wrócił po włączeniu tej grupy. Sprawdź jej wymagania i aktualizacje. Inne mody lub zależności między nimi też mogą mieć znaczenie.",
+  "games.sims.testSuspectNote":
+    "Problem wrócił po włączeniu tej grupy. Sprawdź jej wymagania i aktualizacje. Inne mody lub zależności między nimi też mogą mieć znaczenie.",
   "games.sims.testInconclusive": "Nie wyodrębniono grupy",
-  "games.sims.testBaselineFailed": "Problem pozostał mimo wyłączenia wybranych grup. Sprawdź grę lub mody poza tym testem.",
-  "games.sims.testInconclusiveNote": "Problem nie występował regularnie. Może zależeć od kilku modów razem lub od zapisu gry.",
+  "games.sims.testBaselineFailed":
+    "Problem pozostał mimo wyłączenia wybranych grup. Sprawdź grę lub mody poza tym testem.",
+  "games.sims.testInconclusiveNote":
+    "Problem nie występował regularnie. Może zależeć od kilku modów razem lub od zapisu gry.",
   "games.sims.testOutside": "Mody spoza tego wyboru pozostają bez zmian.",
-  "games.sims.testPatch": "Wersja gry się zmieniła. Przywróć konfigurację początkową przed nowym testem.",
+  "games.sims.testPatch":
+    "Wersja gry się zmieniła. Przywróć konfigurację początkową przed nowym testem.",
   "games.sims.testPresent": "Problem nadal występuje",
   "games.sims.testGone": "Problem zniknął",
   "games.sims.testIncluded": "Grupy w tym teście",
   "games.sims.testHelp": "Poradnik EA dotyczący problemów z modami",
-  "games.sims.testRestoreNote": "Przywróć początkowy stan włączenia grup. Obecne ustawienia twórców zostaną zachowane. Zapisy gry nie zostaną przywrócone.",
-  "games.sims.testReviewNote": "Zamknij The Sims 4. Sprawdź grupy przed zastosowaniem. Podczas testów wychodź bez zapisywania, aby brakujące CC nie zostało usunięte z zapisu.",
-  "games.sims.testChooseNote": "Wybierz grupy do testu. Zachowaj zależności razem lub wyklucz wspólne biblioteki z testu, aby pozostały włączone.",
+  "games.sims.testRestoreNote":
+    "Przywróć początkowy stan włączenia grup. Obecne ustawienia twórców zostaną zachowane. Zapisy gry nie zostaną przywrócone.",
+  "games.sims.testReviewNote":
+    "Zamknij The Sims 4. Sprawdź grupy przed zastosowaniem. Podczas testów wychodź bez zapisywania, aby brakujące CC nie zostało usunięte z zapisu.",
+  "games.sims.testChooseNote":
+    "Wybierz grupy do testu. Zachowaj zależności razem lub wyklucz wspólne biblioteki z testu, aby pozostały włączone.",
   "games.sims.testBackup": "Utwórz kopię zapisów przed testem",
 
   "games.sims.adopt": "Zarządzaj istniejącymi modami",
-  "games.sims.adoptNote": "Zamknij The Sims 4. Wybierz jeden mod lub powiązane CC wraz z ustawieniami z tego samego folderu. Wymienione pliki trafią do jednej grupy Harbor; pozostałe zostaną na miejscu.",
+  "games.sims.adoptNote":
+    "Zamknij The Sims 4. Wybierz jeden mod lub powiązane CC wraz z ustawieniami z tego samego folderu. Wymienione pliki trafią do jednej grupy Harbor; pozostałe zostaną na miejscu.",
   "games.sims.adoptFrom": "Obecny folder",
   "games.sims.adoptTo": "Przenieś do",
   "games.sims.adoptFolder": "Wybierz powiązane pliki z jednego folderu wewnątrz Mods.",
-  "games.sims.adoptManaged": "Wybierz pliki spoza folderów zarządzanych przez Harbor i pozostaw Resource.cfg na miejscu.",
-  "games.sims.adoptScan": "Nie udało się przeskanować części folderów modów. Rozwiąż ten problem przed zarządzaniem tymi plikami.",
+  "games.sims.adoptManaged":
+    "Wybierz pliki spoza folderów zarządzanych przez Harbor i pozostaw Resource.cfg na miejscu.",
+  "games.sims.adoptScan":
+    "Nie udało się przeskanować części folderów modów. Rozwiąż ten problem przed zarządzaniem tymi plikami.",
 
   "games.sims.sets": "Zestawy modów",
-  "games.sims.setsNote": "Przełączaj zarządzane mody razem. Zestawy używają zainstalowanych wersji.",
+  "games.sims.setsNote":
+    "Przełączaj zarządzane mody razem. Zestawy używają zainstalowanych wersji.",
   "games.sims.newSet": "Nowy zestaw",
   "games.sims.switchSet": "Sprawdź zmianę",
   "games.sims.editSet": "Edytuj zestaw",
@@ -238,21 +290,26 @@ export default {
   "games.sims.emptySets": "Zapisz wybór, do którego możesz wrócić.",
   "games.sims.setsNeedMods": "Zaimportuj mod przed utworzeniem zestawu.",
   "games.sims.setName": "Nazwa zestawu",
-  "games.sims.setEditNote": "Wybierz grupy włączane przez ten zestaw. Zapisanie go nie zmienia plików modów.",
+  "games.sims.setEditNote":
+    "Wybierz grupy włączane przez ten zestaw. Zapisanie go nie zmienia plików modów.",
   "games.sims.setRemovedNote": "Usunięte grupy znikną z zestawu po zapisaniu.",
   "games.sims.setFiles": "Pliki · {count}",
   "games.sims.deleteSetNote": "Usunąć ten wybór? Pliki modów pozostaną na miejscu.",
   "games.sims.deleteSet": "Usuń zestaw",
   "games.sims.saveSet": "Zapisz zestaw",
   "games.sims.applySet": "Przełącz zestaw modów",
-  "games.sims.setReviewNote": "Najpierw zamknij The Sims 4. Zmieniają się tylko wymienione grupy; późniejsze importy pozostają bez zmian. Zapis gry z wyłączonym CC może zmienić rodziny lub budowle.",
+  "games.sims.setReviewNote":
+    "Najpierw zamknij The Sims 4. Zmieniają się tylko wymienione grupy; późniejsze importy pozostają bez zmian. Zapis gry z wyłączonym CC może zmienić rodziny lub budowle.",
   "games.sims.setBackup": "Utwórz kopię zapisów przed zmianą",
   "games.sims.setBackupDone": "Kopia jest dostępna w kopiach zapisów gry.",
   "games.sims.setUnchanged": "Ten zestaw już odpowiada obecnej konfiguracji.",
-  "games.sims.setScan": "Nie udało się sprawdzić niektórych folderów modów. Rozwiąż to przed zmianą zestawu.",
+  "games.sims.setScan":
+    "Nie udało się sprawdzić niektórych folderów modów. Rozwiąż to przed zmianą zestawu.",
   "games.sims.savesLabelHint": "Przed nowymi modami",
-  "games.sims.savesRunning": "Zamknij The Sims 4 przed tworzeniem lub przywracaniem kopii zapisów. Harbor musi potwierdzić, że gra jest wyłączona.",
-  "games.sims.savesIntro": "Zrób kopię zapisów przed zmianą modów. Najpierw zamknij The Sims 4. Kopia nie obejmuje modów ani rodzin z folderu Tray.",
+  "games.sims.savesRunning":
+    "Zamknij The Sims 4 przed tworzeniem lub przywracaniem kopii zapisów. Harbor musi potwierdzić, że gra jest wyłączona.",
+  "games.sims.savesIntro":
+    "Zrób kopię zapisów przed zmianą modów. Najpierw zamknij The Sims 4. Kopia nie obejmuje modów ani rodzin z folderu Tray.",
   "games.sims.title": "Twoje mody i zawartość niestandardowa",
   "games.sims.intro": "Uporządkuj pobrane pliki i zachowuj poprzednie wersje podczas aktualizacji.",
   "games.sims.choose": "Wybierz folder The Sims",
@@ -266,22 +323,29 @@ export default {
   "games.sims.recover": "Odzyskaj przerwaną zmianę",
   "games.sims.name": "Nazwa moda lub kolekcji",
   "games.sims.nameError": "Nadaj tej grupie krótką nazwę.",
-  "games.sims.reviewNote": "Zamknij The Sims 4. Importuj jeden mod lub powiązany zestaw zawartości naraz. Aktualizacje zachowują ustawienia twórcy. Przed grą sprawdź jego wymagania.",
-  "games.sims.removeNote": "Zamknij The Sims 4. Zapisanie gry bez zawartości niestandardowej może zmienić rodziny lub budynki. Usunięte pliki pozostają w kopiach; wyłączone trafiają poza Mods.",
-  "games.sims.recovery": "Zmiana została przerwana. Przywróć poprzednią konfigurację, zanim wprowadzisz kolejną.",
+  "games.sims.reviewNote":
+    "Zamknij The Sims 4. Importuj jeden mod lub powiązany zestaw zawartości naraz. Aktualizacje zachowują ustawienia twórcy. Przed grą sprawdź jego wymagania.",
+  "games.sims.removeNote":
+    "Zamknij The Sims 4. Zapisanie gry bez zawartości niestandardowej może zmienić rodziny lub budynki. Usunięte pliki pozostają w kopiach; wyłączone trafiają poza Mods.",
+  "games.sims.recovery":
+    "Zmiana została przerwana. Przywróć poprzednią konfigurację, zanim wprowadzisz kolejną.",
   "games.sims.success": "Pliki modów zostały zaktualizowane.",
   "games.sims.applying": "Stosowanie zmian. Nie zamykaj Harbor…",
   "games.sims.checking": "Sprawdzanie plików…",
   "games.sims.skipped": "Pominięte dokumenty i obrazy · {count}",
   "games.sims.preview": "Podgląd zawarty w pakiecie",
   "games.sims.connect": "Zacznij od folderu The Sims",
-  "games.sims.folderNote": "Wybierz folder danych użytkownika The Sims 4 zawierający Mods, saves i Options.ini. Jeśli go nie ma, uruchom grę po raz pierwszy.",
+  "games.sims.folderNote":
+    "Wybierz folder danych użytkownika The Sims 4 zawierający Mods, saves i Options.ini. Jeśli go nie ma, uruchom grę po raz pierwszy.",
   "games.sims.version": "Wersja gry {version}",
   "games.sims.refresh": "Odśwież pliki modów",
   "games.sims.checkSettings": "Sprawdź opcje gry",
-  "games.sims.settingsNote": "Mody lub skrypty są wyłączone albo nie udało się odczytać ustawień. W The Sims 4 otwórz Opcje gry → Inne, włącz zawartość zmodyfikowaną i mody ze skryptami, a następnie uruchom grę ponownie. Aktualizacje mogą je wyłączać.",
-  "games.sims.resourceNote": "Nie udało się potwierdzić reguły Mods/Resource.cfg dla pakietów w podfolderach. Przed grą sprawdź oryginalną konfigurację modów.",
-  "games.sims.partial": "Niektórych plików lub połączonych folderów nie udało się przeskanować. Lista może być niepełna.",
+  "games.sims.settingsNote":
+    "Mody lub skrypty są wyłączone albo nie udało się odczytać ustawień. W The Sims 4 otwórz Opcje gry → Inne, włącz zawartość zmodyfikowaną i mody ze skryptami, a następnie uruchom grę ponownie. Aktualizacje mogą je wyłączać.",
+  "games.sims.resourceNote":
+    "Nie udało się potwierdzić reguły Mods/Resource.cfg dla pakietów w podfolderach. Przed grą sprawdź oryginalną konfigurację modów.",
+  "games.sims.partial":
+    "Niektórych plików lub połączonych folderów nie udało się przeskanować. Lista może być niepełna.",
   "games.sims.eaHelp": "Poradnik modów EA",
   "games.sims.managed": "Zarządzane mody",
   "games.sims.files": "Wszystkie pliki modów",
@@ -291,23 +355,35 @@ export default {
   "games.sims.package": "Zawartość niestandardowa",
   "games.sims.script": "Mod skryptowy",
   "games.sims.settings": "Ustawienia twórcy",
-  "games.sims.managedNote": "Każdy import pozostaje grupą. Tutaj włączysz, zaktualizujesz lub usuniesz cały mod.",
-  "games.sims.filesNote": "Pliki już obecne w Mods są wyświetlane bez zmian. Obrazy pochodzą z dołączonych podglądów, jeśli są dostępne.",
-  "games.sims.backupsNote": "Poprzednie wersje pozostają na tym komputerze. Przywracanie zachowuje bieżące ustawienia, jeśli mod nadal jest zainstalowany.",
+  "games.sims.managedNote":
+    "Każdy import pozostaje grupą. Tutaj włączysz, zaktualizujesz lub usuniesz cały mod.",
+  "games.sims.filesNote":
+    "Pliki już obecne w Mods są wyświetlane bez zmian. Obrazy pochodzą z dołączonych podglądów, jeśli są dostępne.",
+  "games.sims.backupsNote":
+    "Poprzednie wersje pozostają na tym komputerze. Przywracanie zachowuje bieżące ustawienia, jeśli mod nadal jest zainstalowany.",
   "games.sims.patchChanged": "Gra zaktualizowana od importu",
-  "games.sims.compatibility": "Kontrola plików nie potwierdza zgodności. Sprawdzaj mody po aktualizacjach gry.",
+  "games.sims.compatibility":
+    "Kontrola plików nie potwierdza zgodności. Sprawdzaj mody po aktualizacjach gry.",
   "games.sims.tooDeep": "Skrypt znajduje się głębiej niż jeden podfolder.",
   "games.sims.noMatches": "Brak wyników. Spróbuj innego wyszukiwania.",
   "games.sims.emptyManaged": "Zaimportuj pobrany mod, aby nim tutaj zarządzać.",
   "games.sims.emptyBackups": "Poprzednie wersje pojawią się po aktualizacji lub usunięciu moda.",
   "games.sims.emptyFiles": "Nie znaleziono obsługiwanych plików w Mods.",
   "games.sims.desktop": "Zarządzanie modami wymaga aktualnej aplikacji Harbor na Windows.",
-  "games.sims.folderError": "Wybierz rzeczywisty folder danych The Sims 4, bez skrótów i dowiązań. Musi zawierać Mods, saves, GameVersion.txt i Options.ini.",
-  "games.sims.readError": "Nie udało się odczytać plików. Sprawdź dostęp do folderu i spróbuj ponownie.",
-  "games.sims.formatError": "To nie jest obsługiwany mod The Sims 4 lub archiwum jest uszkodzone. Pliki wykonywalne, zagnieżdżone archiwa i pliki Tray nie mogą być tutaj importowane.",
-  "games.sims.layoutError": "Archiwum zawiera osobne foldery modów lub powielone nazwy. Importuj każdy mod oddzielnie, aby zachować jego pliki razem.",
-  "games.sims.running": "Zamknij The Sims 4 przed zmianą plików modów. Harbor musi móc potwierdzić zamknięcie gry.",
-  "games.sims.duplicate": "Mod o tej samej nazwie pliku już istnieje w innym folderze Mods. Usuń konflikt przed importem lub włączeniem grupy.",
-  "games.sims.recordError": "Nie udało się zweryfikować lokalnego rejestru modów. Twoje pliki pozostają bez zmian. Przywróć oryginalny rejestr przed zmianą konfiguracji.",
-  "games.sims.reviewError": "Ta kontrola zmian nie jest ważna dla bieżącego profilu. Zamknij ją i ponownie sprawdź pliki."
+  "games.sims.folderError":
+    "Wybierz rzeczywisty folder danych The Sims 4, bez skrótów i dowiązań. Musi zawierać Mods, saves, GameVersion.txt i Options.ini.",
+  "games.sims.readError":
+    "Nie udało się odczytać plików. Sprawdź dostęp do folderu i spróbuj ponownie.",
+  "games.sims.formatError":
+    "To nie jest obsługiwany mod The Sims 4 lub archiwum jest uszkodzone. Pliki wykonywalne, zagnieżdżone archiwa i pliki Tray nie mogą być tutaj importowane.",
+  "games.sims.layoutError":
+    "Archiwum zawiera osobne foldery modów lub powielone nazwy. Importuj każdy mod oddzielnie, aby zachować jego pliki razem.",
+  "games.sims.running":
+    "Zamknij The Sims 4 przed zmianą plików modów. Harbor musi móc potwierdzić zamknięcie gry.",
+  "games.sims.duplicate":
+    "Mod o tej samej nazwie pliku już istnieje w innym folderze Mods. Usuń konflikt przed importem lub włączeniem grupy.",
+  "games.sims.recordError":
+    "Nie udało się zweryfikować lokalnego rejestru modów. Twoje pliki pozostają bez zmian. Przywróć oryginalny rejestr przed zmianą konfiguracji.",
+  "games.sims.reviewError":
+    "Ta kontrola zmian nie jest ważna dla bieżącego profilu. Zamknij ją i ponownie sprawdź pliki.",
 } satisfies Record<string, string>;

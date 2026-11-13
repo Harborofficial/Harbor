@@ -7,7 +7,8 @@ export default {
   "games.atlas.era.before1990": "До 1990 года",
   "games.atlas.searchOrder": "По релевантности поиска",
   "games.atlas.empty": "Попробуйте другое название или период выпуска.",
-  "games.atlas.source": "Данные об играх, связи, оценки и изображения предоставлены IGDB. Наличие игры на платформе не означает, что вы владеете ею или что она совместима с эмулятором.",
+  "games.atlas.source":
+    "Данные об играх, связи, оценки и изображения предоставлены IGDB. Наличие игры на платформе не означает, что вы владеете ею или что она совместима с эмулятором.",
   "games.hero.pauseMotion": "Приостановить анимацию обложки",
   "games.hero.playMotion": "Включить анимацию обложки",
   "games.catalog.sort": "Порядок игр",
@@ -15,5 +16,5 @@ export default {
   "games.catalog.reset": "Сбросить фильтры",
   "games.discovery.ratingCombined": "Общая оценка IGDB",
   "games.discovery.ratingCombinedNote": "Общий балл игроков и критиков на основе {count} оценок.",
-  "games.discovery.ratingCombinedValue": "Общая оценка IGDB: {score}/100"
+  "games.discovery.ratingCombinedValue": "Общая оценка IGDB: {score}/100",
 };

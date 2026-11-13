@@ -116,6 +116,11 @@ test("group list URLs normalize supported providers without retaining query cred
     path: "lists/alice/netflix",
     url: "https://mdblist.com/lists/alice/netflix",
   });
+  assert.deepEqual(parseGroupListUrl("https://mdblist.com/lists/dg.provence13/top-manga/"), {
+    source: "mdblist",
+    path: "lists/dg.provence13/top-manga",
+    url: "https://mdblist.com/lists/dg.provence13/top-manga",
+  });
   assert.equal(parseGroupListUrl("https://trakt.tv/users/alice/lists/weekend")?.source, "trakt");
   assert.equal(parseGroupListUrl("https://trakt.tv/lists/123")?.path, "lists/123");
   for (const url of [

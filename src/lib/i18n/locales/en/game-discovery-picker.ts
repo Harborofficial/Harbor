@@ -9,8 +9,10 @@ export default {
   "games.pick.heading0": "What are you in the mood for?",
   "games.pick.heading1": "A few games you love go a long way.",
   "games.pick.heading2": "Something worth playing.",
-  "games.pick.note0": "Pick what matters tonight. Exact mood matches come first, then the closest alternatives. Play mode and other filters still apply.",
-  "games.pick.note1": "Choose up to five favorites. We’ll look at what makes them work, alongside your recent activity.",
+  "games.pick.note0":
+    "Pick what matters tonight. Exact mood matches come first, then the closest alternatives. Play mode and other filters still apply.",
+  "games.pick.note1":
+    "Choose up to five favorites. We’ll look at what makes them work, alongside your recent activity.",
   "games.pick.note2": "A shortlist shaped by your choices, shared interests, and player reviews.",
   "games.pick.company": "Who are you playing with?",
   "games.pick.refine": "Fine-tune the search",
@@ -37,15 +39,18 @@ export default {
   "games.pick.remove": "Remove {name} from favorites",
   "games.pick.addFavorite": "Use {name} as a favorite",
   "games.pick.history": "Use my library activity",
-  "games.pick.historyNote": "Recent play, most played, newly added games, and saved games. Favorites carry more weight.",
+  "games.pick.historyNote":
+    "Recent play, most played, newly added games, and saved games. Favorites carry more weight.",
   "games.pick.signal.recent": "Recently played",
   "games.pick.signal.mostPlayed": "Most played",
   "games.pick.signal.added": "Recently added",
   "games.pick.signal.saved": "Saved",
   "games.pick.hours": "h",
-  "games.pick.noHistory": "No activity to use yet. Pick favorites above, or connect Steam in Games settings.",
+  "games.pick.noHistory":
+    "No activity to use yet. Pick favorites above, or connect Steam in Games settings.",
   "games.pick.manualOnly": "Only your favorites and selected filters will shape these picks.",
-  "games.pick.addedNote": "“Recently added” means first seen in Harbor after your initial import, not a purchase date.",
+  "games.pick.addedNote":
+    "“Recently added” means first seen in Harbor after your initial import, not a purchase date.",
   "games.pick.because": "Because you like {name}",
   "games.pick.matches": "Matches your choices",
   "games.pick.steamCatalog": "Steam catalog",
@@ -59,12 +64,16 @@ export default {
   "games.pick.undo": "Undo",
   "games.pick.resetHidden": "Show dismissed games again",
   "games.pick.more": "Find more picks",
-  "games.pick.rankingNote": "Ranked by shared Steam tags, your activity, review strength, and variety. Scores are positive Steam reviews. Availability and prices follow the US catalog.",
+  "games.pick.rankingNote":
+    "Ranked by shared Steam tags, your activity, review strength, and variety. Scores are positive Steam reviews. Availability and prices follow the US catalog.",
   "games.pick.error": "Your next game can wait a moment.",
-  "games.pick.errorNote": "We couldn’t reach the game catalog. Your choices are saved; try again when you’re ready.",
+  "games.pick.errorNote":
+    "We couldn’t reach the game catalog. Your choices are saved; try again when you’re ready.",
   "games.pick.noMatches": "No picks found with these requirements yet.",
-  "games.pick.noMatchesNote": "Try a wider platform, price or library setting. Your mood choices already include close matches.",
-  "games.pick.saveError": "These choices work for this session, but couldn’t be saved on this device.",
+  "games.pick.noMatchesNote":
+    "Try a wider platform, price or library setting. Your mood choices already include close matches.",
+  "games.pick.saveError":
+    "These choices work for this session, but couldn’t be saved on this device.",
   "games.pick.selected": "{count} tags selected",
   "games.pick.favoriteCount": "{count} of 5 favorites",
   "games.pick.resultsCount": "{count} matches so far",
@@ -76,5 +85,5 @@ export default {
   "games.pick.owned": "In your library",
   "games.pick.closest": "Closest matches included. Play mode and your other filters still apply.",
   "games.pick.closeMatch": "Matches {count} of {total} mood tags",
-  "games.pick.missing": "Not tagged: {tags}"
+  "games.pick.missing": "Not tagged: {tags}",
 };

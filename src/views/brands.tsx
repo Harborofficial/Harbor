@@ -38,7 +38,15 @@ function genreNames(kind: BrandKind): Map<number, string> {
   return new Map(Object.entries(table).map(([name, id]) => [id, name]));
 }
 
-function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {
+function Chip({
+  on,
+  onClick,
+  children,
+}: {
+  on: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button type="button" onClick={onClick} className={`brand-chip ${on ? "is-on" : ""}`}>
       {children}
@@ -65,14 +73,20 @@ export function BrandsView({ brand }: { brand: BrandKind }) {
   const countries = useMemo(() => {
     const counts = new Map<string, number>();
     for (const b of brands) if (b.country) counts.set(b.country, (counts.get(b.country) ?? 0) + 1);
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([c]) => c);
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([c]) => c);
   }, [brands]);
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const list = brands.filter((b) => (!country || b.country === country) && (!q || b.name.toLowerCase().includes(q)));
+    const list = brands.filter(
+      (b) => (!country || b.country === country) && (!q || b.name.toLowerCase().includes(q)),
+    );
     if (sort === "titles") list.sort((a, b) => b.count - a.count);
-    else if (sort === "rated") list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || b.score - a.score);
+    else if (sort === "rated")
+      list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || b.score - a.score);
     else if (sort === "alpha") list.sort((a, b) => a.name.localeCompare(b.name));
     return list;
   }, [brands, country, query, sort]);
@@ -97,15 +111,22 @@ export function BrandsView({ brand }: { brand: BrandKind }) {
   }, [hasMore, limit]);
 
   const title = brand === "studio" ? t("All studios") : t("All networks");
-  const openBrand = (b: BrandSummary) => openFilter({ kind: b.kind, mediaType: b.media, name: b.name, id: b.id });
+  const openBrand = (b: BrandSummary) =>
+    openFilter({ kind: b.kind, mediaType: b.media, name: b.name, id: b.id });
 
   return (
     <main ref={scrollRef} className="absolute inset-0 z-30 overflow-y-auto bg-canvas">
       <div className="relative px-12 pb-6 pt-28">
-        <span className="text-[12.5px] font-medium uppercase tracking-[0.22em] text-ink-subtle">{t("Discover")}</span>
-        <h1 className="mt-3 font-display text-[64px] font-medium leading-[0.95] tracking-tight text-ink">{title}</h1>
+        <span className="text-[12.5px] font-medium uppercase tracking-[0.22em] text-ink-subtle">
+          {t("Discover")}
+        </span>
+        <h1 className="mt-3 font-display text-[64px] font-medium leading-[0.95] tracking-tight text-ink">
+          {title}
+        </h1>
         <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-ink-muted">
-          {t("The studios and networks behind what you watch, ranked by what people are watching now.")}
+          {t(
+            "The studios and networks behind what you watch, ranked by what people are watching now.",
+          )}
         </p>
         <div className="mt-5 inline-flex gap-1 rounded-full bg-elevated/50 p-1 ring-1 ring-edge-soft/60">
           {(["studio", "network"] as const).map((k) => (
@@ -146,7 +167,11 @@ export function BrandsView({ brand }: { brand: BrandKind }) {
                   {t("Any country")}
                 </Chip>
                 {countries.map((c) => (
-                  <Chip key={c} on={country === c} onClick={() => setCountry(country === c ? null : c)}>
+                  <Chip
+                    key={c}
+                    on={country === c}
+                    onClick={() => setCountry(country === c ? null : c)}
+                  >
                     {region(c)}
                   </Chip>
                 ))}
@@ -156,7 +181,9 @@ export function BrandsView({ brand }: { brand: BrandKind }) {
         </div>
 
         {!settings.tmdbKey && (
-          <p className="text-[15px] text-ink-muted">{t("Add a TMDB key to browse by this filter.")}</p>
+          <p className="text-[15px] text-ink-muted">
+            {t("Add a TMDB key to browse by this filter.")}
+          </p>
         )}
         {settings.tmdbKey && !loading && shown.length === 0 && (
           <p className="text-[15px] text-ink-muted">{t("Nothing matches those filters yet.")}</p>
@@ -165,12 +192,21 @@ export function BrandsView({ brand }: { brand: BrandKind }) {
         <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-x-4 gap-y-7">
           {shown.slice(0, limit).map((b) => (
             <div key={b.id} className="flex flex-col gap-2.5">
-              <BrandTile brand={b} facts={[b.country ? region(b.country) : "", b.span].filter(Boolean).join(" · ")} />
-              <button type="button" onClick={() => openBrand(b)} className="flex flex-col gap-1 text-start">
+              <BrandTile
+                brand={b}
+                facts={[b.country ? region(b.country) : "", b.span].filter(Boolean).join(" · ")}
+              />
+              <button
+                type="button"
+                onClick={() => openBrand(b)}
+                className="flex flex-col gap-1 text-start"
+              >
                 <span className="flex items-baseline justify-between gap-3">
                   <span className="truncate text-[15px] font-semibold text-ink">{b.name}</span>
                   {b.rating !== null && (
-                    <span className="shrink-0 text-[12.5px] tabular-nums text-ink-subtle">★ {b.rating.toFixed(1)}</span>
+                    <span className="shrink-0 text-[12.5px] tabular-nums text-ink-subtle">
+                      ★ {b.rating.toFixed(1)}
+                    </span>
                   )}
                 </span>
                 <span className="text-[12.5px] text-ink-subtle">
@@ -190,7 +226,10 @@ export function BrandsView({ brand }: { brand: BrandKind }) {
           ))}
           {loading &&
             Array.from({ length: 12 }).map((_, i) => (
-              <div key={`s-${i}`} className="aspect-[5/4] animate-pulse rounded-2xl bg-elevated/40" />
+              <div
+                key={`s-${i}`}
+                className="aspect-[5/4] animate-pulse rounded-2xl bg-elevated/40"
+              />
             ))}
         </div>
         {hasMore && <div ref={sentinelRef} className="h-px" />}

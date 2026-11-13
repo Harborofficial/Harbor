@@ -7,8 +7,14 @@ import type { MusicTrack } from "@/lib/music/types";
 export function MusicAddToPlaylist({ track }: { track: MusicTrack }) {
   const t = useT();
   const { openPlaylistPicker } = useMusicPlaylistPicker();
-  return <button type="button" onClick={() => openPlaylistPicker(track)}
-    className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] text-ink-muted ring-1 ring-white/10 transition-colors hover:text-ink">
-    <ListPlus className="size-4" aria-hidden />{t("music.playlist.save")}
-  </button>;
+  return (
+    <button
+      type="button"
+      onClick={() => openPlaylistPicker(track)}
+      className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] text-ink-muted ring-1 ring-white/10 transition-colors hover:text-ink"
+    >
+      <ListPlus className="size-4" aria-hidden />
+      {t("music.playlist.save")}
+    </button>
+  );
 }

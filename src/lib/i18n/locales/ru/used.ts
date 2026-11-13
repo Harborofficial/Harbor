@@ -23,7 +23,8 @@ const used: Record<string, string> = {
   "Blur up looks smoothest. Fade is lighter on older devices. Instant turns it off.":
     "«Плавное проявление» выглядит мягче всего. «Затухание» легче для старых устройств. «Мгновенно» отключает эффект.",
   "Browse public groups": "Смотреть публичные группы",
-  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.": "Буферизует файл целиком в фоне во время просмотра и даже на паузе: крупные remux подгружаются заранее, а по кэшированному файлу можно перематывать без повторной буферизации. Работает с потоками debrid и P2P. Расходует больше места на диске и трафика; очищается при переключении или закрытии.",
+  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.":
+    "Буферизует файл целиком в фоне во время просмотра и даже на паузе: крупные remux подгружаются заранее, а по кэшированному файлу можно перематывать без повторной буферизации. Работает с потоками debrid и P2P. Расходует больше места на диске и трафика; очищается при переключении или закрытии.",
   "Bulk upload is not live yet, sending one rating per second.":
     "Массовая отправка пока не работает, оценки уходят по одной в секунду.",
   "Cancel import": "Отменить импорт",

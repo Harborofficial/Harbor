@@ -31,12 +31,17 @@ export function MusicReleaseMetadata({ item }: { item: MusicCatalogItem }) {
   if (!details) return null;
   if (item.kind === "artist") {
     if (details.fanCount === undefined) return null;
-    return <div className="music-artist-fans">
-      <span className="inline-flex items-center gap-2 text-xs text-ink-muted">
-        <MusicServiceLogo source="deezer" size={20} />{t("music.metadata.deezerFans")}
-      </span>
-      <strong className="mt-1 block text-2xl font-semibold tabular-nums text-ink">{details.fanCount.toLocaleString(language)}</strong>
-    </div>;
+    return (
+      <div className="music-artist-fans">
+        <span className="inline-flex items-center gap-2 text-xs text-ink-muted">
+          <MusicServiceLogo source="deezer" size={20} />
+          {t("music.metadata.deezerFans")}
+        </span>
+        <strong className="mt-1 block text-2xl font-semibold tabular-nums text-ink">
+          {details.fanCount.toLocaleString(language)}
+        </strong>
+      </div>
+    );
   }
   const fields: { label: string; value: string; stat?: "albums" | "fans" }[] = [];
   if (details.releaseDate)

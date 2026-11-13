@@ -31,11 +31,22 @@ function useRail() {
     };
   }, []);
   const nudge = (direction: 1 | -1) =>
-    ref.current?.scrollBy({ left: direction * Math.max(240, ref.current.clientWidth * 0.8), behavior: "smooth" });
+    ref.current?.scrollBy({
+      left: direction * Math.max(240, ref.current.clientWidth * 0.8),
+      behavior: "smooth",
+    });
   return { ref, edges, nudge, measure };
 }
 
-function RailArrow({ side, onClick, label }: { side: "start" | "end"; onClick: () => void; label: string }) {
+function RailArrow({
+  side,
+  onClick,
+  label,
+}: {
+  side: "start" | "end";
+  onClick: () => void;
+  label: string;
+}) {
   return (
     <button
       type="button"
@@ -45,7 +56,11 @@ function RailArrow({ side, onClick, label }: { side: "start" | "end"; onClick: (
         side === "start" ? "start-0" : "end-0"
       }`}
     >
-      {side === "start" ? <ChevronLeft size={17} className="dir-icon" /> : <ChevronRight size={17} className="dir-icon" />}
+      {side === "start" ? (
+        <ChevronLeft size={17} className="dir-icon" />
+      ) : (
+        <ChevronRight size={17} className="dir-icon" />
+      )}
     </button>
   );
 }
@@ -132,34 +147,52 @@ export function SportsMarquee({
             ref={chips.ref}
             className="flex gap-2 overflow-x-auto overflow-y-hidden pb-1 pe-[9px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            <LeagueChip active={selected === "all"} onClick={() => onLeague("all")} label={t("All")} />
-            {leagues.filter((l) => selectedLeagues.includes(l.key)).map((l) => (
-              <LeagueChip
-                key={l.key}
-                active={selected === l.key}
-                onClick={() => onLeague(l.key)}
-                label={getLeagueLabel(l)}
-                logo={l.logo}
-              />
-            ))}
+            <LeagueChip
+              active={selected === "all"}
+              onClick={() => onLeague("all")}
+              label={t("All")}
+            />
+            {leagues
+              .filter((l) => selectedLeagues.includes(l.key))
+              .map((l) => (
+                <LeagueChip
+                  key={l.key}
+                  active={selected === l.key}
+                  onClick={() => onLeague(l.key)}
+                  label={getLeagueLabel(l)}
+                  logo={l.logo}
+                />
+              ))}
           </div>
-          {chips.edges.left && <RailArrow side="start" label={t("Scroll left")} onClick={() => chips.nudge(-1)} />}
-          {chips.edges.right && <RailArrow side="end" label={t("Scroll right")} onClick={() => chips.nudge(1)} />}
+          {chips.edges.left && (
+            <RailArrow side="start" label={t("Scroll left")} onClick={() => chips.nudge(-1)} />
+          )}
+          {chips.edges.right && (
+            <RailArrow side="end" label={t("Scroll right")} onClick={() => chips.nudge(1)} />
+          )}
         </div>
         {games.length > 0 ? (
           <div className="relative min-w-0">
             <div
               ref={trackRef}
-              onMouseEnter={() => { pausedRef.current = true; }}
-              onMouseLeave={() => { pausedRef.current = false; }}
+              onMouseEnter={() => {
+                pausedRef.current = true;
+              }}
+              onMouseLeave={() => {
+                pausedRef.current = false;
+              }}
               className="flex gap-4 overflow-x-auto overflow-y-hidden pb-1 pe-[9px] [scroll-snap-type:x_mandatory] [&>*]:[scroll-snap-align:start] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
             >
               {games.map((g) => (
                 <SportsCard key={g.id} game={g} onSelect={onSelect} />
               ))}
             </div>
-            {cards.edges.left && <RailArrow side="start" label={t("Scroll left")} onClick={() => cards.nudge(-1)} />}
-            {cards.edges.right && <RailArrow side="end" label={t("Scroll right")} onClick={() => cards.nudge(1)} />}
+            {cards.edges.left && (
+              <RailArrow side="start" label={t("Scroll left")} onClick={() => cards.nudge(-1)} />
+            )}
+            {cards.edges.right && (
+              <RailArrow side="end" label={t("Scroll right")} onClick={() => cards.nudge(1)} />
+            )}
           </div>
         ) : (
           <div className="flex h-[60px] items-center rounded-xl border border-edge-soft/45 bg-elevated/40 px-5 text-[13px] text-ink-subtle">
@@ -178,8 +211,6 @@ export function SportsMarquee({
     </>
   );
 }
-
-
 
 function LeagueChip({
   active,

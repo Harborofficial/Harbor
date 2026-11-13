@@ -12,5 +12,6 @@ export default {
   "games.titles.changes": "제목 {count}개가 변경됩니다",
   "games.titles.applied": "제목 {count}개를 업데이트했습니다.",
   "games.titles.unchanged": "제목 변경 사항이 없습니다. 환경설정은 저장할 수 있습니다.",
-  "games.titles.conflict": "다른 곳에서 제목이 변경되었습니다. 저장하기 전에 이 검토 창을 닫았다가 다시 여세요."
+  "games.titles.conflict":
+    "다른 곳에서 제목이 변경되었습니다. 저장하기 전에 이 검토 창을 닫았다가 다시 여세요.",
 };

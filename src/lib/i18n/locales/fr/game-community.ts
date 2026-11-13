@@ -7,6 +7,7 @@ export default {
   "games.community.previousPage": "Précédent",
   "games.community.nextPage": "Suivant",
   "games.community.pageNumber": "Page {count}",
-  "games.community.reviewSource": "Évaluations publiques Steam. Le temps de jeu total et celui au moment de l’évaluation sont affichés séparément. Le filtre des évaluations hors sujet de Steam s’applique.",
+  "games.community.reviewSource":
+    "Évaluations publiques Steam. Le temps de jeu total et celui au moment de l’évaluation sont affichés séparément. Le filtre des évaluations hors sujet de Steam s’applique.",
   "games.community.authorOneReview": "1 évaluation",
 } satisfies Record<string, string>;

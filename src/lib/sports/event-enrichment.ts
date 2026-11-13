@@ -231,30 +231,32 @@ export function loadPublishedEvent(
       users: 0,
       promise: Promise.resolve(null),
     };
-    const request = json(`${DB}/lookupevent.php?id=${game.id}`, controller.signal).then(async (raw) => {
-      const events = record(raw).events;
-      if (events !== null && !Array.isArray(events)) throw new Error("Event details unavailable");
-      const event = (Array.isArray(events) ? events.slice(0, 20).map(record) : []).find(
-        (item) => id(item.idEvent) === game.id && id(item.idLeague) === def.path,
-      );
-      const published = event ? parsePublishedEvent(game, def, event) : null;
-      if (!published || !isIndividualCompetition(def.group) || published.game.state !== "post")
-        return published;
-      try {
-        const results = await json(`${DB}/eventresults.php?id=${game.id}`, controller.signal);
-        controller.signal.throwIfAborted();
-        return {
-          ...published,
-          entrants: mergeCompetitionEntrants(
-            parseCompetitionResultText(published.resultText),
-            parseCompetitionResults(record(results).results, game.id),
-          ),
-        };
-      } catch {
-        controller.signal.throwIfAborted();
-        return { ...published, partial: true };
-      }
-    });
+    const request = json(`${DB}/lookupevent.php?id=${game.id}`, controller.signal).then(
+      async (raw) => {
+        const events = record(raw).events;
+        if (events !== null && !Array.isArray(events)) throw new Error("Event details unavailable");
+        const event = (Array.isArray(events) ? events.slice(0, 20).map(record) : []).find(
+          (item) => id(item.idEvent) === game.id && id(item.idLeague) === def.path,
+        );
+        const published = event ? parsePublishedEvent(game, def, event) : null;
+        if (!published || !isIndividualCompetition(def.group) || published.game.state !== "post")
+          return published;
+        try {
+          const results = await json(`${DB}/eventresults.php?id=${game.id}`, controller.signal);
+          controller.signal.throwIfAborted();
+          return {
+            ...published,
+            entrants: mergeCompetitionEntrants(
+              parseCompetitionResultText(published.resultText),
+              parseCompetitionResults(record(results).results, game.id),
+            ),
+          };
+        } catch {
+          controller.signal.throwIfAborted();
+          return { ...published, partial: true };
+        }
+      },
+    );
     const aborted = new Promise<never>((_, reject) => {
       controller.signal.addEventListener(
         "abort",

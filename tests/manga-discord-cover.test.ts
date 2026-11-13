@@ -106,8 +106,15 @@ test("only public, short HTTPS covers pass through untouched", () => {
 test("a fetchable source cover wins without any AniList lookup", () => {
   const mocks = freshMocks();
   const mod = load(mocks);
-  const cover = mod.mangaDiscordCover as (c?: string, t?: string, id?: string) => string | undefined;
-  assert.equal(cover("https://cdn.example.com/jojo.jpg", "JoJo"), "https://cdn.example.com/jojo.jpg");
+  const cover = mod.mangaDiscordCover as (
+    c?: string,
+    t?: string,
+    id?: string,
+  ) => string | undefined;
+  assert.equal(
+    cover("https://cdn.example.com/jojo.jpg", "JoJo"),
+    "https://cdn.example.com/jojo.jpg",
+  );
   assert.equal(mocks.requestCalls, 0);
 });
 
@@ -115,7 +122,11 @@ test("a local cover falls back to the cached AniList cover", () => {
   const mocks = freshMocks();
   const mod = load(mocks);
   mocks.disk.set("jojo part 7", "https://s4.anilist.co/file/manga/cover/large/1.jpg");
-  const cover = mod.mangaDiscordCover as (c?: string, t?: string, id?: string) => string | undefined;
+  const cover = mod.mangaDiscordCover as (
+    c?: string,
+    t?: string,
+    id?: string,
+  ) => string | undefined;
   assert.equal(
     cover("http://192.168.1.4/api/v1/manga/9/thumbnail", "JoJo Part 7"),
     "https://s4.anilist.co/file/manga/cover/large/1.jpg",
@@ -127,7 +138,11 @@ test("the color tag is dropped from the AniList lookup key", () => {
   const mocks = freshMocks();
   const mod = load(mocks);
   mocks.disk.set("solo leveling", "https://s4.anilist.co/file/manga/cover/large/3.jpg");
-  const cover = mod.mangaDiscordCover as (c?: string, t?: string, id?: string) => string | undefined;
+  const cover = mod.mangaDiscordCover as (
+    c?: string,
+    t?: string,
+    id?: string,
+  ) => string | undefined;
   assert.equal(
     cover("http://192.168.1.4/thumb.jpg", "Solo Leveling (Color)"),
     "https://s4.anilist.co/file/manga/cover/large/3.jpg",
@@ -138,10 +153,19 @@ test("the color tag is dropped from the AniList lookup key", () => {
 test("an exact AniList match resolves and flushes", async () => {
   const url = "https://s4.anilist.co/file/manga/cover/large/2.jpg";
   const mocks = freshMocks({
-    results: [media({ title: { romaji: "Some Manga", english: null, native: null }, coverImage: { extraLarge: url } })],
+    results: [
+      media({
+        title: { romaji: "Some Manga", english: null, native: null },
+        coverImage: { extraLarge: url },
+      }),
+    ],
   });
   const mod = load(mocks);
-  const cover = mod.mangaDiscordCover as (c?: string, t?: string, id?: string) => string | undefined;
+  const cover = mod.mangaDiscordCover as (
+    c?: string,
+    t?: string,
+    id?: string,
+  ) => string | undefined;
   let flushed = 0;
   (mod.onMangaCoverResolved as (cb: () => void) => void)(() => {
     flushed += 1;
@@ -157,11 +181,18 @@ test("an exact AniList match resolves and flushes", async () => {
 test("a common name with no exact match shows no cover", async () => {
   const mocks = freshMocks({
     results: [
-      media({ title: { romaji: "Something Else", english: null, native: null }, coverImage: { extraLarge: "https://s4.anilist.co/x.jpg" } }),
+      media({
+        title: { romaji: "Something Else", english: null, native: null },
+        coverImage: { extraLarge: "https://s4.anilist.co/x.jpg" },
+      }),
     ],
   });
   const mod = load(mocks);
-  const cover = mod.mangaDiscordCover as (c?: string, t?: string, id?: string) => string | undefined;
+  const cover = mod.mangaDiscordCover as (
+    c?: string,
+    t?: string,
+    id?: string,
+  ) => string | undefined;
   assert.equal(cover("http://10.0.0.9/thumb.jpg", "Again"), undefined);
   await tick();
   assert.equal(cover("http://10.0.0.9/thumb.jpg", "Again"), undefined, "no wrong poster");
@@ -180,10 +211,17 @@ test("the manga author breaks ties between same-named entries", async () => {
   });
   const mocks = freshMocks({ results: [a, b], detail: { author: "John Smith" } });
   const mod = load(mocks);
-  const cover = mod.mangaDiscordCover as (c?: string, t?: string, id?: string) => string | undefined;
+  const cover = mod.mangaDiscordCover as (
+    c?: string,
+    t?: string,
+    id?: string,
+  ) => string | undefined;
   assert.equal(cover("http://192.168.1.4/thumb.jpg", "Again", "manga-1"), undefined);
   await tick();
-  assert.equal(cover("http://192.168.1.4/thumb.jpg", "Again", "manga-1"), "https://s4.anilist.co/b.jpg");
+  assert.equal(
+    cover("http://192.168.1.4/thumb.jpg", "Again", "manga-1"),
+    "https://s4.anilist.co/b.jpg",
+  );
 });
 
 test("a known author matching no same-named entry shows no cover", async () => {
@@ -199,7 +237,11 @@ test("a known author matching no same-named entry shows no cover", async () => {
   });
   const mocks = freshMocks({ results: [a, b], detail: { author: "John Smith" } });
   const mod = load(mocks);
-  const cover = mod.mangaDiscordCover as (c?: string, t?: string, id?: string) => string | undefined;
+  const cover = mod.mangaDiscordCover as (
+    c?: string,
+    t?: string,
+    id?: string,
+  ) => string | undefined;
   assert.equal(cover("http://192.168.1.4/thumb.jpg", "Again", "manga-2"), undefined);
   await tick();
   assert.equal(cover("http://192.168.1.4/thumb.jpg", "Again", "manga-2"), undefined, "no guess");
@@ -208,7 +250,11 @@ test("a known author matching no same-named entry shows no cover", async () => {
 test("no title and no cover resolves to nothing", () => {
   const mocks = freshMocks();
   const mod = load(mocks);
-  const cover = mod.mangaDiscordCover as (c?: string, t?: string, id?: string) => string | undefined;
+  const cover = mod.mangaDiscordCover as (
+    c?: string,
+    t?: string,
+    id?: string,
+  ) => string | undefined;
   assert.equal(cover("http://10.0.0.9/thumb.jpg", undefined), undefined);
   assert.equal(cover(undefined, ""), undefined);
   assert.equal(mocks.requestCalls, 0);

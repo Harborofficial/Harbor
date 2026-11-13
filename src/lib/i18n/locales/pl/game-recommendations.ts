@@ -6,9 +6,11 @@ export default {
   "games.recommend.filterTitle": "Wyklucz z propozycji",
   "games.recommend.hideLibrary": "Gry w mojej bibliotece",
   "games.recommend.hideSaved": "Zapisane gry",
-  "games.recommend.libraryNote": "Dopasowanie do biblioteki uwzględnia wykryte gry, powiązane importy i ostatnią synchronizację ze Steam.",
+  "games.recommend.libraryNote":
+    "Dopasowanie do biblioteki uwzględnia wykryte gry, powiązane importy i ostatnią synchronizację ze Steam.",
   "games.recommend.steamSynced": "Biblioteka Steam zsynchronizowana: {date}",
-  "games.recommend.steamUnavailable": "Informacje o posiadanych grach na Steam są niedostępne. Gry z lokalnej biblioteki nadal są uwzględniane.",
+  "games.recommend.steamUnavailable":
+    "Informacje o posiadanych grach na Steam są niedostępne. Gry z lokalnej biblioteki nadal są uwzględniane.",
   "games.recommend.inLibrary": "W twojej bibliotece",
   "games.recommend.removeSaved": "Usuń {name} z zapisanych gier",
   "games.recommend.forYou": "Dla ciebie",
@@ -21,23 +23,30 @@ export default {
   "games.recommend.recent": "Ostatnio grane",
   "games.recommend.reset": "Przywróć ukryte gry",
   "games.recommend.empty": "Odkrywaj po swojemu",
-  "games.recommend.emptyNote": "Zapisuj gry, które cię interesują, lub graj w te z biblioteki. Tutaj pojawią się propozycje.",
-  "games.recommend.signalsOff": "Włącz powyżej Zapisane gry lub Ostatnio grane, aby dopasować propozycje.",
+  "games.recommend.emptyNote":
+    "Zapisuj gry, które cię interesują, lub graj w te z biblioteki. Tutaj pojawią się propozycje.",
+  "games.recommend.signalsOff":
+    "Włącz powyżej Zapisane gry lub Ostatnio grane, aby dopasować propozycje.",
   "games.recommend.save": "Zapisz {name}",
   "games.recommend.hide": "Ukryj {name} w propozycjach",
   "games.recommend.hideShort": "Nie dla mnie",
   "games.recommend.because.saved": "Ponieważ zapisano",
   "games.recommend.because.played": "Ponieważ grano w",
   "games.recommend.unavailable": "Powiązania nie są jeszcze dostępne.",
-  "games.recommend.retryNote": "Twoja biblioteka jest dostępna. Spróbuj ponownie wczytać powiązane gry.",
+  "games.recommend.retryNote":
+    "Twoja biblioteka jest dostępna. Spróbuj ponownie wczytać powiązane gry.",
   "games.recommend.caughtUp": "Spróbuj innego kierunku.",
-  "games.recommend.caughtUpNote": "Spróbuj wyłączyć filtr, przywrócić ukrytą propozycję lub zapisać inną ulubioną grę.",
+  "games.recommend.caughtUpNote":
+    "Spróbuj wyłączyć filtr, przywrócić ukrytą propozycję lub zapisać inną ulubioną grę.",
   "games.recommend.finding": "Szukanie powiązań z twoimi grami…",
-  "games.recommend.source": "Propozycje na podstawie tagów Steam i IGDB, dopasowane do twojej biblioteki. Ukryte wybory dotyczą tylko tego profilu.",
+  "games.recommend.source":
+    "Propozycje na podstawie tagów Steam i IGDB, dopasowane do twojej biblioteki. Ukryte wybory dotyczą tylko tego profilu.",
   "games.recommend.retrySome": "Ponów brakujące powiązania",
-  "games.recommend.saveError": "Nie udało się zapisać preferencji odkrywania na tym urządzeniu. Spróbuj ponownie.",
+  "games.recommend.saveError":
+    "Nie udało się zapisać preferencji odkrywania na tym urządzeniu. Spróbuj ponownie.",
   "games.recommend.influences": "Co wpływa na propozycje",
-  "games.recommend.influencesNote": "Wybierz gry, które Harbor bierze pod uwagę. Twoja biblioteka pozostanie bez zmian.",
+  "games.recommend.influencesNote":
+    "Wybierz gry, które Harbor bierze pod uwagę. Twoja biblioteka pozostanie bez zmian.",
   "games.recommend.exclude": "Nie uwzględniaj {name}",
   "games.recommend.excluded": "Wykluczone podstawy ({count})",
   "games.recommend.useAgain": "Ponownie uwzględniaj {name}",
@@ -48,8 +57,8 @@ export default {
   "games.recommend.undo": "Cofnij",
   "games.recommend.undoLabel": "Cofnij zmianę dla {name}",
   "games.recommend.allExcluded": "Wszystkie podstawy propozycji są wykluczone.",
-  "games.recommend.allExcludedNote": "Przywróć grę w Dostosuj propozycje lub zapisz inną ulubioną grę.",
+  "games.recommend.allExcludedNote":
+    "Przywróć grę w Dostosuj propozycje lub zapisz inną ulubioną grę.",
   "games.recommend.saved": "Zapisane gry",
-  "games.recommend.close": "Zamknij ustawienia propozycji"
+  "games.recommend.close": "Zamknij ustawienia propozycji",
 };
-

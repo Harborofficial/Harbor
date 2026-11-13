@@ -16,8 +16,7 @@ const ROUND =
 // has to carry the contrast itself. Depth here comes from darkening.
 const SECONDARY =
   "h-[clamp(48px,5.6vh,68px)] w-[clamp(48px,5.6vh,68px)] border border-[var(--bp-edge-2)] bg-[var(--bp-void)]/70 text-ink";
-const PRIMARY =
-  "h-[clamp(56px,6.6vh,82px)] w-[clamp(56px,6.6vh,82px)] bg-[var(--bp-on)] text-ink";
+const PRIMARY = "h-[clamp(56px,6.6vh,82px)] w-[clamp(56px,6.6vh,82px)] bg-[var(--bp-on)] text-ink";
 
 function BpControl({
   label,

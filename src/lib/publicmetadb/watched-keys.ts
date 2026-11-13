@@ -50,7 +50,10 @@ export function rememberPmdbWatched(keys: Set<string>): void {
   const account = accountId();
   if (!account) return;
   try {
-    localStorage.setItem(storageKey(), JSON.stringify({ account, at: Date.now(), keys: [...keys] }));
+    localStorage.setItem(
+      storageKey(),
+      JSON.stringify({ account, at: Date.now(), keys: [...keys] }),
+    );
   } catch {
     /* ignore quota */
   }

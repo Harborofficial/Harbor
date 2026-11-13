@@ -11,5 +11,5 @@ export default {
   "games.studioCatalog.minimumRating.value": "{count}+ / 100",
   "games.studioCatalog.minimumVotes.all": "Jumlah penilaian apa pun",
   "games.studioCatalog.minimumVotes.value": "{count}+ penilaian",
-  "games.studioCatalog.ratingFloor": "Skor memerlukan setidaknya 5 penilaian."
+  "games.studioCatalog.ratingFloor": "Skor memerlukan setidaknya 5 penilaian.",
 };

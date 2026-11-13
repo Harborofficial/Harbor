@@ -21,7 +21,8 @@ export default {
   "games.valorant.search": "Cari agen",
   "games.valorant.referenceError": "Referensi game gagal dimuat.",
   "games.valorant.stale": "Gagal menyegarkan. Menampilkan hasil terakhir yang dimuat.",
-  "games.valorant.metaError": "Statistik peringkat tidak tersedia. Referensi agen tetap dapat dibaca.",
+  "games.valorant.metaError":
+    "Statistik peringkat tidak tersedia. Referensi agen tetap dapat dibaca.",
   "games.valorant.agents": "Peringkat agen",
   "games.valorant.sort": "Urutkan agen",
   "games.valorant.winSort": "Tingkat kemenangan tertinggi",
@@ -34,20 +35,24 @@ export default {
   "games.valorant.sampleNote": "Agen dengan kurang dari 200 penampilan ditampilkan terakhir.",
   "games.valorant.empty": "Tidak ada hasil yang sesuai filter.",
   "games.valorant.checked": "Diperiksa {date}",
-  "games.valorant.metaScope": "Data kompetitif OP.GG untuk patch yang dipilih. Tingkat pemilihan adalah proporsi penampilan agen. Hasil mencerminkan sampel sumber, bukan semua pemain.",
-  "games.valorant.referenceScope": "Gambar dan referensi game melalui Valorant-API. Pembaruan mungkin tertinggal dari game. Harbor tidak didukung oleh Riot Games.",
+  "games.valorant.metaScope":
+    "Data kompetitif OP.GG untuk patch yang dipilih. Tingkat pemilihan adalah proporsi penampilan agen. Hasil mencerminkan sampel sumber, bukan semua pemain.",
+  "games.valorant.referenceScope":
+    "Gambar dan referensi game melalui Valorant-API. Pembaruan mungkin tertinggal dari game. Harbor tidak didukung oleh Riot Games.",
   "games.valorant.samples": "{count} penampilan",
   "games.valorant.smallSample": "Sampel kecil",
   "games.valorant.abilities": "Kemampuan",
   "games.valorant.watchAbility": "Tonton kemampuan",
   "games.valorant.videoError": "Demonstrasi ini tidak dapat diputar.",
   "games.valorant.mapMeta": "Meta agen di peta ini",
-  "games.valorant.mapScope": "Referensi peta, termasuk peta di luar rotasi peringkat saat ini. Nama peta dan lokasi dalam bahasa Inggris.",
+  "games.valorant.mapScope":
+    "Referensi peta, termasuk peta di luar rotasi peringkat saat ini. Nama peta dan lokasi dalam bahasa Inggris.",
   "games.valorant.callouts": "Nama lokasi",
   "games.valorant.compareWeapon": "Bandingkan dengan",
   "games.valorant.weapon": "Senjata",
   "games.valorant.distance": "Jarak",
-  "games.valorant.damageScope": "Nilai dasar tembakan utama sebelum armor, penetrasi, atau kemampuan. Shotgun menampilkan damage per pelet.",
+  "games.valorant.damageScope":
+    "Nilai dasar tembakan utama sebelum armor, penetrasi, atau kemampuan. Shotgun menampilkan damage per pelet.",
   "games.valorant.weaponStats": "Statistik senjata",
   "games.valorant.cost": "Kredit",
   "games.valorant.magazine": "Magasin",
@@ -55,5 +60,5 @@ export default {
   "games.valorant.reload": "Isi ulang · detik",
   "games.valorant.head": "Damage kepala",
   "games.valorant.body": "Damage badan",
-  "games.valorant.legs": "Damage kaki"
+  "games.valorant.legs": "Damage kaki",
 };

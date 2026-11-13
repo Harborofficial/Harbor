@@ -172,14 +172,14 @@ export function useBpExtraRows(): BpExtraRows {
 
   return useMemo(
     () => ({
-      before: [...listHomeRows, ...collectionHomeRows, ...pinnedRows, ...arabicRows, ...russianRows],
-      after: [
-        ...personalRows,
-        ...traktRows,
-        ...simklRows,
-        ...letterboxdRows,
-        ...animeRows,
+      before: [
+        ...listHomeRows,
+        ...collectionHomeRows,
+        ...pinnedRows,
+        ...arabicRows,
+        ...russianRows,
       ],
+      after: [...personalRows, ...traktRows, ...simklRows, ...letterboxdRows, ...animeRows],
     }),
     [
       listHomeRows,

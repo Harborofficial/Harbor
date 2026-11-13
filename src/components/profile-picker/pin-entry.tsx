@@ -89,7 +89,8 @@ export function PinEntry({
         if (isOk) {
           await onComplete(pin);
         } else {
-          const errMessage = (typeof result === "object" && result?.message) ? result.message : t("Wrong PIN");
+          const errMessage =
+            typeof result === "object" && result?.message ? result.message : t("Wrong PIN");
           setError(errMessage);
           if (inputRef.current) inputRef.current.value = "";
           setPin("");
@@ -148,8 +149,7 @@ export function PinEntry({
     focus();
   };
 
-  const displayTitle =
-    mode === "set" && stage === "confirm" ? t("Confirm your PIN") : title;
+  const displayTitle = mode === "set" && stage === "confirm" ? t("Confirm your PIN") : title;
   const displaySub =
     mode === "set" && stage === "confirm" ? t("Type the same 4-digit PIN again.") : subtitle;
 

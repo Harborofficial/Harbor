@@ -99,9 +99,11 @@ const coverage: Record<string, string> = {
   "Reveal comments": "Pokaż komentarze",
   "Comments are hidden": "Komentarze są ukryte",
   "Hosted elsewhere": "Hostowane gdzie indziej",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "Te plany prowadzi podmiot zewnętrzny. Harbor nie jest z nim powiązany i nic nie otrzymuje za rejestrację. Aktualne ceny i warunki są na ich stronie.",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "Te plany prowadzi podmiot zewnętrzny. Harbor nie jest z nim powiązany i nic nie otrzymuje za rejestrację. Aktualne ceny i warunki są na ich stronie.",
   "{name} can run on a hosted instance": "{name} może działać na hostowanej instancji",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "Prowadzi to podmiot zewnętrzny. Harbor nie jest z nim powiązany, nie odsprzedaje usługi i nic nie otrzymuje, jeśli się zapiszesz. Cena i zakres są na ich stronie.",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "Prowadzi to podmiot zewnętrzny. Harbor nie jest z nim powiązany, nie odsprzedaje usługi i nic nie otrzymuje, jeśli się zapiszesz. Cena i zakres są na ich stronie.",
   "Show comments": "Pokaż komentarze",
   "Hide comments": "Ukryj komentarze",
   "You haven't commented yet": "Nie masz jeszcze żadnych komentarzy",

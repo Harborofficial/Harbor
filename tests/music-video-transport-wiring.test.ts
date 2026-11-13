@@ -39,13 +39,66 @@ function loadPlayer() {
         invoke: async (command: string, args: any) => {
           calls.push({ command, args });
           if (command === "music_db_init")
-            return { likedIds: [], likedTracks: [], recents: [], queue: [one, two] };
+            return { likedIds: [], likedTracks: [], recents: [one], queue: [one, two] };
           if (command === "music_source_candidates") return [];
           return undefined;
         },
       };
     if (name === "@tauri-apps/api/event") return { listen: async () => () => {} };
     if (name === "react") return { useSyncExternalStore: () => undefined };
+    if (name === "./source-version")
+      return { compatibleVocalVersion: () => true, shouldResolvePreferredSource: () => false };
+    if (name === "./queue-automation")
+      return {
+        cancelMusicQueueAutomation: () => false,
+        markMusicQueueAutomationStarted: () => {},
+        ownsMusicQueueAutomation: () => false,
+      };
+    if (name === "@/lib/active-profile-id")
+      return { activeProfileId: () => "default", activeProfileIsPrimary: () => true };
+    if (name === "./listening-affinity")
+      return { hydrateListeningAffinity: async () => {}, observeMusicListening: () => {} };
+    if (name === "./artist-blocks")
+      return {
+        filterBlockedTracks: (tracks: unknown) => tracks,
+        hydrateArtistBlockStore: async () => {},
+      };
+    if (name === "./liked-artists") return { hydrateLikedArtistStore: async () => {} };
+    if (name === "./decks") return { engineSnapshot: async () => null };
+    if (name === "./queue-source")
+      return { adoptRequestedIdentity: (identity: unknown) => identity };
+    if (name === "./spotify-startup")
+      return {
+        shouldReportSpotifyStartupTimeout: () => false,
+        SPOTIFY_STARTUP_TIMEOUT_MESSAGE: "Spotify playback timed out.",
+        SPOTIFY_STARTUP_TIMEOUT_MS: 35_000,
+      };
+    if (name === "./explicit-preference")
+      return { explicitnessOf: () => 0, rankByExplicitness: (list: unknown[]) => list };
+    if (name === "./pinned-sources")
+      return {
+        loadPinnedSources: () => {},
+        peekPinnedSource: () => null,
+        pinSourceFor: () => {},
+        unpinSourceFor: () => {},
+      };
+    if (name === "./transport")
+      return {
+        getMusicTransport: () => ({ shuffle: false, repeat: "off" }),
+        musicAdvance: (queue: any[], index: number) => queue[index + 1] ?? null,
+        musicPrevious: () => null,
+        musicWarmTargets: () => [],
+        resetMusicOrder: () => {},
+        setMusicPriorityNext: () => {},
+      };
+    if (name === "./recent-context")
+      return {
+        hydrateMusicContextTracks: async () => {},
+        hydrateMusicRecentContexts: async () => {},
+      };
+    if (name === "./recent-destinations") return { hydrateMusicDestinations: async () => {} };
+    if (name === "./pinned-playlists") return { hydratePinnedMusicPlaylists: async () => {} };
+    if (name === "@/lib/platform") return { isWindowsDesktop: () => false };
     if (name === "./queue-order")
       return { queueTrackKey: (track: any) => `${track.connectorId}:${track.id}` };
     if (name === "./liked")
@@ -68,9 +121,15 @@ function loadPlayer() {
         insertIntoQueue: (q: any[], t: any, at: number) => [...q.slice(0, at), t, ...q.slice(at)],
         markManuallyQueued: () => {},
         queueInsertIndex: (q: any[], i: number) => (i < 0 ? 0 : i + 1),
+        queueInsertAfterManualBlock: () => 0,
+        withTrackNext: (q: any[]) => q,
       };
     if (name === "./preferences")
-      return { readMusicPreference: () => null, writeMusicPreference: () => {} };
+      return {
+        readMusicPreference: () => null,
+        readStoredMusicPreference: () => null,
+        writeMusicPreference: () => {},
+      };
     if (name === "./audio-settings")
       return {
         clampMusicVolume: (value: number) => value,
@@ -86,18 +145,27 @@ function loadPlayer() {
       };
     if (name === "./hidden-recents") return { unhideMusicRecent: () => {} };
     if (name === "./playback-origin")
-      return { getMusicPlaybackOrigin: () => null, restoreMusicPlaybackOrigin: () => {} };
+      return {
+        beginMusicQueue: () => {},
+        getMusicPlaybackOrigin: () => null,
+        restoreMusicPlaybackOrigin: () => {},
+      };
     if (name === "@/lib/cast-ownership") return { stopCastOwner: () => {} };
     if (name === "./track-identity") return { dedupeMusicTracks, sameMusicTrack };
     if (name === "./deck-sync")
       return {
         answerDeckRequests: () => () => {},
         broadcastDeckState: () => {},
+        isDeckWindow: () => false,
         sendDeckAdopted: () => {},
+        sendDeckCommand: () => {},
         serveDeckCommands: () => () => {},
       };
     if (name === "./deck-primary")
-      return { createDeckAdoption: () => ({ deck: () => 0, adopt: () => false }) };
+      return {
+        createDeckAdoption: () => ({ deck: () => 0, adopt: () => false }),
+        nativePlaybackAdoption: () => null,
+      };
     if (name === "./casting")
       return {
         getMusicSpeakerState: () => ({ active: false, device: null, positionSec: 0 }),

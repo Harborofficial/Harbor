@@ -47,7 +47,11 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
   const liveThemeRef = useRef(settings.theme);
   liveThemeRef.current = settings.theme;
   const [popoutTab, setPopoutTab] = useState<CodeLang | null>(null);
-  const { inspectorHidden, setInspectorHidden } = useStudioPreview(draft.layout, draft.bokeh, draft.navCustomization);
+  const { inspectorHidden, setInspectorHidden } = useStudioPreview(
+    draft.layout,
+    draft.bokeh,
+    draft.navCustomization,
+  );
   const [initialJson] = useState(() => JSON.stringify(initialDraft));
   const [confirmClose, setConfirmClose] = useState(false);
   const minimizeRef = useRef<HTMLButtonElement>(null);
@@ -301,11 +305,14 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
   };
 
   return createPortal(
-    <div
-      className="pointer-events-none fixed inset-0 z-[210]"
-    >
+    <div className="pointer-events-none fixed inset-0 z-[210]">
       {!inspectorHidden && (
-        <StudioShell cardRef={drag.ref} position={drag.position} dragging={drag.dragging}>
+        <StudioShell
+          cardRef={drag.ref}
+          position={drag.position}
+          dragging={drag.dragging}
+          onClose={requestClose}
+        >
           <StudioHeader
             name={trimmedName}
             minimizeRef={minimizeRef}

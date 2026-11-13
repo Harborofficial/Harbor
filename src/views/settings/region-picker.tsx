@@ -110,7 +110,9 @@ export function RegionPicker({
     }
     const dir = getDirection(e.nativeEvent);
     if (dir !== "up" && dir !== "down") return;
-    const items = Array.from(listRef.current?.querySelectorAll<HTMLElement>('[role="option"]') ?? []);
+    const items = Array.from(
+      listRef.current?.querySelectorAll<HTMLElement>('[role="option"]') ?? [],
+    );
     if (!items.length) return;
     e.preventDefault();
     const from = items.indexOf(e.target as HTMLElement);
@@ -149,9 +151,7 @@ export function RegionPicker({
       >
         <FlagChip code={currentCode} size={36} />
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="harbor-settings-label">
-            {t("Region")}
-          </span>
+          <span className="harbor-settings-label">{t("Region")}</span>
           <span className="truncate text-[16.5px] font-medium leading-[24px] text-ink">
             {current ? t(current.label) : value}
           </span>
@@ -233,7 +233,9 @@ export function RegionPicker({
                     <span className="shrink-0 font-mono text-[13px] font-bold tracking-[0.72px] text-ink-subtle">
                       {r.code}
                     </span>
-                    {selected && <Check size={18} strokeWidth={2.4} className="ms-1 shrink-0 text-ink" />}
+                    {selected && (
+                      <Check size={18} strokeWidth={2.4} className="ms-1 shrink-0 text-ink" />
+                    )}
                   </button>
                 );
               })

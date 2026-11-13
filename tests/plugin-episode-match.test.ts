@@ -59,10 +59,7 @@ test("a provider that numbers nothing at all is still reached", () => {
 
 test("a season that is missing its own numbering still falls back rather than going empty", () => {
   // The provider numbers season 1 but leaves season 2's episodes without a season.
-  const partial = media([
-    ep("s1e1", 1, 1, "Episode 1"),
-    ep("s2e1", null, 1, "Episode 1"),
-  ]);
+  const partial = media([ep("s1e1", 1, 1, "Episode 1"), ep("s2e1", null, 1, "Episode 1")]);
   assert.deepEqual(pickEpisodes(partial, req({ season: 2, episode: 1 })), ["s2e1"]);
   assert.deepEqual(pickEpisodes(partial, req({ season: 1, episode: 1 })), ["s1e1"]);
 });

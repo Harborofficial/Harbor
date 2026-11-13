@@ -11,14 +11,22 @@ const SUBTITLE = /[:;(–—]/;
 export function normalizeBookTitle(value: string): string {
   const base = value.toLowerCase().normalize("NFKD").replace(MARKS, "").replace(QUOTES, "");
   const head = base.split(SUBTITLE)[0] ?? base;
-  return head.replace(STOP, " ").replace(/[^a-z0-9]+/g, " ").trim();
+  return head
+    .replace(STOP, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function surnames(values: string[]): Set<string> {
   const out = new Set<string>();
   for (const value of values) {
     for (const part of value.split(/,|\band\b|&/)) {
-      const words = part.trim().toLowerCase().replace(/[^a-z\s]/g, "").split(/\s+/).filter(Boolean);
+      const words = part
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z\s]/g, "")
+        .split(/\s+/)
+        .filter(Boolean);
       const last = words[words.length - 1];
       if (last && last.length > 2) out.add(last);
     }

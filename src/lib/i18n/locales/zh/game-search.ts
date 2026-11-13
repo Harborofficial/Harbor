@@ -11,7 +11,8 @@ export default {
   "games.searchUi.aiHint": "准备好后按 Enter。所选筛选条件也适用于 AI 结果。",
   "games.searchUi.thinking": "正在寻找游戏并在 Steam 中核对…",
   "games.searchUi.verified": "{count} 个 Steam 匹配结果 · AI 建议",
-  "games.searchUi.noAiResults": "当前筛选条件下没有已核实的 Steam 匹配结果。请调整描述或减少筛选条件。",
+  "games.searchUi.noAiResults":
+    "当前筛选条件下没有已核实的 Steam 匹配结果。请调整描述或减少筛选条件。",
   "games.searchUi.random": "随机游戏",
   "games.searchUi.randomHint": "随机选择符合当前搜索和筛选条件的游戏。",
   "games.searchUi.picking": "正在选择…",
@@ -21,5 +22,5 @@ export default {
   "games.searchUi.sources": "Steam + IGDB · 电脑游戏、主机游戏和 ROM 改版。",
   "games.searchUi.steamScope": "这些筛选条件或排序方式使用 Steam 数据。",
   "games.searchUi.allCatalogs": "搜索所有目录",
-  "games.searchUi.partial": "部分结果暂时无法获取：{providers}。"
+  "games.searchUi.partial": "部分结果暂时无法获取：{providers}。",
 };

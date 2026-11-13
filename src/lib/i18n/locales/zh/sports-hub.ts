@@ -168,7 +168,7 @@ export default {
   "Show all {count}": "显示全部 {count} 人",
   "{count} competing": "{count} 人参赛",
   "Starting field": "发车名单",
-  "Leaderboard": "排行榜",
+  Leaderboard: "排行榜",
   "Full field": "全部参赛者",
   "Loading event schedule…": "正在加载赛事日程…",
   "Loading lineups…": "正在加载阵容…",

@@ -23,6 +23,12 @@ function deferred() {
   return { promise, resolve };
 }
 
+// These panel tests drive async retries; a fixed sleep flakes when the runner is busy.
+async function until(ready, timeout = 3000) {
+  const deadline = Date.now() + timeout;
+  while (!ready() && Date.now() < deadline) await new Promise((r) => setTimeout(r, 10));
+}
+
 function fixture({
   storage = new Map(),
   blockNames = false,
@@ -637,7 +643,11 @@ test("anime falls back to an available order if the requested order is empty", a
   const panel = panelFixture(f, availability, "dvd");
   const cleanup = panel.run();
   try {
-    await new Promise((r) => setTimeout(r, 20));
+    await until(
+      () =>
+        panel.updates.find((u) => u.index === 3)?.value === "aired" &&
+        panel.updates.find((u) => u.index === 1)?.value?.bySeason.size > 0,
+    );
     assert.equal(panel.updates.find((u) => u.index === 3).value, "aired");
     assert.ok(panel.updates.find((u) => u.index === 1).value.bySeason.size > 0);
   } finally {
@@ -656,7 +666,7 @@ test("anime retries a requested order confirmed available after a transient fail
   const panel = panelFixture(f, availability),
     cleanup = panel.run();
   try {
-    await new Promise((r) => setTimeout(r, 20));
+    await until(() => attempts >= 2 && panel.updates.some((u) => u.index === 1 && u.value));
     assert.equal(attempts, 2);
     assert.ok(panel.updates.some((u) => u.index === 1 && u.value));
   } finally {

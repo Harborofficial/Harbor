@@ -86,6 +86,15 @@ function harness() {
           }
           if (name.endsWith("/addon-store")) return { fetchManifestAt: async () => null };
           if (name === "@/lib/feed/external-cw") return { removeExternalCwItem: () => {} };
+          if (name === "@/lib/settings/load")
+            return {
+              loadStoredSettings: () => ({
+                cwClearProviderProgress: false,
+                cwSources: { trakt: false, simkl: false, publicmetadb: false },
+              }),
+            };
+          if (name === "./cw-provider-dismiss" || name === "@/lib/cw-provider-dismiss")
+            return { clearProviderPlayback: async () => ({ failed: [] }) };
           if (name.startsWith("@tauri-apps/"))
             return { invoke: async () => {}, isTauri: () => false };
           if (name.startsWith("@noble/hashes/"))

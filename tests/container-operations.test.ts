@@ -49,7 +49,8 @@ test("rename and delete preserve unaffected containers and metadata", () => {
   assert.equal(JSON.parse(values.get(key)!)[0].items[0].keep, true);
   assert.equal(run({ mode: "delete" }).status, "removed");
   assert.deepEqual(JSON.parse(values.get(key)!), [{ id: "two", name: "Two", items: [] }]);
-  assert.equal(writes, 2);
+  // Each mutation writes the source and its durable mirror.
+  assert.equal(writes, 4);
 });
 test("container mutations reject failures, stale snapshot, and stale profile without data loss", () => {
   const before = values.get(key);

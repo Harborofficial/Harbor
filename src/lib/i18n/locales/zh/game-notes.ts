@@ -28,5 +28,5 @@ export default {
   "games.notes.export": "导出备份",
   "games.notes.unsaved": "未保存的更改",
   "games.notes.local": "保存在此Harbor个人资料中",
-  "games.notes.importGuide": "复制到我的笔记"
+  "games.notes.importGuide": "复制到我的笔记",
 };

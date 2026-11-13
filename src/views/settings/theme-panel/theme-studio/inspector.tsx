@@ -131,7 +131,9 @@ export function Inspector({
               <StudioSection title={t("Surfaces")}>
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2">
-                    <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{t("Cards")}</span>
+                    <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">
+                      {t("Cards")}
+                    </span>
                     <StylePicker
                       kind="card"
                       value={draft.cardStyle}
@@ -140,7 +142,9 @@ export function Inspector({
                     />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{t("Buttons")}</span>
+                    <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">
+                      {t("Buttons")}
+                    </span>
                     <StylePicker
                       kind="button"
                       value={draft.buttonStyle}
@@ -198,7 +202,11 @@ export function Inspector({
                     />
                   }
                 >
-                  <NavEditor layout={draft.layout} value={draft.navCustomization} onChange={(navCustomization) => onPatch({ navCustomization })} />
+                  <NavEditor
+                    layout={draft.layout}
+                    value={draft.navCustomization}
+                    onChange={(navCustomization) => onPatch({ navCustomization })}
+                  />
                 </StudioSection>
               )}
             </div>

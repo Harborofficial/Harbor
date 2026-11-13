@@ -3,7 +3,7 @@ export default {
   "Most liked": "Paling disukai",
   "Most recent": "Terbaru",
   "Lowest rated": "Rating terendah",
-  "Longest": "Terpanjang",
+  Longest: "Terpanjang",
   "Sort reviews": "Urutkan ulasan",
   "Episode reviews": "Ulasan episode",
   "Gathering reviews from IMDb and Trakt…": "Mengumpulkan ulasan dari IMDb dan Trakt…",
@@ -13,12 +13,15 @@ export default {
   "Translate reviews to": "Terjemahkan ulasan ke",
   "Translate all": "Terjemahkan semua",
   "Show original": "Tampilkan asli",
-  "Translate": "Terjemahkan",
+  Translate: "Terjemahkan",
   "In {language}": "Dalam {language}",
   "No reviews in {language} here.": "Tidak ada ulasan dalam {language} di sini.",
-  "{n} reviews couldn't be translated. Try again.": "{n} ulasan tidak dapat diterjemahkan. Coba lagi.",
+  "{n} reviews couldn't be translated. Try again.":
+    "{n} ulasan tidak dapat diterjemahkan. Coba lagi.",
   "Couldn't translate. Try again": "Gagal menerjemahkan. Coba lagi",
-  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.": "Beberapa ulasan terbaru tidak dapat dimuat, jadi ulasan cadangan ditampilkan setelah hasil terbaru.",
-  "Letterboxd didn't share review dates right now, so these are shown by popularity.": "Letterboxd sedang tidak memberikan tanggal ulasan, jadi ulasan diurutkan menurut popularitas.",
+  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.":
+    "Beberapa ulasan terbaru tidak dapat dimuat, jadi ulasan cadangan ditampilkan setelah hasil terbaru.",
+  "Letterboxd didn't share review dates right now, so these are shown by popularity.":
+    "Letterboxd sedang tidak memberikan tanggal ulasan, jadi ulasan diurutkan menurut popularitas.",
   "Reviewers' average: {rating}": "Rata-rata pengulas: {rating}",
 } as Record<string, string>;

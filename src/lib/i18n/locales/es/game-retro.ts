@@ -6,10 +6,13 @@ export default {
   "games.retro.keyboardOnly": "Teclado listo · pulsa un botón del mando para conectar",
   "games.retro.resetControls": "Restablecer controles",
   "games.retro.controlsSaved": "Guardado para este perfil y sistema",
-  "games.retro.pressKey": "Pulsa una tecla. Esc cancela. F1, F2 y F4 están reservadas para el reproductor.",
+  "games.retro.pressKey":
+    "Pulsa una tecla. Esc cancela. F1, F2 y F4 están reservadas para el reproductor.",
   "games.retro.pressButton": "Pulsa un botón del mando o mueve una palanca.",
-  "games.retro.disconnected": "Mando desconectado. Vuelve a conectarlo y continúa cuando estés listo.",
-  "games.retro.controlsSaveFailed": "Los controles funcionan en esta sesión, pero no se pudieron guardar.",
+  "games.retro.disconnected":
+    "Mando desconectado. Vuelve a conectarlo y continúa cuando estés listo.",
+  "games.retro.controlsSaveFailed":
+    "Los controles funcionan en esta sesión, pero no se pudieron guardar.",
   "games.retro.menuChord": "Select + Start: menú",
   "games.retro.pause": "Pausa",
   "games.retro.resume": "Continuar",
@@ -18,7 +21,8 @@ export default {
   "games.retro.controls": "Controles",
   "games.retro.saveExit": "Guardar y salir",
   "games.retro.popout": "Ventana aparte",
-  "games.retro.dock": "Volver a Harbor",  "games.retro.mute": "Silenciar",
+  "games.retro.dock": "Volver a Harbor",
+  "games.retro.mute": "Silenciar",
   "games.retro.unmute": "Activar sonido",
   "games.retro.volume": "Volumen",
   "games.retro.picture": "Imagen",
@@ -27,7 +31,8 @@ export default {
   "games.retro.fullscreen": "Pantalla completa",
   "games.retro.exitFullscreen": "Salir de pantalla completa",
   "games.retro.playInside": "Jugar en Harbor",
-  "games.retro.setup": "Instala una vez el reproductor de {system} para jugar aquí. Tu juego se queda en este dispositivo.",
+  "games.retro.setup":
+    "Instala una vez el reproductor de {system} para jugar aquí. Tu juego se queda en este dispositivo.",
   "games.retro.install": "Instalar y jugar · {size} MB",
   "games.retro.runtime": "EmulatorJS {version} · una descarga, disponible sin conexión",
   "games.retro.aboutRuntime": "Código fuente y licencias",

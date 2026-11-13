@@ -137,7 +137,9 @@ export function MusicDetail({
     setSearchOpen(false);
     searchTrigger.current?.focus({ preventScroll: true });
   };
-  useEffect(() => { setSearchOpen(false); }, [detail.item.id, detail.item.connectorId]);
+  useEffect(() => {
+    setSearchOpen(false);
+  }, [detail.item.id, detail.item.connectorId]);
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
   }, [detail.item.id]);
@@ -222,16 +224,25 @@ export function MusicDetail({
   );
   const trackControls = (
     <div className="music-detail-track-controls">
-      <div className="music-detail-filter" data-expanded={searchExpanded || undefined}
+      <div
+        className="music-detail-filter"
+        data-expanded={searchExpanded || undefined}
         onBlur={(event) => {
           if (!query && !event.currentTarget.contains(event.relatedTarget)) setSearchOpen(false);
-        }}>
-        <button ref={searchTrigger} type="button" className="music-detail-search-trigger"
-          aria-label={t("music.filter.tracks")} aria-expanded={searchExpanded} aria-controls={searchId}
+        }}
+      >
+        <button
+          ref={searchTrigger}
+          type="button"
+          className="music-detail-search-trigger"
+          aria-label={t("music.filter.tracks")}
+          aria-expanded={searchExpanded}
+          aria-controls={searchId}
           onClick={() => {
             setSearchOpen(true);
             requestAnimationFrame(() => searchInput.current?.focus({ preventScroll: true }));
-          }}>
+          }}
+        >
           <Search size={19} aria-hidden />
         </button>
         <div className="music-detail-search-field" inert={!searchExpanded}>
@@ -411,20 +422,44 @@ export function MusicDetail({
                     {item.kind === "track" && (
                       <>
                         <HoverTooltip label={t("music.card.addToQueue")} side="top" align="center">
-                          <button type="button" className="music-collection-extra"
-                            aria-label={t("music.card.addToQueue")} onClick={() => { enqueueMusic(item); queued.confirm(); }}>
-                            <MusicActionGlyph state={queued.confirmed ? "done" : "idle"} idle={<ListPlus size={26} />} size={26} identity={item.id} />
+                          <button
+                            type="button"
+                            className="music-collection-extra"
+                            aria-label={t("music.card.addToQueue")}
+                            onClick={() => {
+                              enqueueMusic(item);
+                              queued.confirm();
+                            }}
+                          >
+                            <MusicActionGlyph
+                              state={queued.confirmed ? "done" : "idle"}
+                              idle={<ListPlus size={26} />}
+                              size={26}
+                              identity={item.id}
+                            />
                           </button>
                         </HoverTooltip>
-                        <HoverTooltip label={t("music.card.addToPlaylist")} side="top" align="center">
-                          <button type="button" className="music-collection-extra"
-                            aria-label={t("music.card.addToPlaylist")} onClick={() => openPlaylistPicker(item)}>
+                        <HoverTooltip
+                          label={t("music.card.addToPlaylist")}
+                          side="top"
+                          align="center"
+                        >
+                          <button
+                            type="button"
+                            className="music-collection-extra"
+                            aria-label={t("music.card.addToPlaylist")}
+                            onClick={() => openPlaylistPicker(item)}
+                          >
                             <Plus size={26} aria-hidden />
                           </button>
                         </HoverTooltip>
                         <HoverTooltip label={t("music.ytm.title")} side="top" align="center">
-                          <button type="button" className="music-collection-extra"
-                            aria-label={t("music.ytm.title")} onClick={() => onWatch(item)}>
+                          <button
+                            type="button"
+                            className="music-collection-extra"
+                            aria-label={t("music.ytm.title")}
+                            onClick={() => onWatch(item)}
+                          >
                             <Video size={26} aria-hidden />
                           </button>
                         </HoverTooltip>
@@ -489,7 +524,9 @@ export function MusicDetail({
           {showTracks && tracks.length > 1 && trackControls}
         </div>
       )}
-      {item.kind === "playlist" && <MusicPlaylistToolbar controller={collection} loading={loading} />}
+      {item.kind === "playlist" && (
+        <MusicPlaylistToolbar controller={collection} loading={loading} />
+      )}
       {item.kind !== "playlist" && showTracks && tracks.length > 1 && (
         <div className="music-detail-toolbar">
           <h2>
@@ -519,9 +556,17 @@ export function MusicDetail({
           </button>
         </div>
       ) : item.kind === "playlist" ? (
-        <LibraryTrackList title="" subtitle="" showControls={false} tracks={filtered} view={collection.filters.view}
-          likedIds={player.likedIds} selectedPlaylist={null} onPlay={onPlay}
-          emptyCopy={t(collection.active ? "music.searchEmpty" : "music.row.emptyRow")} />
+        <LibraryTrackList
+          title=""
+          subtitle=""
+          showControls={false}
+          tracks={filtered}
+          view={collection.filters.view}
+          likedIds={player.likedIds}
+          selectedPlaylist={null}
+          onPlay={onPlay}
+          emptyCopy={t(collection.active ? "music.searchEmpty" : "music.row.emptyRow")}
+        />
       ) : !showTracks ? null : shownTracks.length ? (
         <div className="music-detail-track-list">
           {shownTracks.map((track, index) => (

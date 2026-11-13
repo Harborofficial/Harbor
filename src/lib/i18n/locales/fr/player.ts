@@ -359,7 +359,7 @@ const player: Record<string, string> = {
   "{word} {n}s · hold for options": "{word} {n} s · maintenez pour afficher les options",
   "Search audio language": "Rechercher une langue audio",
   "No audio track in that language.": "Aucune piste audio dans cette langue.",
-  "Clear": "Effacer",
+  Clear: "Effacer",
   "Show keyboard shortcuts": "Afficher les raccourcis clavier",
   "Show or hide the list of player shortcuts.":
     "Affiche ou masque la liste des raccourcis du lecteur.",

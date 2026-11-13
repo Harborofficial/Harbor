@@ -452,8 +452,14 @@ pub fn move_window_to_monitor(
     window: &tauri::WebviewWindow,
     resolved: &ResolvedMonitorTarget,
 ) -> Result<(), String> {
-    // Unmaximize first: SetWindowPos position is ignored while maximized, and the
-    // window-state plugin restores MAXIMIZED at launch.
+    // Moving for playback/display selection is temporary; don't persist its
+    // full-display dimensions as the user's normal window placement.
+    #[cfg(windows)]
+    {
+        use tauri::Manager;
+        crate::window_placement::pause_for_transition(window.app_handle(), true);
+    }
+    // Unmaximize first: SetWindowPos position is ignored while maximized.
     let _ = window.unmaximize();
     let _ = window.set_fullscreen(false);
     window

@@ -120,11 +120,7 @@ export function isSafeProviderSubtitleUrl(rawUrl: string): boolean {
 export function isLocalAddonSubtitleUrl(rawUrl: string, addonBase: string): boolean {
   try {
     const url = new URL(rawUrl);
-    if (
-      (url.protocol !== "https:" && url.protocol !== "http:") ||
-      url.username ||
-      url.password
-    ) {
+    if ((url.protocol !== "https:" && url.protocol !== "http:") || url.username || url.password) {
       return false;
     }
     const base = new URL(addonBase);
@@ -149,7 +145,7 @@ function loopbackAlias(hostname: string): boolean {
   if (v6) {
     if (v6.slice(0, 7).every((part) => part === 0) && v6[7] <= 1) return true;
     const mapped = v6.slice(0, 5).every((part) => part === 0) && v6[5] === 0xffff;
-    if (mapped) return (v6[6] >> 8) === 127;
+    if (mapped) return v6[6] >> 8 === 127;
   }
   return false;
 }

@@ -3,6 +3,7 @@ fn batch_args(f: &Fixture, s: &Server, names: &[&str]) -> NewBatch {
         profile: "one".into(), directory: f.0.to_string_lossy().into_owned(),
         files: names.iter().map(|name| batch::BatchFile {
             source_link: None,
+            torbox_origin: None,
             browser_ticket: None,
             filename: (*name).into(), name: (*name).into(), game: None, url: format!("{}/fast", s.url),
             expected_bytes: Some(s.data.len() as u64), expected_sha256: Some(s.hash()),

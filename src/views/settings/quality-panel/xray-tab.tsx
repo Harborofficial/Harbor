@@ -11,18 +11,24 @@ export function XrayTab() {
   return (
     <Section
       title={t("X-Ray (experimental)")}
-      subtitle={t("Open the cast while you watch and tap anyone for their bio and other titles. You can also enable on-device face matching to show who is on screen. Off by default.")}
+      subtitle={t(
+        "Open the cast while you watch and tap anyone for their bio and other titles. You can also enable on-device face matching to show who is on screen. Off by default.",
+      )}
     >
       <ToggleRow
         label={t("Enable X-Ray")}
-        sub={t("Adds an X-Ray button in the player to see the full cast with photos and tap through to any actor. Needs a TMDB key for photos and filmographies.")}
+        sub={t(
+          "Adds an X-Ray button in the player to see the full cast with photos and tap through to any actor. Needs a TMDB key for photos and filmographies.",
+        )}
         value={settings.xrayEnabled}
         onChange={(v) => update({ xrayEnabled: v })}
       />
       {settings.xrayEnabled && (
         <ToggleRow
           label={t("Scan who is on screen while playing")}
-          sub={t("Periodically match faces in the current frame against the cast to show who is on screen now. On-device, nothing leaves your machine. Uses a little more CPU while playing.")}
+          sub={t(
+            "Periodically match faces in the current frame against the cast to show who is on screen now. On-device, nothing leaves your machine. Uses a little more CPU while playing.",
+          )}
           value={settings.xrayLiveScan}
           onChange={(v) => update({ xrayLiveScan: v })}
           warn={
@@ -37,7 +43,9 @@ export function XrayTab() {
       {settings.xrayEnabled && !settings.tmdbKey.trim() && (
         <SettingRow
           label={t("X-Ray needs a TMDB key")}
-          warn={t("X-Ray reads the cast and their photos from TMDB. Without a TMDB key there is no cast to match against. Add your free key under Library & metadata.")}
+          warn={t(
+            "X-Ray reads the cast and their photos from TMDB. Without a TMDB key there is no cast to match against. Add your free key under Library & metadata.",
+          )}
         >
           <button
             type="button"

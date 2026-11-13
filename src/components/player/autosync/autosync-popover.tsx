@@ -12,6 +12,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { openSyncBar } from "@/lib/player/sub-sync";
 import { useAsrModelProgress } from "@/lib/subtitles/autosync/asr-model-progress";
+import { moonshineLanguageName } from "@/lib/subtitles/autosync/moonshine-models";
 import type { AutoSyncHandle } from "@/views/player/hooks/use-auto-sync";
 import type { PipelineOutcome } from "@/lib/subtitles/autosync/pipeline";
 import type { SyncTransform } from "@/lib/subtitles/autosync/fp-gate";
@@ -222,6 +223,9 @@ export function AutosyncPopover({ handle }: { handle: AutoSyncHandle }) {
               t={t}
               phase={phase}
               reason={handle.reason}
+              moonshineModelRequest={handle.moonshineModelRequest ?? null}
+              onMoonshineDownload={() => void handle.downloadMoonshineModel?.()}
+              onMoonshineDismiss={() => handle.dismissMoonshineModel?.()}
               unverifiedAudio={handle.offer?.decision.bindingRule === "consensus-audio-unverified"}
               embeddedReferenceOnly={
                 handle.offer?.decision.bindingRule === "embedded-text-reference"
@@ -297,9 +301,12 @@ function Lead({ phase }: { phase: Phase }) {
 }
 
 function Body(props: {
-  t: (s: string) => string;
+  t: ReturnType<typeof useT>;
   phase: Phase;
   reason: string | null;
+  moonshineModelRequest: NonNullable<AutoSyncHandle["moonshineModelRequest"]> | null;
+  onMoonshineDownload: () => void;
+  onMoonshineDismiss: () => void;
   unverifiedAudio: boolean;
   embeddedReferenceOnly: boolean;
   localReferenceOnly: boolean;
@@ -315,6 +322,42 @@ function Body(props: {
   onKeep: () => void;
 }) {
   const { t, phase, reason, correction, thumb, acting } = props;
+
+  if ((phase === "error" || phase === "declined") && props.moonshineModelRequest) {
+    const model = props.moonshineModelRequest;
+    const language = moonshineLanguageName(model.language);
+    return (
+      <div className="flex flex-col gap-2 pe-6">
+        <p className="text-[13px] font-semibold text-ink">
+          {t("Download a Moonshine language model?")}
+        </p>
+        <p className="text-[12px] leading-snug text-ink-muted">
+          {model.source === "audio-track"
+            ? t("The selected audio track is labeled")
+            : t("Moonshine's manual language override is set to")}{" "}
+          <strong>{language}</strong>.{" "}
+          {t(
+            "Silero can still sync without it. This model downloads only if you approve. If the audio language is wrong, change Moonshine's override in Settings.",
+          )}
+        </p>
+        {model.error && (
+          <p role="alert" className="text-[12px] text-danger">
+            {model.error}
+          </p>
+        )}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <PrimaryBtn
+            icon={<Wand2 size={14} strokeWidth={2.2} />}
+            label={t("Download {language} model", { language })}
+            onClick={props.onMoonshineDownload}
+            busy={model.downloading}
+          />
+          <GhostBtn label={t("Not now")} onClick={props.onMoonshineDismiss} />
+          <GhostBtn label={t("Sync manually")} onClick={props.onManual} />
+        </div>
+      </div>
+    );
+  }
 
   if (phase === "synced") {
     if (thumb === "up") {

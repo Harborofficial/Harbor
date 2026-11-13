@@ -191,7 +191,8 @@ const extra: Record<string, string> = {
   Budget: "Бюджет",
   "Buffer fill": "Заполнение буфера",
   "Reveal the dot on hover": "Показывать точку при наведении",
-  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.": "Точка не мешает и появляется, когда вы наводите курсор на полосу. Отключите, чтобы она была видна постоянно.",
+  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.":
+    "Точка не мешает и появляется, когда вы наводите курсор на полосу. Отключите, чтобы она была видна постоянно.",
   "Buffer fill brightness": "Яркость заполнения буфера",
   Buffering: "Буферизация",
   Build: "Сборка",
@@ -248,7 +249,8 @@ const extra: Record<string, string> = {
     "Подключите debrid-сервис (Real-Debrid, TorBox, AllDebrid), чтобы смотреть в HD сразу и без ожидания.",
   "Connect MyAnimeList": "Подключить MyAnimeList",
   "Connect your MyAnimeList account": "Подключите аккаунт MyAnimeList",
-  "Connect your Trakt account to leave comments and reviews.": "Подключите аккаунт Trakt, чтобы оставлять комментарии и отзывы.",
+  "Connect your Trakt account to leave comments and reviews.":
+    "Подключите аккаунт Trakt, чтобы оставлять комментарии и отзывы.",
   "Connected as {username}": "Подключено как {username}",
   "Connected as @{user}": "Подключено как @{user}",
   "Connected as @{username}": "Подключено как @{username}",
@@ -265,7 +267,8 @@ const extra: Record<string, string> = {
   "Continue from last watched": "Продолжить с последнего просмотренного",
   "Continue in your browser...": "Продолжите в браузере...",
   "Copy diagnostics": "Копировать диагностику",
-  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.": "«Копировать диагностику» собирает состояние движка и ваши настройки P2P в JSON, удобно вставить в отчёт об ошибке. В папке движка хранятся кэш DHT (dht.json) и данные активных передач.",
+  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.":
+    "«Копировать диагностику» собирает состояние движка и ваши настройки P2P в JSON, удобно вставить в отчёт об ошибке. В папке движка хранятся кэш DHT (dht.json) и данные активных передач.",
   "Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor. Safe to run again, Trakt skips anything it already has.":
     "Скопируйте свой список к просмотру из Harbor в Trakt или загрузите список к просмотру из Trakt в Harbor. Можно запускать повторно: Trakt пропустит то, что уже есть.",
   "Corner radius": "Скругление углов",
@@ -864,7 +867,8 @@ const extra: Record<string, string> = {
   "Show the full notes for this build": "Показать полные заметки этой сборки",
   "Show the IMDb rating and synopsis on episodes across the list, grid, and panel layouts.":
     "Показывать оценку IMDb и краткое содержание у серий во всех макетах: список, сетка и панель.",
-  "Show the report button on every P2P stream, not just likely new releases.": "Показывать кнопку жалобы у каждого P2P-потока, а не только у возможных новинок.",
+  "Show the report button on every P2P stream, not just likely new releases.":
+    "Показывать кнопку жалобы у каждого P2P-потока, а не только у возможных новинок.",
   "Show the Skip button": "Показывать кнопку «Пропустить»",
   "Show title": "Показывать название",
   "Show TMDB score on cards": "Показывать оценку TMDB на карточках",

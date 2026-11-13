@@ -501,7 +501,8 @@ const catalog: Record<string, string> = {
   "Buffer fill brightness": "Kecerahan isi buffer",
   "Buffer size": "Ukuran buffer",
   Buffering: "Buffering",
-  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.": "Menyimpan seluruh file ke buffer di latar belakang saat Anda menonton, bahkan ketika dijeda, sehingga remux besar dimuat lebih awal dan Anda dapat menggeser posisi pada file yang sudah tersimpan di cache tanpa buffering ulang. Berfungsi untuk stream debrid dan P2P. Menggunakan lebih banyak ruang disk dan bandwidth; dihapus saat Anda beralih atau menutupnya.",
+  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.":
+    "Menyimpan seluruh file ke buffer di latar belakang saat Anda menonton, bahkan ketika dijeda, sehingga remux besar dimuat lebih awal dan Anda dapat menggeser posisi pada file yang sudah tersimpan di cache tanpa buffering ulang. Berfungsi untuk stream debrid dan P2P. Menggunakan lebih banyak ruang disk dan bandwidth; dihapus saat Anda beralih atau menutupnya.",
   "Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.":
     "Pelapor bug akan dicantumkan dalam catatan rilis jika laporannya menghasilkan perbaikan yang dirilis. Kosongkan agar tetap anonim.",
   "Bug reports": "Laporan bug",
@@ -912,9 +913,11 @@ const catalog: Record<string, string> = {
     "Komentar diburamkan hingga Anda menampilkannya, meskipun tidak ditandai sebagai spoiler.",
   "Comments are hidden": "Komentar disembunyikan",
   "Hosted elsewhere": "Dihosting pihak lain",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "Paket ini dijalankan pihak ketiga. Harbor tidak berafiliasi dan tidak menerima apa pun dari pendaftaran. Harga dan ketentuan terkini ada di situs mereka.",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "Paket ini dijalankan pihak ketiga. Harbor tidak berafiliasi dan tidak menerima apa pun dari pendaftaran. Harga dan ketentuan terkini ada di situs mereka.",
   "{name} can run on a hosted instance": "{name} bisa berjalan di instans terkelola",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "Layanan ini dijalankan pihak ketiga. Harbor tidak berafiliasi, tidak menjualnya kembali, dan tidak menerima apa pun jika kamu mendaftar. Harga dan isinya ada di situs mereka.",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "Layanan ini dijalankan pihak ketiga. Harbor tidak berafiliasi, tidak menjualnya kembali, dan tidak menerima apa pun jika kamu mendaftar. Harga dan isinya ada di situs mereka.",
   "Show comments": "Tampilkan komentar",
   "Hide comments": "Sembunyikan komentar",
   "Comments may take a moment to appear on Trakt":

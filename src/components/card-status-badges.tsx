@@ -13,7 +13,14 @@ const BADGE_STACKS: Record<CardLayout, { plain: string[]; ribbon: string[]; circ
   },
   tv: {
     plain: ["top-2", "top-[34px]", "top-[54px]", "top-[74px]", "top-[94px]", "top-[114px]"],
-    ribbon: ["top-[48px]", "top-[76px]", "top-[104px]", "top-[132px]", "top-[160px]", "top-[188px]"],
+    ribbon: [
+      "top-[48px]",
+      "top-[76px]",
+      "top-[104px]",
+      "top-[132px]",
+      "top-[160px]",
+      "top-[188px]",
+    ],
     circles: ["top-1.5", "top-[48px]", "top-[76px]", "top-[104px]", "top-[132px]", "top-[152px]"],
   },
 };
@@ -59,7 +66,18 @@ export function StatusBadge({
   );
 }
 
-export function CinemaBadge({ dubShift = false, ribbonShift = false, side = "start", layout = "poster" }: { dubShift?: boolean; ribbonShift?: boolean; side?: "start" | "end"; layout?: CardLayout; className?: string }) {
+export function CinemaBadge({
+  dubShift = false,
+  ribbonShift = false,
+  side = "start",
+  layout = "poster",
+}: {
+  dubShift?: boolean;
+  ribbonShift?: boolean;
+  side?: "start" | "end";
+  layout?: CardLayout;
+  className?: string;
+}) {
   const t = useT();
   return (
     <span

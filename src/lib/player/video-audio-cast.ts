@@ -311,7 +311,8 @@ export class VideoAudioCast {
           // Receiver position is coarse; only correct large drift, never claim frame-accurate sync.
           if (Math.abs(status.position_sec - (this.local?.positionSec ?? 0)) > 2)
             this.bridge?.seek(status.position_sec);
-          if (this.local?.status !== "playing") await this.bridge?.play({ preserveMuted: true, reason: "cast" });
+          if (this.local?.status !== "playing")
+            await this.bridge?.play({ preserveMuted: true, reason: "cast" });
           this.desiredPlaying = true;
         }
         this.update({ position: status.position_sec, phase: paused ? "paused" : "playing" });

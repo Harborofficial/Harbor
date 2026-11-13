@@ -14,7 +14,8 @@ export default {
   "games.discovery.steamVerdict.Positive": "Positif",
   "games.discovery.steamVerdict.Very Positive": "Sangat positif",
   "games.discovery.steamVerdict.Overwhelmingly Positive": "Sangat luar biasa positif",
-  "games.discovery.ratingNote.steam": "Persentase ulasan pemain Steam yang merekomendasikan game ini.",
+  "games.discovery.ratingNote.steam":
+    "Persentase ulasan pemain Steam yang merekomendasikan game ini.",
   "games.launchers.explore": "Jelajahi menurut launcher",
   "games.launchers.note": "Temukan game dari berbagai launcher PC.",
   "games.launchers.choose": "Pilih launcher",
@@ -59,7 +60,8 @@ export default {
   "games.recent.open": "Buka {name} dari {source}",
   "games.recent.files": "Berkas sumber",
   "games.recent.empty": "Hubungkan sumber game untuk melihat tambahan terbarunya di sini.",
-  "games.recent.undated": "Sumber Anda belum memiliki unggahan game bertanggal. Jelajahi melalui Kelola sumber.",
+  "games.recent.undated":
+    "Sumber Anda belum memiliki unggahan game bertanggal. Jelajahi melalui Kelola sumber.",
   "games.recent.adult": "Konten dewasa · gambar diburamkan",
   "games.recent.artHidden": "Gambar disembunyikan",
   "games.recent.artUnrated": "Rating konten tidak tersedia",
@@ -85,7 +87,8 @@ export default {
   "games.collectionsLive.pacmanRecord": "Pendapatan arkade, 1980–1999",
   "games.collectionsLive.wowRecord": "Puncak pelanggan berbayar",
   "games.collectionsLive.wiiRecord": "Salinan terjual di Wii",
-  "games.collectionsLive.manhuntRecord": "Gim aksi-petualangan pertama yang ditolak klasifikasinya di Inggris",
+  "games.collectionsLive.manhuntRecord":
+    "Gim aksi-petualangan pertama yang ditolak klasifikasinya di Inggris",
   "games.collectionsLive.gtaVSalesRecord": "Gim aksi-petualangan terlaris",
   "games.collectionsLive.blackOps3Record": "Gim penembak orang pertama terlaris",
   "games.collectionsLive.smashUltimateRecord": "Gim pertarungan terlaris",
@@ -111,7 +114,8 @@ export default {
   "games.collectionsLive.honorKingsRecord": "Pendapatan terbesar yang pernah diraih gim seluler",
   "games.collectionsLive.gearsBillionRecord": "Seri penembak orang ketiga pertama yang mencapainya",
   "games.collectionsLive.oldRepublicRecord": "MMORPG termahal yang pernah dibuat",
-  "games.collectionsLive.mario64AuctionRecord": "Harga tertinggi yang pernah dibayar untuk gim di lelang",
+  "games.collectionsLive.mario64AuctionRecord":
+    "Harga tertinggi yang pernah dibayar untuk gim di lelang",
   "games.collectionsLive.dotaPrizeRecord": "Hadiah esports terbesar pada masanya",
   "games.collectionsLive.ocarinaScoreRecord": "Skor kritikus tertinggi yang pernah tercatat",
   "games.collectionsLive.breathScoreRecord": "Gim dunia terbuka berperingkat tertinggi",
@@ -143,7 +147,8 @@ export default {
   "games.tournaments.schedule": "Detail resmi acara",
   "games.tournaments.watch": "Tempat menonton",
   "games.tournaments.channelsNote": "Kanal resmi. Siaran mengikuti jadwal turnamen.",
-  "games.tournaments.broadcastPending": "Detail siaran belum dikonfirmasi di sini. Periksa halaman penyelenggara.",
+  "games.tournaments.broadcastPending":
+    "Detail siaran belum dikonfirmasi di sini. Periksa halaman penyelenggara.",
   "games.tournaments.noDates": "Belum ada Major mendatang yang dikonfirmasi dalam kalender ini.",
   "games.launchers.topGames": "Paling banyak dimainkan di Steam",
   "games.launchers.chartRank": "Peringkat {rank} paling banyak dimainkan",

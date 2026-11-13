@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import {
   animeSeriesFromStreamId,
@@ -19,6 +19,7 @@ export function useSeasonBrowser(
   meta: Meta,
   current: PlayEpisode | undefined,
   open: boolean,
+  overrideMeta?: Meta | null,
 ): {
   seasons: number[];
   season: number;
@@ -29,15 +30,18 @@ export function useSeasonBrowser(
 } {
   const { settings } = useSettings();
   const effMeta = useMemo<Meta>(() => {
+    if (overrideMeta) return overrideMeta;
     if (!isAnimeId(meta.id)) return meta;
     const base = animeSeriesFromStreamId(current?.kitsuStreamId);
     return base && base !== meta.id ? { ...meta, id: base } : meta;
-  }, [meta, current?.kitsuStreamId]);
+  }, [meta, current?.kitsuStreamId, overrideMeta]);
   const [seasons, setSeasons] = useState<number[]>([]);
   const [season, setSeason] = useState<number>(current?.imdbSeason ?? current?.season ?? 1);
   const [episodes, setEpisodes] = useState<PlayEpisode[]>([]);
   const [loading, setLoading] = useState(false);
   const [imdbRatings, setImdbRatings] = useState<Map<string, number>>(new Map());
+  const loadedSeasonMetaRef = useRef<string | null>(null);
+  const loadedEpisodeKeyRef = useRef("");
 
   useEffect(() => {
     if (!open) return;
@@ -52,12 +56,27 @@ export function useSeasonBrowser(
   }, [open, effMeta.id]);
 
   useEffect(() => {
-    if (open) setSeason(current?.imdbSeason ?? current?.season ?? 1);
-  }, [open, meta.id, current?.imdbSeason, current?.season]);
+    if (!open || overrideMeta) return;
+    setSeason(current?.imdbSeason ?? current?.season ?? 1);
+  }, [open, meta.id, current?.imdbSeason, current?.season, overrideMeta]);
 
   useEffect(() => {
-    if (!open || (effMeta.type !== "series" && !isAnimeId(effMeta.id))) return;
+    if (overrideMeta) setSeason(1);
+  }, [overrideMeta?.id]);
+
+  useEffect(() => {
+    if (!open || (effMeta.type !== "series" && !isAnimeId(effMeta.id))) {
+      setSeasons([]);
+      return;
+    }
     let cancelled = false;
+    // A new entry or provider must not keep the previous list while loading.
+    // The same entry can be re-read when its full metadata lands; keep the list
+    // then so the panel does not flash between two identical fetches.
+    if (loadedSeasonMetaRef.current !== effMeta.id) {
+      loadedSeasonMetaRef.current = effMeta.id;
+      setSeasons([]);
+    }
     fetchSeasonList(effMeta, {
       tmdbKey: settings.tmdbKey,
       episodeSources: settings.metadataSources?.episodes,
@@ -65,7 +84,9 @@ export function useSeasonBrowser(
       tvdbSeasonType: settings.tvdbSeasonType,
     })
       .then((s) => {
-        if (!cancelled) setSeasons(s);
+        if (cancelled) return;
+        setSeasons(s);
+        setSeason((previous) => (s.length > 0 && !s.includes(previous) ? s[0] : previous));
       })
       .catch(() => {
         if (!cancelled) setSeasons([]);
@@ -89,6 +110,11 @@ export function useSeasonBrowser(
     }
     let cancelled = false;
     setLoading(true);
+    const episodeKey = `${effMeta.id}|${season}`;
+    if (loadedEpisodeKeyRef.current !== episodeKey) {
+      loadedEpisodeKeyRef.current = episodeKey;
+      setEpisodes([]);
+    }
     const overlayTmdbNames = (eps: PlayEpisode[]) => {
       if (!settings.tmdbKey || effMeta.id.startsWith("tmdb:tv:")) return;
       if (!needsTmdbEpisodeDetails(eps)) return;

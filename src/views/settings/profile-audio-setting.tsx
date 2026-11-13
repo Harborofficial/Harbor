@@ -17,7 +17,9 @@ export function ProfileAudioSetting() {
   return (
     <Section
       title={t("Profile songs")}
-      subtitle={t("People can pin a track to their profile. This controls what happens when you visit one.")}
+      subtitle={t(
+        "People can pin a track to their profile. This controls what happens when you visit one.",
+      )}
     >
       <SettingRow
         wide

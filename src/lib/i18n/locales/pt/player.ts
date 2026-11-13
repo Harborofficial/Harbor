@@ -470,10 +470,8 @@ const player: Record<string, string> = {
   "Harbor's streaming server only runs in the desktop app.":
     "O servidor de streaming do Harbor só funciona no app para computador.",
   "Restarting the streaming server…": "Reiniciando o servidor de streaming…",
-  "Couldn't restart the streaming server.":
-    "Não foi possível reiniciar o servidor de streaming.",
-  "The streaming server didn't come back up.":
-    "O servidor de streaming não voltou a funcionar.",
+  "Couldn't restart the streaming server.": "Não foi possível reiniciar o servidor de streaming.",
+  "The streaming server didn't come back up.": "O servidor de streaming não voltou a funcionar.",
   "Streaming server restarted.": "Servidor de streaming reiniciado.",
   "Ignore this title": "Ignorar este título",
   "Never show the content advisory for this title again":

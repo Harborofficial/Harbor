@@ -231,7 +231,9 @@ export function ShaderCard({ entry }: { entry: ShaderCatalogEntry }) {
           className="flex min-h-11 w-fit items-center gap-2 text-start text-[14px] text-ink-muted hover:text-ink"
           onClick={() => openUrl(entry.source.url)}
         >
-          <span>{t("Source")}: {entry.source.label}</span>
+          <span>
+            {t("Source")}: {entry.source.label}
+          </span>
           <ExternalLink size={15} className="shrink-0" />
         </button>
       </Nested>

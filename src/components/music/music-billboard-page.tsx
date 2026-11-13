@@ -216,7 +216,9 @@ export function MusicBillboardPage({
                     loading="lazy"
                   />
                 )}
-                {item.kind === "track" && <MusicTrackPlaybackMark track={item} loading={busy === item.id}/>}
+                {item.kind === "track" && (
+                  <MusicTrackPlaybackMark track={item} loading={busy === item.id} />
+                )}
               </button>
               <div className="music-billboard-copy">
                 <button type="button" disabled={busy === item.id} onClick={() => void open(item)}>

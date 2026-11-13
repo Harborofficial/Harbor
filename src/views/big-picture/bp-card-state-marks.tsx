@@ -37,8 +37,7 @@ export type BpCardLift = "none" | "focus" | "always";
 // more: a ranked cell draws the numeral OUTSIDE the poster, so it cannot collide
 // with anything in the corners and the placement setting is free again.
 export function bpCardZones(settings: Settings): BpCardZones {
-  const scores: BpCardZones["scores"] =
-    settings.badgePlacement === "top" ? "topEnd" : "bottomEnd";
+  const scores: BpCardZones["scores"] = settings.badgePlacement === "top" ? "topEnd" : "bottomEnd";
   return {
     scores,
     watchlist: settings.watchlistBadge,
@@ -64,10 +63,7 @@ export function useBpCardState(
     meta.type,
     imdbId,
   );
-  const inLocal = useInLocalLibrary(
-    settings.showLocalLibraryBadge ? meta.id : undefined,
-    altIds,
-  );
+  const inLocal = useInLocalLibrary(settings.showLocalLibraryBadge ? meta.id : undefined, altIds);
   useTop10Version();
   // On a television the ribbon is not a preference, it is the mark. The only
   // control that writes settings.top10Ribbon is desktop Settings then Library,

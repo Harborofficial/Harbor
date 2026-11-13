@@ -21,9 +21,7 @@ export function PrivacyTab() {
       {isTauri && (
         <Section
           title={t("Discord Rich Presence")}
-          subtitle={t(
-            "Control what appears on your Discord profile while you use Harbor.",
-          )}
+          subtitle={t("Control what appears on your Discord profile while you use Harbor.")}
         >
           <DiscordPresenceRow />
         </Section>
@@ -74,18 +72,22 @@ function DiscordPresenceRow() {
             value={settings.discordShowWhenBrowsing}
             onChange={(discordShowWhenBrowsing) => update({ discordShowWhenBrowsing })}
           />
-          {!settings.discordHideTitle && <ToggleRow
-            label={t("Show poster")}
-            sub={t("Reveal the show or movie artwork. Off keeps the title but hides the poster.")}
-            value={settings.discordShowPoster}
-            onChange={(discordShowPoster) => update({ discordShowPoster })}
-          />}
-          {!settings.discordHideTitle && <ToggleRow
-            label={t("Show elapsed time")}
-            sub={t("Display the live progress bar showing how far into the title you are.")}
-            value={settings.discordShowTimestamp}
-            onChange={(discordShowTimestamp) => update({ discordShowTimestamp })}
-          />}
+          {!settings.discordHideTitle && (
+            <ToggleRow
+              label={t("Show poster")}
+              sub={t("Reveal the show or movie artwork. Off keeps the title but hides the poster.")}
+              value={settings.discordShowPoster}
+              onChange={(discordShowPoster) => update({ discordShowPoster })}
+            />
+          )}
+          {!settings.discordHideTitle && (
+            <ToggleRow
+              label={t("Show elapsed time")}
+              sub={t("Display the live progress bar showing how far into the title you are.")}
+              value={settings.discordShowTimestamp}
+              onChange={(discordShowTimestamp) => update({ discordShowTimestamp })}
+            />
+          )}
           <ToggleRow
             label={t("Show what you are listening to")}
             sub={t(
@@ -111,9 +113,7 @@ function DiscordPresenceRow() {
             onChange={(discordShowPartyJoin) => update({ discordShowPartyJoin })}
           />
           <p className={`max-w-[70ch] ${ROW_DESC}`}>
-            {t(
-              "Activity from adult addons is never shown on Discord.",
-            )}
+            {t("Activity from adult addons is never shown on Discord.")}
           </p>
         </>
       )}

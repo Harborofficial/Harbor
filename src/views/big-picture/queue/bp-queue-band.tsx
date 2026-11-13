@@ -58,9 +58,7 @@ export function BpQueueBand({
   const ready = peek.status === "ready";
   const loading = peek.status === "loading";
   const bedIsPoster = !peek.backdrop && posters.length > 0;
-  const raw = peek.backdrop
-    ? bpHeroArt(peek.backdrop)
-    : bpCardArt(posters[0], BED_POSTER_W);
+  const raw = peek.backdrop ? bpHeroArt(peek.backdrop) : bpCardArt(posters[0], BED_POSTER_W);
   // A url that errored is not a url still on its way. Without this the pulse
   // under it runs for the life of the session on any 404, rate limit or plain
   // http source the WebView refuses, and the one autofocused cell on Discover
@@ -95,7 +93,12 @@ export function BpQueueBand({
   const bedOpacity = bedIsPoster ? "opacity-45" : "opacity-80";
 
   return (
-    <section data-bp-row data-bp-row-key="queue" aria-label={t("Discovery Queue")} className="relative">
+    <section
+      data-bp-row
+      data-bp-row-key="queue"
+      aria-label={t("Discovery Queue")}
+      className="relative"
+    >
       <div className="px-[var(--bp-gutter)] pt-[clamp(22px,2.6vh,40px)]">
         <button
           type="button"
@@ -165,7 +168,11 @@ export function BpQueueBand({
             />
           )}
 
-          <span aria-hidden className="absolute inset-0" style={{ background: "var(--bp-scrim-side)" }} />
+          <span
+            aria-hidden
+            className="absolute inset-0"
+            style={{ background: "var(--bp-scrim-side)" }}
+          />
 
           {posters.map((url, i) => (
             <img

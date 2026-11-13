@@ -312,7 +312,8 @@ const settings: Record<string, string> = {
     "Budget aufgebraucht. Es wird um Mitternacht (UTC) zurückgesetzt.",
   "Buffer fill": "Pufferfüllstand",
   "Reveal the dot on hover": "Punkt beim Überfahren einblenden",
-  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.": "Der Punkt hält sich zurück und erscheint, sobald du auf die Leiste zeigst. Schalte das aus, damit er dauerhaft sichtbar bleibt.",
+  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.":
+    "Der Punkt hält sich zurück und erscheint, sobald du auf die Leiste zeigst. Schalte das aus, damit er dauerhaft sichtbar bleibt.",
   "Buffer fill brightness": "Helligkeit der Pufferfüllung",
   "Buffer size": "Puffergröße",
   "Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.":
@@ -483,7 +484,8 @@ const settings: Record<string, string> = {
   Copy: "Kopieren",
   "Copy Webhook URL": "Webhook-URL kopieren",
   "Copy diagnostics": "Diagnosedaten kopieren",
-  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.": "„Diagnosedaten kopieren“ erfasst den Engine-Status und deine P2P-Einstellungen als JSON, damit du sie bequem in einen Fehlerbericht einfügen kannst. Der Engine-Ordner enthält den DHT-Cache (dht.json) und die Daten aktiver Übertragungen.",
+  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.":
+    "„Diagnosedaten kopieren“ erfasst den Engine-Status und deine P2P-Einstellungen als JSON, damit du sie bequem in einen Fehlerbericht einfügen kannst. Der Engine-Ordner enthält den DHT-Cache (dht.json) und die Daten aktiver Übertragungen.",
   "Copy filename": "Dateinamen kopieren",
   "Copy relay URL": "Relay-URL kopieren",
   "Copy theme": "Design kopieren",
@@ -790,7 +792,8 @@ const settings: Record<string, string> = {
   "Fan-made avatars for personal use. Harbor claims no rights to these characters; they belong to their creators and studios, shown here under fair use. Every one is optimized down to a tiny WebP.":
     "Von Fans erstellte Avatare für den persönlichen Gebrauch. Harbor beansprucht keine Rechte an diesen Figuren; sie gehören ihren Urhebern und Studios und werden hier im Rahmen der zulässigen Nutzung gezeigt. Alle wurden auf winzige WebP-Dateien optimiert.",
   "Fanart.tv · logos and backdrops": "Fanart.tv · Logos und Hintergründe",
-  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.": "Schneller und unauffälliger als P2P, wenn du bereits für Usenet bezahlst. Konfiguriere das Add-on auf der Add-on-Seite und füge die dort ausgegebene Manifest-URL ein.",
+  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.":
+    "Schneller und unauffälliger als P2P, wenn du bereits für Usenet bezahlst. Konfiguriere das Add-on auf der Add-on-Seite und füge die dort ausgegebene Manifest-URL ein.",
   "Fetches DuckDuckGo results and feeds top hits into the model prompt.":
     "Ruft DuckDuckGo-Ergebnisse ab und fügt die besten Treffer in den Modell-Prompt ein.",
   "Fetching library index…": "Mediatheksindex wird abgerufen…",
@@ -961,7 +964,8 @@ const settings: Record<string, string> = {
     "Harbor verwendet die Grafikkarte, wenn es unbedenklich ist, und weicht andernfalls auf die CPU aus. Für fast alle die richtige Wahl.",
   "Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.":
     "Harbor markiert abgeschlossene Titel auf Simkl als angesehen und synchronisiert deine Merkliste.",
-  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.": "Harbor startet die P2P-Engine nicht, kontaktiert keine Tracker und führt DHT nicht aus. Aktiviere diese Option, wenn du nur Debrid- und Direktlinks nutzen möchtest. Deaktiviere sie, um P2P-Streaming wieder zu aktivieren.",
+  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.":
+    "Harbor startet die P2P-Engine nicht, kontaktiert keine Tracker und führt DHT nicht aus. Aktiviere diese Option, wenn du nur Debrid- und Direktlinks nutzen möchtest. Deaktiviere sie, um P2P-Streaming wieder zu aktivieren.",
   "Harbor will scrobble your playback to Trakt and sync your watchlist.":
     "Harbor scrobbelt deine Wiedergabe an Trakt und synchronisiert deine Merkliste.",
   "Harbor {version} available": "Harbor {version} verfügbar",
@@ -1598,7 +1602,8 @@ const settings: Record<string, string> = {
     "Spielt beim Öffnen eines Titels einen stummgeschalteten Trailer im Hintergrund ab. Klicke auf den Lautsprecher, um den Ton einzuschalten. Ist kein Trailer verfügbar, wird stattdessen das Bild angezeigt.",
   "Please add your TMDB API key in the Library & Metadata settings to view this folder.":
     "Füge bitte deinen TMDB-API-Schlüssel in den Einstellungen unter „Mediathek & Metadaten“ hinzu, um diesen Ordner anzuzeigen.",
-  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.": "Verbinde Harbor mit einem Streaming-Server auf einem anderen Gerät, etwa dem Stremio-Dienst auf einem Heimserver. P2P-Streams werden dann auf diesem Gerät statt auf diesem Computer heruntergeladen und wiedergegeben.",
+  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.":
+    "Verbinde Harbor mit einem Streaming-Server auf einem anderen Gerät, etwa dem Stremio-Dienst auf einem Heimserver. P2P-Streams werden dann auf diesem Gerät statt auf diesem Computer heruntergeladen und wiedergegeben.",
   "Pop-up position": "Pop-up-Position",
   Popular: "Beliebt",
   "Popular This Week": "Diese Woche beliebt",
@@ -1880,7 +1885,8 @@ const settings: Record<string, string> = {
   Seeking: "Wird gespult",
   "Self-host": "Selbst hosten",
   "Self-test": "Selbsttest",
-  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.": "Der Selbsttest ist deaktiviert, solange striktes Remote-Streaming aktiv ist. Er lädt auf diesem Gerät eine kleine Testdatei über P2P herunter.",
+  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.":
+    "Der Selbsttest ist deaktiviert, solange striktes Remote-Streaming aktiv ist. Er lädt auf diesem Gerät eine kleine Testdatei über P2P herunter.",
   "Send a bug report straight to the Harbor team. Screenshots and screen recordings welcome.":
     "Sende einen Fehlerbericht direkt an das Harbor-Team. Screenshots und Bildschirmaufnahmen sind willkommen.",
   "Send audio to specific speakers, headphones or a receiver. System default follows Windows.":
@@ -2002,7 +2008,8 @@ const settings: Record<string, string> = {
   "Show the full notes for this build": "Vollständige Hinweise zu diesem Build anzeigen",
   "Show the player controls when you pause or resume using the keyboard. Turn off to keep them hidden so they don't cover subtitles.":
     "Player-Steuerelemente anzeigen, wenn du die Wiedergabe mit der Tastatur pausierst oder fortsetzt. Deaktiviere dies, damit sie ausgeblendet bleiben und keine Untertitel verdecken.",
-  "Show the report button on every P2P stream, not just likely new releases.": "Die Melden-Schaltfläche bei jedem P2P-Stream anzeigen, nicht nur bei wahrscheinlichen Neuerscheinungen.",
+  "Show the report button on every P2P stream, not just likely new releases.":
+    "Die Melden-Schaltfläche bei jedem P2P-Stream anzeigen, nicht nur bei wahrscheinlichen Neuerscheinungen.",
   "Show this control": "Dieses Bedienelement anzeigen",
   "Show this panel": "Dieses Panel anzeigen",
   "Show thumbnail preview on hover": "Vorschaubild beim Bewegen des Mauszeigers darüber anzeigen",
@@ -2342,7 +2349,8 @@ const settings: Record<string, string> = {
     "Top-Titel pro Dienst. Deaktiviere die Dienste, für die du nicht bezahlst.",
   "TorBox API key": "TorBox-API-Schlüssel",
   "Torrent name": "Torrent-Name",
-  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.": "P2P ist deaktiviert. Nicht zwischengespeicherte Streams werden nur wiedergegeben, wenn sie von einem Debrid-Dienst oder einem Direktlink stammen. Deaktiviere diese Option, um P2P zu verwenden.",
+  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.":
+    "P2P ist deaktiviert. Nicht zwischengespeicherte Streams werden nur wiedergegeben, wenn sie von einem Debrid-Dienst oder einem Direktlink stammen. Deaktiviere diese Option, um P2P zu verwenden.",
   "Track everything you watch, see your watchlist, and get personalized recommendations on Harbor's home page. Free at trakt.tv.":
     "Verfolge alles, was du ansiehst, greife auf deine Merkliste zu und erhalte personalisierte Empfehlungen auf der Harbor-Startseite. Kostenlos auf trakt.tv.",
   "Tracked people": "Personen, denen du folgst",
@@ -2536,7 +2544,8 @@ const settings: Record<string, string> = {
     "Verwende beim automatischen Abspielen der nächsten Folge dieselbe Veröffentlichung bzw. Quelle wie zuvor, statt des von Harbor am höchsten bewerteten Streams. Ist diese Quelle nicht verfügbar, wird auf den besten Stream zurückgegriffen.",
   "When in fullscreen, Esc leaves fullscreen instead of closing the player. Press Esc again to close. Turn off to make Esc always close.":
     "Im Vollbildmodus beendet Esc den Vollbildmodus, statt den Player zu schließen. Drücke erneut Esc, um ihn zu schließen. Deaktiviere dies, damit Esc den Player immer schließt.",
-  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.": "Wenn diese Option deaktiviert ist, wird eine P2P-Übertragung sofort gestoppt, sobald du den Stream schließt oder wechselst, sodass im Hintergrund nichts weiter heruntergeladen wird. Aktiviere sie, damit der Download nach dem Verlassen weiterläuft; verwalte oder pausiere solche Downloads im Tab „Downloads“.",
+  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.":
+    "Wenn diese Option deaktiviert ist, wird eine P2P-Übertragung sofort gestoppt, sobald du den Stream schließt oder wechselst, sodass im Hintergrund nichts weiter heruntergeladen wird. Aktiviere sie, damit der Download nach dem Verlassen weiterläuft; verwalte oder pausiere solche Downloads im Tab „Downloads“.",
   "When playback starts, Harbor automatically finds and loads a subtitle in one of these languages, so you never have to search by hand. The first available match wins, so put your main language first.":
     "Beim Wiedergabestart sucht und lädt Harbor automatisch einen Untertitel in einer dieser Sprachen, damit du nie manuell suchen musst. Die erste verfügbare Übereinstimmung wird verwendet, daher sollte deine Hauptsprache an erster Stelle stehen.",
   "When the Up Next pill appears before an episode ends. Auto scales to the episode length, so short episodes stop prompting so early. Off hides it.":
@@ -2768,9 +2777,12 @@ const settings: Record<string, string> = {
   "{repaired} fixed, {clean} already clean": "{repaired} repariert, {clean} bereits fehlerfrei",
   "{themeName} theme": "Design „{themeName}“",
   "{used} / {limit} requests today.": "Heute {used} / {limit} Anfragen.",
-  "Cached source resolution and direct download links.": "Auflösung zwischengespeicherter Quellen und Direkt-Downloadlinks.",
-  "Cached source resolution and cloud library access.": "Auflösung zwischengespeicherter Quellen und Zugriff auf die Cloud-Bibliothek.",
-  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.": "„Beide“ zeigt Direkt-, Debrid- und Peer-to-Peer-Ergebnisse zusammen an. „Direkt/Debrid“ hält P2P-Ergebnisse im Hintergrund, solange etwas anderes verfügbar ist. „P2P“ zeigt sie zuerst.",
+  "Cached source resolution and direct download links.":
+    "Auflösung zwischengespeicherter Quellen und Direkt-Downloadlinks.",
+  "Cached source resolution and cloud library access.":
+    "Auflösung zwischengespeicherter Quellen und Zugriff auf die Cloud-Bibliothek.",
+  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.":
+    "„Beide“ zeigt Direkt-, Debrid- und Peer-to-Peer-Ergebnisse zusammen an. „Direkt/Debrid“ hält P2P-Ergebnisse im Hintergrund, solange etwas anderes verfügbar ist. „P2P“ zeigt sie zuerst.",
 };
 
 export default settings;

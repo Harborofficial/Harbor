@@ -3,11 +3,13 @@ export default {
   "games.audience.deck": "Steam Deck · chơi nhiều nhất",
   "games.audience.deckNote": "Các trò chơi được chơi nhiều nhất trên Steam Deck · tuần qua",
   "games.audience.deckSource": "Steam Deck · bảng xếp hạng hằng tuần",
-  "games.audience.deckCoverage": "Bảng xếp hạng Steam Deck hằng tuần của Valve được cập nhật tự động. Bảng này không công bố số người chơi đồng thời.",
+  "games.audience.deckCoverage":
+    "Bảng xếp hạng Steam Deck hằng tuần của Valve được cập nhật tự động. Bảng này không công bố số người chơi đồng thời.",
   "games.audience.xbox": "Xbox · chơi nhiều nhất",
   "games.audience.xboxNote": "Trò chơi Xbox được chơi nhiều nhất · Hoa Kỳ",
   "games.audience.xboxSource": "Xbox · bảng xếp hạng hiện tại",
-  "games.audience.xboxCoverage": "Bảng xếp hạng Xbox tại Mỹ hiện tại của Microsoft, tự động cập nhật. Xbox không công bố số người chơi.",
+  "games.audience.xboxCoverage":
+    "Bảng xếp hạng Xbox tại Mỹ hiện tại của Microsoft, tự động cập nhật. Xbox không công bố số người chơi.",
   "games.audience.xboxChecked": "Đã kiểm tra {date}",
   "games.audience.xboxView": "Xem trên Xbox",
   "games.audience.pc": "PC · mọi trình khởi chạy",
@@ -19,6 +21,7 @@ export default {
   "games.audience.monthlyRank": "Hạng tháng {rank}",
   "games.audience.onSteamNow": "trên Steam lúc này",
   "games.audience.source": "Newzoo · người chơi hoạt động hằng tháng",
-  "games.audience.coverage": "Top 10 công bố theo người chơi hoạt động hằng tháng tại 37 thị trường, không gồm Trung Quốc và Ấn Độ. Bảng xếp hạng theo kỳ, không phải số liệu trực tiếp hay xếp hạng toàn cầu.",
-  "games.audience.snapshot": "Newzoo · bảng xếp hạng đã công bố · {month}"
+  "games.audience.coverage":
+    "Top 10 công bố theo người chơi hoạt động hằng tháng tại 37 thị trường, không gồm Trung Quốc và Ấn Độ. Bảng xếp hạng theo kỳ, không phải số liệu trực tiếp hay xếp hạng toàn cầu.",
+  "games.audience.snapshot": "Newzoo · bảng xếp hạng đã công bố · {month}",
 };

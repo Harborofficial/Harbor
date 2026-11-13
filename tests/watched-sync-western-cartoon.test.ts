@@ -13,7 +13,7 @@ const detail = read("../src/views/detail.tsx");
 test("anime detection keys on the PRIMARY country, not any country in the list", () => {
   assert.match(animeDetect, /function primaryCountry\(/);
   assert.match(animeDetect, /\.split\(","\)\[0\]/);
-  const fn = animeDetect.match(/function isJapaneseAnime\([\s\S]*?\n\}/)?.[0] ?? "";
+  const fn = animeDetect.match(/function isJapaneseAnime\([\s\S]*?\n\}\n/)?.[0] ?? "";
   assert.match(fn, /const c = primaryCountry\(m\)/);
   assert.ok(
     !/const c = \(m\.country \?\? ""\)\.toLowerCase\(\)/.test(fn),

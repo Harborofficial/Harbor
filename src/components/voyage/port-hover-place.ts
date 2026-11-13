@@ -3,7 +3,12 @@ const GAP = 14;
 const EDGE = 12;
 
 export type Box = { left: number; top: number; right: number; bottom: number };
-export type Spot = { left: number; top: number; origin: string; side: "left" | "right" | "top" | "bottom" };
+export type Spot = {
+  left: number;
+  top: number;
+  origin: string;
+  side: "left" | "right" | "top" | "bottom";
+};
 
 export function placeBeside(
   anchor: Box,
@@ -29,5 +34,10 @@ export function placeBeside(
   const below = anchor.bottom + GAP + height <= viewH - EDGE;
   const y = below ? anchor.bottom + GAP : Math.max(EDGE, anchor.top - GAP - height);
   const x = Math.max(EDGE, Math.min(anchor.left, viewW - width - EDGE));
-  return { left: x, top: y, origin: below ? "top left" : "bottom left", side: below ? "bottom" : "top" };
+  return {
+    left: x,
+    top: y,
+    origin: below ? "top left" : "bottom left",
+    side: below ? "bottom" : "top",
+  };
 }

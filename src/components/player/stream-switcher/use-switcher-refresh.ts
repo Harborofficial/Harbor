@@ -28,21 +28,24 @@ export function useSwitcherRefresh(params: {
   const [refreshing, setRefreshing] = useState(false);
   const acRef = useRef<AbortController | null>(null);
   const streamIds = useStreamIds(meta, episode, imdbId);
-  const animePreference = streamIds && hasAnimeStreamIds(streamIds)
-    ? settings.animePreferImdbStreams : undefined;
-  const preferredAnimeImdbId = animePreference && streamIds
-    ? preferredAnimeImdbStreamId(meta.id, episode, imdbId, imdbIdVerified, streamIds) : undefined;
+  const animePreference =
+    streamIds && hasAnimeStreamIds(streamIds) ? settings.animePreferImdbStreams : undefined;
+  const preferredAnimeImdbId =
+    animePreference && streamIds
+      ? preferredAnimeImdbStreamId(meta.id, episode, imdbId, imdbIdVerified, streamIds)
+      : undefined;
   const strictMode = settings.streamFilterLevel === "strict";
   const filterDisabled = settings.streamFilterLevel === "off";
   const configHash = useMemo(
-    () => buildPickerConfigHash({
-      addonTransportUrls: (addons ?? []).map((a) => a.transportUrl),
-      debridSlugs: debrids.map((d) => d.slug),
-      scraperKeys: pluginCacheTokens(),
-      filterMode: filterDisabled ? "off" : strictMode ? "strict" : "balanced",
-      animePreferImdbStreams: animePreference,
-      preferredAnimeImdbId,
-    }),
+    () =>
+      buildPickerConfigHash({
+        addonTransportUrls: (addons ?? []).map((a) => a.transportUrl),
+        debridSlugs: debrids.map((d) => d.slug),
+        scraperKeys: pluginCacheTokens(),
+        filterMode: filterDisabled ? "off" : strictMode ? "strict" : "balanced",
+        animePreferImdbStreams: animePreference,
+        preferredAnimeImdbId,
+      }),
     [addons, debrids, filterDisabled, strictMode, animePreference, preferredAnimeImdbId],
   );
 
@@ -83,7 +86,20 @@ export function useSwitcherRefresh(params: {
     } finally {
       if (!ac.signal.aborted) setRefreshing(false);
     }
-  }, [addons, debrids, meta, episode, imdbId, imdbIdVerified, settings, streamIds, configHash, animePreference, strictMode, filterDisabled]);
+  }, [
+    addons,
+    debrids,
+    meta,
+    episode,
+    imdbId,
+    imdbIdVerified,
+    settings,
+    streamIds,
+    configHash,
+    animePreference,
+    strictMode,
+    filterDisabled,
+  ]);
 
   const autoFilledRef = useRef<string | null>(null);
   useEffect(() => {
@@ -92,7 +108,13 @@ export function useSwitcherRefresh(params: {
       return;
     }
     if (!addons || !streamIds) return;
-    const stamp = JSON.stringify([meta.id, episode?.season, episode?.episode, episode?.videoId, configHash]);
+    const stamp = JSON.stringify([
+      meta.id,
+      episode?.season,
+      episode?.episode,
+      episode?.videoId,
+      configHash,
+    ]);
     if (autoFilledRef.current === stamp) return;
     if (getPickerCache(meta, episode, configHash)?.complete) return;
     autoFilledRef.current = stamp;

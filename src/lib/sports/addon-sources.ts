@@ -1,3 +1,4 @@
+import { addonBaseUrl } from "@/lib/addon-url";
 import { addonAccepts, fetchAddonMeta, type Addon } from "../addons";
 import type { SportsGame } from "./espn-types";
 import { leagueByTag } from "@/lib/sports/espn-leagues";
@@ -156,7 +157,7 @@ export async function loadSportsAddonStreams(
   installed: Addon[] = [listing.addon],
 ): Promise<Stream[]> {
   const { addon } = listing;
-  const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
+  const base = addonBaseUrl(addon.transportUrl);
   let meta = listing.meta;
   const embedded = () => {
     const video =

@@ -38,7 +38,8 @@ export function RankNumeral({
         fontSize: fontSize(size, digits),
         letterSpacing: "-0.01em",
         WebkitTextStroke: `${STROKE[size]} var(--color-ink-muted)`,
-        WebkitMaskImage: "linear-gradient(to right, transparent 0, #000 12%, #000 60%, transparent 88%)",
+        WebkitMaskImage:
+          "linear-gradient(to right, transparent 0, #000 12%, #000 60%, transparent 88%)",
         maskImage: "linear-gradient(to right, transparent 0, #000 12%, #000 60%, transparent 88%)",
       }}
     >

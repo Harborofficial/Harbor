@@ -11,5 +11,5 @@ export default {
   "games.studioCatalog.minimumRating.value": "{count}+ / 100",
   "games.studioCatalog.minimumVotes.all": "أي عدد من التقييمات",
   "games.studioCatalog.minimumVotes.value": "{count}+ تقييمات",
-  "games.studioCatalog.ratingFloor": "تتطلب الدرجات 5 تقييمات على الأقل."
+  "games.studioCatalog.ratingFloor": "تتطلب الدرجات 5 تقييمات على الأقل.",
 };

@@ -14,18 +14,25 @@ export default {
   "games.manage.uninstallOptions": "Options de désinstallation…",
   "games.manage.remove": "Retirer de Harbor…",
   "games.manage.manage": "Gérer",
-  "games.manage.failed": "Impossible de terminer. Vérifiez que le jeu et son lanceur sont toujours disponibles, puis réessayez.",
+  "games.manage.failed":
+    "Impossible de terminer. Vérifiez que le jeu et son lanceur sont toujours disponibles, puis réessayez.",
   "games.manage.removed": "Retiré de Harbor",
   "games.manage.sent": "Continuer dans {source}",
   "games.manage.removeTitle": "Retirer cette entrée ?",
   "games.manage.uninstallTitle": "Désinstaller ce jeu ?",
   "games.manage.optionsTitle": "Désinstaller avec {source}",
-  "games.manage.removedNote": "L’entrée a été retirée. Les fichiers du jeu restent sur cet ordinateur.",
-  "games.manage.sentNote": "{source} est ouvert. Terminez l’opération là-bas ; Harbor actualisera l’installation à votre retour.",
-  "games.manage.removeNote": "Retire {name} et son historique de jeu Harbor de ce profil, sans désinstaller le jeu ni supprimer ses fichiers.",
-  "games.manage.steamNote": "Steam se chargera de désinstaller {name}. Une autre confirmation peut être nécessaire dans Steam. Sauvegardez d’abord les sauvegardes locales et mods à conserver.",
-  "games.manage.launcherNote": "Ouvrez {source}, sélectionnez {name}, puis Gérer ou Désinstaller. Le lanceur gère la suppression ; Harbor ne supprime pas le dossier.",
-  "games.manage.windowsNote": "Cherchez {name} dans Applications installées de Windows, puis Désinstaller. Pour un jeu portable, suivez ses instructions. Harbor ne supprimera pas son dossier.",
+  "games.manage.removedNote":
+    "L’entrée a été retirée. Les fichiers du jeu restent sur cet ordinateur.",
+  "games.manage.sentNote":
+    "{source} est ouvert. Terminez l’opération là-bas ; Harbor actualisera l’installation à votre retour.",
+  "games.manage.removeNote":
+    "Retire {name} et son historique de jeu Harbor de ce profil, sans désinstaller le jeu ni supprimer ses fichiers.",
+  "games.manage.steamNote":
+    "Steam se chargera de désinstaller {name}. Une autre confirmation peut être nécessaire dans Steam. Sauvegardez d’abord les sauvegardes locales et mods à conserver.",
+  "games.manage.launcherNote":
+    "Ouvrez {source}, sélectionnez {name}, puis Gérer ou Désinstaller. Le lanceur gère la suppression ; Harbor ne supprime pas le dossier.",
+  "games.manage.windowsNote":
+    "Cherchez {name} dans Applications installées de Windows, puis Désinstaller. Pour un jeu portable, suivez ses instructions. Harbor ne supprimera pas son dossier.",
   "games.manage.opening": "Ouverture…",
   "games.manage.confirmUninstall": "Continuer vers Steam",
   "games.manage.openSource": "Ouvrir {source}",

@@ -8,7 +8,8 @@ export default {
   "games.sidebar.customOrder": "Мой порядок",
   "games.sidebar.arrange": "Настроить боковую панель",
   "games.sidebar.resetFilters": "Сбросить фильтры",
-  "games.sidebar.arrangeNote": "Перетаскивайте игры или используйте стрелки. Закрепляйте любимые игры или скрывайте их на этой панели.",
+  "games.sidebar.arrangeNote":
+    "Перетаскивайте игры или используйте стрелки. Закрепляйте любимые игры или скрывайте их на этой панели.",
   "games.sidebar.saveFailed": "Не удалось сохранить настройки. Изменения действуют в этом сеансе.",
   "games.sidebar.move": "Переместить {name}",
   "games.sidebar.up": "Переместить {name} вверх",
@@ -19,12 +20,15 @@ export default {
   "games.sidebar.hide": "Скрыть {name} на панели",
   "games.sidebar.pinned": "Закреплено",
   "games.dock.welcomeTitle": "Показать вкладку игр?",
-  "games.dock.welcomeNote": "Наведите указатель, чтобы открыть свои игры. Отключить вкладку можно в любой момент: Настройки → Тема и оформление → Интерфейс.",
+  "games.dock.welcomeNote":
+    "Наведите указатель, чтобы открыть свои игры. Отключить вкладку можно в любой момент: Настройки → Тема и оформление → Интерфейс.",
   "games.dock.welcomeEnable": "Показать вкладку",
   "games.dock.welcomeDismiss": "Не сейчас",
   "games.dock.settingTitle": "Быстрая библиотека",
-  "games.dock.settingNote": "Показывает ненавязчивую вкладку у края экрана для быстрого доступа к вашей библиотеке. По умолчанию отключено.",
-  "games.dock.launchError": "Не удалось открыть игру. Проверьте установку и лаунчер, затем повторите попытку.",
+  "games.dock.settingNote":
+    "Показывает ненавязчивую вкладку у края экрана для быстрого доступа к вашей библиотеке. По умолчанию отключено.",
+  "games.dock.launchError":
+    "Не удалось открыть игру. Проверьте установку и лаунчер, затем повторите попытку.",
   "games.dock.launcher": "Лаунчеры",
   "games.dock.client": "Открыть в {launcher}",
   "games.dock.openClient": "Открыть {name} в {launcher}",
@@ -75,5 +79,5 @@ export default {
   "games.badge.unavailable": "Файлы недоступны",
   "games.badge.notInstalled": "Не установлено",
   "games.home.libraryFirstTitle": "Открывать «Игры» в библиотеке",
-  "games.home.libraryFirstNote": "Каждый раз начинать с вашей библиотеки, а не с «Обзора»."
+  "games.home.libraryFirstNote": "Каждый раз начинать с вашей библиотеки, а не с «Обзора».",
 };

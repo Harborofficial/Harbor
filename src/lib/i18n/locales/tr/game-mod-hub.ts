@@ -26,7 +26,8 @@ export default {
   "games.modHub.entryNote": "Modları keşfet ve yüklü içeriklerini yönet.",
   "games.modHub.switchGame": "Oyunu değiştir",
   "games.modHub.creatorDownload": "İçerik üreticisinden indir",
-  "games.modHub.legacyNote": "The Sims 2 ve The Sims 3 içerikleri üreticinin sayfasından indirilebilir. Yerel mod yönetimi şu anda The Sims 4 oyununu destekliyor.",
+  "games.modHub.legacyNote":
+    "The Sims 2 ve The Sims 3 içerikleri üreticinin sayfasından indirilebilir. Yerel mod yönetimi şu anda The Sims 4 oyununu destekliyor.",
   "games.modHub.bodyShop": "Body Shop",
   "games.modHub.patterns": "Desenler",
   "games.modHub.sets": "Temalı setler",
@@ -42,5 +43,5 @@ export default {
   "games.modHub.creator": "İçerik üreticisi",
   "games.modHub.viewOnSource": "İçerik üreticisinin sayfası",
   "games.modHub.filesPending": "Proje dosyaları yükleniyor…",
-  "games.modHub.picked": "MTS seçimi"
+  "games.modHub.picked": "MTS seçimi",
 };

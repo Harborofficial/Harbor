@@ -25,5 +25,5 @@ export default {
   "games.wow.equipment.mainhand": "主手",
   "games.wow.equipment.offhand": "副手",
   "games.wow.equipment.shirt": "衬衫",
-  "games.wow.equipment.tabard": "战袍"
+  "games.wow.equipment.tabard": "战袍",
 };

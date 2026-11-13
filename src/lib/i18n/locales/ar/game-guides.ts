@@ -52,11 +52,14 @@ export default {
   "games.guides.date.all": "أي وقت",
   "games.guides.viewers": "يشاهد الآن {count}",
   "games.guides.views": "{count} مشاهدة",
-  "games.guides.import.callofdutywarzone": "انسخ القيم إلى إعدادات Warzone المطابقة. اضبط DPI من برنامج الفأرة.",
-  "games.guides.import.css": "انسخ الإعدادات إلى Counter-Strike: Source. هذه القيم من أرشيفات مجتمعية مؤرخة.",
+  "games.guides.import.callofdutywarzone":
+    "انسخ القيم إلى إعدادات Warzone المطابقة. اضبط DPI من برنامج الفأرة.",
+  "games.guides.import.css":
+    "انسخ الإعدادات إلى Counter-Strike: Source. هذه القيم من أرشيفات مجتمعية مؤرخة.",
   "games.guides.import.cod": "استخدم هذه القيم في إصدار اللعبة المطابق. اضبط DPI من برنامج الفأرة.",
   "games.guides.noCrosshair": "لا يوفر هذا المصدر تفاصيل كافية لعرض معاينة دقيقة لعلامة التصويب.",
-  "games.guides.previewNote": "معاينة ثابتة للقيم المنشورة. قد تغيّر الدقة والحركة والارتداد النتيجة داخل اللعبة.",
+  "games.guides.previewNote":
+    "معاينة ثابتة للقيم المنشورة. قد تغيّر الدقة والحركة والارتداد النتيجة داخل اللعبة.",
   "games.guides.previewBackground": "تبديل الخلفية الفاتحة للمعاينة",
   "games.guides.crosshairPreview": "معاينة علامة التصويب",
   "games.guides.noPlayers": "لا يوجد لاعبون مطابقون. جرّب اسمًا آخر.",
@@ -73,18 +76,23 @@ export default {
   "games.guides.sourceErrorTitle": "لنحاول مرة أخرى",
   "games.guides.more": "تحميل المزيد",
   "games.guides.moreKick": "المزيد على Kick",
-  "games.guides.configNote": "إعدادات نشرها اللاعبون وصنّاع المحتوى. اختر ملفًا للاطلاع على المصدر والتاريخ والإعدادات.",
+  "games.guides.configNote":
+    "إعدادات نشرها اللاعبون وصنّاع المحتوى. اختر ملفًا للاطلاع على المصدر والتاريخ والإعدادات.",
   "games.guides.players": "كل اللاعبين",
   "games.guides.useConfig": "استخدام هذه الإعدادات",
-  "games.guides.import.cs2": "الصق الأوامر في وحدة تحكم المطور في CS2. يمكن استيراد رموز التصويب من الإعدادات ← اللعبة ← علامة التصويب. راجع القيم قبل تطبيقها.",
-  "games.guides.import.valorant": "انسخ رمز التصويب ثم افتح الإعدادات ← علامة التصويب ← استيراد رمز الملف في VALORANT. أدخل القيم الأخرى في إعداداتها المناسبة.",
-  "games.guides.import.rainbowsixsiege": "انسخ الإعدادات وأدخل القيم في إعدادات الماوس والعرض في Siege. تُضبط DPI في برنامج الماوس.",
+  "games.guides.import.cs2":
+    "الصق الأوامر في وحدة تحكم المطور في CS2. يمكن استيراد رموز التصويب من الإعدادات ← اللعبة ← علامة التصويب. راجع القيم قبل تطبيقها.",
+  "games.guides.import.valorant":
+    "انسخ رمز التصويب ثم افتح الإعدادات ← علامة التصويب ← استيراد رمز الملف في VALORANT. أدخل القيم الأخرى في إعداداتها المناسبة.",
+  "games.guides.import.rainbowsixsiege":
+    "انسخ الإعدادات وأدخل القيم في إعدادات الماوس والعرض في Siege. تُضبط DPI في برنامج الماوس.",
   "games.guides.copyCrosshair": "نسخ علامة التصويب",
   "games.guides.copyCommands": "نسخ الأوامر",
   "games.guides.copySettings": "نسخ الإعدادات",
   "games.guides.copied": "تم النسخ",
   "games.guides.copyError": "تعذر النسخ. حاول مجددًا.",
-  "games.guides.embedNote": "توفر منصة صانع المحتوى التشغيل. إذا كان التضمين مقيدًا، افتح المصدر الأصلي.",
+  "games.guides.embedNote":
+    "توفر منصة صانع المحتوى التشغيل. إذا كان التضمين مقيدًا، افتح المصدر الأصلي.",
   "games.guides.readerErrorTitle": "تعذر تحميل هذا الدليل",
   "games.guides.short": "الأدلة",
   "games.guides.title": "الأدلة وشروحات اللعب",
@@ -112,8 +120,7 @@ export default {
   "games.guides.playerNote": "التشغيل عبر YouTube. إذا منع المنشئ التضمين، افتح الفيديو الأصلي.",
   "games.guides.readerError": "تعذرت قراءة هذا الدليل هنا. أعد المحاولة أو افتح الأصل.",
   "games.guides.contents": "في هذا الدليل",
-  "games.guides.credits": "المؤلفون والترخيص"
-,
+  "games.guides.credits": "المؤلفون والترخيص",
   "games.guides.copy": "نسخ",
   "games.guides.previewMap": "إظهار لقطة من الخريطة خلف علامة التصويب",
   "games.guides.skins": "المظاهر",
@@ -123,5 +130,5 @@ export default {
   "games.guides.teammates": "زملاء الفريق",
   "games.guides.specs": "المواصفات",
   "games.guides.exportAll": "تصدير الكل",
-  "games.guides.copyValue": "نسخ {label}"
+  "games.guides.copyValue": "نسخ {label}",
 } satisfies Record<string, string>;

@@ -20,7 +20,13 @@ export function VoyageInline({ active, onClose }: { active: Voyage | null; onClo
     <div ref={root} className="voyage-inline" data-tv-focus-scope>
       <header className="voyage-inline-header">
         <span>{t("Harbor Voyages")}</span>
-        <button type="button" onClick={onClose} aria-label={t("Close")} data-tv-modal-close className="voyage-collapse">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t("Close")}
+          data-tv-modal-close
+          className="voyage-collapse"
+        >
           <ChevronUp size={18} strokeWidth={1.7} />
         </button>
       </header>

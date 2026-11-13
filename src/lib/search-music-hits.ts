@@ -46,19 +46,23 @@ export function personMusicHits(
   );
   if (!recognised) return [];
   return [
-    ...results.albums.filter((album) => mine(album.artist)).map((album) => ({
-      id: `album:${album.connectorId ?? ""}:${album.id}`,
-      kind: "album" as const,
-      title: album.title,
-      subtitle: album.artist,
-      artwork: first(album.artwork),
-    })),
-    ...results.tracks.filter((track) => mine(track.artist)).map((track) => ({
-      id: `track:${track.connectorId ?? ""}:${track.id}`,
-      kind: "track" as const,
-      title: track.title,
-      subtitle: track.artist,
-      artwork: first(track.artwork),
-    })),
+    ...results.albums
+      .filter((album) => mine(album.artist))
+      .map((album) => ({
+        id: `album:${album.connectorId ?? ""}:${album.id}`,
+        kind: "album" as const,
+        title: album.title,
+        subtitle: album.artist,
+        artwork: first(album.artwork),
+      })),
+    ...results.tracks
+      .filter((track) => mine(track.artist))
+      .map((track) => ({
+        id: `track:${track.connectorId ?? ""}:${track.id}`,
+        kind: "track" as const,
+        title: track.title,
+        subtitle: track.artist,
+        artwork: first(track.artwork),
+      })),
   ].slice(0, 20);
 }

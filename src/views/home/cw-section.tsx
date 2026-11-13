@@ -27,6 +27,7 @@ export function CWSection({ signedIn, isNuvio, items, watchedSet, onDismiss, loa
   const t = useT();
   const queueResumeItem = useQueueResumeItem();
   const showQueueCard = queueResumeItem !== null;
+  const headKey = showQueueCard ? "queue" : (items[0]?._id ?? "");
   const [showAuth, setShowAuth] = useState(false);
 
   const signInButton = signedIn ? null : (
@@ -76,6 +77,7 @@ export function CWSection({ signedIn, isNuvio, items, watchedSet, onDismiss, loa
           min={260}
           shape="landscape"
           scrollKey="home:cw"
+          scrollAnchorKey={headKey}
           headerRight={signInButton}
           className={showQueueCard ? "home-cw-with-queue" : undefined}
         >

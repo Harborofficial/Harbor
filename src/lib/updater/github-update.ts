@@ -157,15 +157,12 @@ export async function discoverGithubUpdate(
       payloadVersion !== null &&
       payloadVersion > probe.payloadVersion
     ) {
-      const response = await fetchRelease(signatureAsset.browser_download_url);
-      if (!response.ok) throw new Error("Could not fetch the release installer signature.");
-      const signature = (await response.text()).trim();
-      if (!signature) throw new Error("The release installer signature is empty.");
       handoff = {
         version,
         notes,
         url: installer.browser_download_url,
-        signature,
+        signature: "",
+        signatureUrl: signatureAsset.browser_download_url,
         size: installer.size ?? null,
         payloadVersion,
         verifiable: true,

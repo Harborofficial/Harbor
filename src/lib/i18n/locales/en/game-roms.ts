@@ -18,12 +18,14 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "Creator playthroughs",
   "games.roms.watchVideo": "Watch video",
   "games.roms.noVideos": "No videos are listed for these games yet.",
-  "games.roms.libraryNote": "Bring your own games. Import files, choose an emulator and keep your collection together.",
+  "games.roms.libraryNote":
+    "Bring your own games. Import files, choose an emulator and keep your collection together.",
   "games.roms.openLibrary": "Open library",
   "games.roms.downloadCharts": "Most downloaded ROM hacks",
   "games.roms.downloadChartsNote": "Ranked by patch downloads on Romhack Plaza.",
   "games.roms.downloadCount": "{count} downloads",
-  "games.roms.chartUnavailable": "The download chart is unavailable right now. You can still browse Romhack Plaza.",
+  "games.roms.chartUnavailable":
+    "The download chart is unavailable right now. You can still browse Romhack Plaza.",
   "games.roms.allPlatforms": "All platforms",
   "games.roms.moreReleases": "Show more releases",
   "games.roms.fewerReleases": "Show fewer releases",
@@ -66,7 +68,8 @@ const gameRoms: Record<string, string> = {
   "games.roms.era": "Release era",
   "games.roms.reset": "Reset filters",
   "games.roms.empty": "Try another title or broaden the filters for this console.",
-  "games.roms.source": "Game metadata and relationships from IGDB. Import your local files to play supported games in Harbor.",
+  "games.roms.source":
+    "Game metadata and relationships from IGDB. Import your local files to play supported games in Harbor.",
   "games.roms.playerScore": "IGDB player rating · {count} ratings",
   "games.roms.combinedScore": "IGDB combined rating · {count} ratings",
   "games.roms.sort.discussed": "Most rated",

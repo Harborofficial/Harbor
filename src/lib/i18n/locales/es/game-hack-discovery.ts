@@ -16,28 +16,43 @@ export default {
   "games.patch.saveCopy": "Guardar una nueva copia",
   "games.patch.verified": "Archivos verificados",
   "games.patch.ready": "Parche preparado",
-  "games.patch.verifiedNote": "El juego original, el parche y la copia final coinciden con las sumas de verificación del parche BPS.",
-  "games.patch.ipsNote": "IPS no incluye una suma de verificación del juego original. Comprueba la versión que requiere el proyecto antes de guardar.",
+  "games.patch.verifiedNote":
+    "El juego original, el parche y la copia final coinciden con las sumas de verificación del parche BPS.",
+  "games.patch.ipsNote":
+    "IPS no incluye una suma de verificación del juego original. Comprueba la versión que requiere el proyecto antes de guardar.",
   "games.patch.output": "Copia final",
   "games.patch.fingerprint": "Huella del archivo · SHA-256",
   "games.patch.fingerprints": "Huellas de los archivos · SHA-256",
   "games.patch.localNote": "En tu dispositivo · BPS · IPS · UPS · Hasta 256 MB",
-  "games.patch.desktop": "Aplica parches en la app de escritorio de Harbor para Windows, macOS o Linux. Tus archivos permanecen en tu dispositivo y el juego original se conserva.",
+  "games.patch.desktop":
+    "Aplica parches en la app de escritorio de Harbor para Windows, macOS o Linux. Tus archivos permanecen en tu dispositivo y el juego original se conserva.",
   "games.patch.done": "Todo listo para una nueva aventura",
-  "games.patch.preserved": "Tu copia modificada está guardada. El juego original y el parche no han cambiado.",
-  "games.patch.patch_source_mismatch": "Este parche necesita otro archivo o versión del juego original. Revisa los requisitos del proyecto y elige el archivo correcto.",
-  "games.patch.patch_checksum_mismatch": "La suma de verificación del parche no coincide. Puede estar incompleto; descarga una copia nueva desde su proyecto.",
-  "games.patch.patch_target_mismatch": "La copia final no coincide con la suma de verificación esperada. No se ha guardado nada.",
+  "games.patch.preserved":
+    "Tu copia modificada está guardada. El juego original y el parche no han cambiado.",
+  "games.patch.patch_source_mismatch":
+    "Este parche necesita otro archivo o versión del juego original. Revisa los requisitos del proyecto y elige el archivo correcto.",
+  "games.patch.patch_checksum_mismatch":
+    "La suma de verificación del parche no coincide. Puede estar incompleto; descarga una copia nueva desde su proyecto.",
+  "games.patch.patch_target_mismatch":
+    "La copia final no coincide con la suma de verificación esperada. No se ha guardado nada.",
   "games.patch.patch_expired": "Esta preparación ha caducado. Vuelve a comprobar el parche.",
-  "games.patch.patch_inputs_changed": "Un archivo seleccionado cambió después de la verificación. Vuelve a comprobar el parche antes de guardar.",
-  "games.patch.patch_output_exists": "Ya existe un archivo en esa ubicación. Elige otro nombre; Harbor no reemplaza archivos existentes.",
-  "games.patch.patch_read_failed": "No se pudo leer uno de los archivos. Comprueba que siga disponible y selecciónalo de nuevo.",
-  "games.patch.patch_write_failed": "No se pudo guardar la copia. Revisa la carpeta y el espacio disponible, o elige otra ubicación.",
-  "games.patch.patch_too_large": "El juego original, el parche y la copia final no pueden superar los 256 MB cada uno.",
+  "games.patch.patch_inputs_changed":
+    "Un archivo seleccionado cambió después de la verificación. Vuelve a comprobar el parche antes de guardar.",
+  "games.patch.patch_output_exists":
+    "Ya existe un archivo en esa ubicación. Elige otro nombre; Harbor no reemplaza archivos existentes.",
+  "games.patch.patch_read_failed":
+    "No se pudo leer uno de los archivos. Comprueba que siga disponible y selecciónalo de nuevo.",
+  "games.patch.patch_write_failed":
+    "No se pudo guardar la copia. Revisa la carpeta y el espacio disponible, o elige otra ubicación.",
+  "games.patch.patch_too_large":
+    "El juego original, el parche y la copia final no pueden superar los 256 MB cada uno.",
   "games.patch.patch_busy": "Se está procesando otro parche. Inténtalo cuando termine.",
-  "games.patch.patch_game_type": "Elige un archivo de juego compatible, como GBA, GB, NES, SFC, NDS o ROM.",
-  "games.patch.patch_output_type": "Mantén la extensión del archivo del juego original al guardar la copia.",
-  "games.patch.invalid": "No se pudo leer este parche. Comprueba el archivo y la versión del juego que requiere el proyecto.",
+  "games.patch.patch_game_type":
+    "Elige un archivo de juego compatible, como GBA, GB, NES, SFC, NDS o ROM.",
+  "games.patch.patch_output_type":
+    "Mantén la extensión del archivo del juego original al guardar la copia.",
+  "games.patch.invalid":
+    "No se pudo leer este parche. Comprueba el archivo y la versión del juego que requiere el proyecto.",
   "games.hub.spotlight": "En primer plano",
   "games.hub.watch": "Ver gameplay",
   "games.hub.watchTitle": "Míralo en acción",
@@ -49,7 +64,8 @@ export default {
   "games.hub.viewOriginal": "Ver juego original",
   "games.hub.toolkitNote": "Descarga un parche para tu juego original.",
   "games.hub.baseVersion": "Usa la versión y región exactas que indique el proyecto.",
-  "games.hub.catalogNote": "Explora ROM hacks y mods de consola. Filtra por sistema o busca por nombre.",
+  "games.hub.catalogNote":
+    "Explora ROM hacks y mods de consola. Filtra por sistema o busca por nombre.",
   "games.hub.findVideos": "Buscar gameplay",
   "games.hub.resources": "Comunidades de ROM hacking",
   "games.patch.open": "Aplicar un parche",
@@ -60,10 +76,12 @@ export default {
   "games.atlas.sort.rated": "Mejor puntuados",
   "games.atlas.sort.newest": "Más recientes",
   "games.atlas.sort.oldest": "Más antiguos",
-  "games.hub.stepPatch": "Elige tu juego original y un parche BPS, IPS o UPS. Harbor guarda una copia aparte.",
-  "games.patch.description": "Elige tu juego original y un parche BPS, IPS o UPS. Harbor guarda una copia aparte.",
+  "games.hub.stepPatch":
+    "Elige tu juego original y un parche BPS, IPS o UPS. Harbor guarda una copia aparte.",
+  "games.patch.description":
+    "Elige tu juego original y un parche BPS, IPS o UPS. Harbor guarda una copia aparte.",
   "games.patch.choosePatch": "Elegir parche (BPS, IPS, UPS)",
   "games.patch.patch_unsupported": "Este archivo no es un parche BPS, IPS o UPS compatible.",
   "games.discovery.viewGame": "Ver juego",
-  "games.atlas.basedOn": "Basado en este juego"
+  "games.atlas.basedOn": "Basado en este juego",
 };

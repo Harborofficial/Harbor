@@ -31,7 +31,8 @@ export function SettingsJumpBar({
       if (title) next.push({ id: s.id, title });
     }
     setItems((prev) =>
-      prev.length === next.length && prev.every((p, i) => p.id === next[i].id && p.title === next[i].title)
+      prev.length === next.length &&
+      prev.every((p, i) => p.id === next[i].id && p.title === next[i].title)
         ? prev
         : next,
     );
@@ -160,11 +161,9 @@ export function SettingsJumpBar({
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onWheel={onWheel}
- className={`pointer-events-auto flex max-w-[min(640px,72vw)] select-none items-center gap-1 overflow-x-auto rounded-full bg-surface px-1.5 py-1.5 harbor-float backdrop-blur-xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${dragging ?"cursor-grabbing" :"cursor-grab"}`}
+        className={`pointer-events-auto flex max-w-[min(640px,72vw)] select-none items-center gap-1 overflow-x-auto rounded-full bg-surface px-1.5 py-1.5 harbor-float backdrop-blur-xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
       >
-        <span className="harbor-settings-label shrink-0 ps-2.5 pe-1.5">
-          {t("On this page")}
-        </span>
+        <span className="harbor-settings-label shrink-0 ps-2.5 pe-1.5">{t("On this page")}</span>
         {items.map((it) => {
           const on = it.id === activeId;
           return (

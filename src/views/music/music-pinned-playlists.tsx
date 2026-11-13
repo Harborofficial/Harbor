@@ -2,7 +2,10 @@ import { useRef, useState, type MouseEvent } from "react";
 import { save } from "@tauri-apps/plugin-dialog";
 import { confirmAction } from "@/lib/confirm-action";
 import { MusicCoverCard } from "@/components/music/music-cover-card";
-import { MusicPlaylistEditDialog, type PlaylistEditTarget } from "@/components/music/music-playlist-edit-dialog";
+import {
+  MusicPlaylistEditDialog,
+  type PlaylistEditTarget,
+} from "@/components/music/music-playlist-edit-dialog";
 import {
   harborPlaylistMenuItems,
   spotifyPlaylistMenuItems,
@@ -133,7 +136,9 @@ function PinnedToHome({ ctx, title }: { ctx: MusicBandContext; title: string }) 
     if (entry.spotify) {
       // Editable is only known from the account's playlist list, so fetch the
       // record the same way the library does and let the menu fill in.
-      void loadSpotifyPlaylist(entry.id).then(setSpotifyInfo).catch(() => setSpotifyInfo(null));
+      void loadSpotifyPlaylist(entry.id)
+        .then(setSpotifyInfo)
+        .catch(() => setSpotifyInfo(null));
     }
   };
 

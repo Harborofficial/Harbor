@@ -59,7 +59,8 @@ export default {
   "games.recent.open": "Open {name} from {source}",
   "games.recent.files": "Source files",
   "games.recent.empty": "Connect a game source to see its latest additions here.",
-  "games.recent.undated": "Your sources have no dated game uploads yet. Browse them in Manage sources.",
+  "games.recent.undated":
+    "Your sources have no dated game uploads yet. Browse them in Manage sources.",
   "games.recent.adult": "Adult content · artwork blurred",
   "games.recent.artHidden": "Artwork hidden",
   "games.recent.artUnrated": "Content rating unavailable",
@@ -142,8 +143,10 @@ export default {
   "games.tournaments.checked": "Organizer dates checked {date}",
   "games.tournaments.schedule": "Official event details",
   "games.tournaments.watch": "Where to watch",
-  "games.tournaments.channelsNote": "Official channels. Event coverage follows the tournament schedule.",
-  "games.tournaments.broadcastPending": "Broadcast details have not been confirmed here. Check the organizer’s event page.",
+  "games.tournaments.channelsNote":
+    "Official channels. Event coverage follows the tournament schedule.",
+  "games.tournaments.broadcastPending":
+    "Broadcast details have not been confirmed here. Check the organizer’s event page.",
   "games.tournaments.noDates": "No upcoming major confirmed in this calendar.",
   "games.launchers.topGames": "Most played on Steam",
   "games.launchers.chartRank": "#{rank} most played",

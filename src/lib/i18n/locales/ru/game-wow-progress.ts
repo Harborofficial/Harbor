@@ -14,6 +14,6 @@ const gameWowProgress: Record<string, string> = {
   "games.wow.progress.noCounts": "Число прохождений недоступно",
   "games.wow.progress.counts": "Прохождений: {total} · Вовремя: {timed}",
   "games.wow.progress.best": "Лучшее прохождение",
-  "games.wow.progress.explore": "Смотреть прохождения"
+  "games.wow.progress.explore": "Смотреть прохождения",
 };
 export default gameWowProgress;

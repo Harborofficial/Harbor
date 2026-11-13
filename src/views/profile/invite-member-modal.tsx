@@ -120,7 +120,10 @@ export function InviteMemberModal({
 
         <div className="px-5 pt-4">
           <div className="relative">
-            <Search size={16} className="pointer-events-none absolute inset-y-0 start-3.5 my-auto text-ink-subtle" />
+            <Search
+              size={16}
+              className="pointer-events-none absolute inset-y-0 start-3.5 my-auto text-ink-subtle"
+            />
             <input
               autoFocus
               value={query}
@@ -133,19 +136,26 @@ export function InviteMemberModal({
               className="h-11 w-full rounded-xl border border-edge bg-canvas ps-10 pe-10 text-[14px] text-ink outline-none transition-colors placeholder:text-ink-subtle focus:border-ink"
             />
             {phase === "searching" && (
-              <Loader2 size={16} className="absolute inset-y-0 end-3.5 my-auto animate-spin text-ink-subtle" />
+              <Loader2
+                size={16}
+                className="absolute inset-y-0 end-3.5 my-auto animate-spin text-ink-subtle"
+              />
             )}
           </div>
         </div>
 
         {error && (
-          <p className="mx-5 mt-3 rounded-lg bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>
+          <p className="mx-5 mt-3 rounded-lg bg-danger/15 px-3 py-2 text-[12.5px] text-danger">
+            {error}
+          </p>
         )}
 
         <div className="mt-3 max-h-[46vh] overflow-y-auto px-2.5 pb-3">
           {phase === "idle" && <Empty text={t("Start typing to find people.")} />}
           {phase !== "idle" && results.length === 0 && (
-            <Empty text={phase === "searching" ? t("Searching...") : t("No one found by that name.")} />
+            <Empty
+              text={phase === "searching" ? t("Searching...") : t("No one found by that name.")}
+            />
           )}
           {results.map((hit) => (
             <ResultRow key={hit.handle} hit={hit} state={stateFor(hit)} onAdd={() => add(hit)} />
@@ -176,21 +186,35 @@ function ResultRow({ hit, state, onAdd }: { hit: UserHit; state: RowState; onAdd
 function AddButton({ state, onAdd }: { state: RowState; onAdd: () => void }) {
   const t = useT();
   if (state === "self") return <Tag label={t("You")} />;
-  if (state === "member") return <Tag label={t("Member")} tone="success" icon={<Check size={14} />} />;
-  if (state === "added") return <Tag label={t("Added")} tone="success" icon={<Check size={14} />} />;
+  if (state === "member")
+    return <Tag label={t("Member")} tone="success" icon={<Check size={14} />} />;
+  if (state === "added")
+    return <Tag label={t("Added")} tone="success" icon={<Check size={14} />} />;
   return (
     <button
       onClick={onAdd}
       disabled={state === "sending"}
       className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-60"
     >
-      {state === "sending" ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
+      {state === "sending" ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : (
+        <UserPlus size={14} />
+      )}
       {t("Add")}
     </button>
   );
 }
 
-function Tag({ label, tone = "muted", icon }: { label: string; tone?: "muted" | "success"; icon?: ReactNode }) {
+function Tag({
+  label,
+  tone = "muted",
+  icon,
+}: {
+  label: string;
+  tone?: "muted" | "success";
+  icon?: ReactNode;
+}) {
   return (
     <span
       className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-[12.5px] font-medium ${

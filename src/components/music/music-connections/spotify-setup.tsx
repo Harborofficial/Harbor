@@ -53,26 +53,29 @@ export function SpotifyDevicePairing({
   };
 
   const poll = (interval: number) => {
-    timer.current = window.setTimeout(() => {
-      if (!listening.current) return;
-      void pollSpotifyDevicePairing()
-        .then((result) => {
-          if (!listening.current) return;
-          if (result.state === "connected") {
+    timer.current = window.setTimeout(
+      () => {
+        if (!listening.current) return;
+        void pollSpotifyDevicePairing()
+          .then((result) => {
+            if (!listening.current) return;
+            if (result.state === "connected") {
+              stop();
+              setPrompt(null);
+              onPaired();
+              return;
+            }
+            poll(result.interval);
+          })
+          .catch((reason) => {
+            if (!listening.current) return;
             stop();
             setPrompt(null);
-            onPaired();
-            return;
-          }
-          poll(result.interval);
-        })
-        .catch((reason) => {
-          if (!listening.current) return;
-          stop();
-          setPrompt(null);
-          setFailure(text(reason));
-        });
-    }, Math.max(1, interval) * 1000);
+            setFailure(text(reason));
+          });
+      },
+      Math.max(1, interval) * 1000,
+    );
   };
 
   const start = () => {
@@ -120,9 +123,7 @@ export function SpotifyDevicePairing({
             <button
               type="button"
               onClick={() =>
-                void copyText(prompt.userCode).then((ok) =>
-                  setCopyState(ok ? "copied" : "failed"),
-                )
+                void copyText(prompt.userCode).then((ok) => setCopyState(ok ? "copied" : "failed"))
               }
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-edge px-4 text-[12px] font-medium text-ink hover:bg-elevated"
             >
@@ -203,96 +204,94 @@ export function SpotifyBrowsingGuide({
 
   return (
     <ol className="mt-4 grid max-w-2xl gap-5">
-        <li className={stepClass}>
-          <span className={numberClass} aria-hidden="true">
-            1
-          </span>
-          <div>
-            <p className={titleClass}>{t("music.spotifySetup.createTitle")}</p>
-            <p className={bodyClass}>{t("music.spotifySetup.createBody")}</p>
+      <li className={stepClass}>
+        <span className={numberClass} aria-hidden="true">
+          1
+        </span>
+        <div>
+          <p className={titleClass}>{t("music.spotifySetup.createTitle")}</p>
+          <p className={bodyClass}>{t("music.spotifySetup.createBody")}</p>
+          <button
+            type="button"
+            onClick={() => void openUrl(SPOTIFY_DASHBOARD_URL)}
+            className="inline-flex min-h-11 items-center gap-2 text-[13px] font-medium text-ink hover:underline"
+          >
+            {t("music.spotifySetup.dashboard")}
+            <ExternalLink size={15} aria-hidden="true" />
+          </button>
+        </div>
+      </li>
+      <li className={stepClass}>
+        <span className={numberClass} aria-hidden="true">
+          2
+        </span>
+        <div className="min-w-0">
+          <p className={titleClass}>{t("music.spotifySetup.redirectTitle")}</p>
+          <p className={bodyClass}>{t("music.spotifySetup.redirectBody")}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <input
+              readOnly
+              value={SPOTIFY_REDIRECT_URI}
+              aria-label={t("music.spotifySetup.redirectLabel")}
+              onFocus={(event) => event.currentTarget.select()}
+              dir="ltr"
+              className="h-11 min-w-0 flex-[1_1_240px] select-text rounded-md border border-edge bg-canvas px-3 font-mono text-[12px] text-ink outline-none focus:border-ink-muted"
+            />
             <button
               type="button"
-              onClick={() => void openUrl(SPOTIFY_DASHBOARD_URL)}
-              className="inline-flex min-h-11 items-center gap-2 text-[13px] font-medium text-ink hover:underline"
+              onClick={() =>
+                void copyText(SPOTIFY_REDIRECT_URI).then((ok) =>
+                  setCopyState(ok ? "copied" : "failed"),
+                )
+              }
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-edge px-4 text-[12px] font-medium text-ink hover:bg-elevated"
             >
-              {t("music.spotifySetup.dashboard")}
-              <ExternalLink size={15} aria-hidden="true" />
+              {copyState === "copied" ? (
+                <Check size={17} aria-hidden="true" />
+              ) : (
+                <Copy size={17} aria-hidden="true" />
+              )}
+              {t(
+                copyState === "copied" ? "music.spotifySetup.copied" : "music.spotifySetup.copyUri",
+              )}
             </button>
           </div>
-        </li>
-        <li className={stepClass}>
-          <span className={numberClass} aria-hidden="true">
-            2
-          </span>
-          <div className="min-w-0">
-            <p className={titleClass}>{t("music.spotifySetup.redirectTitle")}</p>
-            <p className={bodyClass}>{t("music.spotifySetup.redirectBody")}</p>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <input
-                readOnly
-                value={SPOTIFY_REDIRECT_URI}
-                aria-label={t("music.spotifySetup.redirectLabel")}
-                onFocus={(event) => event.currentTarget.select()}
-                dir="ltr"
-                className="h-11 min-w-0 flex-[1_1_240px] select-text rounded-md border border-edge bg-canvas px-3 font-mono text-[12px] text-ink outline-none focus:border-ink-muted"
-              />
-              <button
-                type="button"
-                onClick={() =>
-                  void copyText(SPOTIFY_REDIRECT_URI).then((ok) =>
-                    setCopyState(ok ? "copied" : "failed"),
-                  )
-                }
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-edge px-4 text-[12px] font-medium text-ink hover:bg-elevated"
-              >
-                {copyState === "copied" ? (
-                  <Check size={17} aria-hidden="true" />
-                ) : (
-                  <Copy size={17} aria-hidden="true" />
-                )}
-                {t(
-                  copyState === "copied"
-                    ? "music.spotifySetup.copied"
-                    : "music.spotifySetup.copyUri",
-                )}
-              </button>
-            </div>
-            <p
-              role="status"
-              className={
-                copyState === "failed" ? "mt-1 text-[12px] leading-5 text-ink-muted" : "sr-only"
-              }
-            >
-              {copyState === "failed"
-                ? t("music.spotifySetup.copyFailed")
-                : copyState === "copied"
-                  ? t("music.spotifySetup.copied")
-                  : null}
-            </p>
-          </div>
-        </li>
-        <li className={stepClass}>
-          <span className={numberClass} aria-hidden="true">
-            3
-          </span>
-          <label className="music-connect-field min-w-0">
-            <span className={`block ${titleClass}`}>{t("music.spotifySetup.clientTitle")}</span>
-            <input
-              type="text"
-              value={clientId}
-              onChange={(event) => onChange(event.currentTarget.value)}
-              disabled={disabled}
-              autoComplete="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              dir="ltr"
-              aria-label={t("music.spotifySetup.clientTitle")}
-              placeholder={t("music.spotifySetup.clientPlaceholder")}
-              className="mt-2 h-11 w-full rounded-md border border-edge bg-canvas px-3 text-[14px] text-ink disabled:opacity-40"
-            />
-            <span className={`block ${bodyClass}`}>{t("music.spotifySetup.accountHint")}</span>
-          </label>
-        </li>
+          <p
+            role="status"
+            className={
+              copyState === "failed" ? "mt-1 text-[12px] leading-5 text-ink-muted" : "sr-only"
+            }
+          >
+            {copyState === "failed"
+              ? t("music.spotifySetup.copyFailed")
+              : copyState === "copied"
+                ? t("music.spotifySetup.copied")
+                : null}
+          </p>
+        </div>
+      </li>
+      <li className={stepClass}>
+        <span className={numberClass} aria-hidden="true">
+          3
+        </span>
+        <label className="music-connect-field min-w-0">
+          <span className={`block ${titleClass}`}>{t("music.spotifySetup.clientTitle")}</span>
+          <input
+            type="text"
+            value={clientId}
+            onChange={(event) => onChange(event.currentTarget.value)}
+            disabled={disabled}
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            dir="ltr"
+            aria-label={t("music.spotifySetup.clientTitle")}
+            placeholder={t("music.spotifySetup.clientPlaceholder")}
+            className="mt-2 h-11 w-full rounded-md border border-edge bg-canvas px-3 text-[14px] text-ink disabled:opacity-40"
+          />
+          <span className={`block ${bodyClass}`}>{t("music.spotifySetup.accountHint")}</span>
+        </label>
+      </li>
     </ol>
   );
 }

@@ -3,7 +3,8 @@ export default {
   "games.dota.title": "Tendances des héros",
   "games.dota.intro": "Trouvez votre prochain héros.",
   "games.dota.refresh": "Actualiser les tendances",
-  "games.dota.unavailable": "Actualisation impossible. Les données déjà chargées peuvent rester affichées.",
+  "games.dota.unavailable":
+    "Actualisation impossible. Les données déjà chargées peuvent rester affichées.",
   "games.dota.partial": "Certaines données sont indisponibles.",
   "games.dota.checked": "Vérifié le {date}",
   "games.dota.search": "Chercher un héros",
@@ -18,7 +19,8 @@ export default {
   "games.dota.attribute.agi": "Agilité",
   "games.dota.attribute.int": "Intelligence",
   "games.dota.attribute.all": "Universel",
-  "games.dota.trendsScope": "Échantillon OpenDota : sept jours UTC, aujourd’hui inclus. Le rang est la moyenne de la partie ; Turbo et parties professionnelles sont séparés.",
+  "games.dota.trendsScope":
+    "Échantillon OpenDota : sept jours UTC, aujourd’hui inclus. Le rang est la moyenne de la partie ; Turbo et parties professionnelles sont séparés.",
   "games.dota.wins": "de victoires",
   "games.dota.picks": "{count} sélections",
   "games.dota.noSample": "Aucune donnée",
@@ -26,7 +28,8 @@ export default {
   "games.dota.moreHeroes": "Plus de héros",
   "games.dota.matchups": "Duels professionnels",
   "games.dota.refreshMatchups": "Actualiser les duels",
-  "games.dota.matchupsScope": "Victoires de {hero} face à chaque adversaire dans les parties professionnelles enregistrées sur un an. Inclut d’anciens patchs ; indépendant du filtre de rang.",
+  "games.dota.matchupsScope":
+    "Victoires de {hero} face à chaque adversaire dans les parties professionnelles enregistrées sur un an. Inclut d’anciens patchs ; indépendant du filtre de rang.",
   "games.dota.opponent": "Chercher un adversaire",
   "games.dota.minimum": "Minimum de parties",
   "games.dota.minGames": "{count}+ parties",
@@ -48,5 +51,5 @@ export default {
   "games.dota.sample.5": "Légende",
   "games.dota.sample.6": "Ancien",
   "games.dota.sample.7": "Divin",
-  "games.dota.sample.8": "Immortel"
+  "games.dota.sample.8": "Immortel",
 };

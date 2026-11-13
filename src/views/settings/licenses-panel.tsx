@@ -80,7 +80,14 @@ const LICENSE_TEXT = import.meta.glob("../../assets/licenses/*.txt", {
   import: "default",
 }) as Record<string, () => Promise<unknown>>;
 
-type Credit = { name: string; blurb: string; url: string; logo?: string; fill?: boolean; mono?: string };
+type Credit = {
+  name: string;
+  blurb: string;
+  url: string;
+  logo?: string;
+  fill?: boolean;
+  mono?: string;
+};
 type Dep = { name: string; license: string; url: string; logo: string };
 type LicenseDoc = { id: string; title: string; used: string; file: string };
 
@@ -121,7 +128,12 @@ function Logo({
 function BrandCard({ credit }: { credit: Credit }) {
   const t = useT();
   return (
-    <button type="button" onClick={() => void openUrl(credit.url)} className="hset-brandcard" title={credit.url}>
+    <button
+      type="button"
+      onClick={() => void openUrl(credit.url)}
+      className="hset-brandcard"
+      title={credit.url}
+    >
       <Logo src={credit.logo} name={credit.name} size={54} fill={credit.fill} />
       <span className="hset-brandcard-name">
         <span className="min-w-0 truncate">{credit.name}</span>
@@ -143,9 +155,17 @@ function ServiceRow({ credit }: { credit: Credit }) {
       title={credit.url}
     >
       <span className="hset-row-text">
-        <Logo src={credit.logo} mono={credit.mono} name={credit.name} size={38} fill={credit.fill} />
+        <Logo
+          src={credit.logo}
+          mono={credit.mono}
+          name={credit.name}
+          size={38}
+          fill={credit.fill}
+        />
         <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[16.5px] font-medium leading-[22px] tracking-[-0.12px] text-ink">{credit.name}</span>
+          <span className="text-[16.5px] font-medium leading-[22px] tracking-[-0.12px] text-ink">
+            {credit.name}
+          </span>
           <span className={"max-w-[70ch] " + ROW_DESC}>{t(credit.blurb)}</span>
         </span>
       </span>
@@ -163,7 +183,12 @@ function ServiceRow({ credit }: { credit: Credit }) {
 
 function DepRow({ dep }: { dep: Dep }) {
   return (
-    <button type="button" onClick={() => void openUrl(dep.url)} className="hset-ossrow" title={dep.url}>
+    <button
+      type="button"
+      onClick={() => void openUrl(dep.url)}
+      className="hset-ossrow"
+      title={dep.url}
+    >
       <Logo src={dep.logo} name={dep.name} size={30} />
       <span className="hset-ossname">{dep.name}</span>
       <span className="hset-osslicense">{dep.license}</span>
@@ -197,12 +222,16 @@ function LicenseRow({
   const action = pending
     ? t("Saving…")
     : saved
-      ? download.status?.phase === "downloaded" ? t("Download started") : t("Saved")
+      ? download.status?.phase === "downloaded"
+        ? t("Download started")
+        : t("Saved")
       : t("Save");
   return (
     <button
       type="button"
-      onClick={() => { if (download.pendingId === null) onSave(doc); }}
+      onClick={() => {
+        if (download.pendingId === null) onSave(doc);
+      }}
       className="hset-row text-start aria-disabled:cursor-wait aria-disabled:opacity-60"
       data-interactive=""
       aria-disabled={download.pendingId !== null}
@@ -210,13 +239,19 @@ function LicenseRow({
     >
       <span className="hset-row-text">
         <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[16.5px] font-medium leading-[22px] tracking-[-0.12px] text-ink">{doc.title}</span>
+          <span className="text-[16.5px] font-medium leading-[22px] tracking-[-0.12px] text-ink">
+            {doc.title}
+          </span>
           <span className={"max-w-[70ch] " + ROW_DESC}>{t(doc.used)}</span>
         </span>
       </span>
       <span className="hset-row-control">
         <span className="hset-license-save">
-          {saved ? <Check size={16} strokeWidth={2.5} aria-hidden /> : <Download size={16} strokeWidth={2} aria-hidden />}
+          {saved ? (
+            <Check size={16} strokeWidth={2.5} aria-hidden />
+          ) : (
+            <Download size={16} strokeWidth={2} aria-hidden />
+          )}
           {action}
         </span>
       </span>
@@ -256,127 +291,461 @@ const METADATA: Credit[] = [
     url: "https://www.themoviedb.org",
     logo: tmdbLogo,
   },
-  { name: "TheTVDB", blurb: "Episode ordering, air dates and series artwork.", url: "https://thetvdb.com", logo: tvdbLogo },
+  {
+    name: "TheTVDB",
+    blurb: "Episode ordering, air dates and series artwork.",
+    url: "https://thetvdb.com",
+    logo: tvdbLogo,
+  },
   {
     name: "Fanart.tv",
     blurb: "Community-contributed logos, backdrops and clear art used on hero and detail pages.",
     url: "https://fanart.tv",
     logo: fanartLogo,
   },
-  { name: "Kitsu", blurb: "Anime metadata and identifier mapping between anime databases.", url: "https://kitsu.io", logo: kitsuLogo },
-  { name: "AniZip", blurb: "Anime episode mapping across Kitsu, AniList, MyAnimeList and TheTVDB.", url: "https://ani.zip" },
-  { name: "OMDb", blurb: "Supplementary ratings, including Rotten Tomatoes scores.", url: "https://www.omdbapi.com", logo: omdbLogo },
-  { name: "RPDB", blurb: "Ratings rendered directly into poster images.", url: "https://ratingposterdb.com", logo: rpdbLogo },
-  { name: "MDBList", blurb: "Aggregated ratings and user-maintained lists.", url: "https://mdblist.com", logo: mdblistLogo },
-  { name: "IMDb", blurb: "Title identifiers and ratings, retrieved through the providers above.", url: "https://www.imdb.com", logo: imdbLogo },
-  { name: "Rotten Tomatoes", blurb: "Critic and audience scores shown on detail pages.", url: "https://www.rottentomatoes.com", logo: rtLogo },
-  { name: "Metacritic", blurb: "Metascores shown on detail pages.", url: "https://www.metacritic.com", logo: metacriticLogo },
-  { name: "The New York Times", blurb: "Bestseller lists shown in the eBook section.", url: "https://developer.nytimes.com", logo: nytLogo },
-  { name: "Project Gutenberg", blurb: "Public-domain books for the eBook library.", url: "https://www.gutenberg.org", logo: gutenbergLogo },
-  { name: "Gutendex", blurb: "Searchable catalog for Project Gutenberg books.", url: "https://gutendex.com" },
-  { name: "IGDB", blurb: "Game metadata, artwork and release dates.", url: "https://www.igdb.com", logo: igdbLogo },
-  { name: "ESPN", blurb: "Live scores, schedules and standings.", url: "https://www.espn.com", logo: espnLogo },
+  {
+    name: "Kitsu",
+    blurb: "Anime metadata and identifier mapping between anime databases.",
+    url: "https://kitsu.io",
+    logo: kitsuLogo,
+  },
+  {
+    name: "AniZip",
+    blurb: "Anime episode mapping across Kitsu, AniList, MyAnimeList and TheTVDB.",
+    url: "https://ani.zip",
+  },
+  {
+    name: "OMDb",
+    blurb: "Supplementary ratings, including Rotten Tomatoes scores.",
+    url: "https://www.omdbapi.com",
+    logo: omdbLogo,
+  },
+  {
+    name: "RPDB",
+    blurb: "Ratings rendered directly into poster images.",
+    url: "https://ratingposterdb.com",
+    logo: rpdbLogo,
+  },
+  {
+    name: "MDBList",
+    blurb: "Aggregated ratings and user-maintained lists.",
+    url: "https://mdblist.com",
+    logo: mdblistLogo,
+  },
+  {
+    name: "IMDb",
+    blurb: "Title identifiers and ratings, retrieved through the providers above.",
+    url: "https://www.imdb.com",
+    logo: imdbLogo,
+  },
+  {
+    name: "Rotten Tomatoes",
+    blurb: "Critic and audience scores shown on detail pages.",
+    url: "https://www.rottentomatoes.com",
+    logo: rtLogo,
+  },
+  {
+    name: "Metacritic",
+    blurb: "Metascores shown on detail pages.",
+    url: "https://www.metacritic.com",
+    logo: metacriticLogo,
+  },
+  {
+    name: "The New York Times",
+    blurb: "Bestseller lists shown in the eBook section.",
+    url: "https://developer.nytimes.com",
+    logo: nytLogo,
+  },
+  {
+    name: "Project Gutenberg",
+    blurb: "Public-domain books for the eBook library.",
+    url: "https://www.gutenberg.org",
+    logo: gutenbergLogo,
+  },
+  {
+    name: "Gutendex",
+    blurb: "Searchable catalog for Project Gutenberg books.",
+    url: "https://gutendex.com",
+  },
+  {
+    name: "IGDB",
+    blurb: "Game metadata, artwork and release dates.",
+    url: "https://www.igdb.com",
+    logo: igdbLogo,
+  },
+  {
+    name: "ESPN",
+    blurb: "Live scores, schedules and standings.",
+    url: "https://www.espn.com",
+    logo: espnLogo,
+  },
 ];
 
 const TRACKERS: Credit[] = [
-  { name: "Trakt", blurb: "Account sign-in, watched history, scrobbling, watchlists and comments.", url: "https://trakt.tv", logo: traktLogo },
-  { name: "Simkl", blurb: "Account sign-in, watch history and scrobbling, including anime.", url: "https://simkl.com", logo: simklLogo },
-  { name: "AniList", blurb: "Anime and manga list management and progress synchronisation.", url: "https://anilist.co", logo: anilistLogo },
-  { name: "MyAnimeList", blurb: "Anime and manga list management and progress synchronisation.", url: "https://myanimelist.net", logo: malLogo },
-  { name: "Letterboxd", blurb: "Film diary and watchlist import.", url: "https://letterboxd.com", logo: letterboxdLogo },
-  { name: "PublicMetaDB", blurb: "Watch history, playback resume sync and watchlists.", url: "https://publicmetadb.com", logo: publicmetadbLogo },
+  {
+    name: "Trakt",
+    blurb: "Account sign-in, watched history, scrobbling, watchlists and comments.",
+    url: "https://trakt.tv",
+    logo: traktLogo,
+  },
+  {
+    name: "Simkl",
+    blurb: "Account sign-in, watch history and scrobbling, including anime.",
+    url: "https://simkl.com",
+    logo: simklLogo,
+  },
+  {
+    name: "AniList",
+    blurb: "Anime and manga list management and progress synchronisation.",
+    url: "https://anilist.co",
+    logo: anilistLogo,
+  },
+  {
+    name: "MyAnimeList",
+    blurb: "Anime and manga list management and progress synchronisation.",
+    url: "https://myanimelist.net",
+    logo: malLogo,
+  },
+  {
+    name: "Letterboxd",
+    blurb: "Film diary and watchlist import.",
+    url: "https://letterboxd.com",
+    logo: letterboxdLogo,
+  },
+  {
+    name: "PublicMetaDB",
+    blurb: "Watch history, playback resume sync and watchlists.",
+    url: "https://publicmetadb.com",
+    logo: publicmetadbLogo,
+  },
 ];
 
 const SUBTITLES: Credit[] = [
-  { name: "OpenSubtitles", blurb: "Subtitle search and download.", url: "https://www.opensubtitles.com", logo: opensubtitlesLogo },
-  { name: "SUBDL", blurb: "Subtitle search and download.", url: "https://subdl.com", logo: subdlLogo },
-  { name: "Subsource", blurb: "Subtitle search and download.", url: "https://subsource.net", logo: subsourceLogo },
-  { name: "Gestdown", blurb: "Subtitle search and download.", url: "https://www.gestdown.info", logo: gestdownLogo },
+  {
+    name: "OpenSubtitles",
+    blurb: "Subtitle search and download.",
+    url: "https://www.opensubtitles.com",
+    logo: opensubtitlesLogo,
+  },
+  {
+    name: "SUBDL",
+    blurb: "Subtitle search and download.",
+    url: "https://subdl.com",
+    logo: subdlLogo,
+  },
+  {
+    name: "Subsource",
+    blurb: "Subtitle search and download.",
+    url: "https://subsource.net",
+    logo: subsourceLogo,
+  },
+  {
+    name: "Gestdown",
+    blurb: "Subtitle search and download.",
+    url: "https://www.gestdown.info",
+    logo: gestdownLogo,
+  },
   { name: "Podnapisi", blurb: "Subtitle search and download.", url: "https://www.podnapisi.net" },
-  { name: "Wyzie", blurb: "Subtitle search requiring no API key.", url: "https://wyzie.ru", logo: wyzieLogo },
+  {
+    name: "Wyzie",
+    blurb: "Subtitle search requiring no API key.",
+    url: "https://wyzie.ru",
+    logo: wyzieLogo,
+  },
 ];
 
 const SKIPPING: Credit[] = [
-  { name: "AniSkip", blurb: "Community-contributed opening and ending timings for anime.", url: "https://aniskip.com", logo: aniskipLogo },
-  { name: "TheIntroDB", blurb: "Intro and credits timings for films and television.", url: "https://theintrodb.org", logo: theIntroDbLogo },
-  { name: "IntroDB", blurb: "Intro, recap and credits timings for television.", url: "https://introdb.app", logo: introdbLogo },
-  { name: "SkipDB", blurb: "Intro, recap, credits and preview timings.", url: "https://skipdb.tv", logo: skipdbLogo },
+  {
+    name: "AniSkip",
+    blurb: "Community-contributed opening and ending timings for anime.",
+    url: "https://aniskip.com",
+    logo: aniskipLogo,
+  },
+  {
+    name: "TheIntroDB",
+    blurb: "Intro and credits timings for films and television.",
+    url: "https://theintrodb.org",
+    logo: theIntroDbLogo,
+  },
+  {
+    name: "IntroDB",
+    blurb: "Intro, recap and credits timings for television.",
+    url: "https://introdb.app",
+    logo: introdbLogo,
+  },
+  {
+    name: "SkipDB",
+    blurb: "Intro, recap, credits and preview timings.",
+    url: "https://skipdb.tv",
+    logo: skipdbLogo,
+  },
 ];
 
 const DEBRID: Credit[] = [
-  { name: "Real-Debrid", blurb: "Cached source resolution and direct download links.", url: "https://real-debrid.com", logo: realdebridLogo },
-  { name: "Premiumize", blurb: "Cached source resolution and cloud library access.", url: "https://www.premiumize.me", logo: premiumizeLogo },
-  { name: "AllDebrid", blurb: "Cached source resolution and direct download links.", url: "https://alldebrid.com", logo: alldebridLogo },
-  { name: "TorBox", blurb: "Cached source resolution and cloud library access.", url: "https://torbox.app", logo: torboxLogo },
-  { name: "Debrid-Link", blurb: "Cached source resolution and direct download links.", url: "https://debrid-link.com", logo: debridlinkLogo },
+  {
+    name: "Real-Debrid",
+    blurb: "Cached source resolution and direct download links.",
+    url: "https://real-debrid.com",
+    logo: realdebridLogo,
+  },
+  {
+    name: "Premiumize",
+    blurb: "Cached source resolution and cloud library access.",
+    url: "https://www.premiumize.me",
+    logo: premiumizeLogo,
+  },
+  {
+    name: "AllDebrid",
+    blurb: "Cached source resolution and direct download links.",
+    url: "https://alldebrid.com",
+    logo: alldebridLogo,
+  },
+  {
+    name: "TorBox",
+    blurb: "Cached source resolution and cloud library access.",
+    url: "https://torbox.app",
+    logo: torboxLogo,
+  },
+  {
+    name: "Debrid-Link",
+    blurb: "Cached source resolution and direct download links.",
+    url: "https://debrid-link.com",
+    logo: debridlinkLogo,
+  },
 ];
 
 const SERVERS: Credit[] = [
-  { name: "Plex", blurb: "Playback from a Plex Media Server library.", url: "https://www.plex.tv", logo: plexLogo },
-  { name: "Jellyfin", blurb: "Playback from a Jellyfin server library.", url: "https://jellyfin.org", logo: jellyfinLogo },
-  { name: "Emby", blurb: "Playback from an Emby server library.", url: "https://emby.media", logo: embyLogo },
+  {
+    name: "Plex",
+    blurb: "Playback from a Plex Media Server library.",
+    url: "https://www.plex.tv",
+    logo: plexLogo,
+  },
+  {
+    name: "Jellyfin",
+    blurb: "Playback from a Jellyfin server library.",
+    url: "https://jellyfin.org",
+    logo: jellyfinLogo,
+  },
+  {
+    name: "Emby",
+    blurb: "Playback from an Emby server library.",
+    url: "https://emby.media",
+    logo: embyLogo,
+  },
 ];
 
 const CASTING: Credit[] = [
-  { name: "Google Cast", blurb: "Casting to Chromecast and Google Cast receivers.", url: "https://www.google.com/chromecast", mono: chromecastMark },
+  {
+    name: "Google Cast",
+    blurb: "Casting to Chromecast and Google Cast receivers.",
+    url: "https://www.google.com/chromecast",
+    mono: chromecastMark,
+  },
   { name: "Roku", blurb: "Casting to Roku devices.", url: "https://www.roku.com", logo: rokuLogo },
-  { name: "AirPlay", blurb: "Casting to Apple TV and AirPlay receivers.", url: "https://www.apple.com/airplay", mono: airplayMark },
-  { name: "DLNA", blurb: "Casting to DLNA and UPnP renderers on the local network.", url: "https://www.dlna.org", mono: dlnaMark },
+  {
+    name: "AirPlay",
+    blurb: "Casting to Apple TV and AirPlay receivers.",
+    url: "https://www.apple.com/airplay",
+    mono: airplayMark,
+  },
+  {
+    name: "DLNA",
+    blurb: "Casting to DLNA and UPnP renderers on the local network.",
+    url: "https://www.dlna.org",
+    mono: dlnaMark,
+  },
 ];
 
 const ADDONS: Credit[] = [
   {
     name: "Stremio",
-    blurb: "The open addon protocol Harbor implements. Harbor is an independent client for that protocol.",
+    blurb:
+      "The open addon protocol Harbor implements. Harbor is an independent client for that protocol.",
     url: "https://www.stremio.com",
     logo: stremioLogo,
   },
-  { name: "Easynews", blurb: "Usenet search and playback.", url: "https://www.easynews.com", logo: easynewsLogo },
-  { name: "AIOStreams", blurb: "Aggregates multiple stream sources into a single addon.", url: "https://github.com/Viren070/AIOStreams", logo: aiostreamsLogo },
-  { name: "AIOStatus", blurb: "Service status for installed addons.", url: "https://p01--status--sdfgdgfsgdfs--s2qq-tktv.code.run/configure", logo: aiostatusLogo },
-  { name: "Local Files", blurb: "Playback of media already stored on the device.", url: "https://www.stremio.com", logo: localFilesLogo },
+  {
+    name: "Easynews",
+    blurb: "Usenet search and playback.",
+    url: "https://www.easynews.com",
+    logo: easynewsLogo,
+  },
+  {
+    name: "AIOStreams",
+    blurb: "Aggregates multiple stream sources into a single addon.",
+    url: "https://github.com/Viren070/AIOStreams",
+    logo: aiostreamsLogo,
+  },
+  {
+    name: "AIOStatus",
+    blurb: "Service status for installed addons.",
+    url: "https://p01--status--sdfgdgfsgdfs--s2qq-tktv.code.run/configure",
+    logo: aiostatusLogo,
+  },
+  {
+    name: "Local Files",
+    blurb: "Playback of media already stored on the device.",
+    url: "https://www.stremio.com",
+    logo: localFilesLogo,
+  },
 ];
 
 const MANGA: Credit[] = [
-  { name: "MangaUpdates", blurb: "Series metadata, chapter counts and release tracking.", url: "https://www.mangaupdates.com", logo: mangaupdatesLogo },
-  { name: "Suwayomi", blurb: "The manga source server Harbor connects to.", url: "https://github.com/Suwayomi", logo: suwayomiLogo },
-  { name: "Mangayomi", blurb: "Source extensions Harbor can read.", url: "https://github.com/kodjodevf/mangayomi", logo: mangayomiLogo },
+  {
+    name: "MangaUpdates",
+    blurb: "Series metadata, chapter counts and release tracking.",
+    url: "https://www.mangaupdates.com",
+    logo: mangaupdatesLogo,
+  },
+  {
+    name: "Suwayomi",
+    blurb: "The manga source server Harbor connects to.",
+    url: "https://github.com/Suwayomi",
+    logo: suwayomiLogo,
+  },
+  {
+    name: "Mangayomi",
+    blurb: "Source extensions Harbor can read.",
+    url: "https://github.com/kodjodevf/mangayomi",
+    logo: mangayomiLogo,
+  },
 ];
 
 const AI: Credit[] = [
-  { name: "OpenRouter", blurb: "Model routing for natural-language search.", url: "https://openrouter.ai", logo: openrouterLogo },
-  { name: "Groq", blurb: "Low-latency inference for natural-language search.", url: "https://groq.com", logo: groqLogo },
-  { name: "Google Gemini", blurb: "Track identification during playback.", url: "https://ai.google.dev", logo: geminiLogo },
-  { name: "AudD", blurb: "Track identification during playback.", url: "https://audd.io", logo: auddLogo },
-  { name: "Jina", blurb: "Page retrieval for search results.", url: "https://jina.ai", logo: jinaLogo },
+  {
+    name: "OpenRouter",
+    blurb: "Model routing for natural-language search.",
+    url: "https://openrouter.ai",
+    logo: openrouterLogo,
+  },
+  {
+    name: "Groq",
+    blurb: "Low-latency inference for natural-language search.",
+    url: "https://groq.com",
+    logo: groqLogo,
+  },
+  {
+    name: "Google Gemini",
+    blurb: "Track identification during playback.",
+    url: "https://ai.google.dev",
+    logo: geminiLogo,
+  },
+  {
+    name: "AudD",
+    blurb: "Track identification during playback.",
+    url: "https://audd.io",
+    logo: auddLogo,
+  },
+  {
+    name: "Jina",
+    blurb: "Page retrieval for search results.",
+    url: "https://jina.ai",
+    logo: jinaLogo,
+  },
 ];
 
 const NOTIFY: Credit[] = [
-  { name: "Discord", blurb: "Webhook notifications and Rich Presence.", url: "https://discord.com", logo: discordLogo },
-  { name: "Telegram", blurb: "Webhook notifications.", url: "https://telegram.org", logo: telegramLogo },
-  { name: "Cloudflare", blurb: "Edge delivery for the services Harbor connects to.", url: "https://www.cloudflare.com", logo: cloudflareLogo },
+  {
+    name: "Discord",
+    blurb: "Webhook notifications and Rich Presence.",
+    url: "https://discord.com",
+    logo: discordLogo,
+  },
+  {
+    name: "Telegram",
+    blurb: "Webhook notifications.",
+    url: "https://telegram.org",
+    logo: telegramLogo,
+  },
+  {
+    name: "Cloudflare",
+    blurb: "Edge delivery for the services Harbor connects to.",
+    url: "https://www.cloudflare.com",
+    logo: cloudflareLogo,
+  },
 ];
 
 const DEPS: Dep[] = [
   { name: "Tauri", license: "MIT / Apache-2.0", url: "https://tauri.app", logo: tauriLogo },
-  { name: "mpv", license: "GPL-2.0-or-later / LGPL-2.1-or-later", url: "https://mpv.io", logo: mpvLogo },
-  { name: "FFmpeg", license: "LGPL-2.1-or-later / GPL-2.0-or-later", url: "https://ffmpeg.org", logo: ffmpegLogo },
+  {
+    name: "mpv",
+    license: "GPL-2.0-or-later / LGPL-2.1-or-later",
+    url: "https://mpv.io",
+    logo: mpvLogo,
+  },
+  {
+    name: "FFmpeg",
+    license: "LGPL-2.1-or-later / GPL-2.0-or-later",
+    url: "https://ffmpeg.org",
+    logo: ffmpegLogo,
+  },
   { name: "SVP", license: "Proprietary, optional", url: "https://www.svp-team.com", logo: svpLogo },
   { name: "React", license: "MIT", url: "https://react.dev", logo: reactLogo },
-  { name: "librqbit", license: "Apache-2.0", url: "https://github.com/ikatson/rqbit", logo: rustLogo },
+  {
+    name: "librqbit",
+    license: "Apache-2.0",
+    url: "https://github.com/ikatson/rqbit",
+    logo: rustLogo,
+  },
   { name: "Lucide", license: "ISC", url: "https://lucide.dev", logo: lucideLogo },
 ];
 
 const LICENSES: LicenseDoc[] = [
-  { id: "miku-visualizer", title: "Hatsune Miku · MikuMikuDance", used: "music.miku.adaptation", file: "miku-visualizer" },
-  { id: "harbor", title: "Harbor, MIT License", used: "The licence Harbor itself is released under.", file: "Harbor" },
-  { id: "mit", title: "MIT License", used: "Used by the majority of Harbor's bundled components, including React and Tauri.", file: "MIT" },
-  { id: "apache", title: "Apache License 2.0", used: "Used by Tauri, librqbit and other bundled components.", file: "Apache-2.0" },
-  { id: "gpl2", title: "GNU General Public License v2.0", used: "Applies to mpv, and to FFmpeg builds configured with GPL components.", file: "GPL-2.0-or-later" },
-  { id: "lgpl21", title: "GNU Lesser General Public License v2.1", used: "Applies to FFmpeg and to mpv's LGPL configuration.", file: "LGPL-2.1-or-later" },
-  { id: "bsd3", title: "BSD 3-Clause License", used: "Used by several bundled components.", file: "BSD-3-Clause" },
-  { id: "bsd2", title: "BSD 2-Clause License", used: "Used by several bundled components.", file: "BSD-2-Clause" },
-  { id: "isc", title: "ISC License", used: "Used by Lucide and several bundled components.", file: "ISC" },
+  {
+    id: "miku-visualizer",
+    title: "Hatsune Miku · MikuMikuDance",
+    used: "music.miku.adaptation",
+    file: "miku-visualizer",
+  },
+  {
+    id: "harbor",
+    title: "Harbor, MIT License",
+    used: "The licence Harbor itself is released under.",
+    file: "Harbor",
+  },
+  {
+    id: "mit",
+    title: "MIT License",
+    used: "Used by the majority of Harbor's bundled components, including React and Tauri.",
+    file: "MIT",
+  },
+  {
+    id: "apache",
+    title: "Apache License 2.0",
+    used: "Used by Tauri, librqbit and other bundled components.",
+    file: "Apache-2.0",
+  },
+  {
+    id: "gpl2",
+    title: "GNU General Public License v2.0",
+    used: "Applies to mpv, and to FFmpeg builds configured with GPL components.",
+    file: "GPL-2.0-or-later",
+  },
+  {
+    id: "lgpl21",
+    title: "GNU Lesser General Public License v2.1",
+    used: "Applies to FFmpeg and to mpv's LGPL configuration.",
+    file: "LGPL-2.1-or-later",
+  },
+  {
+    id: "bsd3",
+    title: "BSD 3-Clause License",
+    used: "Used by several bundled components.",
+    file: "BSD-3-Clause",
+  },
+  {
+    id: "bsd2",
+    title: "BSD 2-Clause License",
+    used: "Used by several bundled components.",
+    file: "BSD-2-Clause",
+  },
+  {
+    id: "isc",
+    title: "ISC License",
+    used: "Used by Lucide and several bundled components.",
+    file: "ISC",
+  },
   {
     id: "notices",
     title: "Third-party notices",
@@ -395,13 +764,22 @@ export function LicensesPanel() {
   const t = useT();
   const download = useAssetDownload();
 
-  const save = useCallback((doc: LicenseDoc) => {
-    void download.save(doc.id, `${doc.file}.txt`, async () => {
-      const load = LICENSE_TEXT[`../../assets/licenses/${doc.file}.txt`];
-      if (!load) throw new Error("Licence source unavailable");
-      return (await load()) as string;
-    }, ["txt"], t("Licence"));
-  }, [download.save, t]);
+  const save = useCallback(
+    (doc: LicenseDoc) => {
+      void download.save(
+        doc.id,
+        `${doc.file}.txt`,
+        async () => {
+          const load = LICENSE_TEXT[`../../assets/licenses/${doc.file}.txt`];
+          if (!load) throw new Error("Licence source unavailable");
+          return (await load()) as string;
+        },
+        ["txt"],
+        t("Licence"),
+      );
+    },
+    [download.save, t],
+  );
 
   return (
     <>
@@ -426,23 +804,58 @@ export function LicensesPanel() {
         </div>
       </Section>
 
-      <Group title="Metadata and artwork" subtitle="Sources of the information and imagery shown in Harbor." items={METADATA} />
+      <Group
+        title="Metadata and artwork"
+        subtitle="Sources of the information and imagery shown in Harbor."
+        items={METADATA}
+      />
       <Group
         title="Trackers and lists"
         subtitle="Services that can record viewing activity. Harbor is not affiliated with any of them."
         items={TRACKERS}
       />
-      <Group title="Subtitles" subtitle="Providers queried when searching for subtitles." items={SUBTITLES} />
-      <Group title="Intro and credits skipping" subtitle="Sources of chapter and segment timing data." items={SKIPPING} />
-      <Group title="Debrid" subtitle="Services Harbor can resolve streams through." items={DEBRID} />
-      <Group title="Media servers" subtitle="Personal media servers Harbor can play from." items={SERVERS} />
+      <Group
+        title="Subtitles"
+        subtitle="Providers queried when searching for subtitles."
+        items={SUBTITLES}
+      />
+      <Group
+        title="Intro and credits skipping"
+        subtitle="Sources of chapter and segment timing data."
+        items={SKIPPING}
+      />
+      <Group
+        title="Debrid"
+        subtitle="Services Harbor can resolve streams through."
+        items={DEBRID}
+      />
+      <Group
+        title="Media servers"
+        subtitle="Personal media servers Harbor can play from."
+        items={SERVERS}
+      />
       <Group title="Casting" subtitle="Protocols and devices Harbor can cast to." items={CASTING} />
-      <Group title="Addons and usenet" subtitle="Sources of the streams themselves." items={ADDONS} />
+      <Group
+        title="Addons and usenet"
+        subtitle="Sources of the streams themselves."
+        items={ADDONS}
+      />
       <Group title="Manga" subtitle="Manga sources, readers and tracking services." items={MANGA} />
-      <Group title="AI and track identification" subtitle="Providers behind natural-language search and song identification." items={AI} />
-      <Group title="Notifications and delivery" subtitle="Services used to deliver notifications and content." items={NOTIFY} />
+      <Group
+        title="AI and track identification"
+        subtitle="Providers behind natural-language search and song identification."
+        items={AI}
+      />
+      <Group
+        title="Notifications and delivery"
+        subtitle="Services used to deliver notifications and content."
+        items={NOTIFY}
+      />
 
-      <Section title={t("Built on")} subtitle={t("The principal open source components Harbor is built from.")}>
+      <Section
+        title={t("Built on")}
+        subtitle={t("The principal open source components Harbor is built from.")}
+      >
         <div className="hset-osslist">
           {DEPS.map((d) => (
             <DepRow key={d.name} dep={d} />

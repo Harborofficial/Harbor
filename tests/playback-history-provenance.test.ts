@@ -302,6 +302,33 @@ test("a manual URL returns to its live session but asks for re-entry after resta
   );
 });
 
+test("local playback keeps the last online source for the same episode", () => {
+  configure();
+  history.savePlayback(
+    "tt-local",
+    {
+      infoHash: "online-hash",
+      addonId: "torrentio",
+      resolution: "1080p",
+      releaseGroup: "NTB",
+      source: "WEB-DL",
+      title: "Example",
+    },
+    1,
+    4,
+  );
+  history.savePlayback(
+    "tt-local",
+    { url: "file:///E:/Shows/Example.S01E04.mkv", title: "Example" },
+    1,
+    4,
+  );
+  const remembered = history.readPlayback("tt-local", 1, 4);
+  assert.equal(remembered?.infoHash, "online-hash");
+  assert.equal(remembered?.addonId, "torrentio");
+  assert.equal(remembered?.releaseGroup, "NTB");
+});
+
 test("protocol-relative URLs in ordinary text and IDs are not retained", () => {
   configure();
   const src = source();

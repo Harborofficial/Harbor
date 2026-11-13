@@ -137,7 +137,9 @@ export function MusicGenreDeep({
   );
   const catalogPlayback = useMusicCatalogPlayback();
   const itemMenu = useMusicItemMenu({
-    onPlay: (item) => { void catalogPlayback.play(item, [item]); },
+    onPlay: (item) => {
+      void catalogPlayback.play(item, [item]);
+    },
     onOpen: (item) => onOpen(item, [item]),
   });
 
@@ -164,18 +166,27 @@ export function MusicGenreDeep({
       [...artists]
         .sort((a, b) => b.score - a.score || b.fans - a.fans || a.name.localeCompare(b.name))
         .map((artist) => ({
-        key: artist.id,
-        kind: "artist",
-        id: artist.id,
-        name: artist.name,
-        subtitle: artist.fans > 0 ? t("music.explore.fans", { count: fansLabel.format(artist.fans) }) : "",
-        artwork: [artist.artwork].filter(Boolean),
-        count: 0,
-        stamp: 0,
-        pinned: false,
-        round: true,
-        item: { kind: "artist", id: artist.id, connectorId: "catalog", name: artist.name, artwork: artist.artwork },
-      })),
+          key: artist.id,
+          kind: "artist",
+          id: artist.id,
+          name: artist.name,
+          subtitle:
+            artist.fans > 0
+              ? t("music.explore.fans", { count: fansLabel.format(artist.fans) })
+              : "",
+          artwork: [artist.artwork].filter(Boolean),
+          count: 0,
+          stamp: 0,
+          pinned: false,
+          round: true,
+          item: {
+            kind: "artist",
+            id: artist.id,
+            connectorId: "catalog",
+            name: artist.name,
+            artwork: artist.artwork,
+          },
+        })),
     [artists, fansLabel, t],
   );
 
@@ -184,10 +195,17 @@ export function MusicGenreDeep({
   return (
     <section className="flex flex-col gap-4">
       {lane !== "songs" && (
-        <MusicSectionHead title={t("music.explore.deepTitle")} subtitle={t("music.explore.deepSubtitle")} />
+        <MusicSectionHead
+          title={t("music.explore.deepTitle")}
+          subtitle={t("music.explore.deepSubtitle")}
+        />
       )}
       <div className="flex flex-wrap items-center justify-end gap-4">
-        <div className="inline-flex shrink-0 items-center gap-1" role="group" aria-label={t("music.explore.deepTitle")}>
+        <div
+          className="inline-flex shrink-0 items-center gap-1"
+          role="group"
+          aria-label={t("music.explore.deepTitle")}
+        >
           {LANES.map((value) => (
             <button
               key={value}
@@ -227,13 +245,27 @@ export function MusicGenreDeep({
         <MusicCollectionGrid
           entries={artistEntries}
           emptyCopy={t("music.explore.deepEmpty")}
-          onOpen={(entry) => entry.item && onOpen(entry.item, artistEntries.flatMap((row) => (row.item ? [row.item] : [])))}
+          onOpen={(entry) =>
+            entry.item &&
+            onOpen(
+              entry.item,
+              artistEntries.flatMap((row) => (row.item ? [row.item] : [])),
+            )
+          }
           onContextMenu={(entry, event) => {
             if (entry.item) itemMenu.open(entry.item, 0, event);
           }}
         />
       )}
-      {failed && <button type="button" className="self-start rounded-md bg-elevated px-4 py-2 text-sm" onClick={() => setRetry(value => value + 1)}>{t("common.retry")}</button>}
+      {failed && (
+        <button
+          type="button"
+          className="self-start rounded-md bg-elevated px-4 py-2 text-sm"
+          onClick={() => setRetry((value) => value + 1)}
+        >
+          {t("common.retry")}
+        </button>
+      )}
       {!laneDone && !failed && <div ref={sentinel} aria-hidden="true" className="h-12 w-full" />}
       {itemMenu.menu}
     </section>

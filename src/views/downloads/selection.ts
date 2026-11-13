@@ -1,5 +1,8 @@
 /** Selection is scoped to the current visible list; hidden filter items are never acted on. */
-export function selectedVisibleIds(visibleIds: readonly string[], selected: ReadonlySet<string>): string[] {
+export function selectedVisibleIds(
+  visibleIds: readonly string[],
+  selected: ReadonlySet<string>,
+): string[] {
   return visibleIds.filter((id) => selected.has(id));
 }
 

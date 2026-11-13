@@ -15,7 +15,9 @@ function evaluate(source: string, resolve: (name: string) => unknown, window: ob
 test("a loaded paused music session returns after video releases SMTC ownership", async () => {
   const owner = evaluate(
     readFileSync(new URL("../src/lib/player/media-key-owner.ts", import.meta.url), "utf8"),
-    (name) => { throw Error(name); },
+    (name) => {
+      throw Error(name);
+    },
   );
   const published: Array<{ kind: string; args?: any[] }> = [];
   const media = {
@@ -23,8 +25,20 @@ test("a loaded paused music session returns after video releases SMTC ownership"
     clearMediaControls: () => published.push({ kind: "clear" }),
     mediaKeyGate: () => true,
   };
-  const track = { title: "Paused song", artist: "Singer", album: "Album", artwork: "https://example.com/art.jpg" };
-  const state = { current: track, phase: "paused", duration: 200, currentTime: 35, volume: 0.7, likedIds: [] };
+  const track = {
+    title: "Paused song",
+    artist: "Singer",
+    album: "Album",
+    artwork: "https://example.com/art.jpg",
+  };
+  const state = {
+    current: track,
+    phase: "paused",
+    duration: 200,
+    currentTime: 35,
+    volume: 0.7,
+    likedIds: [],
+  };
   const controls = evaluate(
     readFileSync(new URL("../src/lib/music/taskbar-buttons.ts", import.meta.url), "utf8"),
     (name) => {
@@ -34,9 +48,11 @@ test("a loaded paused music session returns after video releases SMTC ownership"
       if (name === "./window-title") return { setMusicWindowTitle: () => {} };
       if (name === "@/lib/media-session") return media;
       if (name === "@/lib/player/media-key-owner") return owner;
-      if (name === "./player") return {
-        getMusicState: () => state, subscribeMusic: () => () => {},
-      };
+      if (name === "./player")
+        return {
+          getMusicState: () => state,
+          subscribeMusic: () => () => {},
+        };
       throw Error(name);
     },
     { __TAURI_INTERNALS__: {} },
@@ -49,7 +65,10 @@ test("a loaded paused music session returns after video releases SMTC ownership"
   owner.setVideoOwnsMediaKeys(false);
   media.clearMediaControls(); // Video's unmount cleanup can run after ownership is released.
   await new Promise<void>((resolve) => setImmediate(resolve));
-  assert.deepEqual(published.map((call) => call.kind), ["clear", "update"]);
+  assert.deepEqual(
+    published.map((call) => call.kind),
+    ["clear", "update"],
+  );
   assert.equal(published[1].args?.[0], false, "restore the paused, not playing, state");
   assert.equal(published[1].args?.[1], "Paused song");
   assert.equal(published[1].args?.[7], "music");

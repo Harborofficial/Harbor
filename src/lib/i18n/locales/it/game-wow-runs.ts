@@ -3,7 +3,8 @@ export default {
   "games.wow.runs.title": "Run delle spedizioni",
   "games.wow.runs.all": "Tutti gli affissi",
   "games.wow.runs.current": "Affissi attuali",
-  "games.wow.runs.currentNote": "Corrisponde alla combinazione attuale di affissi, incluse le settimane precedenti.",
+  "games.wow.runs.currentNote":
+    "Corrisponde alla combinazione attuale di affissi, incluse le settimane precedenti.",
   "games.wow.runs.allNote": "Migliori run registrate con tutti gli affissi di questa stagione.",
   "games.wow.runs.page": "Pagina {page}",
   "games.wow.runs.refresh": "Aggiorna le run",
@@ -19,11 +20,12 @@ export default {
   "games.wow.runs.copy": "Copia talenti",
   "games.wow.runs.copyFailed": "Copia non riuscita. Riprova.",
   "games.wow.runs.party": "Composizione del gruppo",
-  "games.wow.runs.snapshots": "I talenti e gli equipaggiamenti pubblicati sono istantanee del fornitore. Possono differire da quelli usati durante questa run.",
+  "games.wow.runs.snapshots":
+    "I talenti e gli equipaggiamenti pubblicati sono istantanee del fornitore. Possono differire da quelli usati durante questa run.",
   "games.wow.runs.gear": "Equipaggiamento",
   "games.wow.runs.tank": "Difensore",
   "games.wow.runs.healer": "Guaritore",
   "games.wow.runs.dps": "Danni",
   "games.wow.runs.snapshotAt": "Istantanea equipaggiamento: {date}",
-  "games.wow.runs.closeGear": "Chiudi equipaggiamento"
+  "games.wow.runs.closeGear": "Chiudi equipaggiamento",
 };

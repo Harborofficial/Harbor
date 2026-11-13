@@ -25,7 +25,7 @@ import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import { SecondaryPrivilegesCard } from "./account/secondary-privileges-card";
 import { SettingsModal, ModalButton } from "./kit";
 import { ShieldAlert } from "lucide-react";
-import { getSecondaryPrivileges } from "@/lib/settings/defaults";
+import { getSecondaryPrivileges } from "@/lib/profiles/privileges";
 import { isStremioActivePrimary, activeProfileIsPrimary } from "@/lib/active-profile-id";
 
 type Tab = "provider" | "you" | "profiles" | "harbor" | "stremio" | "nuvio";

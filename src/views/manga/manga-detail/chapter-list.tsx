@@ -894,19 +894,19 @@ export function ChapterList({
       <div className="relative">
         <Search
           size={18}
-          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-subtle"
+          className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-ink-subtle"
         />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("Search chapters...")}
-          className="h-11 w-full rounded-xl border border-edge-soft bg-surface/60 pl-11 pr-4 text-[14px] text-ink transition-colors placeholder:text-ink-subtle focus:border-edge focus:outline-none"
+          className="h-11 w-full rounded-xl border border-edge-soft bg-surface/60 ps-11 pe-4 text-[14px] text-ink transition-colors placeholder:text-ink-subtle focus:border-edge focus:outline-none"
         />
       </div>
 
       {scanOptions.length > 1 && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="mr-1 text-[13px] font-medium text-ink-subtle">{t("Scanlator")}</span>
+          <span className="me-1 text-[13px] font-medium text-ink-subtle">{t("Scanlator")}</span>
           <button
             type="button"
             onClick={() => chooseScan("")}
@@ -930,7 +930,7 @@ export function ChapterList({
               }`}
             >
               {o.name}
-              <span className="ml-1.5 text-[11px] font-normal tabular-nums text-ink-subtle">
+              <span className="ms-1.5 text-[11px] font-normal tabular-nums text-ink-subtle">
                 {o.count}
               </span>
             </button>
@@ -940,7 +940,7 @@ export function ChapterList({
 
       {showPager && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="mr-1 text-[13px] font-medium text-ink-subtle">{t("Jump to")}</span>
+          <span className="me-1 text-[13px] font-medium text-ink-subtle">{t("Jump to")}</span>
           <button
             type="button"
             onClick={() => setRange(null)}

@@ -3,5 +3,5 @@ export default {
   "games.antiCheat.unknown": "Belirtilmemiş",
   "games.antiCheat.kernel": "Çekirdek düzeyinde hile önleme",
   "games.antiCheat.unavailable": "Hile önleme bilgileri mevcut değil.",
-  "games.antiCheat.source": "Kaynak: {source}"
+  "games.antiCheat.source": "Kaynak: {source}",
 };

@@ -3,11 +3,13 @@ export default {
   "games.audience.deck": "Steam Deck · en çok oynananlar",
   "games.audience.deckNote": "Steam Deck’te en çok oynanan oyunlar · son hafta",
   "games.audience.deckSource": "Steam Deck · haftalık sıralama",
-  "games.audience.deckCoverage": "Valve’ın haftalık Steam Deck sıralaması otomatik yenilenir. Bu liste için eşzamanlı oyuncu sayıları yayımlanmaz.",
+  "games.audience.deckCoverage":
+    "Valve’ın haftalık Steam Deck sıralaması otomatik yenilenir. Bu liste için eşzamanlı oyuncu sayıları yayımlanmaz.",
   "games.audience.xbox": "Xbox · en çok oynananlar",
   "games.audience.xboxNote": "En çok oynanan Xbox oyunları · ABD",
   "games.audience.xboxSource": "Xbox · güncel sıralama",
-  "games.audience.xboxCoverage": "Microsoft’un güncel ABD Xbox sıralaması otomatik yenilenir. Xbox oyuncu sayılarını yayımlamaz.",
+  "games.audience.xboxCoverage":
+    "Microsoft’un güncel ABD Xbox sıralaması otomatik yenilenir. Xbox oyuncu sayılarını yayımlamaz.",
   "games.audience.xboxChecked": "Kontrol: {date}",
   "games.audience.xboxView": "Xbox’ta görüntüle",
   "games.audience.pc": "PC · tüm başlatıcılar",
@@ -19,6 +21,7 @@ export default {
   "games.audience.monthlyRank": "Aylık sıra {rank}",
   "games.audience.onSteamNow": "şu anda Steam’de",
   "games.audience.source": "Newzoo · aylık aktif oyuncular",
-  "games.audience.coverage": "Çin ve Hindistan hariç 37 pazarda aylık aktif oyunculara göre yayımlanan ilk 10. Tarihli bir sıralamadır; canlı sayım veya dünya sıralaması değildir.",
-  "games.audience.snapshot": "Newzoo · yayımlanan sıralama · {month}"
+  "games.audience.coverage":
+    "Çin ve Hindistan hariç 37 pazarda aylık aktif oyunculara göre yayımlanan ilk 10. Tarihli bir sıralamadır; canlı sayım veya dünya sıralaması değildir.",
+  "games.audience.snapshot": "Newzoo · yayımlanan sıralama · {month}",
 };

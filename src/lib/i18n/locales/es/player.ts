@@ -371,7 +371,7 @@ const player: Record<string, string> = {
   "Zoom {pct}%": "Zoom {pct}%",
   "Search audio language": "Buscar idioma de audio",
   "No audio track in that language.": "No hay pista de audio en ese idioma.",
-  "Clear": "Borrar",
+  Clear: "Borrar",
   "Show keyboard shortcuts": "Mostrar atajos de teclado",
   "Show or hide the list of player shortcuts.":
     "Muestra u oculta la lista de atajos del reproductor.",

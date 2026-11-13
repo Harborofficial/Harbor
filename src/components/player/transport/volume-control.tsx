@@ -98,7 +98,14 @@ export function VolumeControl({
         aria-label={label}
       >
         {speakerUrl ? (
-          <img src={speakerUrl} alt="" width={24} height={24} draggable={false} className="pointer-events-none h-6 w-6 select-none object-contain" />
+          <img
+            src={speakerUrl}
+            alt=""
+            width={24}
+            height={24}
+            draggable={false}
+            className="pointer-events-none h-6 w-6 select-none object-contain"
+          />
         ) : muted ? (
           <VolumeX size={24} strokeWidth={1.75} />
         ) : (
@@ -174,7 +181,8 @@ export function VolumeControl({
               style={{
                 left: `${breakPct}%`,
                 right: 0,
-                background: "linear-gradient(to right, rgba(245,158,11,0.18), rgba(220,38,38,0.26))",
+                background:
+                  "linear-gradient(to right, rgba(245,158,11,0.18), rgba(220,38,38,0.26))",
               }}
             />
           )}

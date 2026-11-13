@@ -32,7 +32,9 @@ function toPerson(raw: any, enNameById: Map<number, string> | null): TitleCredit
   const localized = typeof raw.name === "string" ? raw.name : "";
   const original = typeof raw.original_name === "string" ? raw.original_name : "";
   const name =
-    enNameById && original && localized === original ? enNameById.get(raw.id) ?? localized : localized;
+    enNameById && original && localized === original
+      ? (enNameById.get(raw.id) ?? localized)
+      : localized;
   return {
     id: raw.id,
     name,

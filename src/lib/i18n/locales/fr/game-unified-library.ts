@@ -1,39 +1,51 @@
 export default {
-  "games.battlenet.changed": "Le compte Battle.net a changé. Reconnectez-vous pour remplacer les imports de ce profil.",
+  "games.battlenet.changed":
+    "Le compte Battle.net a changé. Reconnectez-vous pour remplacer les imports de ce profil.",
   "games.battlenet.connect": "Se connecter",
-  "games.battlenet.intro": "Connectez-vous à Battle.net pour importer vos jeux. Cette connexion appartient à votre profil Harbor actuel.",
+  "games.battlenet.intro":
+    "Connectez-vous à Battle.net pour importer vos jeux. Cette connexion appartient à votre profil Harbor actuel.",
   "games.battlenet.installed": "Afficher les jeux installés",
   "games.battlenet.uninstalled": "Afficher les jeux du compte non installés",
-  "games.battlenet.partial": "Certaines données du compte n’ont pas pu être actualisées. Les jeux déjà importés restent affichés.",
-  "games.battlenet.unresolved": "L’édition exacte de certains jeux du compte n’a pas pu être identifiée.",
-  "games.battlenet.expired": "Votre session Battle.net a expiré. Reconnectez-vous ; vos jeux importés sont conservés.",
+  "games.battlenet.partial":
+    "Certaines données du compte n’ont pas pu être actualisées. Les jeux déjà importés restent affichés.",
+  "games.battlenet.unresolved":
+    "L’édition exacte de certains jeux du compte n’a pas pu être identifiée.",
+  "games.battlenet.expired":
+    "Votre session Battle.net a expiré. Reconnectez-vous ; vos jeux importés sont conservés.",
   "games.battlenet.timeout": "Battle.net n’a pas répondu à temps. Réessayez.",
   "games.battlenet.busy": "Une action du compte Battle.net est déjà en cours.",
-  "games.battlenet.update": "Redémarrez l’application de bureau Harbor mise à jour pour connecter Battle.net.",
-  "games.battlenet.error": "Impossible d’actualiser Battle.net. Votre dernière bibliothèque importée est conservée.",
+  "games.battlenet.update":
+    "Redémarrez l’application de bureau Harbor mise à jour pour connecter Battle.net.",
+  "games.battlenet.error":
+    "Impossible d’actualiser Battle.net. Votre dernière bibliothèque importée est conservée.",
   "games.battlenet.disconnect": "Déconnecter Battle.net",
-  "games.battlenet.removeNote": "Supprimer les imports du compte de ce profil. Les fichiers installés et les autres profils sont conservés.",
+  "games.battlenet.removeNote":
+    "Supprimer les imports du compte de ce profil. Les fichiers installés et les autres profils sont conservés.",
   "games.battlenet.signing": "Terminez la connexion dans la fenêtre Battle.net.",
   "games.battlenet.cached": "{count} jeux du compte · Dernière actualisation : {date}",
 
   "games.launcherSession.waiting": "En attente du jeu",
   "games.launcherSession.unconfirmed": "Vérification de l’état du jeu",
   "games.launcherSession.notStarted": "Le jeu n’a pas démarré",
-  "games.launcherSession.error": "L’activité du jeu n’a pas pu être enregistrée. Rouvrez Harbor pour réessayer.",
+  "games.launcherSession.error":
+    "L’activité du jeu n’a pas pu être enregistrée. Rouvrez Harbor pour réessayer.",
 
   "games.steamImport.importedTitle": "Jeux importés",
   "games.steamImport.excluded": "Ignoré par vos paramètres d’importation",
   "games.steamImport.ignoreSettings": "Identifiants Steam ignorés ({count})",
   "games.steamImport.ignoreLabel": "Identifiants Steam à ignorer",
-  "games.steamImport.ignoreNote": "Ignorer ces identifiants lors des imports manuels. Les entrées et fichiers existants restent en place. Videz le champ pour ne plus les ignorer.",
+  "games.steamImport.ignoreNote":
+    "Ignorer ces identifiants lors des imports manuels. Les entrées et fichiers existants restent en place. Videz le champ pour ne plus les ignorer.",
   "games.steamImport.ignoreSave": "Enregistrer les identifiants ignorés",
   "games.steamImport.ignoreSaved": "Identifiants ignorés enregistrés.",
   "games.steamImport.title": "Importer des jeux Steam",
-  "games.steamImport.note": "Conservez les fiches de jeux dans ce profil Harbor. La possession et l’installation sont vérifiées séparément.",
+  "games.steamImport.note":
+    "Conservez les fiches de jeux dans ce profil Harbor. La possession et l’installation sont vérifiées séparément.",
   "games.steamImport.input": "Identifiants d’applications Steam ou URL du magasin",
   "games.steamImport.profile": "Choisir un profil Depressurizer",
   "games.steamImport.count": "{selected} sélectionnés · {total} entrées",
-  "games.steamImport.unavailableNote": "Les entrées indisponibles sont décochées. Sélectionnez-en une pour conserver son identifiant et charger ses détails plus tard.",
+  "games.steamImport.unavailableNote":
+    "Les entrées indisponibles sont décochées. Sélectionnez-en une pour conserver son identifiant et charger ses détails plus tard.",
   "games.steamImport.unknown": "Application Steam {id}",
   "games.steamImport.ready": "Détails Steam trouvés",
   "games.steamImport.profileName": "Nom issu du profil",
@@ -43,10 +55,14 @@ export default {
   "games.steamImport.invalid": "Identifiant ou URL non valide",
   "games.steamImport.duplicate": "Entrée en double",
   "games.steamImport.nonSteam": "Raccourci hors Steam · ignoré",
-  "games.steamImport.limit": "Un profil accepte jusqu’à 5 000 jeux importés. Les fichiers doivent faire moins de 4 Mo.",
-  "games.steamImport.inputError": "Saisissez des identifiants Steam ou URL valides, ou choisissez un profil Depressurizer valide.",
-  "games.steamImport.writeError": "Impossible d’enregistrer l’importation. Vos entrées existantes sont inchangées. Réessayez.",
-  "games.steamImport.readError": "Impossible de lire les jeux importés. Réessayez avant toute modification.",
+  "games.steamImport.limit":
+    "Un profil accepte jusqu’à 5 000 jeux importés. Les fichiers doivent faire moins de 4 Mo.",
+  "games.steamImport.inputError":
+    "Saisissez des identifiants Steam ou URL valides, ou choisissez un profil Depressurizer valide.",
+  "games.steamImport.writeError":
+    "Impossible d’enregistrer l’importation. Vos entrées existantes sont inchangées. Réessayez.",
+  "games.steamImport.readError":
+    "Impossible de lire les jeux importés. Réessayez avant toute modification.",
   "games.steamImport.done": "Ajoutés à la bibliothèque : {count}",
   "games.steamImport.stop": "Arrêter la vérification",
   "games.steamImport.restart": "Recommencer",
@@ -65,7 +81,8 @@ export default {
   "games.libraryStatus.finished": "Terminé",
   "games.libraryStatus.onHold": "En pause",
   "games.libraryStatus.stopped": "Abandonné",
-  "games.libraryStatus.note": "Votre choix pour cet exemplaire est enregistré dans ce profil Harbor. Le temps de jeu et les succès ne le modifient jamais.",
+  "games.libraryStatus.note":
+    "Votre choix pour cet exemplaire est enregistré dans ce profil Harbor. Le temps de jeu et les succès ne le modifient jamais.",
 
   "games.unified.playtime": "Temps de jeu",
   "games.unified.playtime.all": "Tous les temps de jeu",
@@ -78,9 +95,12 @@ export default {
   "games.unified.playtime.steam": "{time} sur Steam",
   "games.unified.playtime.zeroSteam": "Aucun temps de jeu enregistré sur Steam",
   "games.unified.playtime.zeroHarbor": "Aucun temps de jeu enregistré dans Harbor",
-  "games.unified.playtime.unknownHint": "Le temps de jeu du compte Steam est indisponible, ou cette source ne le fournit pas.",
-  "games.unified.playtime.note": "Utilise les totaux Steam et le temps enregistré dans Harbor, corrections comprises. Les temps indisponibles restent séparés.",
-  "games.unified.note": "Votre bibliothèque Steam, vos jeux PC et vos ROMs importées dans une seule vue.",
+  "games.unified.playtime.unknownHint":
+    "Le temps de jeu du compte Steam est indisponible, ou cette source ne le fournit pas.",
+  "games.unified.playtime.note":
+    "Utilise les totaux Steam et le temps enregistré dans Harbor, corrections comprises. Les temps indisponibles restent séparés.",
+  "games.unified.note":
+    "Votre bibliothèque Steam, vos jeux PC et vos ROMs importées dans une seule vue.",
   "games.unified.allSources": "Toutes les sources",
   "games.unified.availability": "Disponibilité",
   "games.unified.anyState": "Tous les états",
@@ -94,15 +114,19 @@ export default {
   "games.unified.state.setup": "Configuration nécessaire",
   "games.unified.state.unknown": "Installation non vérifiée",
   "games.unified.refresh": "Actualiser les bibliothèques locales",
-  "games.unified.scanNote": "Certaines bibliothèques n’ont pas pu être vérifiées. Leurs jeux restent affichés ici avec un état inconnu ou indisponible.",
-  "games.unified.partial": "Certains dossiers n’ont pas pu être vérifiés ; certaines installations peuvent ne pas être reconnues.",
+  "games.unified.scanNote":
+    "Certaines bibliothèques n’ont pas pu être vérifiées. Leurs jeux restent affichés ici avec un état inconnu ou indisponible.",
+  "games.unified.partial":
+    "Certains dossiers n’ont pas pu être vérifiés ; certaines installations peuvent ne pas être reconnues.",
   "games.unified.empty": "Rassemblez vos jeux",
-  "games.unified.emptyNote": "Connectez Steam, ajoutez un jeu PC ou importez un dossier de ROMs pour retrouver vos jeux ici.",
+  "games.unified.emptyNote":
+    "Connectez Steam, ajoutez un jeu PC ou importez un dossier de ROMs pour retrouver vos jeux ici.",
   "games.unified.pcGames": "Gérer les jeux PC",
   "games.unified.roms": "Gérer les ROMs",
   "games.unified.steam": "Gérer Steam",
   "games.unified.results": "{count} jeux sur {total}",
-  "games.unified.browser": "Le lancement et l’installation en local sont disponibles dans l’application de bureau.",
+  "games.unified.browser":
+    "Le lancement et l’installation en local sont disponibles dans l’application de bureau.",
   "games.unified.manage": "Gérer {name}",
   "games.unified.lastPlayed": "Dernière partie : {date}",
   "games.unified.clear": "Effacer les filtres de la bibliothèque",
@@ -117,5 +141,5 @@ export default {
   "games.libraryNews.failed": "Impossible de charger les actualités des jeux.",
   "games.libraryNews.hide": "Masquer les actualités des jeux",
   "games.libraryNews.show": "Afficher les actualités des jeux",
-  "games.libraryNews.pending": "Recherche des actualités des jeux…"
+  "games.libraryNews.pending": "Recherche des actualités des jeux…",
 };

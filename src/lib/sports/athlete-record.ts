@@ -2,9 +2,10 @@
 export function parseAthleteRecord(raw: unknown): string {
   const items = (raw as { items?: unknown })?.items;
   if (!Array.isArray(items)) return "";
-  const rows = items.filter((item): item is Record<string, unknown> => !!item && typeof item === "object");
-  const overall =
-    rows.find((row) => row.type === "total" || row.name === "overall") ?? rows[0];
+  const rows = items.filter(
+    (item): item is Record<string, unknown> => !!item && typeof item === "object",
+  );
+  const overall = rows.find((row) => row.type === "total" || row.name === "overall") ?? rows[0];
   if (!overall) return "";
   const value = overall.summary ?? overall.displayValue;
   if (typeof value !== "string") return "";

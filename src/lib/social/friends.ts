@@ -34,12 +34,13 @@ export function removeFriend(handle: string): Promise<{ ok: boolean }> {
 
 export function fetchFriends(signal?: AbortSignal): Promise<Friend[]> {
   return socialGet<{ friends?: Friend[] } | Friend[]>("/social/friends", signal).then((d) =>
-    Array.isArray(d) ? d : d.friends ?? [],
+    Array.isArray(d) ? d : (d.friends ?? []),
   );
 }
 
 export function fetchPendingRequests(signal?: AbortSignal): Promise<PendingRequest[]> {
-  return socialGet<{ pending?: PendingRequest[] } | PendingRequest[]>("/social/friends/pending", signal).then((d) =>
-    Array.isArray(d) ? d : d.pending ?? [],
-  );
+  return socialGet<{ pending?: PendingRequest[] } | PendingRequest[]>(
+    "/social/friends/pending",
+    signal,
+  ).then((d) => (Array.isArray(d) ? d : (d.pending ?? [])));
 }

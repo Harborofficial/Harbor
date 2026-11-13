@@ -19,11 +19,12 @@ export default {
   "games.wow.runs.copy": "Sao chép tài năng",
   "games.wow.runs.copyFailed": "Không thể sao chép. Hãy thử lại.",
   "games.wow.runs.party": "Đội hình nhóm",
-  "games.wow.runs.snapshots": "Tài năng và trang bị công khai là dữ liệu chụp tại thời điểm của nhà cung cấp. Chúng có thể khác với cấu hình dùng trong lượt chạy này.",
+  "games.wow.runs.snapshots":
+    "Tài năng và trang bị công khai là dữ liệu chụp tại thời điểm của nhà cung cấp. Chúng có thể khác với cấu hình dùng trong lượt chạy này.",
   "games.wow.runs.gear": "Trang bị",
   "games.wow.runs.tank": "Đỡ đòn",
   "games.wow.runs.healer": "Hồi máu",
   "games.wow.runs.dps": "Sát thương",
   "games.wow.runs.snapshotAt": "Ảnh chụp trang bị: {date}",
-  "games.wow.runs.closeGear": "Đóng trang bị"
+  "games.wow.runs.closeGear": "Đóng trang bị",
 };

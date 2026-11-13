@@ -1,5 +1,6 @@
 const awards: Record<string, string> = {
-  "No data shipped for this award yet. Re-run": "Nenhum dado disponível para este prêmio ainda. Execute novamente",
+  "No data shipped for this award yet. Re-run":
+    "Nenhum dado disponível para este prêmio ainda. Execute novamente",
   "to refresh the bundled dataset.": "para atualizar o conjunto de dados incluído.",
   "No data shipped for this award yet.": "Nenhum dado disponível para este prêmio ainda.",
   "No winners match these filters.": "Nenhum vencedor corresponde a estes filtros.",
@@ -18,8 +19,10 @@ const awards: Record<string, string> = {
   "Acclaimed directors": "Diretores aclamados",
   "Honored writers": "Roteiristas homenageados",
   "{n} wins": "{n} vitórias",
-  "Add a TMDB key in Settings to unlock posters and the artists behind this award.": "Adicione uma chave do TMDB em Configurações para desbloquear pôsteres e os artistas por trás deste prêmio.",
-  "No winners are catalogued for this award yet.": "Nenhum vencedor catalogado para este prêmio ainda.",
+  "Add a TMDB key in Settings to unlock posters and the artists behind this award.":
+    "Adicione uma chave do TMDB em Configurações para desbloquear pôsteres e os artistas por trás deste prêmio.",
+  "No winners are catalogued for this award yet.":
+    "Nenhum vencedor catalogado para este prêmio ainda.",
   "Anime award": "Prêmio de anime",
   "recorded winners": "vencedores registrados",
   "Search winners or categories…": "Pesquisar vencedores ou categorias…",

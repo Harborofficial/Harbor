@@ -6,9 +6,11 @@ export default {
   "games.recommend.filterTitle": "सुझावों से बाहर रखें",
   "games.recommend.hideLibrary": "मेरी लाइब्रेरी के गेम",
   "games.recommend.hideSaved": "सहेजे गए गेम",
-  "games.recommend.libraryNote": "आपकी लाइब्रेरी से मिलान के लिए पहचाने गए गेम, लिंक किए गए इम्पोर्ट और पिछली Steam सिंक का उपयोग होता है।",
+  "games.recommend.libraryNote":
+    "आपकी लाइब्रेरी से मिलान के लिए पहचाने गए गेम, लिंक किए गए इम्पोर्ट और पिछली Steam सिंक का उपयोग होता है।",
   "games.recommend.steamSynced": "Steam लाइब्रेरी सिंक हुई: {date}",
-  "games.recommend.steamUnavailable": "Steam पर आपके स्वामित्व वाले गेम की जानकारी उपलब्ध नहीं है। स्थानीय लाइब्रेरी के गेम का मिलान अब भी लागू है।",
+  "games.recommend.steamUnavailable":
+    "Steam पर आपके स्वामित्व वाले गेम की जानकारी उपलब्ध नहीं है। स्थानीय लाइब्रेरी के गेम का मिलान अब भी लागू है।",
   "games.recommend.inLibrary": "आपकी लाइब्रेरी में",
   "games.recommend.removeSaved": "{name} को सहेजे गए गेम से हटाएँ",
   "games.recommend.forYou": "आपके लिए",
@@ -31,9 +33,11 @@ export default {
   "games.recommend.unavailable": "संबंधित गेम अभी उपलब्ध नहीं हैं।",
   "games.recommend.retryNote": "आपकी लाइब्रेरी मौजूद है। उससे जुड़े गेम फिर से लोड करके देखें।",
   "games.recommend.caughtUp": "कुछ अलग आज़माएँ।",
-  "games.recommend.caughtUpNote": "कोई फ़िल्टर बंद करके, छिपाए गए सुझाव को वापस लाकर या कोई और पसंदीदा गेम सहेजकर देखें।",
+  "games.recommend.caughtUpNote":
+    "कोई फ़िल्टर बंद करके, छिपाए गए सुझाव को वापस लाकर या कोई और पसंदीदा गेम सहेजकर देखें।",
   "games.recommend.finding": "आपके गेम से जुड़े गेम खोजे जा रहे हैं…",
-  "games.recommend.source": "आपकी लाइब्रेरी के आधार पर Steam टैग और IGDB से सुझाव। छिपाने के विकल्प केवल इस प्रोफ़ाइल पर लागू होते हैं।",
+  "games.recommend.source":
+    "आपकी लाइब्रेरी के आधार पर Steam टैग और IGDB से सुझाव। छिपाने के विकल्प केवल इस प्रोफ़ाइल पर लागू होते हैं।",
   "games.recommend.retrySome": "बाकी संबंधित गेम फिर लोड करें",
   "games.recommend.saveError": "इस डिवाइस पर आपकी खोज संबंधी पसंद सहेजी नहीं जा सकी। फिर कोशिश करें।",
   "games.recommend.influences": "आपके सुझावों का आधार",
@@ -50,6 +54,5 @@ export default {
   "games.recommend.allExcluded": "सुझावों के सभी आधार हटा दिए गए हैं।",
   "games.recommend.allExcludedNote": "सुझाव बदलें में किसी गेम को वापस लाएँ या कोई और पसंदीदा गेम सहेजें।",
   "games.recommend.saved": "सहेजे गए गेम",
-  "games.recommend.close": "सुझाव की सेटिंग बंद करें"
+  "games.recommend.close": "सुझाव की सेटिंग बंद करें",
 };
-

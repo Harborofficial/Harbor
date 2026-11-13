@@ -13,9 +13,13 @@ export default {
   "artwork.chooseLaunch": "Elegir logotipo de inicio",
   "artwork.resetLoading": "Restablecer animación de carga",
   "artwork.resetLaunch": "Restablecer logotipo de inicio",
-  "artwork.local": "Se guarda en este dispositivo. Con movimiento reducido se muestra una imagen fija.",
+  "artwork.local":
+    "Se guarda en este dispositivo. Con movimiento reducido se muestra una imagen fija.",
   "artwork.error.large": "Elige un archivo más pequeño: hasta 8 MB y 4096 × 4096 píxeles.",
-  "artwork.error.external": "Esta animación usa contenido externo. Expórtala con las imágenes incorporadas.",
-  "artwork.error.storage": "No se pudo guardar el archivo en este dispositivo. Se mantiene la elección anterior.",
-  "artwork.error.invalid": "No se pudo leer el archivo. Elige Lottie (.json o .lottie), GIF, PNG, JPEG o WebP."
+  "artwork.error.external":
+    "Esta animación usa contenido externo. Expórtala con las imágenes incorporadas.",
+  "artwork.error.storage":
+    "No se pudo guardar el archivo en este dispositivo. Se mantiene la elección anterior.",
+  "artwork.error.invalid":
+    "No se pudo leer el archivo. Elige Lottie (.json o .lottie), GIF, PNG, JPEG o WebP.",
 };

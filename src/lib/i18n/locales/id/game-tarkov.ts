@@ -14,17 +14,19 @@ export default {
   "games.tarkov.listedStart": "Awal tercantum:",
   "games.tarkov.noSeason": "Tidak ada musim aktif yang tercantum",
   "games.tarkov.noSeasonDetail": "Sumber belum mencantumkan musim saat ini atau mendatang.",
-  "games.tarkov.scheduleNote": "Tanggal dikelola oleh tarkov.dev dan dapat berubah. Ini bukan pengumuman wipe resmi.",
+  "games.tarkov.scheduleNote":
+    "Tanggal dikelola oleh tarkov.dev dan dapat berubah. Ini bukan pengumuman wipe resmi.",
   "games.tarkov.seasonSource": "Tanggal musim · tarkov.dev",
   "games.tarkov.checked": "Diperiksa: {time}",
   "games.tarkov.fullWipe": "Wipe penuh terakhir di sumber",
   "games.tarkov.historyFailed": "Riwayat wipe gagal dimuat.",
   "games.tarkov.elapsed": "{days} hari",
   "games.tarkov.noHistory": "Tidak ada wipe sebelumnya yang tercantum.",
-  "games.tarkov.modeNote": "Progres musiman dan wipe akun penuh terpisah. Riwayat ini tidak menjelaskan reset karakter PvP atau PvE permanen.",
+  "games.tarkov.modeNote":
+    "Progres musiman dan wipe akun penuh terpisah. Riwayat ini tidak menjelaskan reset karakter PvP atau PvE permanen.",
   "games.tarkov.historySource": "Tanggal wipe · tarkov.dev",
   "games.tarkov.history": "Riwayat wipe penuh",
   "games.tarkov.patch": "Patch",
   "games.tarkov.date": "Tanggal mulai (UTC)",
-  "games.tarkov.duration": "Hingga wipe penuh berikutnya"
+  "games.tarkov.duration": "Hingga wipe penuh berikutnya",
 };

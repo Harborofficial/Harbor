@@ -39,12 +39,7 @@ export const isIndividualCompetition = (group: string) =>
   ].includes(group);
 
 const personName = (name: string) =>
-  name
-    .normalize("NFKD")
-    .replace(/\p{M}/gu, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+  name.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().replace(/\s+/g, " ").trim();
 
 /** Published reports can be longer; only named provider athlete records make their rows interactive. */
 export function mergeCompetitionEntrants(
@@ -84,7 +79,8 @@ const rows = (value: unknown): RecordData[] =>
 const str = (value: unknown, max = 500): string =>
   typeof value === "string" ? value.trim().slice(0, max) : "";
 const numericId = (value: unknown) => {
-  const text = typeof value === "number" && Number.isSafeInteger(value) ? String(value) : str(value);
+  const text =
+    typeof value === "number" && Number.isSafeInteger(value) ? String(value) : str(value);
   return /^\d{1,16}$/.test(text) ? text : "";
 };
 
@@ -364,8 +360,7 @@ async function requestMetadata(
     );
     if (!event) return competitionSeed(game, def);
     const venueId = numericId(event.idVenue);
-    const finished =
-      isFinishedStatus(str(event.strStatus)) || !!str(event.strResult);
+    const finished = isFinishedStatus(str(event.strStatus)) || !!str(event.strResult);
     // These supplements are independent; losing a venue request must not erase the race result.
     const supplements = await Promise.allSettled<RecordData>([
       venueId

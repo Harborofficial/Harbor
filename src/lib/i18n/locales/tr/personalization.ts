@@ -318,7 +318,8 @@ const personalization: Record<string, string> = {
     "HDR içeriği kendi penceresinde oynatır; böylece Windows bunu gerçek HDR olarak işler (SDR parlaklık kaydırıcısı görüntüyü karartmaz). Bunu HDR ekranda kullanmak için yukarıdaki HDR'den SDR'ye ton eşlemeyi kapatın.",
   "Please add your TMDB API key in the Library & Metadata settings to view this folder.":
     "Bu klasörü görüntülemek için lütfen Kütüphane ve Meta Veriler ayarlarına TMDB API anahtarınızı ekleyin.",
-  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.": "Harbor'ı başka bir makinedeki yayın sunucusuna yönlendirin; örneğin bir ev sunucusundaki Stremio hizmetine. P2P yayınları bu makine yerine o makineden indirilir ve oynatılır.",
+  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.":
+    "Harbor'ı başka bir makinedeki yayın sunucusuna yönlendirin; örneğin bir ev sunucusundaki Stremio hizmetine. P2P yayınları bu makine yerine o makineden indirilir ve oynatılır.",
   "Point Harbor at your self-hosted library to browse and install sources":
     "Kaynaklara göz atmak ve yüklemek için Harbor'ı kendi barındırdığınız kütüphaneye bağlayın",
   Popular: "Popüler",
@@ -708,7 +709,8 @@ const personalization: Record<string, string> = {
   "Select a subtitle track to sync": "Senkronize edilecek altyazı parçasını seçin",
   "Self-host": "Kendiniz barındırın",
   "Self-test": "Öz sınama",
-  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.": "Yalnızca uzak sunucu kullanımı açıkken öz sınama devre dışıdır. Bu makinede eşler arası bağlantı üzerinden küçük bir test dosyası indirir.",
+  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.":
+    "Yalnızca uzak sunucu kullanımı açıkken öz sınama devre dışıdır. Bu makinede eşler arası bağlantı üzerinden küçük bir test dosyası indirir.",
   "Send a bug report straight to the Harbor team. Screenshots and screen recordings welcome.":
     "Doğrudan Harbor ekibine hata raporu gönderin. Ekran görüntüleri ve ekran kayıtları faydalı olur.",
   "Send test": "Test gönder",
@@ -1317,7 +1319,8 @@ const personalization: Record<string, string> = {
     "Her hizmetteki popüler içerikler. Abone olmadıklarınızı kapatın.",
   "Top-right controls": "Sağ üst denetimler",
   "TorBox API key": "TorBox API anahtarı",
-  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.": "P2P devre dışı. Önbelleğe alınmamış yayınlar, bir debrid hizmetinden veya doğrudan bağlantıdan gelmedikçe oynatılmaz. P2P kullanmak için bunu kapatın.",
+  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.":
+    "P2P devre dışı. Önbelleğe alınmamış yayınlar, bir debrid hizmetinden veya doğrudan bağlantıdan gelmedikçe oynatılmaz. P2P kullanmak için bunu kapatın.",
   "Tracked people": "Takip edilen kişiler",
   "Tracked person release rule": "Takip edilen kişi için yayın kuralı",
   Tracks: "Parçalar",
@@ -1539,7 +1542,8 @@ const personalization: Record<string, string> = {
     "Altyazı erken veya geç geldiğinde Harbor konuşmayı ölçer ve zamanlamayı kendiliğinden düzeltir. Varsayılan olarak kapalıdır.",
   "When an episode ends, automatically start the next one. Off lets the episode finish and stop.":
     "Bir bölüm bittiğinde sonrakini otomatik olarak başlatır. Kapalı olduğunda bölüm biter ve oynatma durur.",
-  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.": "Kapalıyken, yayını kapattığınız veya değiştirdiğiniz anda P2P aktarımı durur; böylece arka planda indirme devam etmez. Ayrıldıktan sonra da sürmesini sağlamak için açın. Bu indirmeleri İndirilenler sekmesinden yönetebilir veya duraklatabilirsiniz.",
+  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.":
+    "Kapalıyken, yayını kapattığınız veya değiştirdiğiniz anda P2P aktarımı durur; böylece arka planda indirme devam etmez. Ayrıldıktan sonra da sürmesini sağlamak için açın. Bu indirmeleri İndirilenler sekmesinden yönetebilir veya duraklatabilirsiniz.",
   "When playback starts, Harbor automatically finds and loads a subtitle in one of these languages, so you never have to search by hand. The first available match wins, so put your main language first.":
     "Oynatma başladığında Harbor bu dillerden birinde otomatik olarak altyazı bulup yükler, böylece elle aramanız gerekmez. Bulunan ilk eşleşme seçilir, bu nedenle ana dilinizi ilk sıraya koyun.",
   "When the Up Next pill appears before an episode ends. Auto scales to the episode length, so short episodes stop prompting so early. Off hides it.":

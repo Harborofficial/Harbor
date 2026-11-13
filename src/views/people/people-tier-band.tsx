@@ -75,7 +75,9 @@ export function PeopleJumpIndex({
           key={b.id}
           type="button"
           onClick={() =>
-            document.getElementById(bandDomId(b.id))?.scrollIntoView({ block: "start", behavior: "smooth" })
+            document
+              .getElementById(bandDomId(b.id))
+              ?.scrollIntoView({ block: "start", behavior: "smooth" })
           }
           className={`rounded-full px-2.5 py-1 text-[11px] font-medium tabular-nums transition-colors motion-reduce:transition-none ${
             active === b.id

@@ -11,10 +11,20 @@ import { BpMosaic } from "./bp-mosaic";
 import { BpResultCard } from "./bp-result-card";
 import { useBpT } from "./bp-i18n";
 import { useBpCatalog } from "./use-bp-catalog";
-import { bpSectionCount, useBpSearch, type BpSearchFilter, type BpSearchSection } from "./use-bp-search";
+import {
+  bpSectionCount,
+  useBpSearch,
+  type BpSearchFilter,
+  type BpSearchSection,
+} from "./use-bp-search";
 import { BpRecentRow, BpSearchField } from "./search/bp-search-input";
 import { bpSearchCells } from "./search/bp-search-cells";
-import { bpGroupRenders, type BpGroupShape, type BpGroupSource, type BpGroupState } from "./search/bp-search-group";
+import {
+  bpGroupRenders,
+  type BpGroupShape,
+  type BpGroupSource,
+  type BpGroupState,
+} from "./search/bp-search-group";
 import { BpSearchResults, bpSearchSlotsEmpty, type BpSearchSlot } from "./search/bp-search-results";
 import { BpEmptyState } from "./bp-empty";
 import { bpSearchEmptyMessage } from "./search/bp-search-empty";
@@ -187,7 +197,11 @@ export function BpSearch({ onSelect }: { onSelect: (m: Meta) => void }) {
     <div className="relative flex h-full flex-col">
       <div className="pointer-events-none absolute inset-0 bg-[var(--bp-page)]" />
       {settings.bigPictureMosaic !== false && <BpMosaic metas={mosaicPool} variant="stage" />}
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: IDLE_WASH }} />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{ background: IDLE_WASH }}
+      />
       <div
         aria-hidden
         className={`pointer-events-none absolute inset-0 transition-opacity duration-[var(--bp-dur-slow)] ease-[var(--bp-ease)] motion-reduce:transition-none ${
@@ -242,7 +256,9 @@ export function BpSearch({ onSelect }: { onSelect: (m: Meta) => void }) {
                     />
                   )}
                   {c.label}
-                  <span className="text-[clamp(10.5px,1.4vh,16px)] font-bold opacity-60">{c.count}</span>
+                  <span className="text-[clamp(10.5px,1.4vh,16px)] font-bold opacity-60">
+                    {c.count}
+                  </span>
                 </button>
               ))}
             </div>
@@ -285,7 +301,10 @@ export function BpSearch({ onSelect }: { onSelect: (m: Meta) => void }) {
                 <div
                   data-bp-grid
                   className="grid gap-[clamp(11px,1vw,21px)] pb-[56px]"
-                  style={{ gridTemplateColumns: "repeat(auto-fill, minmax(clamp(210px, 17vw, 330px), 1fr))" }}
+                  style={{
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(clamp(210px, 17vw, 330px), 1fr))",
+                  }}
                 >
                   {suggestions.map((m) => (
                     <BpResultCard key={m.id} meta={m} onSelect={pick} />
@@ -295,13 +314,23 @@ export function BpSearch({ onSelect }: { onSelect: (m: Meta) => void }) {
             )}
             {showEmpty && (
               <BpEmptyState
-                message={t("Start typing to search movies, series and everything your addons carry.")}
+                message={t(
+                  "Start typing to search movies, series and everything your addons carry.",
+                )}
               />
             )}
           </div>
         ) : showEmpty ? (
           <BpEmptyState
-            message={bpSearchEmptyMessage({ t, trimmed: query.trim(), tmdbUnavailable, hasResults, noResults, filterStale, failedCount })}
+            message={bpSearchEmptyMessage({
+              t,
+              trimmed: query.trim(),
+              tmdbUnavailable,
+              hasResults,
+              noResults,
+              filterStale,
+              failedCount,
+            })}
             action={failedCount > 0 ? t("Try again") : undefined}
             onAction={failedCount > 0 ? retry : undefined}
           />

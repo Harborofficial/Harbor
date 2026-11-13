@@ -74,10 +74,13 @@ export default {
   "games.league.story": "चैंपियन की कहानी",
   "games.league.exploreMore": "और जानें",
   "games.league.guides": "वीडियो गाइड",
-  "games.league.metaScope": "OP.GG अपनी डिफ़ॉल्ट नमूना सूची से लेन रैंकिंग देता है। स्रोत पैच, क्षेत्र या रैंक समूह नहीं बताता। जीत दर दर्ज जीत और मैचों से निकलती है; चयन दर स्रोत द्वारा राउंड की जाती है। रैंकिंग और बिल्ड के नमूने अलग हैं।",
-  "games.league.buildNote": "हर बिल्ड का नमूना अलग है। पूरे बिल्ड में वे मैच अधिक होते हैं जो आइटम खरीदने तक चले; उनकी जीत दर चैंपियन की कुल जीत दर नहीं है। मुकाबले के नमूने छोटे हो सकते हैं। टीम और प्रतिद्वंद्वी के अनुसार बदलाव करें। वीडियो पुराने पैच के हो सकते हैं।",
+  "games.league.metaScope":
+    "OP.GG अपनी डिफ़ॉल्ट नमूना सूची से लेन रैंकिंग देता है। स्रोत पैच, क्षेत्र या रैंक समूह नहीं बताता। जीत दर दर्ज जीत और मैचों से निकलती है; चयन दर स्रोत द्वारा राउंड की जाती है। रैंकिंग और बिल्ड के नमूने अलग हैं।",
+  "games.league.buildNote":
+    "हर बिल्ड का नमूना अलग है। पूरे बिल्ड में वे मैच अधिक होते हैं जो आइटम खरीदने तक चले; उनकी जीत दर चैंपियन की कुल जीत दर नहीं है। मुकाबले के नमूने छोटे हो सकते हैं। टीम और प्रतिद्वंद्वी के अनुसार बदलाव करें। वीडियो पुराने पैच के हो सकते हैं।",
   "games.league.patchDifference": "बिल्ड आँकड़े {patch} के हैं; आइटम और क्षमता डेटा {assets} का है।",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "टियर सूची",
   "games.league.tierScope": "रैंक्ड सोलो/डुओ · एमराल्ड+ · वैश्विक",
   "games.league.patchFilter": "पैच चुनें",

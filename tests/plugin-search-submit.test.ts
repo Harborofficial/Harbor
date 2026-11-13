@@ -24,7 +24,7 @@ test("a search runs when it is submitted, not as the box is typed in", () => {
 });
 
 test("the box's text is not what was asked for", () => {
-  assert.match(VIEW, /const \[asked, setAsked\] = useState\(""\)/);
+  assert.match(VIEW, /const \[asked, setAsked\] = useSessionState\("plugins\.asked", ""\)/);
   assert.match(VIEW, /const \[askRun, setAskRun\] = useState\(0\)/);
   assert.match(
     VIEW,

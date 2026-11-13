@@ -25,8 +25,10 @@ export default {
   "games.pokemon.videosHint": "Poradniki i wskazówki",
   "games.pokemon.bank": "Zapisy i Pokémony",
   "games.pokemon.bankHint": "Edytuj zapisy i zarządzaj pudełkami",
-  "games.pokemon.bankIntro": "Otwórz zapis emulatora, by edytować drużynę, lub importuj pojedyncze Pokémony do kolekcji.",
-  "games.pokemon.guideSourceNote": "Czytaj oryginalny poradnik lub otwórz go tutaj, gdy źródło jest dostępne.",
+  "games.pokemon.bankIntro":
+    "Otwórz zapis emulatora, by edytować drużynę, lub importuj pojedyncze Pokémony do kolekcji.",
+  "games.pokemon.guideSourceNote":
+    "Czytaj oryginalny poradnik lub otwórz go tutaj, gdy źródło jest dostępne.",
   "games.pokemon.readGuide": "Czytaj na Bulbapedii",
   "games.pokemon.readInside": "Czytaj w Harbor",
   "games.pokemon.closeReader": "Zamknij czytnik",
@@ -36,17 +38,21 @@ export default {
   "games.pokemon.saveStart": "Używasz emulatora?",
   "games.pokemon.emulatorSave": "Emulator tworzy plik zapisu, gdy zapisujesz z menu samej gry.",
   "games.pokemon.saveStep1": "Otwórz grę i wybierz Zapisz w jej menu.",
-  "games.pokemon.saveStep2": "Zamknij grę, a następnie znajdź lub wyeksportuj zapis baterii (.sav, .srm lub .dsv).",
+  "games.pokemon.saveStep2":
+    "Zamknij grę, a następnie znajdź lub wyeksportuj zapis baterii (.sav, .srm lub .dsv).",
   "games.pokemon.saveStep3": "Wybierz powyżej Otwórz zapis gry, aby edytować go w Harbor.",
   "games.pokemon.findSave": "Gdzie jest mój zapis?",
-  "games.pokemon.saveLocations": "Sprawdź obok ROM-u lub w folderze zapisów emulatora. Jeśli masz tylko stan emulatora, wczytaj go, a następnie zapisz z menu gry.",
+  "games.pokemon.saveLocations":
+    "Sprawdź obok ROM-u lub w folderze zapisów emulatora. Jeśli masz tylko stan emulatora, wczytaj go, a następnie zapisz z menu gry.",
   "games.pokemon.noSave": "Nie masz jeszcze zapisu?",
   "games.pokemon.communitySaves": "Przeglądaj zapisy społeczności",
-  "games.pokemon.communitySavesNote": "Project Pokémon · Wybierz dokładną grę i przeczytaj uwagi autora.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · Wybierz dokładną grę i przeczytaj uwagi autora.",
   "games.pokemon.pkhexNote": "Edytor zapisów, pliki do pobrania i pomoc od twórców.",
-  "games.pokemon.noSaveNeeded": "Możesz importować pliki Pokémon bez zapisu gry. Zapis jest potrzebny tylko do edytowania drużyny lub pudełek w grze.",
+  "games.pokemon.noSaveNeeded":
+    "Możesz importować pliki Pokémon bez zapisu gry. Zapis jest potrzebny tylko do edytowania drużyny lub pudełek w grze.",
   "games.pokemon.videoUnavailable": "Nie udało się tutaj wczytać filmów.",
   "games.pokemon.youtubeSearch": "Szukaj w YouTube",
   "games.hub.downloadApply": "Pobierz łatkę",
-  "games.hub.manualPatch": "Użyj posiadanej łatki lub odnośnika"
+  "games.hub.manualPatch": "Użyj posiadanej łatki lub odnośnika",
 };

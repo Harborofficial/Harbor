@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "Герои Стадиона",
   "games.overwatch.searchHeroes": "Найти героя",
   "games.overwatch.refresh": "Обновить справочник",
-  "games.overwatch.unavailable": "Не удалось обновить справочник. Могут отображаться ранее загруженные сведения.",
+  "games.overwatch.unavailable":
+    "Не удалось обновить справочник. Могут отображаться ранее загруженные сведения.",
   "games.overwatch.partial": "Некоторые записи недоступны.",
   "games.overwatch.checked": "Проверено: {date}",
-  "games.overwatch.scope": "Сведения о героях Blizzard через OverFast. Изменения баланса могут появиться в игре раньше, чем обновится справочник.",
-  "games.overwatch.mapsScope": "Карты и режимы из OverFast. Включены Аркада и старые карты; доступность зависит от режима.",
+  "games.overwatch.scope":
+    "Сведения о героях Blizzard через OverFast. Изменения баланса могут появиться в игре раньше, чем обновится справочник.",
+  "games.overwatch.mapsScope":
+    "Карты и режимы из OverFast. Включены Аркада и старые карты; доступность зависит от режима.",
   "games.overwatch.empty": "Совпадений нет. Измените запрос или фильтр.",
   "games.overwatch.moreHeroes": "Больше героев",
   "games.overwatch.moreMaps": "Больше карт",
@@ -30,9 +33,9 @@ export default {
   "games.overwatch.watchDemo": "Смотреть демонстрацию",
   "games.overwatch.hideDemo": "Скрыть демонстрацию",
   "games.overwatch.closeDemo": "Закрыть демонстрацию",
-  "games.overwatch.videoFailed": "Не удалось воспроизвести демонстрацию. Посмотрите её на официальной странице героя.",
+  "games.overwatch.videoFailed":
+    "Не удалось воспроизвести демонстрацию. Посмотрите её на официальной странице героя.",
   "games.overwatch.mode": "Режим игры",
   "games.overwatch.allModes": "Все режимы",
-  "games.overwatch.searchMaps": "Поиск карт или мест"
+  "games.overwatch.searchMaps": "Поиск карт или мест",
 };
-

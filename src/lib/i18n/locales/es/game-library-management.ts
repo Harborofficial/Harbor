@@ -14,18 +14,25 @@ export default {
   "games.manage.uninstallOptions": "Opciones de desinstalación…",
   "games.manage.remove": "Quitar de Harbor…",
   "games.manage.manage": "Administrar",
-  "games.manage.failed": "No se pudo completar la acción. Comprueba que el juego y su lanzador siguen disponibles e inténtalo de nuevo.",
+  "games.manage.failed":
+    "No se pudo completar la acción. Comprueba que el juego y su lanzador siguen disponibles e inténtalo de nuevo.",
   "games.manage.removed": "Quitado de Harbor",
   "games.manage.sent": "Continuar en {source}",
   "games.manage.removeTitle": "¿Quitar esta entrada?",
   "games.manage.uninstallTitle": "¿Desinstalar este juego?",
   "games.manage.optionsTitle": "Desinstalar con {source}",
-  "games.manage.removedNote": "Se quitó la entrada de la biblioteca. Los archivos del juego siguen en este equipo.",
-  "games.manage.sentNote": "Se abrió {source}. Termina allí; Harbor actualizará el estado de instalación cuando vuelvas.",
-  "games.manage.removeNote": "Quita {name} y su historial de juego en Harbor de este perfil. No desinstala el juego ni borra sus archivos.",
-  "games.manage.steamNote": "Steam se encargará de desinstalar {name}. Puede que debas confirmar de nuevo en Steam. Antes, guarda las partidas locales y los mods que quieras conservar.",
-  "games.manage.launcherNote": "Abre {source}, selecciona {name} y elige Administrar o Desinstalar. El lanzador se encarga de eliminarlo; Harbor no borra la carpeta.",
-  "games.manage.windowsNote": "Busca {name} en Aplicaciones instaladas de Windows y elige Desinstalar. Para juegos portátiles, sigue sus instrucciones. Harbor no borrará la carpeta.",
+  "games.manage.removedNote":
+    "Se quitó la entrada de la biblioteca. Los archivos del juego siguen en este equipo.",
+  "games.manage.sentNote":
+    "Se abrió {source}. Termina allí; Harbor actualizará el estado de instalación cuando vuelvas.",
+  "games.manage.removeNote":
+    "Quita {name} y su historial de juego en Harbor de este perfil. No desinstala el juego ni borra sus archivos.",
+  "games.manage.steamNote":
+    "Steam se encargará de desinstalar {name}. Puede que debas confirmar de nuevo en Steam. Antes, guarda las partidas locales y los mods que quieras conservar.",
+  "games.manage.launcherNote":
+    "Abre {source}, selecciona {name} y elige Administrar o Desinstalar. El lanzador se encarga de eliminarlo; Harbor no borra la carpeta.",
+  "games.manage.windowsNote":
+    "Busca {name} en Aplicaciones instaladas de Windows y elige Desinstalar. Para juegos portátiles, sigue sus instrucciones. Harbor no borrará la carpeta.",
   "games.manage.opening": "Abriendo…",
   "games.manage.confirmUninstall": "Continuar a Steam",
   "games.manage.openSource": "Abrir {source}",

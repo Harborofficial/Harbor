@@ -6,7 +6,11 @@ export function collectionForTitle(
   hits: TvdbCollectionHit[],
 ): TvdbCollectionHit | null {
   if (!title || hits.length === 0) return null;
-  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const norm = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
   const titleTokens = new Set(norm(title).split(" "));
   for (const h of hits) {
     const tokens = norm(h.name)

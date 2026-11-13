@@ -14,18 +14,24 @@ export default {
   "games.manage.uninstallOptions": "Opcje odinstalowania…",
   "games.manage.remove": "Usuń z Harbor…",
   "games.manage.manage": "Zarządzaj",
-  "games.manage.failed": "Nie udało się wykonać działania. Sprawdź, czy gra i program uruchamiający są dostępne, i spróbuj ponownie.",
+  "games.manage.failed":
+    "Nie udało się wykonać działania. Sprawdź, czy gra i program uruchamiający są dostępne, i spróbuj ponownie.",
   "games.manage.removed": "Usunięto z Harbor",
   "games.manage.sent": "Kontynuuj w {source}",
   "games.manage.removeTitle": "Usunąć ten wpis?",
   "games.manage.uninstallTitle": "Odinstalować tę grę?",
   "games.manage.optionsTitle": "Odinstaluj przez {source}",
   "games.manage.removedNote": "Wpis został usunięty. Pliki gry pozostają na komputerze.",
-  "games.manage.sentNote": "Otwarto {source}. Dokończ tam; Harbor odświeży stan instalacji po powrocie.",
-  "games.manage.removeNote": "Usuwa {name} i historię gry w Harbor z tego profilu. Nie odinstalowuje gry ani nie usuwa jej plików.",
-  "games.manage.steamNote": "Steam zajmie się odinstalowaniem {name}. Może wymagać ponownego potwierdzenia. Najpierw zachowaj kopię lokalnych zapisów i modów.",
-  "games.manage.launcherNote": "Otwórz {source}, wybierz {name}, a następnie Zarządzaj lub Odinstaluj. Usuwaniem zajmuje się program uruchamiający; Harbor nie usuwa folderu.",
-  "games.manage.windowsNote": "Znajdź {name} w Zainstalowanych aplikacjach Windows i wybierz Odinstaluj. Dla gier przenośnych postępuj według ich instrukcji. Harbor nie usunie folderu.",
+  "games.manage.sentNote":
+    "Otwarto {source}. Dokończ tam; Harbor odświeży stan instalacji po powrocie.",
+  "games.manage.removeNote":
+    "Usuwa {name} i historię gry w Harbor z tego profilu. Nie odinstalowuje gry ani nie usuwa jej plików.",
+  "games.manage.steamNote":
+    "Steam zajmie się odinstalowaniem {name}. Może wymagać ponownego potwierdzenia. Najpierw zachowaj kopię lokalnych zapisów i modów.",
+  "games.manage.launcherNote":
+    "Otwórz {source}, wybierz {name}, a następnie Zarządzaj lub Odinstaluj. Usuwaniem zajmuje się program uruchamiający; Harbor nie usuwa folderu.",
+  "games.manage.windowsNote":
+    "Znajdź {name} w Zainstalowanych aplikacjach Windows i wybierz Odinstaluj. Dla gier przenośnych postępuj według ich instrukcji. Harbor nie usunie folderu.",
   "games.manage.opening": "Otwieranie…",
   "games.manage.confirmUninstall": "Przejdź do Steam",
   "games.manage.openSource": "Otwórz {source}",

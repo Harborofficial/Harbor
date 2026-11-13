@@ -11,7 +11,10 @@ const COVERS = 3;
 let state: SurpriseFeedbackState = { step: "idle", heard: 0, covers: [] };
 let answered = false;
 const listeners = new Set<() => void>();
-const publish = (next: SurpriseFeedbackState) => { state = next; for (const listener of listeners) listener(); };
+const publish = (next: SurpriseFeedbackState) => {
+  state = next;
+  for (const listener of listeners) listener();
+};
 
 export function resetSurpriseFeedback(): void {
   answered = false;
@@ -22,9 +25,16 @@ export function resetSurpriseFeedback(): void {
 export function noteSurpriseTrack(track: MusicTrack): void {
   if (answered) return;
   const artwork = typeof track.artwork === "string" ? track.artwork : "";
-  const covers = artwork && !state.covers.includes(artwork) ? [...state.covers, artwork].slice(-COVERS) : state.covers;
+  const covers =
+    artwork && !state.covers.includes(artwork)
+      ? [...state.covers, artwork].slice(-COVERS)
+      : state.covers;
   const heard = state.heard + 1;
-  publish({ step: state.step === "idle" && heard >= ASK_AFTER ? "rate" : state.step, heard, covers });
+  publish({
+    step: state.step === "idle" && heard >= ASK_AFTER ? "rate" : state.step,
+    heard,
+    covers,
+  });
 }
 
 export function surpriseEnjoyed(): void {
@@ -45,7 +55,12 @@ export const surpriseFeedbackState = (): SurpriseFeedbackState => state;
 
 export function useSurpriseFeedback(): SurpriseFeedbackState {
   return useSyncExternalStore(
-    listener => { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
     () => state,
     () => ({ step: "idle" as SurprisePromptStep, heard: 0, covers: [] }),
   );

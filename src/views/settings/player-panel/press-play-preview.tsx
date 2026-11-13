@@ -19,7 +19,12 @@ export function PressPlayPreview({ instant }: { instant: boolean }) {
     >
       <PreviewScreen>
         <span className={`${FADE} bg-raised ${instant ? "opacity-100" : "opacity-0"}`}>
-          <img src={filmStill} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
+          <img
+            src={filmStill}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
           <span className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
           <span className="absolute inset-0 grid place-items-center">
             <Play size={24} className="text-white" />

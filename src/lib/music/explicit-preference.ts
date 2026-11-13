@@ -1,6 +1,7 @@
 import type { MusicTrack } from "./types";
 
-const CLEAN_MARK = /\(\s*(?:clean|edited)[^)]*\)|\[\s*(?:clean|edited)[^\]]*\]|\b(?:clean version|edited version)\b/i;
+const CLEAN_MARK =
+  /\(\s*(?:clean|edited)[^)]*\)|\[\s*(?:clean|edited)[^\]]*\]|\b(?:clean version|edited version)\b/i;
 const EXPLICIT_MARK = /\(\s*explicit[^)]*\)|\[\s*explicit[^\]]*\]|\bexplicit version\b/i;
 
 export function explicitnessOf(track: MusicTrack): boolean | undefined {

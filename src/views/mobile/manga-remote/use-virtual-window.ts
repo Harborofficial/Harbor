@@ -31,5 +31,14 @@ export function useVirtualWindow(count: number, rowHeight: number, overscan = 8)
   const start = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
   const end = Math.min(count, Math.ceil((scrollTop + viewport) / rowHeight) + overscan);
 
-  return { ref, onScroll, scrollToRow, scrollTop, start, end, padTop: start * rowHeight, totalHeight: count * rowHeight };
+  return {
+    ref,
+    onScroll,
+    scrollToRow,
+    scrollTop,
+    start,
+    end,
+    padTop: start * rowHeight,
+    totalHeight: count * rowHeight,
+  };
 }

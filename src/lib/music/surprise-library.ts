@@ -13,7 +13,10 @@ async function spotifyPlaylistTaste(signal: AbortSignal): Promise<MusicTrack[]> 
   const work = async () => {
     const page = await loadSpotifyLibraryPage("playlists");
     if (deadline.aborted) return;
-    const playlists = shuffleSurprise(page.playlists.filter(playlist => playlist.canRead)).slice(0, 4);
+    const playlists = shuffleSurprise(page.playlists.filter((playlist) => playlist.canRead)).slice(
+      0,
+      4,
+    );
     const worker = async () => {
       while (playlists.length && !deadline.aborted) {
         const playlist = playlists.shift()!;
@@ -25,7 +28,9 @@ async function spotifyPlaylistTaste(signal: AbortSignal): Promise<MusicTrack[]> 
         const pages = Math.ceil(Math.min(first.total ?? 0, 100_000) / 50);
         if (pages > 1) {
           const offset = (1 + Math.floor(Math.random() * (pages - 1))) * 50;
-          const older = await loadSpotifyLibraryPage("playlist", offset, playlist.id).catch(() => null);
+          const older = await loadSpotifyLibraryPage("playlist", offset, playlist.id).catch(
+            () => null,
+          );
           if (deadline.aborted) return;
           if (older) tracks.push(...older.tracks);
         }
@@ -37,7 +42,11 @@ async function spotifyPlaylistTaste(signal: AbortSignal): Promise<MusicTrack[]> 
   return signal.aborted ? [] : tracks;
 }
 
-export async function loadSurpriseLibrary(primary: boolean, spotifyConnected: boolean, signal: AbortSignal): Promise<MusicTrack[]> {
+export async function loadSurpriseLibrary(
+  primary: boolean,
+  spotifyConnected: boolean,
+  signal: AbortSignal,
+): Promise<MusicTrack[]> {
   if (signal.aborted) return [];
   const [playlists, saved, spotify] = await Promise.all([
     // Read the active profile's current playlists even when Saved and recents are populated.
@@ -48,5 +57,9 @@ export async function loadSurpriseLibrary(primary: boolean, spotifyConnected: bo
     primary && spotifyConnected ? spotifyPlaylistTaste(signal) : Promise.resolve([]),
   ]);
   if (signal.aborted) return [];
-  return mixRecordings([...playlists.flatMap(playlist => playlist.tracks), ...saved.tracks, ...spotify]);
+  return mixRecordings([
+    ...playlists.flatMap((playlist) => playlist.tracks),
+    ...saved.tracks,
+    ...spotify,
+  ]);
 }

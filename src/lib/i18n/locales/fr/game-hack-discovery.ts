@@ -16,28 +16,44 @@ export default {
   "games.patch.saveCopy": "Enregistrer une nouvelle copie",
   "games.patch.verified": "Fichiers vérifiés",
   "games.patch.ready": "Patch préparé",
-  "games.patch.verifiedNote": "Le jeu d’origine, le patch et la copie finale correspondent aux sommes de contrôle du patch BPS.",
-  "games.patch.ipsNote": "Le format IPS ne vérifie pas le jeu d’origine. Vérifiez la version requise par le projet avant d’enregistrer.",
+  "games.patch.verifiedNote":
+    "Le jeu d’origine, le patch et la copie finale correspondent aux sommes de contrôle du patch BPS.",
+  "games.patch.ipsNote":
+    "Le format IPS ne vérifie pas le jeu d’origine. Vérifiez la version requise par le projet avant d’enregistrer.",
   "games.patch.output": "Copie finale",
   "games.patch.fingerprint": "Empreinte du fichier · SHA-256",
   "games.patch.fingerprints": "Empreintes des fichiers · SHA-256",
   "games.patch.localNote": "Sur votre appareil · BPS · IPS · UPS · Jusqu’à 256 Mo",
-  "games.patch.desktop": "Appliquez les patchs dans l’application de bureau Harbor sous Windows, macOS ou Linux. Vos fichiers restent sur votre appareil et le jeu d’origine est préservé.",
+  "games.patch.desktop":
+    "Appliquez les patchs dans l’application de bureau Harbor sous Windows, macOS ou Linux. Vos fichiers restent sur votre appareil et le jeu d’origine est préservé.",
   "games.patch.done": "Prêt pour une nouvelle aventure",
-  "games.patch.preserved": "Votre copie modifiée est enregistrée. Le jeu d’origine et le patch sont inchangés.",
-  "games.patch.patch_source_mismatch": "Ce patch nécessite un autre fichier ou une autre version du jeu. Consultez les prérequis du projet et choisissez le bon fichier.",
-  "games.patch.patch_checksum_mismatch": "La somme de contrôle du patch ne correspond pas. Le fichier est peut-être incomplet ; téléchargez-le à nouveau depuis son projet.",
-  "games.patch.patch_target_mismatch": "La copie finale ne correspond pas à la somme de contrôle attendue. Rien n’a été enregistré.",
+  "games.patch.preserved":
+    "Votre copie modifiée est enregistrée. Le jeu d’origine et le patch sont inchangés.",
+  "games.patch.patch_source_mismatch":
+    "Ce patch nécessite un autre fichier ou une autre version du jeu. Consultez les prérequis du projet et choisissez le bon fichier.",
+  "games.patch.patch_checksum_mismatch":
+    "La somme de contrôle du patch ne correspond pas. Le fichier est peut-être incomplet ; téléchargez-le à nouveau depuis son projet.",
+  "games.patch.patch_target_mismatch":
+    "La copie finale ne correspond pas à la somme de contrôle attendue. Rien n’a été enregistré.",
   "games.patch.patch_expired": "Cette préparation a expiré. Vérifiez à nouveau le patch.",
-  "games.patch.patch_inputs_changed": "Un fichier sélectionné a changé depuis la vérification. Vérifiez à nouveau le patch avant d’enregistrer.",
-  "games.patch.patch_output_exists": "Un fichier existe déjà à cet emplacement. Choisissez un autre nom ; Harbor ne remplace pas les fichiers existants.",
-  "games.patch.patch_read_failed": "Impossible de lire un fichier sélectionné. Vérifiez qu’il est toujours disponible et sélectionnez-le à nouveau.",
-  "games.patch.patch_write_failed": "Impossible d’enregistrer la copie. Vérifiez le dossier et l’espace disponible, ou choisissez un autre emplacement.",
-  "games.patch.patch_too_large": "Le jeu d’origine, le patch et la copie finale ne doivent pas dépasser 256 Mo chacun.",
-  "games.patch.patch_busy": "Un autre patch est en cours de traitement. Réessayez une fois terminé.",
-  "games.patch.patch_game_type": "Choisissez un fichier de jeu compatible, comme GBA, GB, NES, SFC, NDS ou ROM.",
-  "games.patch.patch_output_type": "Conservez l’extension du jeu d’origine lors de l’enregistrement.",
-  "games.patch.invalid": "Impossible de lire ce patch. Vérifiez le fichier et la version du jeu requise par le projet.",
+  "games.patch.patch_inputs_changed":
+    "Un fichier sélectionné a changé depuis la vérification. Vérifiez à nouveau le patch avant d’enregistrer.",
+  "games.patch.patch_output_exists":
+    "Un fichier existe déjà à cet emplacement. Choisissez un autre nom ; Harbor ne remplace pas les fichiers existants.",
+  "games.patch.patch_read_failed":
+    "Impossible de lire un fichier sélectionné. Vérifiez qu’il est toujours disponible et sélectionnez-le à nouveau.",
+  "games.patch.patch_write_failed":
+    "Impossible d’enregistrer la copie. Vérifiez le dossier et l’espace disponible, ou choisissez un autre emplacement.",
+  "games.patch.patch_too_large":
+    "Le jeu d’origine, le patch et la copie finale ne doivent pas dépasser 256 Mo chacun.",
+  "games.patch.patch_busy":
+    "Un autre patch est en cours de traitement. Réessayez une fois terminé.",
+  "games.patch.patch_game_type":
+    "Choisissez un fichier de jeu compatible, comme GBA, GB, NES, SFC, NDS ou ROM.",
+  "games.patch.patch_output_type":
+    "Conservez l’extension du jeu d’origine lors de l’enregistrement.",
+  "games.patch.invalid":
+    "Impossible de lire ce patch. Vérifiez le fichier et la version du jeu requise par le projet.",
   "games.hub.spotlight": "À découvrir",
   "games.hub.watch": "Voir du gameplay",
   "games.hub.watchTitle": "En pleine partie",
@@ -49,7 +65,8 @@ export default {
   "games.hub.viewOriginal": "Voir le jeu original",
   "games.hub.toolkitNote": "Téléchargez un patch pour votre jeu original.",
   "games.hub.baseVersion": "Utilisez la version et la région exactes indiquées par le projet.",
-  "games.hub.catalogNote": "Explorez les ROM hacks et mods console. Filtrez par système ou cherchez un projet.",
+  "games.hub.catalogNote":
+    "Explorez les ROM hacks et mods console. Filtrez par système ou cherchez un projet.",
   "games.hub.findVideos": "Chercher du gameplay",
   "games.hub.resources": "Communautés de ROM hacking",
   "games.patch.open": "Appliquer un patch",
@@ -60,10 +77,12 @@ export default {
   "games.atlas.sort.rated": "Les mieux notés",
   "games.atlas.sort.newest": "Plus récents",
   "games.atlas.sort.oldest": "Plus anciens",
-  "games.hub.stepPatch": "Choisissez votre jeu original et un patch BPS, IPS ou UPS. Harbor enregistre une copie séparée.",
-  "games.patch.description": "Choisissez votre jeu original et un patch BPS, IPS ou UPS. Harbor enregistre une copie séparée.",
+  "games.hub.stepPatch":
+    "Choisissez votre jeu original et un patch BPS, IPS ou UPS. Harbor enregistre une copie séparée.",
+  "games.patch.description":
+    "Choisissez votre jeu original et un patch BPS, IPS ou UPS. Harbor enregistre une copie séparée.",
   "games.patch.choosePatch": "Choisir un patch (BPS, IPS, UPS)",
   "games.patch.patch_unsupported": "Ce fichier n’est pas un patch BPS, IPS ou UPS compatible.",
   "games.discovery.viewGame": "Voir le jeu",
-  "games.atlas.basedOn": "Basé sur ce jeu"
+  "games.atlas.basedOn": "Basé sur ce jeu",
 };

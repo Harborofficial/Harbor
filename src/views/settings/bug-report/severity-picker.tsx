@@ -26,7 +26,9 @@ export function SeverityPicker({
   return (
     <div className="flex flex-col items-start gap-2">
       <Segmented value={value} options={OPTIONS} onChange={onChange} />
-      <p className="text-[14px] leading-5 text-ink-muted" aria-live="polite">{descriptions[value]}</p>
+      <p className="text-[14px] leading-5 text-ink-muted" aria-live="polite">
+        {descriptions[value]}
+      </p>
     </div>
   );
 }

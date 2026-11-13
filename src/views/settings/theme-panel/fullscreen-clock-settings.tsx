@@ -136,7 +136,11 @@ export function FullscreenClockSettings() {
                         </span>
                       </span>
                       {active && (
-                        <Check size={18} strokeWidth={2.6} className="mt-[3px] shrink-0 text-accent" />
+                        <Check
+                          size={18}
+                          strokeWidth={2.6}
+                          className="mt-[3px] shrink-0 text-accent"
+                        />
                       )}
                     </span>
                   </button>

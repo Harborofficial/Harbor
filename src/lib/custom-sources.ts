@@ -50,7 +50,8 @@ export function isValidSourceRow(data: any): data is SourceRow {
     if (typeof folder.id !== "string" || typeof folder.title !== "string") return false;
     if (folder.tileShape !== "LANDSCAPE" && folder.tileShape !== "POSTER") return false;
 
-    const hasCatalogSources = Array.isArray(folder.catalogSources) && folder.catalogSources.length > 0;
+    const hasCatalogSources =
+      Array.isArray(folder.catalogSources) && folder.catalogSources.length > 0;
     const hasNativeSources = Array.isArray(folder.sources) && folder.sources.length > 0;
 
     if (!hasCatalogSources && !hasNativeSources) return false;
@@ -58,7 +59,11 @@ export function isValidSourceRow(data: any): data is SourceRow {
     if (hasCatalogSources) {
       for (const source of folder.catalogSources!) {
         if (!source || typeof source !== "object") return false;
-        if (typeof source.addonId !== "string" || typeof source.type !== "string" || typeof source.catalogId !== "string") {
+        if (
+          typeof source.addonId !== "string" ||
+          typeof source.type !== "string" ||
+          typeof source.catalogId !== "string"
+        ) {
           return false;
         }
       }
@@ -82,9 +87,8 @@ export function folderLayout(
   sourceId: string,
   folderId: string,
 ): SourceFolder["layout"] {
-  return customSources
-    .find((row) => row.id === sourceId)
-    ?.folders.find((f) => f.id === folderId)?.layout;
+  return customSources.find((row) => row.id === sourceId)?.folders.find((f) => f.id === folderId)
+    ?.layout;
 }
 
 export function updateSourceFolder(

@@ -619,7 +619,8 @@ const miscA: Record<string, string> = {
   "Browsing {section}. Change section": "{section} bölümüne göz atılıyor. Bölümü değiştir",
   "Buffer fill": "Arabellek doluluğu",
   "Reveal the dot on hover": "Nokta imleçle görünsün",
-  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.": "Nokta göz önünde durmaz, çubuğu işaret ettiğinizde belirir. Sürekli görünmesini isterseniz bunu kapatın.",
+  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.":
+    "Nokta göz önünde durmaz, çubuğu işaret ettiğinizde belirir. Sürekli görünmesini isterseniz bunu kapatın.",
   "Buffer fill brightness": "Arabellek doluluk parlaklığı",
   "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.":
     "Siz izlerken, duraklatılmış olsa bile dosyanın tamamını arka planda arabelleğe alır. Böylece büyük remux dosyaları önceden yüklenir ve önbelleğe alınmış dosyada yeniden arabelleğe alma olmadan ileri geri sarabilirsiniz. Debrid ve P2P yayınlarında çalışır. Daha fazla disk alanı ve bant genişliği kullanır; kaynak değiştirdiğinizde veya kapattığınızda temizlenir.",
@@ -812,9 +813,11 @@ const miscA: Record<string, string> = {
     "Spoiler olarak etiketlenmemiş olsalar bile yorumlar siz açana kadar bulanık görünür.",
   "Comments are hidden": "Yorumlar gizli",
   "Hosted elsewhere": "Başka yerde barındırılıyor",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "Bu planları üçüncü bir taraf yürütüyor. Harbor onlarla bağlı değil ve kayıttan hiçbir şey almyor. Güncel fiyat ve koşullar kendi sitelerinde.",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "Bu planları üçüncü bir taraf yürütüyor. Harbor onlarla bağlı değil ve kayıttan hiçbir şey almyor. Güncel fiyat ve koşullar kendi sitelerinde.",
   "{name} can run on a hosted instance": "{name} barındırılan bir örnekte çalışabilir",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "Bunu üçüncü bir taraf işletiyor. Harbor onlarla bağlı değil, yeniden satmıyor ve kaydolursanız hiçbir şey almıyor. Fiyat ve kapsam kendi sitelerinde.",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "Bunu üçüncü bir taraf işletiyor. Harbor onlarla bağlı değil, yeniden satmıyor ve kaydolursanız hiçbir şey almıyor. Fiyat ve kapsam kendi sitelerinde.",
   "Show comments": "Yorumları göster",
   "Hide comments": "Yorumları gizle",
   "Comments may take a moment to appear on Trakt":
@@ -853,7 +856,8 @@ const miscA: Record<string, string> = {
   "Connect your AniList account to see forum threads and comments.":
     "Forum konularını ve yorumları görmek için AniList hesabınızı bağlayın.",
   "Connect your MyAnimeList account": "MyAnimeList hesabınızı bağlayın",
-  "Connect your Trakt account to leave comments and reviews.": "Yorum ve inceleme bırakmak için Trakt hesabını bağla.",
+  "Connect your Trakt account to leave comments and reviews.":
+    "Yorum ve inceleme bırakmak için Trakt hesabını bağla.",
   "Connect {name} in Settings first": "Önce Ayarlar'dan {name} bağlantısını kurun",
   "Connected as @{username}": "@{username} olarak bağlandı",
   "Connected as @{user}": "@{user} olarak bağlandı",

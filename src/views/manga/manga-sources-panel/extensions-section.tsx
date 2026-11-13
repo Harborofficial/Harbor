@@ -1,8 +1,17 @@
 import { Blocks, Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import { addRepo, removeRepo, repoUrlsSync, subscribePlugins, subscribeRepos } from "@/lib/manga/plugins";
+import {
+  addRepo,
+  removeRepo,
+  repoUrlsSync,
+  subscribePlugins,
+  subscribeRepos,
+} from "@/lib/manga/plugins";
 import { removeAllMangayomiRecords } from "@/lib/manga/sources/mangayomi";
-import { mangayomiSourcesSync, subscribeMangayomiSources } from "@/lib/manga/sources/mangayomi/store";
+import {
+  mangayomiSourcesSync,
+  subscribeMangayomiSources,
+} from "@/lib/manga/sources/mangayomi/store";
 import { CARD, INPUT } from "./shared";
 import { RepoCard } from "./extensions/repo-card";
 import { useT } from "@/lib/i18n";
@@ -23,7 +32,9 @@ function Explainer() {
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-canvas text-ink-muted ring-1 ring-edge-soft">
           <ShieldCheck size={18} />
         </span>
-        <span className="text-[15.5px] font-semibold text-ink">{t("Bring your own extensions")}</span>
+        <span className="text-[15.5px] font-semibold text-ink">
+          {t("Bring your own extensions")}
+        </span>
       </div>
       <p className="text-[13.5px] leading-relaxed text-ink-muted">
         {t(
@@ -117,7 +128,11 @@ export function ExtensionsSection() {
             disabled={adding}
             className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-5 text-[14.5px] font-semibold text-canvas transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
           >
-            {adding ? <Loader2 size={17} className="animate-spin" /> : <Plus size={17} strokeWidth={2.4} />}
+            {adding ? (
+              <Loader2 size={17} className="animate-spin" />
+            ) : (
+              <Plus size={17} strokeWidth={2.4} />
+            )}
             {t("Add")}
           </button>
         </div>

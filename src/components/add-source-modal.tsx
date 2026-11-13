@@ -70,7 +70,9 @@ export function AddSourceModal({
       <div className="animate-modal-in flex w-full max-w-[420px] flex-col gap-4 rounded-lg border border-edge-soft bg-elevated p-4 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.75)]">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-0.5">
-            <h2 className="text-[13px] font-semibold tracking-tight text-ink">{t("Add Custom Source")}</h2>
+            <h2 className="text-[13px] font-semibold tracking-tight text-ink">
+              {t("Add Custom Source")}
+            </h2>
             <p className="text-[11.5px] leading-relaxed text-ink-subtle">
               {t("Provide a JSON link or paste it directly.")}
             </p>

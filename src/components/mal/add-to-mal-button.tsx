@@ -102,7 +102,11 @@ export function AddToMalButton({ harborId, title }: { harborId: string; title: s
 
   if (status == null) {
     return (
-      <HoverTooltip label={t("Add {title} to MyAnimeList", { title })} align="center" className="shrink-0">
+      <HoverTooltip
+        label={t("Add {title} to MyAnimeList", { title })}
+        align="center"
+        className="shrink-0"
+      >
         <button
           type="button"
           disabled={busy}
@@ -133,7 +137,12 @@ export function AddToMalButton({ harborId, title }: { harborId: string; title: s
           className={`text-ink-muted transition-transform ${menuOpen ? "rotate-180" : ""}`}
         />
       </button>
-      <AnchoredMenu anchorRef={btnRef} open={menuOpen} onClose={() => setMenuOpen(false)} width={224}>
+      <AnchoredMenu
+        anchorRef={btnRef}
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        width={224}
+      >
         <div className="overflow-hidden rounded-2xl border border-edge bg-raised py-1.5 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.7)]">
           {STATUS_ORDER.map((s) => (
             <button

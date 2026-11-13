@@ -1,7 +1,8 @@
 export default {
   "games.tarkov.title": "Wipe- und Saisonuhr",
   "games.tarkov.refresh": "Daten aktualisieren",
-  "games.tarkov.refreshFailed": "Aktualisierung fehlgeschlagen. Die bisherigen Daten werden angezeigt.",
+  "games.tarkov.refreshFailed":
+    "Aktualisierung fehlgeschlagen. Die bisherigen Daten werden angezeigt.",
   "games.tarkov.seasonFailed": "Der Saisonplan konnte nicht geladen werden.",
   "games.tarkov.season": "Saison {number}",
   "games.tarkov.community": "Community-Zeitplan",
@@ -14,17 +15,19 @@ export default {
   "games.tarkov.listedStart": "Angegebener Start:",
   "games.tarkov.noSeason": "Keine aktive Saison aufgeführt",
   "games.tarkov.noSeasonDetail": "Die Quelle führt keine aktuelle oder kommende Saison auf.",
-  "games.tarkov.scheduleNote": "tarkov.dev pflegt diese Termine. Sie können sich ändern und sind keine offizielle Wipe-Ankündigung.",
+  "games.tarkov.scheduleNote":
+    "tarkov.dev pflegt diese Termine. Sie können sich ändern und sind keine offizielle Wipe-Ankündigung.",
   "games.tarkov.seasonSource": "Saisontermine · tarkov.dev",
   "games.tarkov.checked": "Geprüft: {time}",
   "games.tarkov.fullWipe": "Letzter vollständiger Wipe laut Quelle",
   "games.tarkov.historyFailed": "Der Wipe-Verlauf konnte nicht geladen werden.",
   "games.tarkov.elapsed": "{days} Tage",
   "games.tarkov.noHistory": "Keine vergangenen Wipes aufgeführt.",
-  "games.tarkov.modeNote": "Saisonfortschritt und vollständige Account-Wipes sind getrennt. Dieser Verlauf beschreibt keine Zurücksetzungen dauerhafter PvP- oder PvE-Charaktere.",
+  "games.tarkov.modeNote":
+    "Saisonfortschritt und vollständige Account-Wipes sind getrennt. Dieser Verlauf beschreibt keine Zurücksetzungen dauerhafter PvP- oder PvE-Charaktere.",
   "games.tarkov.historySource": "Wipe-Termine · tarkov.dev",
   "games.tarkov.history": "Vollständige Wipes",
   "games.tarkov.patch": "Patch",
   "games.tarkov.date": "Startdatum (UTC)",
-  "games.tarkov.duration": "Bis zum nächsten vollständigen Wipe"
+  "games.tarkov.duration": "Bis zum nächsten vollständigen Wipe",
 };

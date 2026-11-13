@@ -135,7 +135,10 @@ test("a live row becomes a match with teams, series format, stage and the public
   assert.equal(match.bestOf, 3);
   assert.equal(match.teams[0].name, "MASONIC");
   assert.equal(match.teams[0].id, "1059");
-  assert.equal(match.teams[0].logo, "https://files.bo3.gg/uploads/team/1059/image/webp-3acae7de.webp");
+  assert.equal(
+    match.teams[0].logo,
+    "https://files.bo3.gg/uploads/team/1059/image/webp-3acae7de.webp",
+  );
   assert.equal(match.teams[0].score, 0);
   assert.equal(match.teams[0].winner, undefined);
   assert.equal(match.teams[0].code, undefined);
@@ -184,11 +187,24 @@ test("platform integers select the player, and unusable channels are dropped not
     viewers_number: 10,
   };
   const blocked = { ...kickStream, id: 8, blocked: true, name: "Blocked" };
-  const lying = { ...kickStream, id: 9, platform: 1, raw_url: "https://kick.com/not-twitch", name: "Lying" };
-  const videoPage = { ...twitchStream, id: 10, raw_url: "https://www.twitch.tv/videos/12345", name: "Vod" };
+  const lying = {
+    ...kickStream,
+    id: 9,
+    platform: 1,
+    raw_url: "https://kick.com/not-twitch",
+    name: "Lying",
+  };
+  const videoPage = {
+    ...twitchStream,
+    id: 10,
+    raw_url: "https://www.twitch.tv/videos/12345",
+    name: "Vod",
+  };
   const insecure = { ...kickStream, id: 11, raw_url: "http://kick.com/insecure", name: "Insecure" };
   const result = parseBo3Matches(
-    page([row({ streams: [kickStream, youtube, blocked, lying, videoPage, insecure, twitchStream] })]),
+    page([
+      row({ streams: [kickStream, youtube, blocked, lying, videoPage, insecure, twitchStream] }),
+    ]),
     cs2,
     now,
   );
@@ -229,7 +245,10 @@ test("a filter the provider silently replaced is an outage, never a board of the
     /outside the requested filter/,
   );
   // A dropped filter returns the whole database; the live facing states are only ever hundreds.
-  assert.throws(() => parseBo3Matches(page([row()], { count: 81257 }), cs2, now), /schedule filter/);
+  assert.throws(
+    () => parseBo3Matches(page([row()], { count: 81257 }), cs2, now),
+    /schedule filter/,
+  );
   assert.throws(() => parseBo3Matches({ data: [] }, cs2, now), /unavailable/);
 });
 
@@ -272,7 +291,12 @@ test("titles beyond the feed contract come free, and only modelled titles cross 
     status: "upcoming",
     start_date: iso(90),
     streams: [],
-    tournament: tournament({ id: 7001, slug: "mpl-ph-s16", name: "MPL PH Season 16", discipline_id: 8 }),
+    tournament: tournament({
+      id: 7001,
+      slug: "mpl-ph-s16",
+      name: "MPL PH Season 16",
+      discipline_id: 8,
+    }),
     stage: { id: 1, title: "MPL PH Season 16 Regular Season", tournament_id: 7001 },
     round: { id: 2, name: "Week 5" },
     team1: { id: 22144, slug: "myanmar-", name: "Myanmar", image_url: null },
@@ -298,7 +322,12 @@ test("rows the provider cannot identify are skipped without failing the whole pa
     row({ id: "not-a-number", slug: "bad-id-01-10-2026" }),
     row({ id: 130218, slug: "no-date-01-10-2026", start_date: "soon" }),
     row({ id: 130219, slug: "no-team-01-10-2026", team2: { id: 2, name: "" } }),
-    row({ id: 130220, slug: "stale-upcoming-01-10-2026", status: "upcoming", start_date: iso(-60) }),
+    row({
+      id: 130220,
+      slug: "stale-upcoming-01-10-2026",
+      status: "upcoming",
+      start_date: iso(-60),
+    }),
   ];
   const result = parseBo3Matches(page([row(), ...unusable]), cs2, now);
   assert.equal(result.matches.length, 1);

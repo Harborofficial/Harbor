@@ -1,4 +1,4 @@
-const gameHub: Record<string,string> = {
+const gameHub: Record<string, string> = {
   "games.hub.filesTitle": "プロジェクトのファイル",
   "games.hub.videoUnavailable": "プレイ動画を読み込めませんでした。",
   "games.hub.noVideos": "これらのROMハックにはまだ動画が登録されていません。",
@@ -7,9 +7,12 @@ const gameHub: Record<string,string> = {
   "games.hub.allOriginals": "すべての元ゲーム",
   "games.hub.searchOriginal": "元のゲームを検索…",
   "games.hub.getFiles": "ファイルを取得",
-  "games.hub.packNote": "このプロジェクトはMODパックを使用します。対応するシステムの作者の導入手順に従ってください。",
-  "games.hub.noDownload": "パッチの直接リンクが見つかりません。プロジェクトのサイトを開くか、ファイルのリンクを貼り付けてください。",
-  "games.hub.downloadFailed": "ファイルを取得できませんでした。再試行するか、プロジェクトのサイトを開いてください。",
+  "games.hub.packNote":
+    "このプロジェクトはMODパックを使用します。対応するシステムの作者の導入手順に従ってください。",
+  "games.hub.noDownload":
+    "パッチの直接リンクが見つかりません。プロジェクトのサイトを開くか、ファイルのリンクを貼り付けてください。",
+  "games.hub.downloadFailed":
+    "ファイルを取得できませんでした。再試行するか、プロジェクトのサイトを開いてください。",
   "games.hub.downloadNote": "作者のパッチをダウンロードして、適用する元のゲームを選んでください。",
   "games.hub.downloadLink": "ダウンロードリンクを貼り付け",
   "games.hub.gettingFiles": "ファイルを確認中…",
@@ -20,18 +23,22 @@ const gameHub: Record<string,string> = {
   "games.hub.toolkitNote": "元のゲームに適用するパッチをダウンロード。",
   "games.hub.communityMade": "コミュニティ制作",
   "games.hub.title": "ROMハック",
-  "games.hub.note": "新しい冒険、生まれ変わった名作。ハックを見つけて保存し、パッチを適用した自分のコピーをHarborで遊べます。",
+  "games.hub.note":
+    "新しい冒険、生まれ変わった名作。ハックを見つけて保存し、パッチを適用した自分のコピーをHarborで遊べます。",
   "games.hub.hacksFor": "{name}のハック",
   "games.hub.baseNote": "このゲームから生まれたコミュニティ作品を見つけましょう。",
   "games.hub.how": "ROMハックの遊び方",
   "games.hub.stepFind": "ハックの詳細を開くと、プロジェクトのサイトと必要な原作を確認できます。",
-  "games.hub.stepPatch": "元のROMとBPSまたはIPSパッチを選びます。Harborが確認し、別のコピーとして保存します。",
-  "games.hub.stepPlay": "コピーをライブラリに追加します。対応機種はHarborで、それ以外は設定したエミュレーターで遊べます。",
+  "games.hub.stepPatch":
+    "元のROMとBPSまたはIPSパッチを選びます。Harborが確認し、別のコピーとして保存します。",
+  "games.hub.stepPlay":
+    "コピーをライブラリに追加します。対応機種はHarborで、それ以外は設定したエミュレーターで遊べます。",
   "games.hub.byOriginal": "元のゲームからハックを探す",
   "games.hub.allHacks": "すべてのハック",
   "games.hub.baseUnlisted": "原作の記載なし",
   "games.hub.makePlayable": "プレイの準備",
-  "games.hub.installNote": "プロジェクトのサイトからパッチを入手し、自分の原作コピーに適用します。必要なバージョンを先に確認してください。",
+  "games.hub.installNote":
+    "プロジェクトのサイトからパッチを入手し、自分の原作コピーに適用します。必要なバージョンを先に確認してください。",
   "games.hub.moreFor": "{name}のほかのハック",
   "games.hub.project": "プロジェクトのサイト",
   "games.hub.relatedError": "関連ハックを読み込めませんでした。",
@@ -43,7 +50,8 @@ const gameHub: Record<string,string> = {
   "games.collectionsLive.greats": "歴代の名作",
   "games.collectionsLive.greatsNote": "プレイヤーと批評家の評価が100件以上ある、IGDBの高評価作品。",
   "games.collectionsLive.coop": "一緒ならもっと楽しい",
-  "games.collectionsLive.coopNote": "IGDBの評価が100件以上ある高評価の協力ゲーム。対応モードは機種によって異なります。",
+  "games.collectionsLive.coopNote":
+    "IGDBの評価が100件以上ある高評価の協力ゲーム。対応モードは機種によって異なります。",
   "games.collectionsLive.records": "記録に残るゲーム",
   "games.collectionsLive.recordsNote": "驚きの達成記録。その背景と出典も紹介します。",
   "games.collectionsLive.minecraft": "Minecraft",
@@ -56,6 +64,6 @@ const gameHub: Record<string,string> = {
   "games.collectionsLive.gtaRecord": "わずか3日間の売上",
   "games.collectionsLive.gtaDate": "2013年9月",
   "games.atlas.kind.greats": "歴代の名作",
-  "games.atlas.kind.coop": "協力ゲーム"
+  "games.atlas.kind.coop": "協力ゲーム",
 };
 export default gameHub;

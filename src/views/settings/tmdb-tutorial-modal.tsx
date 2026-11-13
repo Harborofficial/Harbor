@@ -28,12 +28,16 @@ function steps(t: (s: string) => string): Step[] {
   return [
     {
       title: t("Open the TMDB API page"),
-      body: t("Use the button below. If you are not signed in yet TMDB says you do not have permission, which is normal. Click the link in that message to sign in."),
+      body: t(
+        "Use the button below. If you are not signed in yet TMDB says you do not have permission, which is normal. Click the link in that message to sign in.",
+      ),
       shot: shot1,
     },
     {
       title: t("Sign in, or make an account"),
-      body: t("Already have a TMDB login? Sign in and skip ahead. Otherwise press Register and fill in a username, password and email."),
+      body: t(
+        "Already have a TMDB login? Sign in and skip ahead. Otherwise press Register and fill in a username, password and email.",
+      ),
       shot: shot2,
     },
     {
@@ -43,17 +47,23 @@ function steps(t: (s: string) => string): Step[] {
     },
     {
       title: t("Your account needs activating"),
-      body: t("Right after registering TMDB tells you the account is not active yet. Nothing is broken, the email is on its way."),
+      body: t(
+        "Right after registering TMDB tells you the account is not active yet. Nothing is broken, the email is on its way.",
+      ),
       shot: shot4,
     },
     {
       title: t("Click Activate in the email"),
-      body: t("Open the email TMDB sent to the address you registered with and press the activate button inside it. Check spam if it has not arrived."),
+      body: t(
+        "Open the email TMDB sent to the address you registered with and press the activate button inside it. Check spam if it has not arrived.",
+      ),
       shot: shot5,
     },
     {
       title: t("Open your account settings"),
-      body: t("Back on TMDB, click your avatar in the top right and choose Settings from the menu."),
+      body: t(
+        "Back on TMDB, click your avatar in the top right and choose Settings from the menu.",
+      ),
       shot: shot6,
     },
     {
@@ -63,7 +73,9 @@ function steps(t: (s: string) => string): Step[] {
     },
     {
       title: t("Request a key"),
-      body: t("You have no key yet, so TMDB asks you to request one. Follow the link to create it."),
+      body: t(
+        "You have no key yet, so TMDB asks you to request one. Follow the link to create it.",
+      ),
       shot: shot8,
     },
     {
@@ -78,20 +90,30 @@ function steps(t: (s: string) => string): Step[] {
     },
     {
       title: t("Fill in the details, then Subscribe"),
-      body: t("This is the part people get stuck on. None of it is checked and nothing is billed. Give the app any name, any URL, pick a type of use, and write a sentence for the summary. The contact fields can be anything real enough to look sensible. Tick the agreement and press Subscribe."),
+      body: t(
+        "This is the part people get stuck on. None of it is checked and nothing is billed. Give the app any name, any URL, pick a type of use, and write a sentence for the summary. The contact fields can be anything real enough to look sensible. Tick the agreement and press Subscribe.",
+      ),
       shot: shotApi3,
-      note: t("For Application URL anything works, for example https://harborcommunity.site. TMDB never visits it."),
+      note: t(
+        "For Application URL anything works, for example https://harborcommunity.site. TMDB never visits it.",
+      ),
     },
     {
       title: t("That was the hard part"),
-      body: t("TMDB confirms the key is created. Follow the link it gives you to see your API key details."),
+      body: t(
+        "TMDB confirms the key is created. Follow the link it gives you to see your API key details.",
+      ),
       shot: shotFinal,
     },
     {
       title: t("Copy your API Key"),
-      body: t("Back on the API page, scroll to the bottom. Copy the value under API Key and paste it into Harbor. Harbor saves it on its own."),
+      body: t(
+        "Back on the API page, scroll to the bottom. Copy the value under API Key and paste it into Harbor. Harbor saves it on its own.",
+      ),
       shot: shotDone,
-      note: t("Take the short API Key at the very bottom, not the long API Read Access Token above it."),
+      note: t(
+        "Take the short API Key at the very bottom, not the long API Read Access Token above it.",
+      ),
     },
   ];
 }
@@ -137,10 +159,10 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
       >
         <div className="flex items-start justify-between gap-4 px-6 pb-4 pt-5">
           <div className="flex min-w-0 flex-col gap-1">
-            <span className="harbor-settings-label">
-              {t("TMDB")}
-            </span>
-            <h2 className="text-[19px] font-semibold leading-[26px] tracking-tight text-ink">{t("Get your free TMDB key")}</h2>
+            <span className="harbor-settings-label">{t("TMDB")}</span>
+            <h2 className="text-[19px] font-semibold leading-[26px] tracking-tight text-ink">
+              {t("Get your free TMDB key")}
+            </h2>
             <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
               {t("Free forever for personal use. No payment, ever.")}
             </p>
@@ -161,8 +183,12 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
               {i + 1}
             </span>
             <div className="flex min-w-0 flex-col gap-1">
-              <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">{step.title}</span>
-              <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{step.body}</p>
+              <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">
+                {step.title}
+              </span>
+              <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
+                {step.body}
+              </p>
             </div>
           </div>
 
@@ -207,9 +233,7 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
                 <span
                   aria-hidden
                   className={`block h-1.5 rounded-full transition-all duration-150 ${
-                    n === i
-                      ? "w-5 bg-accent"
-                      : "w-1.5 bg-edge group-hover/dot:bg-ink-subtle"
+                    n === i ? "w-5 bg-accent" : "w-1.5 bg-edge group-hover/dot:bg-ink-subtle"
                   }`}
                 />
               </button>

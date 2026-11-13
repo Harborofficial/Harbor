@@ -67,8 +67,11 @@
 }
 
 .hb-terms-mark {
-  transition: background-color var(--t-hover) var(--ease), box-shadow var(--t-hover) var(--ease),
-    opacity var(--t-hover) var(--ease), transform var(--t-press) var(--ease);
+  transition:
+    background-color var(--t-hover) var(--ease),
+    box-shadow var(--t-hover) var(--ease),
+    opacity var(--t-hover) var(--ease),
+    transform var(--t-press) var(--ease);
 }
 
 .hb-terms-mark[aria-checked="true"] {
@@ -163,7 +166,9 @@
   color: var(--ink-subtle);
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color var(--t-hover) var(--ease), color var(--t-hover) var(--ease);
+  transition:
+    background-color var(--t-hover) var(--ease),
+    color var(--t-hover) var(--ease);
 }
 
 .hb-terms-lang:hover {
@@ -171,7 +176,7 @@
   color: var(--ink-muted);
 }
 
-.hb-terms-lang[aria-pressed='true'] {
+.hb-terms-lang[aria-pressed="true"] {
   background: var(--wash);
   color: var(--ink);
 }

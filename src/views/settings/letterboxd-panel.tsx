@@ -121,7 +121,9 @@ export function LetterboxdPanel() {
       setPassword("");
       setTotp("");
       setNeeds2fa(false);
-      update({ letterboxd: { ...lb, enabled: true, mode: "full", username: result.session.username } });
+      update({
+        letterboxd: { ...lb, enabled: true, mode: "full", username: result.session.username },
+      });
       invalidateLetterboxdCache();
     } else if (result.kind === "2fa") {
       setNeeds2fa(true);
@@ -148,7 +150,10 @@ export function LetterboxdPanel() {
       const catalogId = `letterboxd-list-${ref.id}`;
       const next = {
         ...lb,
-        listRefs: [...lb.listRefs.filter((r) => r.id !== ref.id), { id: ref.id, name: ref.name, owner: ref.owner, filmCount: ref.filmCount }],
+        listRefs: [
+          ...lb.listRefs.filter((r) => r.id !== ref.id),
+          { id: ref.id, name: ref.name, owner: ref.owner, filmCount: ref.filmCount },
+        ],
         selectedCatalogs: lb.selectedCatalogs.includes(catalogId)
           ? lb.selectedCatalogs
           : [...lb.selectedCatalogs, catalogId],
@@ -270,7 +275,9 @@ export function LetterboxdPanel() {
               <SettingRow
                 wide
                 label={t("Two-factor authentication code")}
-                desc={t("Letterboxd asked for a second step. Enter the six digit code, then connect again.")}
+                desc={t(
+                  "Letterboxd asked for a second step. Enter the six digit code, then connect again.",
+                )}
               >
                 <input
                   type="text"
@@ -290,7 +297,9 @@ export function LetterboxdPanel() {
               desc={
                 isPublic
                   ? t("Checks the username against Stremboxd and turns on the catalogs it finds.")
-                  : t("Signs in to Letterboxd and unlocks your diary, friends activity and ratings.")
+                  : t(
+                      "Signs in to Letterboxd and unlocks your diary, friends activity and ratings.",
+                    )
               }
             >
               <SButton
@@ -331,7 +340,9 @@ export function LetterboxdPanel() {
                       ? `${session.displayName} (@${session.username})`
                       : `@${session.username}`}
                     {". "}
-                    {t("Full mode is active, so diary, friends activity and your ratings all work.")}
+                    {t(
+                      "Full mode is active, so diary, friends activity and your ratings all work.",
+                    )}
                   </>
                 }
               >
@@ -382,10 +393,7 @@ export function LetterboxdPanel() {
                   autoComplete="off"
                   className="h-11 min-w-[220px] flex-1 rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                 />
-                <SButton
-                  onClick={handleAddList}
-                  disabled={listBusy || listUrl.trim().length === 0}
-                >
+                <SButton onClick={handleAddList} disabled={listBusy || listUrl.trim().length === 0}>
                   {listBusy ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
                   {t("Add")}
                 </SButton>
@@ -430,7 +438,9 @@ export function LetterboxdPanel() {
           {lb.hiddenCatalogs.length > 0 && (
             <SettingGroup label={t("Hidden catalogs")}>
               <p className={`max-w-[70ch] ${ROW_DESC}`}>
-                {t("These rows are switched on but hidden from your home page. Choose Show to bring one back.")}
+                {t(
+                  "These rows are switched on but hidden from your home page. Choose Show to bring one back.",
+                )}
               </p>
               {lb.hiddenCatalogs.map((id) => {
                 const opt = CATALOG_OPTIONS.find((o) => o.id === id);

@@ -24,14 +24,22 @@ const argv = Object.fromEntries(
   }),
 );
 const SHOTS = typeof argv.shots === "string" ? argv.shots : "./.diag/verify";
-const sh = (c) => execSync(c, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 64 * 1024 * 1024 });
+const sh = (c) =>
+  execSync(c, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+    maxBuffer: 64 * 1024 * 1024,
+  });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 fs.mkdirSync(SHOTS, { recursive: true });
 
 function shot(name) {
   const out = `${SHOTS}/${name}.png`;
   try {
-    fs.writeFileSync(out, execSync(`adb exec-out screencap -p`, { maxBuffer: 64 * 1024 * 1024, encoding: "buffer" }));
+    fs.writeFileSync(
+      out,
+      execSync(`adb exec-out screencap -p`, { maxBuffer: 64 * 1024 * 1024, encoding: "buffer" }),
+    );
     return out;
   } catch {
     return null;
@@ -43,23 +51,28 @@ function shot(name) {
 // this way once. Refuse to run rather than produce it.
 function preflight() {
   const scr = sh(`adb shell dumpsys display`);
-  if (!/mScreenState=ON/.test(scr)) throw new Error("screen is OFF. Turn the television on; a dark panel fakes good numbers.");
+  if (!/mScreenState=ON/.test(scr))
+    throw new Error("screen is OFF. Turn the television on; a dark panel fakes good numbers.");
   const fg = sh(`adb shell dumpsys activity activities`).match(/ResumedActivity.*?([\w.]+)\//);
   if ((fg ? fg[1] : "?") !== PKG) throw new Error(`${fg ? fg[1] : "?"} is foreground, not ${PKG}`);
 }
 
 const get = (p) =>
   new Promise((res, rej) =>
-    http.get({ host: "127.0.0.1", port: 9333, path: p }, (s) => {
-      let d = "";
-      s.on("data", (c) => (d += c));
-      s.on("end", () => res(d));
-    }).on("error", rej),
+    http
+      .get({ host: "127.0.0.1", port: 9333, path: p }, (s) => {
+        let d = "";
+        s.on("data", (c) => (d += c));
+        s.on("end", () => res(d));
+      })
+      .on("error", rej),
   );
 
 async function cdp() {
   try {
-    const pg = JSON.parse(await get("/json/list")).find((t) => t.type === "page" && t.webSocketDebuggerUrl);
+    const pg = JSON.parse(await get("/json/list")).find(
+      (t) => t.type === "page" && t.webSocketDebuggerUrl,
+    );
     if (!pg) return null;
     const ws = new WebSocket(pg.webSocketDebuggerUrl);
     let id = 0;
@@ -83,12 +96,19 @@ async function cdp() {
       });
     return {
       ws,
-      ev: async (e) => (await send("Runtime.evaluate", { expression: `(()=>{${e}})()`, returnByValue: true }))?.result?.value,
+      ev: async (e) =>
+        (await send("Runtime.evaluate", { expression: `(()=>{${e}})()`, returnByValue: true }))
+          ?.result?.value,
       key: async (k) => {
         const c = { right: 39, left: 37, down: 40, up: 38 }[k];
         const n = { right: "ArrowRight", left: "ArrowLeft", down: "ArrowDown", up: "ArrowUp" }[k];
         for (const t of ["keyDown", "keyUp"])
-          await send("Input.dispatchKeyEvent", { type: t, windowsVirtualKeyCode: c, nativeVirtualKeyCode: c, key: n });
+          await send("Input.dispatchKeyEvent", {
+            type: t,
+            windowsVirtualKeyCode: c,
+            nativeVirtualKeyCode: c,
+            key: n,
+          });
       },
     };
   } catch {
@@ -121,7 +141,11 @@ if (!c) {
     const pad=parseFloat(getComputedStyle(clipped).paddingLeft)||0;
     const r=el.getBoundingClientRect(), cr=clipped.getBoundingClientRect();
     return JSON.stringify({padLeft:pad, gapToClip:+(r.left-cr.left).toFixed(1)});`);
-  say("ring clip room", typeof ring === "string" && ring.startsWith("{") ? "READ" : "SKIP", String(ring));
+  say(
+    "ring clip room",
+    typeof ring === "string" && ring.startsWith("{") ? "READ" : "SKIP",
+    String(ring),
+  );
 
   // 2. Shimmer: how many animated bands, and are they per CARD or per ROW.
   const shim = await c.ev(`
@@ -175,7 +199,8 @@ if (!c) {
 console.log("");
 for (let r = 0; r < 3; r++) {
   sh(`adb shell dumpsys gfxinfo ${PKG} reset`);
-  for (let i = 0; i < 24; i++) sh(`adb shell input keyevent ${Math.floor(i / 6) % 2 === 0 ? 22 : 21}`);
+  for (let i = 0; i < 24; i++)
+    sh(`adb shell input keyevent ${Math.floor(i / 6) % 2 === 0 ? 22 : 21}`);
   await wait(900);
   const o = sh(`adb shell dumpsys gfxinfo ${PKG}`);
   const n = (re) => {

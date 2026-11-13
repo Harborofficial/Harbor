@@ -7,11 +7,14 @@ export default {
   "games.wow.addons.changes": "リリースノート",
   "games.wow.addons.fullNotes": "作者のページで全文を読む",
 
-  "games.wow.manager.errorIdentity": "インストール済みフォルダが作者のパッケージと一致しません。再スキャンし、アドオンの入手元を確認してください。",
+  "games.wow.manager.errorIdentity":
+    "インストール済みフォルダが作者のパッケージと一致しません。再スキャンし、アドオンの入手元を確認してください。",
   "games.wow.manager.importInstalled": "インストール済みアドオンを取り込む",
   "games.wow.manager.import": "Harborで管理する",
-  "games.wow.manager.importScope": "WoWInterfaceの識別情報があるアドオンです。他のアドオンはインストール済み一覧に残ります。",
-  "games.wow.manager.importNote": "インストール済みファイルを維持します。Harborは作者のパッケージを確認し、今後の更新や削除前に以前のバージョンを保存します。",
+  "games.wow.manager.importScope":
+    "WoWInterfaceの識別情報があるアドオンです。他のアドオンはインストール済み一覧に残ります。",
+  "games.wow.manager.importNote":
+    "インストール済みファイルを維持します。Harborは作者のパッケージを確認し、今後の更新や削除前に以前のバージョンを保存します。",
   "games.wow.manager.keepVersion": "インストール済みバージョン{version}を維持",
   "games.wow.manager.keep": "維持",
   "games.wow.manager.importSuccess": "このアドオンはHarborで管理されるようになりました。",
@@ -19,8 +22,10 @@ export default {
   "games.wow.manager.browse": "アドオンを探す",
   "games.wow.manager.managed": "Harborで管理",
   "games.wow.manager.backups": "バックアップ",
-  "games.wow.manager.catalogNote": "WoWInterfaceを検索。変更を適用する前に、インストール済みWoWとの互換性を確認します。",
-  "games.wow.manager.managedNote": "ここで変更できるのはHarborから導入したアドオンです。他のアドオンはインストール済み一覧に残ります。",
+  "games.wow.manager.catalogNote":
+    "WoWInterfaceを検索。変更を適用する前に、インストール済みWoWとの互換性を確認します。",
+  "games.wow.manager.managedNote":
+    "ここで変更できるのはHarborから導入したアドオンです。他のアドオンはインストール済み一覧に残ります。",
   "games.wow.manager.category": "カテゴリ",
   "games.wow.manager.allCategories": "すべてのカテゴリ",
   "games.wow.manager.popular": "月間ダウンロード数",
@@ -28,31 +33,41 @@ export default {
   "games.wow.manager.name": "名前",
   "games.wow.manager.sort": "アドオンの並べ替え",
   "games.wow.manager.monthly": "今月のダウンロード数",
-  "games.wow.manager.catalogError": "カタログを読み込めませんでした。以前の結果は古い可能性があります。",
+  "games.wow.manager.catalogError":
+    "カタログを読み込めませんでした。以前の結果は古い可能性があります。",
   "games.wow.manager.categoriesError": "カテゴリを取得できません。全アドオンの検索は利用できます。",
-  "games.wow.manager.partial": "一部の提供元データを取得できませんでした。結果が不完全な可能性があります。",
+  "games.wow.manager.partial":
+    "一部の提供元データを取得できませんでした。結果が不完全な可能性があります。",
   "games.wow.manager.emptyManaged": "Harborで管理するアドオンはまだありません。",
   "games.wow.manager.emptyBackups": "以前のバージョンはまだ保存されていません。",
-  "games.wow.manager.reviewNote": "まずパッケージとフォルダの変更を確認してください。確認・適用前にWoWを終了してください。",
+  "games.wow.manager.reviewNote":
+    "まずパッケージとフォルダの変更を確認してください。確認・適用前にWoWを終了してください。",
   "games.wow.manager.backupNote": "以前のファイルをローカルに保存：{size}。",
   "games.wow.manager.fileSummary": "{count}ファイル · {size}",
   "games.wow.manager.preparing": "変更の確認を準備中…",
   "games.wow.manager.applying": "変更を適用中…",
   "games.wow.manager.success": "アドオン構成を更新しました。",
   "games.wow.manager.cancelled": "キャンセルしました。更新して現在の状態を確認してください。",
-  "games.wow.manager.recovery": "中断された変更を復旧する必要があります。先にWoWを終了してください。",
+  "games.wow.manager.recovery":
+    "中断された変更を復旧する必要があります。先にWoWを終了してください。",
   "games.wow.manager.recover": "構成を復旧",
   "games.wow.manager.add": "追加",
   "games.wow.manager.replace": "置換",
   "games.wow.manager.remove": "削除",
-  "games.wow.manager.error": "変更を完了できませんでした。接続と空き容量を確認して再試行してください。",
+  "games.wow.manager.error":
+    "変更を完了できませんでした。接続と空き容量を確認して再試行してください。",
   "games.wow.manager.errorRunning": "WoWを完全に終了してから再試行してください。",
-  "games.wow.manager.errorCompatibility": "このパッケージはインストール済みWoWのエディションまたはバージョンに対応していません。",
-  "games.wow.manager.errorUnmanaged": "これらのフォルダはHarbor外で導入されているため、ここでは上書きできません。",
-  "games.wow.manager.errorChanged": "ファイルが変更されたか、確認が必要です。再スキャンしてください。",
-  "games.wow.manager.errorDependency": "必須の依存アドオンがないか、別のアドオンがこれらのファイルを必要としています。",
+  "games.wow.manager.errorCompatibility":
+    "このパッケージはインストール済みWoWのエディションまたはバージョンに対応していません。",
+  "games.wow.manager.errorUnmanaged":
+    "これらのフォルダはHarbor外で導入されているため、ここでは上書きできません。",
+  "games.wow.manager.errorChanged":
+    "ファイルが変更されたか、確認が必要です。再スキャンしてください。",
+  "games.wow.manager.errorDependency":
+    "必須の依存アドオンがないか、別のアドオンがこれらのファイルを必要としています。",
   "games.wow.manager.errorExpired": "確認の有効期限が切れました。変更を再確認してください。",
-  "games.wow.manager.errorDesktop": "アドオン管理には最新のWindows版Harborデスクトップアプリが必要です。",
+  "games.wow.manager.errorDesktop":
+    "アドオン管理には最新のWindows版Harborデスクトップアプリが必要です。",
 
   "games.wow.addons.screenshots": "作者のスクリーンショット",
   "games.wow.addons.screenshotsUnavailable": "作者のスクリーンショットを読み込めませんでした。",
@@ -61,13 +76,16 @@ export default {
   "games.wow.addons.intro": "このインストールのバージョンと必須の依存関係。",
   "games.wow.addons.refresh": "アドオンを再スキャン",
   "games.wow.addons.client": "インストール済みWoW {version}",
-  "games.wow.addons.unavailable": "インストールを読み取れません。ドライブを接続して再スキャンしてください。",
-  "games.wow.addons.partial": "一部のフォルダーをスキャンできませんでした。一覧が不完全な可能性があります。",
+  "games.wow.addons.unavailable":
+    "インストールを読み取れません。ドライブを接続して再スキャンしてください。",
+  "games.wow.addons.partial":
+    "一部のフォルダーをスキャンできませんでした。一覧が不完全な可能性があります。",
   "games.wow.addons.search": "アドオンを検索",
   "games.wow.addons.attention": "要確認",
   "games.wow.addons.unreadable": "このアドオンのマニフェストを読み取れませんでした。",
   "games.wow.addons.noManifest": "このクライアントに対応するマニフェストが見つかりません。",
-  "games.wow.addons.ambiguous": "対応するマニフェストが複数あります。インストールを確認してください。",
+  "games.wow.addons.ambiguous":
+    "対応するマニフェストが複数あります。インストールを確認してください。",
   "games.wow.addons.missing": "必須フォルダーがありません: {names}",
   "games.wow.addons.gameVersions": "作者が指定したゲームバージョン",
   "games.wow.addons.requires": "必要なアドオン",
@@ -76,7 +94,8 @@ export default {
   "games.wow.addons.noMatches": "条件に一致するアドオンはありません。",
   "games.wow.addons.more": "さらに表示",
   "games.wow.addons.empty": "このインストールにアドオンはありません。",
-  "games.wow.addons.scope": "ゲームバージョンは作者による指定です。有効・無効の状態や更新の有無は確認していません。",
+  "games.wow.addons.scope":
+    "ゲームバージョンは作者による指定です。有効・無効の状態や更新の有無は確認していません。",
   "games.wow.realm.LOCKED": "制限中",
   "games.wow.classic.title": "サーバー状況",
   "games.wow.classic.intro": "アゼロスへ向かう前にサーバーを確認。Blizzardの最新情報です。",
@@ -88,7 +107,8 @@ export default {
   "games.wow.classic.all": "すべてのサーバー",
   "games.wow.classic.pinned": "ピン留め",
   "games.wow.classic.saveError": "この端末にピン留めしたサーバーを保存できませんでした。",
-  "games.wow.classic.unavailable": "サーバー状況を取得できません。しばらくしてから更新してください。",
+  "games.wow.classic.unavailable":
+    "サーバー状況を取得できません。しばらくしてから更新してください。",
   "games.wow.classic.population": "人口",
   "games.wow.classic.status": "状況",
   "games.wow.classic.transfersLocked": "キャラクター移転を停止中",
@@ -98,7 +118,8 @@ export default {
   "games.wow.classic.news": "Classicニュース",
   "games.wow.realm.browse": "サーバーを探す",
   "games.wow.realm.unavailable": "サーバーの状態を取得できません。名前は手動で入力できます。",
-  "games.wow.realm.unsupported": "Blizzardのグローバル状態サービスはこの地域に対応していません。サーバー名を手動で入力してください。",
+  "games.wow.realm.unsupported":
+    "Blizzardのグローバル状態サービスはこの地域に対応していません。サーバー名を手動で入力してください。",
   "games.wow.realm.noMatches": "一致するサーバーがありません。名前は手動で入力できます。",
   "games.wow.realm.refresh": "サーバーの状態を更新",
   "games.wow.realm.unknown": "状態不明",
@@ -122,8 +143,10 @@ export default {
   "games.wow.character.find": "キャラクターを検索",
   "games.wow.character.refresh": "キャラクターを更新",
   "games.wow.character.invalid": "有効なレルムとキャラクター名を入力してください。",
-  "games.wow.character.missing": "キャラクターが見つかりません。地域、レルム、名前を確認してください。",
-  "games.wow.character.limited": "Raider.IOがリクエストを制限しています。少し待って再試行してください。",
+  "games.wow.character.missing":
+    "キャラクターが見つかりません。地域、レルム、名前を確認してください。",
+  "games.wow.character.limited":
+    "Raider.IOがリクエストを制限しています。少し待って再試行してください。",
   "games.wow.character.unavailable": "キャラクターデータは一時的に利用できません。",
   "games.wow.character.previous": "以前に取得した情報を表示しています。",
   "games.wow.character.saveError": "このデバイスにキャラクターを保存できませんでした。",
@@ -145,7 +168,8 @@ export default {
   "games.wow.character.raidUnavailable": "現在のレイド進行状況を取得できません。",
   "games.wow.character.updated": "プロフィール更新：{date}",
   "games.wow.character.gearUpdated": "装備更新：{date}",
-  "games.wow.character.sourceNote": "Raider.IOの公開データです。ゲーム内の状況より更新が遅れる場合があります。",
+  "games.wow.character.sourceNote":
+    "Raider.IOの公開データです。ゲーム内の状況より更新が遅れる場合があります。",
   "games.wow.title": "今週のアゼロス",
   "games.wow.region": "地域",
   "games.wow.refresh": "WoWデータを更新",
@@ -154,7 +178,8 @@ export default {
   "games.wow.resetNote": "お使いの地域の時刻。メンテナンスはリセット後も続く場合があります。",
   "games.wow.resetUnavailable": "リセット時刻を取得できません。",
   "games.wow.affixes": "今週のアフィックス",
-  "games.wow.affixesUnavailable": "現在のアフィックスを取得できません。地域のリセット後に再確認してください。",
+  "games.wow.affixesUnavailable":
+    "現在のアフィックスを取得できません。地域のリセット後に再確認してください。",
   "games.wow.dungeons": "Mythic+ダンジョン",
   "games.wow.timer": "制限時間 {minutes}分",
   "games.wow.rankings": "ランキングを見る",
@@ -163,7 +188,8 @@ export default {
   "games.wow.bosses": "ボス {count}体",
   "games.wow.raidsUnavailable": "現在のレイド情報を取得できません。",
   "games.wow.checked": "確認日時：{date}",
-  "games.wow.scope": "Raider.IOのRetailデータ。制限時間はキーストーン用です。アフィックスはキーのレベルにより異なります。",
+  "games.wow.scope":
+    "Raider.IOのRetailデータ。制限時間はキーストーン用です。アフィックスはキーのレベルにより異なります。",
   "games.wow.region.us": "南北アメリカ／オセアニア",
   "games.wow.region.eu": "ヨーロッパ",
   "games.wow.region.kr": "韓国",

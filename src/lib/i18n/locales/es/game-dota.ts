@@ -18,7 +18,8 @@ export default {
   "games.dota.attribute.agi": "Agilidad",
   "games.dota.attribute.int": "Inteligencia",
   "games.dota.attribute.all": "Universal",
-  "games.dota.trendsScope": "Muestra de OpenDota: siete días UTC, incluido hoy. El rango es el promedio de la partida; Turbo y las partidas profesionales se separan.",
+  "games.dota.trendsScope":
+    "Muestra de OpenDota: siete días UTC, incluido hoy. El rango es el promedio de la partida; Turbo y las partidas profesionales se separan.",
   "games.dota.wins": "victorias",
   "games.dota.picks": "{count} selecciones",
   "games.dota.noSample": "Sin muestra",
@@ -26,7 +27,8 @@ export default {
   "games.dota.moreHeroes": "Más héroes",
   "games.dota.matchups": "Duelos profesionales",
   "games.dota.refreshMatchups": "Actualizar duelos",
-  "games.dota.matchupsScope": "Victorias de {hero} contra cada rival en partidas profesionales registradas del último año. Incluye parches antiguos; no depende del filtro de rango.",
+  "games.dota.matchupsScope":
+    "Victorias de {hero} contra cada rival en partidas profesionales registradas del último año. Incluye parches antiguos; no depende del filtro de rango.",
   "games.dota.opponent": "Buscar un rival",
   "games.dota.minimum": "Partidas mínimas",
   "games.dota.minGames": "{count}+ partidas",
@@ -48,5 +50,5 @@ export default {
   "games.dota.sample.5": "Leyenda",
   "games.dota.sample.6": "Ancestro",
   "games.dota.sample.7": "Divino",
-  "games.dota.sample.8": "Inmortal"
+  "games.dota.sample.8": "Inmortal",
 };

@@ -17,7 +17,13 @@ function Poster({ path, w }: { path: string; w: string }) {
       className="block shrink-0 overflow-hidden rounded-[3px] bg-[var(--bp-panel-2)]"
       style={{ width: w, aspectRatio: "2 / 3" }}
     >
-      <img src={`${IMG}${path}`} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+      <img
+        src={`${IMG}${path}`}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        className="h-full w-full object-cover"
+      />
     </span>
   );
 }
@@ -44,7 +50,13 @@ export function BpLayoutPreview({ mode }: { mode: "harbor" | "classic" }) {
             className="relative block w-full overflow-hidden rounded-[3px] bg-[var(--bp-panel-2)]"
             style={{ aspectRatio: "16 / 7" }}
           >
-            <img src={HERO} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+            <img
+              src={HERO}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
             <span
               className="absolute inset-0"
               style={{ background: "linear-gradient(0deg, var(--bp-void) 6%, transparent 62%)" }}

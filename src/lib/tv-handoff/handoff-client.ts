@@ -58,9 +58,7 @@ type Waiter = {
 
 function defaultHost(): string {
   if (typeof location === "undefined") return "127.0.0.1";
-  return location.hostname && location.hostname !== "localhost"
-    ? location.hostname
-    : "127.0.0.1";
+  return location.hostname && location.hostname !== "localhost" ? location.hostname : "127.0.0.1";
 }
 
 export function createHandoffClient(token: string, host?: string): HandoffClient {

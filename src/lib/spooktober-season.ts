@@ -1,7 +1,8 @@
 /** Local calendar dates; the early 2026 launch must never repeat. */
 export function isSpooktoberSeason(date = new Date()): boolean {
-  return date.getMonth() === 9 || (
-    date.getFullYear() === 2026 && date.getMonth() === 8 && date.getDate() >= 28
+  return (
+    date.getMonth() === 9 ||
+    (date.getFullYear() === 2026 && date.getMonth() === 8 && date.getDate() >= 28)
   );
 }
 

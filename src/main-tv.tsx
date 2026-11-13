@@ -43,9 +43,7 @@ async function mount() {
   // stream plays, and importing it up here put the whole subtitle stack in
   // front of the television's first paint. Loaded after the root is handed to
   // React so it parses on an idle frame instead of a critical one.
-  void import("@/lib/subtitles/subtitle-cache")
-    .then((m) => m.initSubtitleCache())
-    .catch(() => {});
+  void import("@/lib/subtitles/subtitle-cache").then((m) => m.initSubtitleCache()).catch(() => {});
 }
 
 void mount();

@@ -2,12 +2,14 @@ export default {
   "games.minecraft.discovery.viewAll": "Mostra tutto",
   "games.minecraft.discovery.searchCurseForge": "Cerca su CurseForge",
   "games.minecraft.discovery.downloads": "Download",
-  "games.minecraft.discovery.curseForgeBlocked": "CurseForge non consente a Harbor di caricare questo catalogo al momento. Riprova o apri la fonte.",
+  "games.minecraft.discovery.curseForgeBlocked":
+    "CurseForge non consente a Harbor di caricare questo catalogo al momento. Riprova o apri la fonte.",
   "games.minecraft.discovery.unavailable": "Impossibile caricare questa directory. Riprova.",
   "games.minecraft.discovery.openSource": "Apri il sito di origine",
   "games.minecraft.discovery.loadMore": "Carica altro",
   "games.minecraft.discovery.servers": "Server",
-  "games.minecraft.discovery.serverNote": "Directory indipendenti. Harbor non è affiliato a questi siti o server. I dati sono forniti dalle rispettive directory.",
+  "games.minecraft.discovery.serverNote":
+    "Directory indipendenti. Harbor non è affiliato a questi siti o server. I dati sono forniti dalle rispettive directory.",
   "games.minecraft.discovery.searchServers": "Cerca nei server caricati",
   "games.minecraft.discovery.directory": "Directory",
   "games.minecraft.discovery.mode": "Modalità di gioco",
@@ -15,7 +17,8 @@ export default {
   "games.minecraft.discovery.directoryRank": "Classifica della directory",
   "games.minecraft.discovery.playersLoaded": "Giocatori · server caricati",
   "games.minecraft.discovery.loaded": "{count} server caricati",
-  "games.minecraft.discovery.noLoadedMatches": "Nessun risultato nei server caricati. Caricane altri o modifica la ricerca.",
+  "games.minecraft.discovery.noLoadedMatches":
+    "Nessun risultato nei server caricati. Caricane altri o modifica la ricerca.",
   "games.minecraft.discovery.copy": "Copia {address}",
   "games.minecraft.discovery.copied": "Indirizzo copiato",
   "games.minecraft.discovery.copyError": "Copia non riuscita. Seleziona l’indirizzo per copiarlo.",
@@ -37,24 +40,32 @@ export default {
   "games.minecraft.lifecycle.version": "Versione esportata",
   "games.minecraft.lifecycle.worlds": "Includi mondi",
   "games.minecraft.lifecycle.settings": "Includi comandi ed elenco server",
-  "games.minecraft.lifecycle.exportNote": "Crea un file .mrpack portatile con le tue mod e la configurazione.",
-  "games.minecraft.lifecycle.privateNote": "I dati dell’account Harbor, i file di esecuzione e i registri sono esclusi. Controlla le configurazioni delle mod prima di condividere.",
+  "games.minecraft.lifecycle.exportNote":
+    "Crea un file .mrpack portatile con le tue mod e la configurazione.",
+  "games.minecraft.lifecycle.privateNote":
+    "I dati dell’account Harbor, i file di esecuzione e i registri sono esclusi. Controlla le configurazioni delle mod prima di condividere.",
   "games.minecraft.lifecycle.included": "File inclusi",
   "games.minecraft.lifecycle.referenced": "Riferimenti di download",
-  "games.minecraft.lifecycle.referenceNote": "I file verificati del fornitore vengono scaricati durante l’importazione. I file modificati e locali sono inclusi nell’archivio.",
+  "games.minecraft.lifecycle.referenceNote":
+    "I file verificati del fornitore vengono scaricati durante l’importazione. I file modificati e locali sono inclusi nell’archivio.",
   "games.minecraft.lifecycle.edit": "Modifica selezione",
-  "games.minecraft.lifecycle.storageNote": "Versioni precedenti conservate durante gli aggiornamenti. Ripristina l’ultima copia da Versioni del pack.",
+  "games.minecraft.lifecycle.storageNote":
+    "Versioni precedenti conservate durante gli aggiornamenti. Ripristina l’ultima copia da Versioni del pack.",
   "games.minecraft.lifecycle.latest": "Punto di ripristino attuale",
   "games.minecraft.lifecycle.reviewCopy": "Controlla {version}",
   "games.minecraft.lifecycle.review": "Controlla file",
   "games.minecraft.lifecycle.empty": "Nessuna copia di ripristino.",
   "games.minecraft.lifecycle.unreadable": "{count} copie illeggibili resteranno inalterate.",
-  "games.minecraft.lifecycle.removeNote": "Controlla questa istanza e le sue copie di ripristino prima di spostarle nel cestino.",
+  "games.minecraft.lifecycle.removeNote":
+    "Controlla questa istanza e le sue copie di ripristino prima di spostarle nel cestino.",
   "games.minecraft.lifecycle.worldCount": "Mondi: {count}",
-  "games.minecraft.lifecycle.latestNote": "Rimuovere questa copia elimina il punto di ripristino attuale. L’istanza attiva resta invariata.",
+  "games.minecraft.lifecycle.latestNote":
+    "Rimuovere questa copia elimina il punto di ripristino attuale. L’istanza attiva resta invariata.",
   "games.minecraft.lifecycle.copiesIncluded": "Include {count} copie di ripristino.",
-  "games.minecraft.lifecycle.trashNote": "Sposta questi file nel cestino di sistema. Lo spazio viene liberato svuotando il cestino.",
-  "games.minecraft.lifecycle.undoNote": "Ripristina le cartelle originali dal cestino di sistema per annullare.",
+  "games.minecraft.lifecycle.trashNote":
+    "Sposta questi file nel cestino di sistema. Lo spazio viene liberato svuotando il cestino.",
+  "games.minecraft.lifecycle.undoNote":
+    "Ripristina le cartelle originali dal cestino di sistema per annullare.",
   "games.minecraft.lifecycle.trash": "Sposta nel cestino",
   "games.minecraft.lifecycle.save": "Salva modpack",
   "games.minecraft.lifecycle.exported": "Modpack esportato",
@@ -65,30 +76,40 @@ export default {
   "games.minecraft.lifecycle.choosing": "Scegli dove salvare…",
   "games.minecraft.lifecycle.exporting": "Esportazione del modpack…",
   "games.minecraft.lifecycle.removing": "Spostamento dei file nel cestino…",
-  "games.minecraft.lifecycle.trashError": "Impossibile spostare tutte le cartelle nel cestino. Aggiorna per vedere lo stato attuale.",
-  "games.minecraft.lifecycle.pathError": "Scegli un file .mrpack fuori dalla libreria delle istanze.",
+  "games.minecraft.lifecycle.trashError":
+    "Impossibile spostare tutte le cartelle nel cestino. Aggiorna per vedere lo stato attuale.",
+  "games.minecraft.lifecycle.pathError":
+    "Scegli un file .mrpack fuori dalla libreria delle istanze.",
   "games.minecraft.lifecycle.existsError": "Il file esiste già. Scegli un altro nome.",
-  "games.minecraft.lifecycle.limitError": "L’esportazione supera il limite di 256 MB. Prova senza i mondi.",
+  "games.minecraft.lifecycle.limitError":
+    "L’esportazione supera il limite di 256 MB. Prova senza i mondi.",
 
-  "games.minecraft.update.compatibilityError": "Queste mod non sono compatibili con le versioni scelte di Minecraft e del loader. L’istanza attuale non è cambiata.",
+  "games.minecraft.update.compatibilityError":
+    "Queste mod non sono compatibili con le versioni scelte di Minecraft e del loader. L’istanza attuale non è cambiata.",
   "games.minecraft.update.title": "Versioni del pacchetto",
   "games.minecraft.update.complete": "Versione pronta",
-  "games.minecraft.update.completeNote": "Mondi e impostazioni personali sono conservati. Controlla la configurazione del gioco prima di giocare.",
+  "games.minecraft.update.completeNote":
+    "Mondi e impostazioni personali sono conservati. Controlla la configurazione del gioco prima di giocare.",
   "games.minecraft.update.installed": "Installata",
   "games.minecraft.update.loading": "Caricamento delle versioni…",
   "games.minecraft.update.version": "Versione del pacchetto",
   "games.minecraft.update.chooseVersion": "Scegli una versione",
   "games.minecraft.update.noVersions": "Non sono disponibili altre versioni.",
-  "games.minecraft.update.localNote": "Scegli un file .mrpack locale per esaminare un aggiornamento.",
+  "games.minecraft.update.localNote":
+    "Scegli un file .mrpack locale per esaminare un aggiornamento.",
   "games.minecraft.update.chooseFile": "Scegli file .mrpack",
   "games.minecraft.update.restoreVersion": "Ripristina {version}",
-  "games.minecraft.update.reviewNote": "Esamina ogni modifica prima di applicarla. Harbor conserva una copia separata dell’istanza precedente.",
+  "games.minecraft.update.reviewNote":
+    "Esamina ogni modifica prima di applicarla. Harbor conserva una copia separata dell’istanza precedente.",
   "games.minecraft.update.changeVersion": "Cambia versione",
   "games.minecraft.update.download": "Download",
   "games.minecraft.update.recoveryCopy": "Copia di ripristino",
-  "games.minecraft.update.loaderConflict": "Le mod aggiuntive non possono essere trasferite tra loader diversi. Rimuovile prima di cambiare loader.",
-  "games.minecraft.update.conflictNote": "Alcuni file del pacchetto si sovrappongono a mod modificate o gestite separatamente. Risolvi i conflitti prima di procedere.",
-  "games.minecraft.update.environmentNote": "La versione di Minecraft o del loader cambierà. Controlla poi la configurazione del gioco.",
+  "games.minecraft.update.loaderConflict":
+    "Le mod aggiuntive non possono essere trasferite tra loader diversi. Rimuovile prima di cambiare loader.",
+  "games.minecraft.update.conflictNote":
+    "Alcuni file del pacchetto si sovrappongono a mod modificate o gestite separatamente. Risolvi i conflitti prima di procedere.",
+  "games.minecraft.update.environmentNote":
+    "La versione di Minecraft o del loader cambierà. Controlla poi la configurazione del gioco.",
   "games.minecraft.update.fileGroups": "File del pacchetto",
   "games.minecraft.update.changes": "Modifiche",
   "games.minecraft.update.preserved": "Conservati",
@@ -100,22 +121,28 @@ export default {
   "games.minecraft.update.action.conflict": "Conflitto",
   "games.minecraft.update.noChanges": "Nessun file in questa vista.",
   "games.minecraft.update.extraMods": "{count} mod aggiuntive conservate",
-  "games.minecraft.update.preserveNote": "Mondi esistenti, impostazioni personali e configurazioni modificate restano invariati. Il ripristino conserva anche i progressi attuali.",
+  "games.minecraft.update.preserveNote":
+    "Mondi esistenti, impostazioni personali e configurazioni modificate restano invariati. Il ripristino conserva anche i progressi attuali.",
   "games.minecraft.update.chooseOriginal": "Scegli .mrpack originale",
   "games.minecraft.update.originalSelected": "Pacchetto originale selezionato",
-  "games.minecraft.update.footer": "L’istanza attuale resta disponibile finché la modifica non è pronta.",
+  "games.minecraft.update.footer":
+    "L’istanza attuale resta disponibile finché la modifica non è pronta.",
   "games.minecraft.update.restore": "Ripristina versione",
   "games.minecraft.update.apply": "Applica aggiornamento",
   "games.minecraft.update.review": "Esamina modifiche",
   "games.minecraft.update.phase.compare": "Confronto dei tuoi file…",
   "games.minecraft.update.phase.copy": "Creazione della copia di ripristino…",
   "games.minecraft.update.phase.commit": "Completamento del cambio versione…",
-  "games.minecraft.update.running": "Chiudi questa istanza di Minecraft prima di cambiare versione del pacchetto.",
-  "games.minecraft.update.recoveryError": "Impossibile verificare i file di ripristino. Le cartelle esistenti sono state conservate.",
+  "games.minecraft.update.running":
+    "Chiudi questa istanza di Minecraft prima di cambiare versione del pacchetto.",
+  "games.minecraft.update.recoveryError":
+    "Impossibile verificare i file di ripristino. Le cartelle esistenti sono state conservate.",
   "games.minecraft.update.sourceError": "Scegli una versione dello stesso modpack.",
-  "games.minecraft.update.originalError": "Questa vecchia installazione locale richiede il file .mrpack originale per identificare i file del pacchetto.",
+  "games.minecraft.update.originalError":
+    "Questa vecchia installazione locale richiede il file .mrpack originale per identificare i file del pacchetto.",
   "games.minecraft.update.previousError": "Nessuna versione precedente disponibile.",
-  "games.minecraft.update.spaceError": "Impossibile confermare spazio sufficiente per la copia e i nuovi file. Controlla il disco e riprova.",
+  "games.minecraft.update.spaceError":
+    "Impossibile confermare spazio sufficiente per la copia e i nuovi file. Controlla il disco e riprova.",
   "games.minecraft.creation.style": "Stile di gioco",
   "games.minecraft.creation.vanillaNote": "L’esperienza originale di Minecraft.",
   "games.minecraft.creation.fabricNote": "Crea la tua configurazione con mod.",
@@ -123,19 +150,28 @@ export default {
   "games.minecraft.creation.loading": "Ricerca delle versioni {loader} compatibili…",
   "games.minecraft.creation.version": "Versione di {loader} Loader",
   "games.minecraft.creation.preview": "Anteprima",
-  "games.minecraft.creation.unavailable": "{loader} non è disponibile per Minecraft {version}. Scegli un’altra versione o Vanilla.",
-  "games.minecraft.creation.note": "Crea una cartella di gioco separata. I file di gioco e Java vengono preparati nella configurazione del gioco.",
+  "games.minecraft.creation.unavailable":
+    "{loader} non è disponibile per Minecraft {version}. Scegli un’altra versione o Vanilla.",
+  "games.minecraft.creation.note":
+    "Crea una cartella di gioco separata. I file di gioco e Java vengono preparati nella configurazione del gioco.",
   "games.minecraft.creation.creating": "Creazione dell’istanza…",
-  "games.minecraft.creation.versionError": "Questa versione del loader non è disponibile per la versione di Minecraft selezionata. Aggiorna le opzioni e riprova.",
+  "games.minecraft.creation.versionError":
+    "Questa versione del loader non è disponibile per la versione di Minecraft selezionata. Aggiorna le opzioni e riprova.",
   "games.minecraft.content.title": "Gestisci mod",
-  "games.minecraft.content.compatible": "Mod Fabric per Minecraft {version}. Controlla le modifiche prima di installare.",
+  "games.minecraft.content.compatible":
+    "Mod Fabric per Minecraft {version}. Controlla le modifiche prima di installare.",
   "games.minecraft.content.search": "Cerca mod",
   "games.minecraft.content.packFiles": "File del pacchetto e altri",
-  "games.minecraft.content.packFilesNote": "Inclusi nel pacchetto o aggiunti fuori da questo gestore. Qui sono di sola lettura.",
-  "games.minecraft.content.empty": "Aggiungi mod compatibili da Esplora. Verranno installate in questa istanza.",
-  "games.minecraft.content.ready": "Le mod sono pronte in {name}. Chiudi questo pannello e apri la configurazione del gioco per giocare.",
-  "games.minecraft.content.reviewNote": "Le modifiche riguardano questa istanza. Mondi e configurazione restano invariati.",
-  "games.minecraft.content.running": "Chiudi questa istanza di Minecraft prima di modificarne le mod, poi riprova.",
+  "games.minecraft.content.packFilesNote":
+    "Inclusi nel pacchetto o aggiunti fuori da questo gestore. Qui sono di sola lettura.",
+  "games.minecraft.content.empty":
+    "Aggiungi mod compatibili da Esplora. Verranno installate in questa istanza.",
+  "games.minecraft.content.ready":
+    "Le mod sono pronte in {name}. Chiudi questo pannello e apri la configurazione del gioco per giocare.",
+  "games.minecraft.content.reviewNote":
+    "Le modifiche riguardano questa istanza. Mondi e configurazione restano invariati.",
+  "games.minecraft.content.running":
+    "Chiudi questa istanza di Minecraft prima di modificarne le mod, poi riprova.",
   "games.minecraft.launch.play": "Gioca",
   "games.minecraft.launch.account": "Account Minecraft",
   "games.minecraft.launch.accountNote": "Gioca con questo account.",
@@ -153,11 +189,15 @@ export default {
   "games.minecraft.launch.failed": "Il gioco è terminato con il codice {code}.",
   "games.minecraft.launch.log": "Registro del gioco",
   "games.minecraft.launch.noLog": "Nessun registro disponibile per questa sessione.",
-  "games.minecraft.launch.filesError": "Alcuni file del gioco mancano o sono stati modificati. Verifica i file e riprova.",
-  "games.minecraft.launch.argumentsError": "La configurazione di avvio di questa versione non è ancora supportata.",
+  "games.minecraft.launch.filesError":
+    "Alcuni file del gioco mancano o sono stati modificati. Verifica i file e riprova.",
+  "games.minecraft.launch.argumentsError":
+    "La configurazione di avvio di questa versione non è ancora supportata.",
   "games.minecraft.launch.startError": "Impossibile avviare Minecraft. Controlla Java e riprova.",
-  "games.minecraft.launch.stateError": "Impossibile controllare il gioco in esecuzione. Riprova prima di avviarlo.",
-  "games.minecraft.launch.limitError": "Chiudi un’istanza di Minecraft in esecuzione prima di avviarne un’altra.",
+  "games.minecraft.launch.stateError":
+    "Impossibile controllare il gioco in esecuzione. Riprova prima di avviarlo.",
+  "games.minecraft.launch.limitError":
+    "Chiudi un’istanza di Minecraft in esecuzione prima di avviarne un’altra.",
   "games.minecraft.java.title": "Java per questa istanza",
   "games.minecraft.java.note": "Questa versione di Minecraft richiede Java {version}.",
   "games.minecraft.java.managed": "Installa con Harbor",
@@ -177,10 +217,13 @@ export default {
   "games.minecraft.java.choose": "Scegli l’eseguibile Java",
   "games.minecraft.java.versionError": "Scegli Java {version} per il tuo sistema.",
   "games.minecraft.java.invalidError": "Impossibile verificare questa installazione di Java.",
-  "games.minecraft.java.metadataError": "Impossibile verificare un download Java compatibile. Riprova.",
-  "games.minecraft.java.managedNote": "Harbor conserva questa versione nella tua libreria Minecraft.",
+  "games.minecraft.java.metadataError":
+    "Impossibile verificare un download Java compatibile. Riprova.",
+  "games.minecraft.java.managedNote":
+    "Harbor conserva questa versione nella tua libreria Minecraft.",
   "games.minecraft.runtime.setup": "Configura gioco",
-  "games.minecraft.runtime.note": "Installa i file ufficiali del gioco per questa istanza. I tuoi mondi e le tue mod restano al loro posto.",
+  "games.minecraft.runtime.note":
+    "Installa i file ufficiali del gioco per questa istanza. I tuoi mondi e le tue mod restano al loro posto.",
   "games.minecraft.runtime.gameFiles": "File di Minecraft",
   "games.minecraft.runtime.fileCount": "{count} file necessari",
   "games.minecraft.runtime.java": "Java {version}",
@@ -190,74 +233,98 @@ export default {
   "games.minecraft.runtime.installing": "Installazione dei file di Minecraft…",
   "games.minecraft.runtime.progress": "{done} file su {total}",
   "games.minecraft.runtime.ready": "File di gioco pronti",
-  "games.minecraft.runtime.readyNote": "File verificati. Per giocare servono ancora Java {version} e un account Minecraft collegato.",
+  "games.minecraft.runtime.readyNote":
+    "File verificati. Per giocare servono ancora Java {version} e un account Minecraft collegato.",
   "games.minecraft.runtime.preserved": "I tuoi mondi e le tue mod non sono stati modificati.",
   "games.minecraft.runtime.resumeNote": "I download completati vengono conservati se annulli.",
   "games.minecraft.runtime.install": "Installa file",
   "games.minecraft.runtime.verify": "Verifica file",
-  "games.minecraft.runtime.metadataError": "Non è stato possibile verificare questi file. Riprova più tardi.",
-  "games.minecraft.runtime.legacyError": "Questa versione usa un formato di installazione o avvio non ancora supportato da Harbor.",
-  "games.minecraft.runtime.loaderError": "Il formato di installazione di questo loader non è ancora supportato.",
-  "games.minecraft.runtime.platformError": "La configurazione del gioco non è ancora supportata su questo sistema.",
-  "games.minecraft.runtime.versionError": "Questa versione di Minecraft non è stata trovata nel catalogo ufficiale.",
+  "games.minecraft.runtime.metadataError":
+    "Non è stato possibile verificare questi file. Riprova più tardi.",
+  "games.minecraft.runtime.legacyError":
+    "Questa versione usa un formato di installazione o avvio non ancora supportato da Harbor.",
+  "games.minecraft.runtime.loaderError":
+    "Il formato di installazione di questo loader non è ancora supportato.",
+  "games.minecraft.runtime.platformError":
+    "La configurazione del gioco non è ancora supportata su questo sistema.",
+  "games.minecraft.runtime.versionError":
+    "Questa versione di Minecraft non è stata trovata nel catalogo ufficiale.",
   "games.minecraft.instances.tab": "Istanze",
   "games.minecraft.instances.title": "Il tuo Minecraft, in ordine.",
   "games.minecraft.instances.note": "Mondi, mod e impostazioni separati per ogni configurazione.",
   "games.minecraft.instances.import": "Importa pacchetto",
   "games.minecraft.instances.create": "Crea istanza",
-  "games.minecraft.instances.desktop": "Apri Harbor per desktop per creare e gestire istanze locali.",
+  "games.minecraft.instances.desktop":
+    "Apri Harbor per desktop per creare e gestire istanze locali.",
   "games.minecraft.instances.search": "Cerca nelle tue istanze",
   "games.minecraft.instances.storage": "Cartella di archiviazione",
   "games.minecraft.instances.chooseFolder": "Scegli cartella",
-  "games.minecraft.instances.unreadable": "Impossibile leggere {count} record delle istanze. I loro file non sono stati modificati.",
+  "games.minecraft.instances.unreadable":
+    "Impossibile leggere {count} record delle istanze. I loro file non sono stati modificati.",
   "games.minecraft.instances.files": "{count} file",
   "games.minecraft.instances.newWorld": "Nuova istanza",
-  "games.minecraft.instances.runtimeNeeded": "Prima di giocare devi ancora installare i file del gioco e un ambiente Java.",
+  "games.minecraft.instances.runtimeNeeded":
+    "Prima di giocare devi ancora installare i file del gioco e un ambiente Java.",
   "games.minecraft.instances.openFolder": "Apri cartella",
   "games.minecraft.instances.renameName": "Rinomina {name}",
   "games.minecraft.instances.noMatches": "Nessuna istanza corrispondente",
   "games.minecraft.instances.empty": "Inizia un nuovo mondo.",
   "games.minecraft.instances.noMatchesNote": "Prova un altro nome, versione o loader.",
-  "games.minecraft.instances.emptyNote": "Crea la tua configurazione o importa un modpack della community nella sua cartella.",
+  "games.minecraft.instances.emptyNote":
+    "Crea la tua configurazione o importa un modpack della community nella sua cartella.",
   "games.minecraft.instances.clear": "Cancella ricerca",
   "games.minecraft.instances.browse": "Esplora modpack",
   "games.minecraft.instances.rename": "Rinomina istanza",
   "games.minecraft.instances.review": "Controlla pacchetto",
   "games.minecraft.instances.name": "Nome dell’istanza",
-  "games.minecraft.instances.createNote": "Crea una cartella di gioco Vanilla separata per questa versione. Gioco e Java si installano separatamente.",
+  "games.minecraft.instances.createNote":
+    "Crea una cartella di gioco Vanilla separata per questa versione. Gioco e Java si installano separatamente.",
   "games.minecraft.instances.contents": "Contenuto del pacchetto",
   "games.minecraft.instances.filterFiles": "Filtra file",
   "games.minecraft.instances.optional": "Facoltativo",
   "games.minecraft.instances.filterMore": "Altri {count} file. Restringi il filtro per vederli.",
   "games.minecraft.instances.overrides": "Inclusi {count} file di configurazione e sostituzione.",
   "games.minecraft.instances.skipped": "Saltati {count} file riservati al server.",
-  "games.minecraft.instances.verifyNote": "I download vengono verificati con gli hash del pacchetto. Mondi e istanze esistenti restano separati.",
+  "games.minecraft.instances.verifyNote":
+    "I download vengono verificati con gli hash del pacchetto. Mondi e istanze esistenti restano separati.",
   "games.minecraft.instances.reviewAgain": "Controlla di nuovo",
   "games.minecraft.instances.loadingVersions": "Caricamento versioni di Minecraft…",
   "games.minecraft.instances.added": "Aggiunto alle tue istanze",
-  "games.minecraft.instances.storageNote": "Scegli dove conservare le istanze Minecraft. Ogni profilo Harbor ha qui la propria cartella.",
+  "games.minecraft.instances.storageNote":
+    "Scegli dove conservare le istanze Minecraft. Ogni profilo Harbor ha qui la propria cartella.",
   "games.minecraft.instances.isolated": "Installazione in una nuova istanza separata.",
   "games.minecraft.instances.cancelling": "Annullamento…",
   "games.minecraft.instances.install": "Installa file del pacchetto",
   "games.minecraft.instances.save": "Salva nome",
-  "games.minecraft.instances.packNote": "Controlla l’ultima versione compatibile o scegline una in Versioni.",
+  "games.minecraft.instances.packNote":
+    "Controlla l’ultima versione compatibile o scegline una in Versioni.",
   "games.minecraft.instances.phase.pack": "Download del pacchetto…",
   "games.minecraft.instances.phase.review": "Lettura del contenuto…",
   "games.minecraft.instances.phase.files": "Installazione dei file…",
   "games.minecraft.instances.phase.overrides": "Applicazione configurazione…",
   "games.minecraft.instances.phase.done": "File installati",
-  "games.minecraft.instances.folderError": "Scegli una cartella locale accessibile per questo profilo Harbor.",
-  "games.minecraft.instances.writeError": "Impossibile scrivere l’istanza. Controlla i permessi della cartella e lo spazio disponibile.",
-  "games.minecraft.instances.readError": "Impossibile leggere l’istanza. Verifica che l’unità sia collegata e i file accessibili.",
-  "games.minecraft.instances.networkError": "Download non riuscito. Controlla la connessione e verifica di nuovo il pacchetto.",
+  "games.minecraft.instances.folderError":
+    "Scegli una cartella locale accessibile per questo profilo Harbor.",
+  "games.minecraft.instances.writeError":
+    "Impossibile scrivere l’istanza. Controlla i permessi della cartella e lo spazio disponibile.",
+  "games.minecraft.instances.readError":
+    "Impossibile leggere l’istanza. Verifica che l’unità sia collegata e i file accessibili.",
+  "games.minecraft.instances.networkError":
+    "Download non riuscito. Controlla la connessione e verifica di nuovo il pacchetto.",
   "games.minecraft.instances.rateLimit": "Il fornitore è occupato. Attendi un momento e riprova.",
-  "games.minecraft.instances.integrityError": "Un file non corrisponde al checksum del pacchetto. Nulla è stato aggiunto alla libreria.",
-  "games.minecraft.instances.changedError": "Il pacchetto è cambiato o il controllo è scaduto. Controllalo di nuovo.",
+  "games.minecraft.instances.integrityError":
+    "Un file non corrisponde al checksum del pacchetto. Nulla è stato aggiunto alla libreria.",
+  "games.minecraft.instances.changedError":
+    "Il pacchetto è cambiato o il controllo è scaduto. Controllalo di nuovo.",
   "games.minecraft.instances.formatError": "Questo non è un archivio .mrpack valido e supportato.",
-  "games.minecraft.instances.loaderError": "Il pacchetto usa un loader sconosciuto o incompatibile con un altro.",
-  "games.minecraft.instances.sourceError": "Il pacchetto richiede una fonte di download non supportata da Harbor.",
-  "games.minecraft.instances.limitError": "Il pacchetto o la libreria supera il limite di dimensione supportato.",
-  "games.minecraft.instances.busyError": "Un’altra operazione sul pacchetto è in corso. Attendi che finisca o annullala.",
+  "games.minecraft.instances.loaderError":
+    "Il pacchetto usa un loader sconosciuto o incompatibile con un altro.",
+  "games.minecraft.instances.sourceError":
+    "Il pacchetto richiede una fonte di download non supportata da Harbor.",
+  "games.minecraft.instances.limitError":
+    "Il pacchetto o la libreria supera il limite di dimensione supportato.",
+  "games.minecraft.instances.busyError":
+    "Un’altra operazione sul pacchetto è in corso. Attendi che finisca o annullala.",
   "games.minecraft.instances.error": "Impossibile completare l’operazione. Riprova.",
   "games.minecraft.catalog.updated": "Aggiornato",
   "games.minecraft.catalog.gameVersion": "Versione di Minecraft",
@@ -270,7 +337,8 @@ export default {
   "games.minecraft.catalog.projectPage": "Pagina del progetto",
   "games.minecraft.catalog.network": "Impossibile caricare i dati del progetto. Riprova.",
   "games.minecraft.catalog.title": "Trova il tuo prossimo mondo.",
-  "games.minecraft.catalog.note": "Pacchetti della community, nuove meccaniche e un altro modo di vedere Minecraft.",
+  "games.minecraft.catalog.note":
+    "Pacchetti della community, nuove meccaniche e un altro modo di vedere Minecraft.",
   "games.minecraft.catalog.search": "Cerca progetti Minecraft",
   "games.minecraft.catalog.content": "Tipo di contenuto",
   "games.minecraft.catalog.modpack": "Modpack",
@@ -282,9 +350,11 @@ export default {
   "games.minecraft.catalog.allVersions": "Tutte le versioni",
   "games.minecraft.catalog.allLoaders": "Tutti i mod loader",
   "games.minecraft.catalog.sort": "Ordina",
-  "games.minecraft.catalog.filterError": "Alcuni filtri non sono disponibili. Puoi continuare a esplorare i progetti.",
+  "games.minecraft.catalog.filterError":
+    "Alcuni filtri non sono disponibili. Puoi continuare a esplorare i progetti.",
   "games.minecraft.catalog.results": "{count} progetti",
-  "games.minecraft.catalog.empty": "Nessun progetto corrisponde. Prova un’altra versione o categoria.",
+  "games.minecraft.catalog.empty":
+    "Nessun progetto corrisponde. Prova un’altra versione o categoria.",
   "games.minecraft.catalog.project": "Dettagli del progetto",
   "games.minecraft.catalog.about": "Informazioni",
   "games.minecraft.catalog.versions": "Versioni",
@@ -297,21 +367,25 @@ export default {
   "games.minecraft.catalog.issues": "Segnala un problema",
   "games.minecraft.catalog.wiki": "Wiki",
   "games.minecraft.catalog.linkError": "Impossibile aprire questo link.",
-  "games.minecraft.catalog.manageNote": "Controlla file compatibili e dipendenze nella cartella mod Fabric collegata.",
+  "games.minecraft.catalog.manageNote":
+    "Controlla file compatibili e dipendenze nella cartella mod Fabric collegata.",
   "games.minecraft.catalog.manage": "Gestisci in Mod",
   "games.minecraft.catalog.discover": "Scopri",
   "games.minecraft.account.signIn": "Accedi",
   "games.minecraft.account.title": "Il tuo account Minecraft",
-  "games.minecraft.account.intro": "Collega Microsoft per vedere skin e mantelli Minecraft e applicare le tue creazioni.",
+  "games.minecraft.account.intro":
+    "Collega Microsoft per vedere skin e mantelli Minecraft e applicare le tue creazioni.",
   "games.minecraft.account.desktop": "Apri Harbor desktop per collegare il tuo account Minecraft.",
-  "games.minecraft.account.setup": "L’accesso Microsoft non è ancora configurato per questa versione di Harbor. Puoi modificare le skin localmente.",
+  "games.minecraft.account.setup":
+    "L’accesso Microsoft non è ancora configurato per questa versione di Harbor. Puoi modificare le skin localmente.",
   "games.minecraft.account.codeNote": "Inserisci questo codice nella pagina di accesso Microsoft.",
   "games.minecraft.account.copy": "Copia codice",
   "games.minecraft.account.openMicrosoft": "Continua su Microsoft",
   "games.minecraft.account.waiting": "In attesa che tu completi l’accesso…",
   "games.minecraft.account.openManually": "Apri questo indirizzo nel browser:",
   "games.minecraft.account.capes": "I tuoi mantelli",
-  "games.minecraft.account.capeNote": "Mantelli posseduti da questo account Minecraft. Selezionane uno per l’anteprima.",
+  "games.minecraft.account.capeNote":
+    "Mantelli posseduti da questo account Minecraft. Selezionane uno per l’anteprima.",
   "games.minecraft.account.noCape": "Nessun mantello",
   "games.minecraft.account.applyCape": "Applica mantello",
   "games.minecraft.account.noSkin": "L’anteprima della skin dell’account non è disponibile.",
@@ -319,16 +393,21 @@ export default {
   "games.minecraft.account.editCurrent": "Modifica skin dell’account",
   "games.minecraft.account.applySkin": "Applica a Minecraft",
   "games.minecraft.account.applied": "Applicato a Minecraft.",
-  "games.minecraft.account.network": "Impossibile contattare il servizio account. Riprova tra poco.",
+  "games.minecraft.account.network":
+    "Impossibile contattare il servizio account. Riprova tra poco.",
   "games.minecraft.account.rateLimit": "Troppe richieste. Attendi un momento e riprova.",
   "games.minecraft.account.reconnect": "Accedi di nuovo per ricollegare questo account.",
   "games.minecraft.account.expired": "Questo codice è scaduto. Ricomincia per riceverne uno nuovo.",
   "games.minecraft.account.declined": "L’accesso è stato annullato o rifiutato.",
-  "games.minecraft.account.notOwned": "Questo account richiede Minecraft: Java Edition e un profilo Minecraft.",
+  "games.minecraft.account.notOwned":
+    "Questo account richiede Minecraft: Java Edition e un profilo Minecraft.",
   "games.minecraft.account.xbox": "Crea il tuo profilo Xbox sul sito Xbox e riprova.",
-  "games.minecraft.account.restricted": "Le impostazioni Microsoft o Xbox impediscono l’accesso. Controlla età, famiglia o regione dell’account.",
-  "games.minecraft.account.skinError": "Impossibile applicare skin o mantello. Aggiorna l’account e riprova.",
-  "games.minecraft.account.storeError": "Harbor non ha potuto salvare l’account in modo sicuro su questo dispositivo.",
+  "games.minecraft.account.restricted":
+    "Le impostazioni Microsoft o Xbox impediscono l’accesso. Controlla età, famiglia o regione dell’account.",
+  "games.minecraft.account.skinError":
+    "Impossibile applicare skin o mantello. Aggiorna l’account e riprova.",
+  "games.minecraft.account.storeError":
+    "Harbor non ha potuto salvare l’account in modo sicuro su questo dispositivo.",
   "games.minecraft.account.error": "Richiesta dell’account non riuscita. Riprova.",
   "games.minecraft.studio": "Studio skin",
   "games.minecraft.skinTitle": "Il tuo stile.",
@@ -363,14 +442,17 @@ export default {
   "games.minecraft.library": "Le tue skin",
   "games.minecraft.localNote": "Salvate su questo dispositivo per questo profilo Harbor.",
   "games.minecraft.new": "Nuova skin",
-  "games.minecraft.empty": "Importa una skin o inizia a dipingere. Le modifiche si salvano automaticamente.",
+  "games.minecraft.empty":
+    "Importa una skin o inizia a dipingere. Le modifiche si salvano automaticamente.",
   "games.minecraft.delete": "Elimina {name}",
   "games.minecraft.saved": "Salvata localmente",
   "games.minecraft.saving": "Salvataggio…",
   "games.minecraft.pixel": "Pixel {x}, {y}: {color}",
-  "games.minecraft.webgl": "Anteprima 3D non disponibile. Puoi continuare a modificare ed esportare.",
+  "games.minecraft.webgl":
+    "Anteprima 3D non disponibile. Puoi continuare a modificare ed esportare.",
   "games.minecraft.errorImport": "Scegli un PNG Minecraft di 64 × 64 o 64 × 32 pixel, fino a 1 MB.",
-  "games.minecraft.errorSave": "Impossibile salvare. Libera spazio locale o elimina una vecchia skin; la libreria ne contiene al massimo 40.",
+  "games.minecraft.errorSave":
+    "Impossibile salvare. Libera spazio locale o elimina una vecchia skin; la libreria ne contiene al massimo 40.",
   "games.minecraft.head": "Testa",
   "games.minecraft.body": "Torso",
   "games.minecraft.rightArm": "Braccio destro",
@@ -386,7 +468,8 @@ export default {
   "games.minecraft.mods": "Mod",
   "games.minecraft.skins": "Skin",
   "games.minecraft.heroTitle": "Il tuo mondo. A modo tuo.",
-  "games.minecraft.heroNote": "Prepara la tua configurazione, scopri mod e personalizza il tuo personaggio.",
+  "games.minecraft.heroNote":
+    "Prepara la tua configurazione, scopri mod e personalizza il tuo personaggio.",
   "games.minecraft.openStudio": "Apri studio skin",
   "games.minecraft.release.choose": "Scegli una versione",
   "games.minecraft.release.file": "File",
@@ -399,20 +482,26 @@ export default {
   "games.minecraft.release.optional": "Facoltativa",
   "games.minecraft.release.incompatible": "Incompatibile",
   "games.minecraft.release.embedded": "Inclusa",
-  "games.minecraft.release.dependencyError": "Non è stato possibile caricare alcuni dettagli delle dipendenze.",
+  "games.minecraft.release.dependencyError":
+    "Non è stato possibile caricare alcuni dettagli delle dipendenze.",
   "games.minecraft.release.moreDependencies": "Mostra altre dipendenze",
-  "games.minecraft.release.dependencyLimit": "Sono mostrate {count} dipendenze. Consulta l’elenco completo su Modrinth.",
-  "games.minecraft.release.versionLimit": "Sono mostrate {count} versioni. Restringi i filtri per trovarne altre.",
+  "games.minecraft.release.dependencyLimit":
+    "Sono mostrate {count} dipendenze. Consulta l’elenco completo su Modrinth.",
+  "games.minecraft.release.versionLimit":
+    "Sono mostrate {count} versioni. Restringi i filtri per trovarne altre.",
   "games.minecraft.release.release": "Stabile",
   "games.minecraft.release.beta": "Beta",
   "games.minecraft.release.alpha": "Alpha",
   "games.minecraft.creation.forgeNote": "Per mod e modpack Forge.",
   "games.minecraft.creation.neoforgeNote": "Per mod e modpack NeoForge.",
-  "games.minecraft.runtime.processorNote": "{loader} usa Java per preparare i file del gioco. Configura Java prima di installare.",
+  "games.minecraft.runtime.processorNote":
+    "{loader} usa Java per preparare i file del gioco. Configura Java prima di installare.",
   "games.minecraft.runtime.preparingLoader": "Preparazione di {loader}…",
   "games.minecraft.runtime.processorProgress": "Passaggio {done} di {total}",
-  "games.minecraft.runtime.processorError": "Il loader non ha completato la preparazione dei file. Riprova per riutilizzare i download verificati.",
-  "games.minecraft.runtime.javaRequired": "Configura una versione compatibile di Java e riprova l’installazione.",
+  "games.minecraft.runtime.processorError":
+    "Il loader non ha completato la preparazione dei file. Riprova per riutilizzare i download verificati.",
+  "games.minecraft.runtime.javaRequired":
+    "Configura una versione compatibile di Java e riprova l’installazione.",
   "games.minecraft.notes.title": "Registro modifiche",
   "games.minecraft.notes.version": "Versione",
   "games.minecraft.notes.empty": "L’autore non ha pubblicato note per questa versione.",
@@ -427,4 +516,3 @@ export default {
   "games.minecraft.hub.curseforge": "Scelti da CurseForge",
   "games.minecraft.hub.browseCurseforge": "Esplora CurseForge",
 } satisfies Record<string, string>;
-

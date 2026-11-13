@@ -53,12 +53,7 @@ export function GameSiteDownload({
           </button>
         </header>
         {link ? (
-          <SourceBrowserFiles
-            link={link}
-            downloads={downloads}
-            onDone={close}
-            closing={closing}
-          />
+          <SourceBrowserFiles link={link} downloads={downloads} onDone={close} closing={closing} />
         ) : (
           <form
             onSubmit={(event) => {

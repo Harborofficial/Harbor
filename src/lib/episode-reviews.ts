@@ -273,7 +273,11 @@ export async function fetchEpisodeReviews(
   if (!episodeReviewsTarget(seriesImdbId, season, episode))
     return { reviews: [], next: null, failed: [] };
 
-  const imdbPromise = async (): Promise<{ reviews: EpisodeReview[]; next: string | null; failed: boolean }> => {
+  const imdbPromise = async (): Promise<{
+    reviews: EpisodeReview[];
+    next: string | null;
+    failed: boolean;
+  }> => {
     if (cursor.imdb == null) return { reviews: [], next: null, failed: false };
     if (episodeImdbId && IMDB_ID.test(episodeImdbId))
       return imdbReviewsPage(episodeImdbId, cursor.imdb, sort);

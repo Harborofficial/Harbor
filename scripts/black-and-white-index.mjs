@@ -84,7 +84,12 @@ console.log(
     .map(([d, n]) => `${d}s ${n}`)
     .join("  "),
 );
-console.log(`head ${films.slice(0, 5).map((f) => f.title).join(", ")}`);
+console.log(
+  `head ${films
+    .slice(0, 5)
+    .map((f) => f.title)
+    .join(", ")}`,
+);
 
 const payload = {
   builtAt: new Date().toISOString().slice(0, 10),

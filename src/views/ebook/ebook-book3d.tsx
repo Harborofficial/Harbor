@@ -9,7 +9,10 @@ function bylineOf(value: string): string {
   const head = value
     .replace(/\s+/g, " ")
     .split(/,|;|\(|\bfirst published\b|\bpublished\b|\bborn\b/i)[0]
-    .replace(/^(?:[A-Z][a-z]+(?:-[A-Z][a-z]+)?\s+)?(?:writer|author|novelist|poet|playwright|journalist|essayist)\s+/i, "")
+    .replace(
+      /^(?:[A-Z][a-z]+(?:-[A-Z][a-z]+)?\s+)?(?:writer|author|novelist|poet|playwright|journalist|essayist)\s+/i,
+      "",
+    )
     .trim();
   if (head.length <= BYLINE_MAX) return head;
   const cut = head.slice(0, BYLINE_MAX).replace(/\s+\S*$/, "");
@@ -50,19 +53,17 @@ export function EBookBook3D({
 }) {
   const art = useArtGlow(cover);
   const opening = text ? openingLines(text) : "";
-  const titleFit = title.length > 78 ? 0.56 : title.length > 54 ? 0.68 : title.length > 34 ? 0.82 : 1;
+  const titleFit =
+    title.length > 78 ? 0.56 : title.length > 54 ? 0.68 : title.length > 34 ? 0.82 : 1;
   const root = useRef<HTMLDivElement>(null);
-  const track = useCallback(
-    (event: { clientX: number; clientY: number }) => {
-      const el = root.current;
-      if (!el) return;
-      const box = el.getBoundingClientRect();
-      if (!box.width || !box.height) return;
-      el.style.setProperty("--hbk-mx", String((event.clientX - box.left) / box.width - 0.5));
-      el.style.setProperty("--hbk-my", String((event.clientY - box.top) / box.height - 0.5));
-    },
-    [],
-  );
+  const track = useCallback((event: { clientX: number; clientY: number }) => {
+    const el = root.current;
+    if (!el) return;
+    const box = el.getBoundingClientRect();
+    if (!box.width || !box.height) return;
+    el.style.setProperty("--hbk-mx", String((event.clientX - box.left) / box.width - 0.5));
+    el.style.setProperty("--hbk-my", String((event.clientY - box.top) / box.height - 0.5));
+  }, []);
   const release = useCallback(() => {
     root.current?.style.setProperty("--hbk-mx", "0");
     root.current?.style.setProperty("--hbk-my", "0");

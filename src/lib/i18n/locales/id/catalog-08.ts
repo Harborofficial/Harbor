@@ -487,7 +487,8 @@ const catalog: Record<string, string> = {
   "Same Wi-Fi as this computer": "Wi-Fi yang sama dengan komputer ini",
   "Same file": "File yang sama",
   "Same file as host": "File yang sama dengan host",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Penggunaan hanya baca yang sama seperti Real-Debrid. Anda juga dapat mengantrekan sumber yang belum di-cache dari pemilih pemutaran.",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Penggunaan hanya baca yang sama seperti Real-Debrid. Anda juga dapat mengantrekan sumber yang belum di-cache dari pemilih pemutaran.",
   "Same-genre picks from your installed sources":
     "Pilihan bergenre sama dari sumber yang Anda instal",
   "Sample title": "Judul contoh",
@@ -840,7 +841,8 @@ const catalog: Record<string, string> = {
   "Select renderer": "Pilih perender",
   "Self-host": "Host sendiri",
   "Self-test": "Uji mandiri",
-  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.": "Uji mandiri dinonaktifkan saat streaming jarak jauh ketat aktif. Tindakan ini mengunduh file uji kecil melalui peer-to-peer di komputer ini.",
+  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.":
+    "Uji mandiri dinonaktifkan saat streaming jarak jauh ketat aktif. Tindakan ini mengunduh file uji kecil melalui peer-to-peer di komputer ini.",
   Send: "Kirim",
   "Send a bug report": "Kirim laporan bug",
   "Send a bug report straight to the Harbor team. Screenshots and screen recordings welcome.":

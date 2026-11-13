@@ -61,7 +61,9 @@ export function TileCard({
           <AddonStarBadge manifestId={resolved.manifest?.id} size="xs" />
         </div>
       </div>
-      <p className="relative line-clamp-3 text-[13.5px] leading-relaxed text-ink-muted">{description}</p>
+      <p className="relative line-clamp-3 text-[13.5px] leading-relaxed text-ink-muted">
+        {description}
+      </p>
       <button
         onClick={handle}
         disabled={installed || installing}

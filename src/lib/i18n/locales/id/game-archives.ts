@@ -1,15 +1,20 @@
 export default {
   "games.cleanup.title": "Arsip unduhan",
-  "games.cleanup.intro": "Tinjau arsip setelah diekstrak. File game hasil ekstraksi tetap tersimpan.",
+  "games.cleanup.intro":
+    "Tinjau arsip setelah diekstrak. File game hasil ekstraksi tetap tersimpan.",
   "games.cleanup.search": "Cari unduhan yang diekstrak",
   "games.cleanup.empty": "Ekstraksi yang selesai akan muncul di sini.",
   "games.cleanup.review": "Tinjau arsip",
   "games.cleanup.confirm": "Pindahkan bagian arsip ini ke tempat sampah sistem?",
-  "games.cleanup.binNote": "Ruang tersedia kembali setelah Anda mengosongkan tempat sampah sendiri.",
-  "games.cleanup.completedNote": "Folder berisi arsip ada di tempat sampah. Pulihkan dari sana jika diperlukan.",
+  "games.cleanup.binNote":
+    "Ruang tersedia kembali setelah Anda mengosongkan tempat sampah sendiri.",
+  "games.cleanup.completedNote":
+    "Folder berisi arsip ada di tempat sampah. Pulihkan dari sana jika diperlukan.",
   "games.cleanup.restoredNote": "Bagian arsip sudah kembali ke folder asal.",
-  "games.cleanup.uncertainNote": "Harbor tidak dapat memastikan hasilnya. Periksa folder asal dan tempat sampah sebelum melanjutkan.",
-  "games.cleanup.recoveryNote": "Sebagian arsip mungkin berada di folder sementara Harbor. Lanjutkan pembersihan atau pulihkan tanpa menimpa file yang ada.",
+  "games.cleanup.uncertainNote":
+    "Harbor tidak dapat memastikan hasilnya. Periksa folder asal dan tempat sampah sebelum melanjutkan.",
+  "games.cleanup.recoveryNote":
+    "Sebagian arsip mungkin berada di folder sementara Harbor. Lanjutkan pembersihan atau pulihkan tanpa menimpa file yang ada.",
   "games.cleanup.working": "Memeriksa file arsip",
   "games.cleanup.restore": "Pulihkan file tersimpan",
   "games.cleanup.resume": "Lanjutkan pembersihan",
@@ -19,19 +24,26 @@ export default {
   "games.cleanup.restored": "Arsip dipulihkan",
   "games.cleanup.unconfirmed": "Hasil belum dipastikan",
   "games.cleanup.unavailable": "Perbarui aplikasi desktop untuk mengelola arsip unduhan.",
-  "games.cleanup.archive_cleanup_in_use": "Operasi lain menggunakan file ini. Hentikan, lalu tinjau lagi.",
-  "games.cleanup.archive_cleanup_recovery": "Pembersihan tersimpan perlu ditinjau. Simpan file dan periksa foldernya.",
-  "games.cleanup.archive_cleanup_recycle": "Tempat sampah tidak dapat menerima file. Pulihkan atau coba lagi.",
-  "games.cleanup.archive_cleanup_receipt": "Ekstraksi ini tidak memiliki catatan sumber lengkap. Arsipnya tidak dapat dibersihkan di sini.",
+  "games.cleanup.archive_cleanup_in_use":
+    "Operasi lain menggunakan file ini. Hentikan, lalu tinjau lagi.",
+  "games.cleanup.archive_cleanup_recovery":
+    "Pembersihan tersimpan perlu ditinjau. Simpan file dan periksa foldernya.",
+  "games.cleanup.archive_cleanup_recycle":
+    "Tempat sampah tidak dapat menerima file. Pulihkan atau coba lagi.",
+  "games.cleanup.archive_cleanup_receipt":
+    "Ekstraksi ini tidak memiliki catatan sumber lengkap. Arsipnya tidak dapat dibersihkan di sini.",
   "games.cleanup.blocker.anotherProfile": "Profil lain menggunakan arsip ini.",
   "games.cleanup.blocker.activeDownload": "Unduhan masih memerlukan file ini.",
   "games.cleanup.blocker.sharing": "Hentikan berbagi torrent ini sebelum membersihkan.",
   "games.cleanup.blocker.pendingPreparation": "File ini menunggu untuk diekstrak.",
   "games.cleanup.blocker.otherExtraction": "Ekstraksi lain menggunakan file ini.",
-  "games.cleanup.orphanNote": "Catatan ekstraksi telah dihapus. Pulihkan arsip yang disimpan ke folder asal.",
-  "games.preparation.storeError": "Pilihan ekstraksi tidak dapat disimpan. Pilihan Anda tetap ada di sini; coba lagi.",
+  "games.cleanup.orphanNote":
+    "Catatan ekstraksi telah dihapus. Pulihkan arsip yang disimpan ke folder asal.",
+  "games.preparation.storeError":
+    "Pilihan ekstraksi tidak dapat disimpan. Pilihan Anda tetap ada di sini; coba lagi.",
   "games.preparation.enable": "Ekstrak setelah diunduh",
-  "games.preparation.note": "Arsip tetap disimpan. Tinjau pemasangan sebelum menjalankan program penyiapan.",
+  "games.preparation.note":
+    "Arsip tetap disimpan. Tinjau pemasangan sebelum menjalankan program penyiapan.",
   "games.preparation.folder": "{name} diekstrak",
   "games.preparation.destination": "Ekstrak ke",
   "games.preparation.spaceNote": "Ruang yang diperlukan diperiksa setelah arsip diunduh.",
@@ -57,21 +69,27 @@ export default {
   "games.setupShortcuts.added": "Ditambahkan",
   "games.setupShortcuts.adding": "Menambahkan…",
   "games.setupShortcuts.add": "Tambah pintasan",
-  "games.setupShortcuts.exists": "Pintasan lain sudah memakai nama ini. Pintasan tersebut tidak diubah.",
-  "games.setupShortcuts.missing": "File game tidak dapat diverifikasi. Periksa lokasinya lalu coba lagi.",
+  "games.setupShortcuts.exists":
+    "Pintasan lain sudah memakai nama ini. Pintasan tersebut tidak diubah.",
+  "games.setupShortcuts.missing":
+    "File game tidak dapat diverifikasi. Periksa lokasinya lalu coba lagi.",
   "games.setupShortcuts.unsupported": "Pintasan tersedia untuk game Windows native.",
   "games.setupShortcuts.error": "Pintasan tidak dapat diperbarui. Coba lagi.",
 
-  "games.archive.archive_decoder": "Harbor tidak dapat mendekode arsip ini dalam batasnya. Coba alat ekstraksi lain.",
-  "games.archive.archive_password_or_checksum": "Kata sandi mungkin salah atau arsip rusak. Periksa kata sandi atau unduh ulang arsip.",
+  "games.archive.archive_decoder":
+    "Harbor tidak dapat mendekode arsip ini dalam batasnya. Coba alat ekstraksi lain.",
+  "games.archive.archive_password_or_checksum":
+    "Kata sandi mungkin salah atau arsip rusak. Periksa kata sandi atau unduh ulang arsip.",
   "games.archive.password": "Kata sandi arsip",
-  "games.archive.passwordNote": "Hanya digunakan untuk ekstraksi ini. Tidak disimpan dalam riwayat unduhan.",
+  "games.archive.passwordNote":
+    "Hanya digunakan untuk ekstraksi ini. Tidak disimpan dalam riwayat unduhan.",
   "games.archive.archive_password": "Kata sandi ini tidak membuka arsip. Periksa dan coba lagi.",
   "games.archive.open": "Ekstrak arsip",
   "games.archive.extractNamed": "Ekstrak {name}",
   "games.archive.eyebrow": "Dari unduhan ke pustakamu",
   "games.archive.title": "Ekstrak file game",
-  "games.archive.intro": "Tinjau arsip ZIP / 7z / RAR / TAR / TAR.GZ / ISO dan pilih lokasi untuk file-nya. Harbor membuat folder baru dan menyimpan arsip asli.",
+  "games.archive.intro":
+    "Tinjau arsip ZIP / 7z / RAR / TAR / TAR.GZ / ISO dan pilih lokasi untuk file-nya. Harbor membuat folder baru dan menyimpan arsip asli.",
   "games.archive.source": "Arsip",
   "games.archive.chooseSource": "Pilih arsip",
   "games.archive.chooseParent": "Pilih folder tujuan",
@@ -86,36 +104,53 @@ export default {
   "games.archive.searchPreview": "Cari di pratinjau ini",
   "games.archive.destination": "Pilih tempat untuk file ini",
   "games.archive.folderName": "Nama folder baru",
-  "games.archive.destinationNote": "Folder yang sudah ada tidak akan diganti. Pilih nama lain jika nama ini sudah dipakai.",
+  "games.archive.destinationNote":
+    "Folder yang sudah ada tidak akan diganti. Pilih nama lain jika nama ini sudah dipakai.",
   "games.archive.phase.checking": "Memeriksa arsip",
   "games.archive.phase.extracting": "Mengekstrak file",
   "games.archive.phase.complete": "File sudah siap",
   "games.archive.ready": "Siap untuk langkah berikutnya",
   "games.archive.complete": "{count} file diekstrak",
-  "games.archive.completeNote": "File-mu sudah siap. Untuk game portabel, tambahkan file executable-nya di Game lokal. Game yang memerlukan penginstal tetap harus melalui proses instalasinya sendiri.",
+  "games.archive.completeNote":
+    "File-mu sudah siap. Untuk game portabel, tambahkan file executable-nya di Game lokal. Game yang memerlukan penginstal tetap harus melalui proses instalasinya sendiri.",
   "games.archive.originalKept": "Arsip asli tetap disimpan.",
-  "games.archive.zipOnly": "Arsip ZIP / 7z / RAR / TAR / TAR.GZ / ISO · file tidak dijalankan otomatis",
+  "games.archive.zipOnly":
+    "Arsip ZIP / 7z / RAR / TAR / TAR.GZ / ISO · file tidak dijalankan otomatis",
   "games.archive.openFolder": "Tampilkan folder",
   "games.archive.localLibrary": "Game lokal",
-  "games.archive.archive_profile": "Profil Harbor ini tidak dapat dikenali. Buka ulang Game dan coba lagi.",
-  "games.archive.archive_busy": "Operasi arsip lain sedang berjalan. Selesaikan atau batalkan dahulu.",
+  "games.archive.archive_profile":
+    "Profil Harbor ini tidak dapat dikenali. Buka ulang Game dan coba lagi.",
+  "games.archive.archive_busy":
+    "Operasi arsip lain sedang berjalan. Selesaikan atau batalkan dahulu.",
   "games.archive.archive_canceled": "Ekstraksi dibatalkan. Arsip asli tetap tersedia.",
-  "games.archive.archive_read": "Arsip tidak dapat dibaca. Pastikan file masih tersedia lalu coba lagi.",
-  "games.archive.archive_links": "Arsip ini berisi tautan atau file khusus. Ikuti petunjuk instalasi dari proyeknya.",
+  "games.archive.archive_read":
+    "Arsip tidak dapat dibaca. Pastikan file masih tersedia lalu coba lagi.",
+  "games.archive.archive_links":
+    "Arsip ini berisi tautan atau file khusus. Ikuti petunjuk instalasi dari proyeknya.",
   "games.archive.archive_limit": "Arsip ini melampaui batas ekstraksi Harbor saat ini.",
-  "games.archive.archive_changed": "Arsip berubah setelah ditinjau. Tinjau lagi sebelum mengekstrak.",
-  "games.archive.archive_path": "Arsip berisi jalur yang tidak dapat diekstrak Harbor dengan aman. Tidak ada file game yang diganti.",
-  "games.archive.archive_format": "Ini bukan arsip ZIP / 7z / RAR / TAR / TAR.GZ / ISO yang didukung, atau direktorinya rusak.",
+  "games.archive.archive_changed":
+    "Arsip berubah setelah ditinjau. Tinjau lagi sebelum mengekstrak.",
+  "games.archive.archive_path":
+    "Arsip berisi jalur yang tidak dapat diekstrak Harbor dengan aman. Tidak ada file game yang diganti.",
+  "games.archive.archive_format":
+    "Ini bukan arsip ZIP / 7z / RAR / TAR / TAR.GZ / ISO yang didukung, atau direktorinya rusak.",
   "games.archive.archive_encrypted": "Masukkan kata sandi arsip ini untuk melanjutkan.",
-  "games.archive.archive_compression": "ZIP / 7z / RAR / TAR / TAR.GZ / ISO ini memakai metode kompresi yang belum didukung Harbor.",
-  "games.archive.archive_collision": "Beberapa entri arsip akan saling menimpa. Tidak ada yang diekstrak.",
-  "games.archive.archive_destination": "Pilih folder yang tersedia dan nama folder baru yang valid.",
-  "games.archive.archive_write": "File tidak dapat ditulis. Periksa ruang dan izin tujuan, lalu tinjau arsip lagi.",
+  "games.archive.archive_compression":
+    "ZIP / 7z / RAR / TAR / TAR.GZ / ISO ini memakai metode kompresi yang belum didukung Harbor.",
+  "games.archive.archive_collision":
+    "Beberapa entri arsip akan saling menimpa. Tidak ada yang diekstrak.",
+  "games.archive.archive_destination":
+    "Pilih folder yang tersedia dan nama folder baru yang valid.",
+  "games.archive.archive_write":
+    "File tidak dapat ditulis. Periksa ruang dan izin tujuan, lalu tinjau arsip lagi.",
   "games.archive.archive_exists": "Folder itu sudah ada. Pilih nama lain agar file-nya tetap utuh.",
   "games.archive.archive_platform": "Ekstraksi arsip tidak tersedia di perangkat ini.",
-  "games.archive.archive_expired": "Tinjauan arsip ini sudah kedaluwarsa. Tinjau lagi untuk melanjutkan.",
-  "games.archive.archive_space": "Ruang kosong tidak cukup untuk file hasil ekstraksi. Pilih tujuan lain.",
-  "games.archive.archive_checksum": "Salah satu file arsip gagal dalam pemeriksaan integritas. Hasil ekstraksi yang tidak lengkap tidak disediakan untuk digunakan.",
+  "games.archive.archive_expired":
+    "Tinjauan arsip ini sudah kedaluwarsa. Tinjau lagi untuk melanjutkan.",
+  "games.archive.archive_space":
+    "Ruang kosong tidak cukup untuk file hasil ekstraksi. Pilih tujuan lain.",
+  "games.archive.archive_checksum":
+    "Salah satu file arsip gagal dalam pemeriksaan integritas. Hasil ekstraksi yang tidak lengkap tidak disediakan untuk digunakan.",
   "games.archive.space.title": "Ruang di tujuan",
   "games.archive.space.checking": "Memeriksa ruang di tujuan…",
   "games.archive.space.free": "{size} tersedia",
@@ -123,10 +158,12 @@ export default {
   "games.archive.space.reserved": "{size} dicadangkan untuk operasi Harbor lain",
   "games.archive.space.after": "{size} tersedia setelah ekstraksi",
   "games.archive.space.shortfall": "Perlu tambahan ruang {size}",
-  "games.archive.space.unknown": "Ruang kosong tidak dapat dibaca. Harbor akan memeriksa lagi saat ekstraksi dimulai.",
+  "games.archive.space.unknown":
+    "Ruang kosong tidak dapat dibaca. Harbor akan memeriksa lagi saat ekstraksi dimulai.",
   "games.archive.space.error": "Tidak dapat memeriksa ruang di tujuan.",
   "games.archive.space.refresh": "Periksa ruang lagi",
-  "games.archive.space.note": "Termasuk sedikit ruang cadangan pengaman. Aplikasi lain masih dapat memakai drive ini.",
+  "games.archive.space.note":
+    "Termasuk sedikit ruang cadangan pengaman. Aplikasi lain masih dapat memakai drive ini.",
   "games.archive.space.shortfallNote": "Kosongkan ruang atau pilih tujuan lain, lalu periksa lagi.",
   "games.archive.keepWorking": "Ekstraksi berlanjut di Unduhan. Anda dapat menutup jendela ini.",
   "games.archive.viewDownloads": "Lihat di Unduhan",
@@ -139,21 +176,29 @@ export default {
   "games.archive.cancelExtract": "Batalkan ekstraksi",
   "games.archive.retry": "Tinjau dan coba lagi",
   "games.archive.showPartial": "Tampilkan berkas parsial",
-  "games.archive.partialNote": "Harbor menyimpan folder yang belum lengkap. Tinjau sebelum menghapusnya; mencoba lagi akan memulai ekstraksi baru.",
+  "games.archive.partialNote":
+    "Harbor menyimpan folder yang belum lengkap. Tinjau sebelum menghapusnya; mencoba lagi akan memulai ekstraksi baru.",
   "games.archive.progressFiles": "{count} dari {total} berkas",
-  "games.archive.archive_store": "Harbor tidak dapat menyimpan kemajuan ekstraksi. Berkas Anda disimpan untuk ditinjau.",
+  "games.archive.archive_store":
+    "Harbor tidak dapat menyimpan kemajuan ekstraksi. Berkas Anda disimpan untuk ditinjau.",
   "games.archive.archive_start": "Ekstraksi tidak dapat dimulai. Coba lagi.",
-  "games.archive.archive_history": "Riwayat ekstraksi penuh. Hapus catatan lama untuk melanjutkan; berkasnya akan tetap disimpan.",
-  "games.archive.archive_interrupted": "Harbor ditutup sebelum ekstraksi selesai. Periksa lokasi yang tersimpan dan coba lagi.",
-  "games.archive.archive_parts": "Bagian-bagian ini tidak membentuk satu arsip. Pastikan semuanya berasal dari unduhan yang sama.",
+  "games.archive.archive_history":
+    "Riwayat ekstraksi penuh. Hapus catatan lama untuk melanjutkan; berkasnya akan tetap disimpan.",
+  "games.archive.archive_interrupted":
+    "Harbor ditutup sebelum ekstraksi selesai. Periksa lokasi yang tersimpan dan coba lagi.",
+  "games.archive.archive_parts":
+    "Bagian-bagian ini tidak membentuk satu arsip. Pastikan semuanya berasal dari unduhan yang sama.",
   "games.archive.archive_tool": "Dukungan format arsip tambahan tidak tersedia dalam versi ini.",
   "games.archive.unavailable": "Perbarui aplikasi desktop untuk mengekstrak di latar belakang.",
   "games.archive.continueSetup": "Siapkan game",
   "games.archive.dismissRecord": "Hapus catatan · simpan berkas",
-  "games.archive.archive_multipart": "Format arsip terbagi ini belum didukung. Ekstrak dengan aplikasi arsip, lalu buka folder hasilnya di Harbor.",
+  "games.archive.archive_multipart":
+    "Format arsip terbagi ini belum didukung. Ekstrak dengan aplikasi arsip, lalu buka folder hasilnya di Harbor.",
   "games.archive.partsCount": "{count} bagian arsip",
-  "games.archive.partsNote": "Simpan semua bagian di folder yang sama. Harbor mengekstraknya bersama.",
+  "games.archive.partsNote":
+    "Simpan semua bagian di folder yang sama. Harbor mengekstraknya bersama.",
   "games.archive.partsMore": "Tampilkan bagian lainnya",
   "games.archive.setHash": "SHA-256 kumpulan arsip",
-  "games.archive.archive_missing_part": "Ada bagian arsip yang hilang. Unduh semua bagian ke folder yang sama, lalu tinjau arsip lagi.",
+  "games.archive.archive_missing_part":
+    "Ada bagian arsip yang hilang. Unduh semua bagian ke folder yang sama, lalu tinjau arsip lagi.",
 };

@@ -70,7 +70,9 @@ export function SimklPanel() {
           <TrackerConnect
             service="Simkl"
             logo={simklLogo}
-            description={t("Keep your movie, show, and anime lists in sync. Connect with a short code to update Simkl as you watch.")}
+            description={t(
+              "Keep your movie, show, and anime lists in sync. Connect with a short code to update Simkl as you watch.",
+            )}
             onConnect={() => setModalOpen(true)}
             website="https://simkl.com"
           />
@@ -79,17 +81,20 @@ export function SimklPanel() {
         <>
           <Section
             title={t("Connected")}
-            subtitle={t("Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.")}
+            subtitle={t(
+              "Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.",
+            )}
           >
             <TrackerIdentity
               service="Simkl"
               logo={simklLogo}
               handle={username || undefined}
               avatar={simklAvatar}
-              profileUrl={username ? `https://simkl.com/${encodeURIComponent(username)}` : undefined}
+              profileUrl={
+                username ? `https://simkl.com/${encodeURIComponent(username)}` : undefined
+              }
               onDisconnect={() => setConfirmDisconnect(true)}
             />
-
 
             {simklAvatar && (
               <ToggleRow
@@ -110,7 +115,9 @@ export function SimklPanel() {
 
             <ToggleRow
               label={t("Scrobble to Simkl")}
-              sub={t("Automatically track what you are playing and save watch progress in real-time.")}
+              sub={t(
+                "Automatically track what you are playing and save watch progress in real-time.",
+              )}
               value={settings.simklScrobbleEnabled}
               onChange={(val) => update({ simklScrobbleEnabled: val })}
               leading={<Radio size={20} strokeWidth={2.1} />}
@@ -120,7 +127,7 @@ export function SimklPanel() {
               label={t("Display Simkl Community Ratings")}
               sub={t("Display SIMKL community score badge on details pages.")}
               value={settings.showSimklBadge}
-              onChange={(val) => update({ showSimklBadge: val, simklShowCommunityRatings: val })}
+              onChange={(val) => update({ showSimklBadge: val })}
               leading={<Star size={20} strokeWidth={2.1} />}
             />
 
@@ -131,7 +138,6 @@ export function SimklPanel() {
               onChange={(val) => update({ simklEnableUserRatings: val })}
               leading={<PenLine size={20} strokeWidth={2.1} />}
             />
-
           </Section>
 
           <Section
@@ -140,7 +146,9 @@ export function SimklPanel() {
           >
             <ToggleRow
               label={t("Show Simkl rails on Home")}
-              sub={t("Display your Watching, Plan to Watch, Up Next, and Trending rows on the home screen.")}
+              sub={t(
+                "Display your Watching, Plan to Watch, Up Next, and Trending rows on the home screen.",
+              )}
               value={settings.simklHomeRailsEnabled}
               onChange={(val) => update({ simklHomeRailsEnabled: val })}
             />
@@ -259,7 +267,6 @@ export function SimklPanel() {
                     update({
                       useSimklAvatar: false,
                       simklScrobbleEnabled: true,
-                      simklShowCommunityRatings: true,
                       simklEnableUserRatings: true,
                       simklHomeRailsEnabled: false,
                       simklUpNextRailEnabled: false,

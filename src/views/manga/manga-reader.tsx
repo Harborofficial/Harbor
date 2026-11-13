@@ -661,6 +661,33 @@ export function MangaReader({
         : (resumePageForChapter(pid, manga.id, manga.title, chapter.id, chapter.chapter) ?? 0)),
     [chapter.id, startPage, pid, manga.id, manga.title, disableMangaPersistence],
   );
+  // Start the page the reader opens on before its image is ready, so the model
+  // load and first inference overlap the reader's own startup instead of
+  // following them.
+  const warmedChapter = useRef<string | null>(null);
+  useEffect(() => {
+    if (!settings.mangaUpscaleEnabled || pages.length === 0) return;
+    const chapterKey = `${manga.id}:${chapter.id}:${bookResume}`;
+    if (warmedChapter.current === chapterKey) return;
+    const index = Math.min(bookResume, pages.length - 1);
+    const page = pages[index];
+    if (!page?.url) return;
+    warmedChapter.current = chapterKey;
+    const key = pageCacheKey(index);
+    if (settings.mangaUpscaleQuality === "best") {
+      void prefetchBestMangaPage(page.url, page.headers, key, settings.mangaUpscaleAutoDownload);
+    } else {
+      void prefetchMangaPage(page.url, page.headers, key);
+    }
+  }, [
+    pages,
+    bookResume,
+    manga.id,
+    chapter.id,
+    settings.mangaUpscaleEnabled,
+    settings.mangaUpscaleQuality,
+    settings.mangaUpscaleAutoDownload,
+  ]);
   const pageRef = useRef(currentPage);
   pageRef.current = currentPage;
   const [bookStart, setBookStart] = useState(bookResume);

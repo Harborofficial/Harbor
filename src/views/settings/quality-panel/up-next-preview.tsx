@@ -26,9 +26,12 @@ export function UpNextPreview({ leadSec }: { leadSec: number }) {
           : shown >= 60
             ? t("1 minute")
             : t("{n} seconds", { n: shown });
-    note = t("The Up Next pill appears {lead} before the end. The bar shows the last three minutes.", {
-      lead: label,
-    });
+    note = t(
+      "The Up Next pill appears {lead} before the end. The bar shows the last three minutes.",
+      {
+        lead: label,
+      },
+    );
   }
 
   return (

@@ -9,11 +9,26 @@
 }
 
 @keyframes harbor-pre-download-toast-lifecycle {
-  0%   { opacity: 0; transform: scale(0.65); }
-  8%   { opacity: 1; transform: scale(1.09); }
-  14%  { opacity: 1; transform: scale(1); }
-  83%  { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(0.83); }
+  0% {
+    opacity: 0;
+    transform: scale(0.65);
+  }
+  8% {
+    opacity: 1;
+    transform: scale(1.09);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  83% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.83);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -21,8 +36,15 @@
     animation-name: harbor-pre-download-toast-reduced;
   }
   @keyframes harbor-pre-download-toast-reduced {
-    0%   { opacity: 0; }
-    8%, 83% { opacity: 1; }
-    100% { opacity: 0; }
+    0% {
+      opacity: 0;
+    }
+    8%,
+    83% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
   }
 }

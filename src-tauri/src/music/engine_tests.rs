@@ -355,16 +355,20 @@ fn native_load_preserves_spaces_in_local_filenames() {
     crate::mpv::mpv_argv_command(&mpv, &["loadfile", path.to_str().unwrap(), "replace"])
         .unwrap();
     let deadline = Instant::now() + Duration::from_secs(5);
-    while mpv.get_property::<f64>("duration").unwrap_or(0.0) <= 0.0 && Instant::now() < deadline
+    let mut quality = audio_quality(&mpv, Some(&path));
+    while (quality.codec.is_none() || mpv.get_property::<f64>("duration").unwrap_or(0.0) <= 0.0)
+        && Instant::now() < deadline
     {
+        // A paused load reports the duration before it starts decoding, and the codec
+        // only appears once the first frame is parsed.
         std::thread::sleep(Duration::from_millis(20));
+        quality = audio_quality(&mpv, Some(&path));
     }
-    let duration = mpv.get_property::<f64>("duration").unwrap_or(0.0);
-    let quality = audio_quality(&mpv, Some(&path));
     assert_eq!(quality.codec.as_deref(), Some("pcm_s16le"));
     assert_eq!(quality.sample_rate_hz, Some(8000));
     assert_eq!(quality.bit_depth, Some(16));
     assert!(quality.bitrate_kbps.is_some());
+    let duration = mpv.get_property::<f64>("duration").unwrap_or(0.0);
     let streamed_quality = audio_quality(&mpv, None);
     assert_eq!(
         streamed_quality.bit_depth, None,

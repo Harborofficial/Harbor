@@ -50,11 +50,7 @@ export function PipChrome({
   const muted = snap.muted || snap.volume === 0;
   return (
     <>
-      <div
-        data-tauri-drag-region
-        aria-hidden
-        className="absolute inset-0 z-10"
-      />
+      <div data-tauri-drag-region aria-hidden className="absolute inset-0 z-10" />
       <div
         aria-hidden
         onPointerDown={(e) => {
@@ -85,8 +81,13 @@ export function PipChrome({
           )}
         </div>
         <div className="pointer-events-none flex shrink-0 items-center">
-        <Tooltip label={captionsFault ?? (captionsOpen ? t("Hide subtitles window") : t("Pop out subtitles"))} side="bottom">
-          <button
+          <Tooltip
+            label={
+              captionsFault ?? (captionsOpen ? t("Hide subtitles window") : t("Pop out subtitles"))
+            }
+            side="bottom"
+          >
+            <button
               type="button"
               onClick={() => void toggleCaptions()}
               aria-pressed={captionsOpen}
@@ -101,17 +102,24 @@ export function PipChrome({
             >
               <Captions size={15} strokeWidth={2.2} />
             </button>
-        </Tooltip>
-        <Tooltip label={t("Return to full window")} side="bottom">
-          <button
-            onClick={onExitPip}
-            className="pointer-events-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/95 backdrop-blur-md transition-colors hover:bg-black/85"
-            aria-label={t("Exit Picture in Picture")}
-          >
-            <img src="/player-icons/pip--inactive.svg" width="12" height="12" alt="" className="shrink-0 select-none" draggable={false} />
-            {t("Exit PiP")}
-          </button>
-        </Tooltip>
+          </Tooltip>
+          <Tooltip label={t("Return to full window")} side="bottom">
+            <button
+              onClick={onExitPip}
+              className="pointer-events-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/95 backdrop-blur-md transition-colors hover:bg-black/85"
+              aria-label={t("Exit Picture in Picture")}
+            >
+              <img
+                src="/player-icons/pip--inactive.svg"
+                width="12"
+                height="12"
+                alt=""
+                className="shrink-0 select-none"
+                draggable={false}
+              />
+              {t("Exit PiP")}
+            </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -127,7 +135,14 @@ export function PipChrome({
             onClick={onPrevEp}
             disabled={!hasPrevEp}
             icon={
-              <img src="/player-icons/skip-prev.png" width={17} height={17} alt="" draggable={false} className="select-none" />
+              <img
+                src="/player-icons/skip-prev.png"
+                width={17}
+                height={17}
+                alt=""
+                draggable={false}
+                className="select-none"
+              />
             }
           />
           <PipStepBtn
@@ -156,9 +171,23 @@ export function PipChrome({
                   Hardcoded here rather than resolved through getCustomIcon, so
                   fixing the shared icon map did not reach this surface. */}
               {playing ? (
-                <img src="/player-icons/play-pause--paused.svg" width={28} height={28} alt="" draggable={false} className="select-none" />
+                <img
+                  src="/player-icons/play-pause--paused.svg"
+                  width={28}
+                  height={28}
+                  alt=""
+                  draggable={false}
+                  className="select-none"
+                />
               ) : (
-                <img src="/player-icons/play-pause--playing.svg" width={28} height={28} alt="" draggable={false} className="select-none" />
+                <img
+                  src="/player-icons/play-pause--playing.svg"
+                  width={28}
+                  height={28}
+                  alt=""
+                  draggable={false}
+                  className="select-none"
+                />
               )}
             </button>
           </Tooltip>
@@ -181,7 +210,14 @@ export function PipChrome({
             onClick={onNextEp}
             disabled={!hasNextEp}
             icon={
-              <img src="/player-icons/skip-next.png" width={17} height={17} alt="" draggable={false} className="select-none" />
+              <img
+                src="/player-icons/skip-next.png"
+                width={17}
+                height={17}
+                alt=""
+                draggable={false}
+                className="select-none"
+              />
             }
           />
           <PipVolume snap={snap} muted={muted} onMute={onMute} onVolume={onVolume} />

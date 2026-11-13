@@ -6,8 +6,7 @@ import { tvFocus } from "@/lib/keyboard-navigation";
 import { useT } from "@/lib/i18n";
 import { stripArrowKeys } from "../shared";
 
-const OVERLAY_LABEL =
-  "text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]";
+const OVERLAY_LABEL = "text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]";
 const ICON_BTN =
   "flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-white/85 transition-colors hover:bg-white/15 hover:text-white";
 

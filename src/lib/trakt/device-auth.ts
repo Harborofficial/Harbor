@@ -1,8 +1,4 @@
-import {
-  TRAKT_API_BASE,
-  TRAKT_CLIENT_ID,
-  TRAKT_DEVICE_TOKEN_PROXY,
-} from "./config";
+import { TRAKT_API_BASE, TRAKT_CLIENT_ID, TRAKT_DEVICE_TOKEN_PROXY } from "./config";
 import { setSession } from "./session";
 import type { DeviceCode, TraktSession, TraktUserMe } from "./types";
 
@@ -94,9 +90,10 @@ export function pollForToken(
         return;
       }
 
-      const result = await pollOnce(device.deviceCode).catch(
-        (e: Error): PollResult => ({ kind: "error", message: e.message }),
-      );
+      const result = await pollOnce(device.deviceCode).catch((e: Error): PollResult => ({
+        kind: "error",
+        message: e.message,
+      }));
       if (cancelled) return;
 
       if (result.kind === "slow_down") {

@@ -13,11 +13,9 @@ import type { BpLibSection } from "./bp-library-types";
 // paints under it. 18vh of width caps the row height near 27vh so a full row
 // clears the hint bar at 1080, 800 and below. NEEDS AN EYE: 18 is an apparent
 // size across a room, push it live and judge bigger or smaller.
-const LIB_POSTER_COLUMNS =
-  "repeat(auto-fill, minmax(clamp(122px, 18vh, 186px), 1fr))";
+const LIB_POSTER_COLUMNS = "repeat(auto-fill, minmax(clamp(122px, 18vh, 186px), 1fr))";
 
-const WIDE_COLUMNS =
-  "repeat(auto-fill, minmax(clamp(240px, 20vw, 400px), 1fr))";
+const WIDE_COLUMNS = "repeat(auto-fill, minmax(clamp(240px, 20vw, 400px), 1fr))";
 const RECHECK_MS = 300;
 const AUTO_PAGES = 4;
 

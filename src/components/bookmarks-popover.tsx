@@ -1,11 +1,7 @@
 import { Bookmark, BookOpen, Trash2 } from "lucide-react";
 import { CoverImg } from "@/components/cover-img";
 import { useEffect, useRef, useState } from "react";
-import {
-  removeMangaBookmark,
-  useMangaBookmarks,
-  type MangaBookmark,
-} from "@/lib/manga-bookmarks";
+import { removeMangaBookmark, useMangaBookmarks, type MangaBookmark } from "@/lib/manga-bookmarks";
 import { useT } from "@/lib/i18n";
 import { setMangaReadIntent } from "@/lib/manga/read-intent";
 import { useProfiles } from "@/lib/profiles";

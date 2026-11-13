@@ -58,7 +58,6 @@ export function MalPanel() {
     }
   };
 
-
   return (
     <>
       {!isConnected ? (
@@ -66,7 +65,9 @@ export function MalPanel() {
           <TrackerConnect
             service="MyAnimeList"
             logo={malLogo}
-            description={t("Bring your anime list into Harbor and update your episode count as you watch. Your existing progress is kept.")}
+            description={t(
+              "Bring your anime list into Harbor and update your episode count as you watch. Your existing progress is kept.",
+            )}
             onConnect={() => setModalOpen(true)}
             website="https://myanimelist.net"
           />
@@ -81,21 +82,33 @@ export function MalPanel() {
             logo={malLogo}
             handle={userName || undefined}
             avatar={malAvatar}
-            meta={session?.createdAt ? t("Authorized {when}", { when: sessionAge(t, session.createdAt) }) : undefined}
-            profileUrl={userName ? `https://myanimelist.net/profile/${encodeURIComponent(userName)}` : undefined}
+            meta={
+              session?.createdAt
+                ? t("Authorized {when}", { when: sessionAge(t, session.createdAt) })
+                : undefined
+            }
+            profileUrl={
+              userName
+                ? `https://myanimelist.net/profile/${encodeURIComponent(userName)}`
+                : undefined
+            }
             onDisconnect={() => setConfirmDisconnect(true)}
           />
 
           <ToggleRow
-            label={t("Sync watch progress")}
-            sub={t("Finishing an anime episode updates your MyAnimeList progress. Forward only: it never lowers a count you already have.")}
+            label={t("Sync watch progress with MyAnimeList")}
+            sub={t(
+              "Finishing an anime episode updates your MyAnimeList progress. Forward only: it never lowers a count you already have.",
+            )}
             value={settings.malAutoSync}
             onChange={(v) => update({ malAutoSync: v })}
             leading={<RefreshCw size={20} strokeWidth={2.1} />}
           />
           <ToggleRow
             label={t("Count MyAnimeList rewatches")}
-            sub={t("Watching an anime you already finished marks it as Rewatching and counts the rewatch, instead of resetting your progress.")}
+            sub={t(
+              "Watching an anime you already finished marks it as Rewatching and counts the rewatch, instead of resetting your progress.",
+            )}
             value={settings.malCountRewatches}
             onChange={(v) => update({ malCountRewatches: v })}
             lockReason={settings.malAutoSync ? undefined : t("Turn on Sync watch progress first.")}
@@ -152,14 +165,17 @@ export function MalPanel() {
         </Section>
       )}
 
-      {isConnected && <SyncIndicatorSetting />}
+      {isConnected && <SyncIndicatorSetting tracker="mal" />}
 
       {modalOpen && <MalConnectModal onClose={() => setModalOpen(false)} />}
     </>
   );
 }
 
-function sessionAge(t: (key: string, vars?: Record<string, string | number>) => string, createdAt?: number): string {
+function sessionAge(
+  t: (key: string, vars?: Record<string, string | number>) => string,
+  createdAt?: number,
+): string {
   if (!createdAt) return "";
   const days = Math.floor((Date.now() - createdAt) / 86400000);
   if (days < 1) return t("today");

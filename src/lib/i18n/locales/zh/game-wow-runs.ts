@@ -19,11 +19,12 @@ export default {
   "games.wow.runs.copy": "复制天赋",
   "games.wow.runs.copyFailed": "无法复制，请重试。",
   "games.wow.runs.party": "队伍配置",
-  "games.wow.runs.snapshots": "发布的天赋和装备是提供方的数据快照，可能与本次挑战时使用的配置不同。",
+  "games.wow.runs.snapshots":
+    "发布的天赋和装备是提供方的数据快照，可能与本次挑战时使用的配置不同。",
   "games.wow.runs.gear": "装备",
   "games.wow.runs.tank": "坦克",
   "games.wow.runs.healer": "治疗",
   "games.wow.runs.dps": "伤害",
   "games.wow.runs.snapshotAt": "装备快照：{date}",
-  "games.wow.runs.closeGear": "关闭装备"
+  "games.wow.runs.closeGear": "关闭装备",
 };

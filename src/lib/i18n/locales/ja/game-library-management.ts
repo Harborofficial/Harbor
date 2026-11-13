@@ -14,18 +14,25 @@ export default {
   "games.manage.uninstallOptions": "アンインストールの選択肢…",
   "games.manage.remove": "Harbor から削除…",
   "games.manage.manage": "管理",
-  "games.manage.failed": "操作を完了できませんでした。ゲームとランチャーが利用可能か確認して、もう一度お試しください。",
+  "games.manage.failed":
+    "操作を完了できませんでした。ゲームとランチャーが利用可能か確認して、もう一度お試しください。",
   "games.manage.removed": "Harbor から削除しました",
   "games.manage.sent": "{source} で続行",
   "games.manage.removeTitle": "ライブラリの項目を削除しますか？",
   "games.manage.uninstallTitle": "このゲームをアンインストールしますか？",
   "games.manage.optionsTitle": "{source} でアンインストール",
-  "games.manage.removedNote": "ライブラリの項目を削除しました。ゲームファイルはこのコンピューターに残っています。",
-  "games.manage.sentNote": "{source} を開きました。そちらで操作を完了してください。戻ると Harbor がインストール状況を更新します。",
-  "games.manage.removeNote": "このプロフィールから {name} と Harbor のプレイ履歴を削除します。ゲームのアンインストールやファイルの削除は行いません。",
-  "games.manage.steamNote": "Steam が {name} をアンインストールします。Steam で再確認が必要な場合があります。残したいローカルセーブや MOD は先にバックアップしてください。",
-  "games.manage.launcherNote": "{source} を開き、{name} を選んで管理またはアンインストールを選択してください。削除はランチャーが行い、Harbor はゲームフォルダーを削除しません。",
-  "games.manage.windowsNote": "Windows のインストールされているアプリで {name} を探し、アンインストールを選択してください。ポータブルゲームは独自の手順に従ってください。Harbor はフォルダーを削除しません。",
+  "games.manage.removedNote":
+    "ライブラリの項目を削除しました。ゲームファイルはこのコンピューターに残っています。",
+  "games.manage.sentNote":
+    "{source} を開きました。そちらで操作を完了してください。戻ると Harbor がインストール状況を更新します。",
+  "games.manage.removeNote":
+    "このプロフィールから {name} と Harbor のプレイ履歴を削除します。ゲームのアンインストールやファイルの削除は行いません。",
+  "games.manage.steamNote":
+    "Steam が {name} をアンインストールします。Steam で再確認が必要な場合があります。残したいローカルセーブや MOD は先にバックアップしてください。",
+  "games.manage.launcherNote":
+    "{source} を開き、{name} を選んで管理またはアンインストールを選択してください。削除はランチャーが行い、Harbor はゲームフォルダーを削除しません。",
+  "games.manage.windowsNote":
+    "Windows のインストールされているアプリで {name} を探し、アンインストールを選択してください。ポータブルゲームは独自の手順に従ってください。Harbor はフォルダーを削除しません。",
   "games.manage.opening": "開いています…",
   "games.manage.confirmUninstall": "Steam に進む",
   "games.manage.openSource": "{source} を開く",

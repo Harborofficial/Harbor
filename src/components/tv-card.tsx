@@ -19,7 +19,13 @@ import {
 import { Bookmark, Check } from "lucide-react";
 import { LocalDot } from "@/components/local-badge";
 import { TopTenRibbon } from "@/components/top-ten-ribbon";
-import { AnimeAwardBadge, AnimeAwardTab, ClassicAwardBadge, ClassicAwardTab, useClassicAwardWin } from "@/components/card-award";
+import {
+  AnimeAwardBadge,
+  AnimeAwardTab,
+  ClassicAwardBadge,
+  ClassicAwardTab,
+  useClassicAwardWin,
+} from "@/components/card-award";
 import { findTopAward, parseAwardYear } from "@/lib/anime-awards";
 import { useT } from "@/lib/i18n";
 import { externalToKitsu, kitsuToImdb } from "@/lib/providers/anime-mapping";
@@ -111,12 +117,17 @@ export const TvCard = memo(function TvCard({
     let cancelled = false;
     void (async () => {
       const source = match[1] === "mal" ? "myanimelist" : match[1];
-      const kitsuId = match[1] === "kitsu" ? Number(match[2]) : await externalToKitsu(source, Number(match[2])).catch(() => null);
+      const kitsuId =
+        match[1] === "kitsu"
+          ? Number(match[2])
+          : await externalToKitsu(source, Number(match[2])).catch(() => null);
       if (!kitsuId || cancelled) return;
       const imdb = await kitsuToImdb(kitsuId).catch(() => null);
       if (!cancelled && imdb) setAnimeImdbId(imdb);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [meta.id, isAnimeCardId, cardSettings.animeCardRating]);
   const imdbId = useTmdbImdbId(meta.id) ?? undefined;
   const sharedCardState = useCardSharedState({ meta, settings: cardSettings, imdbId, flagRerun });
@@ -245,14 +256,13 @@ export function TvCardArtwork({
   const [failedBackdrop, setFailedBackdrop] = useState<string>();
   const [logoAspect, setLogoAspect] = useState<{ src: string; compact: boolean }>();
   const animeBackdrop = useAnimeBackdrop(meta);
-  const { showTop10, inCinema, rerun, newBadge, hasDub, watched, inWatchlist, inLocalLibrary } = sharedState;
+  const { showTop10, inCinema, rerun, newBadge, hasDub, watched, inWatchlist, inLocalLibrary } =
+    sharedState;
   const awardYear = parseAwardYear(meta.releaseInfo);
-  const awardImdb =
-    !isAnime && card.cardAwardDisplay !== "none" ? imdbId : undefined;
+  const awardImdb = !isAnime && card.cardAwardDisplay !== "none" ? imdbId : undefined;
   const classicWin = useClassicAwardWin(meta, awardImdb);
   const animeAward = isAnime
-    ? (findTopAward(awardLookupName ?? meta.name, awardYear) ??
-      findTopAward(meta.name, awardYear))
+    ? (findTopAward(awardLookupName ?? meta.name, awardYear) ?? findTopAward(meta.name, awardYear))
     : null;
   const hasAwardWin = !!classicWin || !!animeAward;
   const showCinema = inCinema && !rerun;
@@ -271,9 +281,7 @@ export function TvCardArtwork({
   // the original metadata or anime backdrop.
   const wide = [backdropSrc, backdrop].find((url) => url && url !== failedBackdrop);
   const pos =
-    settings.tvCardLogoPos === "off"
-      ? null
-      : (POS[settings.tvCardLogoPos] ?? POS.bottomStart);
+    settings.tvCardLogoPos === "off" ? null : (POS[settings.tvCardLogoPos] ?? POS.bottomStart);
   const topLeftSlots = curatedBadgeAtTopStart
     ? 1
     : (ribbonLeft ? 1 : 0) + (hasDub ? 1 : 0) + (hasStatusBadge ? 1 : 0) + (hasAwardBadge ? 1 : 0);
@@ -338,46 +346,46 @@ export function TvCardArtwork({
             }}
           />
 
-      <span className={`absolute z-10 flex gap-2.5 ${pos}`}>
-        <span className="h-[54px] w-[36px] shrink-0 overflow-hidden rounded-sm shadow-[0_8px_18px_-8px_rgba(0,0,0,0.9)] ring-1 ring-white/12">
-          <img
-            src={posterSrc}
-            onError={onPosterError}
-            alt=""
-            draggable={false}
-            className="h-full w-full object-cover"
-          />
-        </span>
-        <span className="flex min-w-0 flex-1 flex-col justify-end gap-1">
-          {logo ? (
-            <img
-              src={logo}
-              alt={meta.name}
-              draggable={false}
-              loading="lazy"
-              onLoad={(event) => {
-                const { naturalWidth, naturalHeight } = event.currentTarget;
-                const ratio = naturalHeight > 0 ? naturalWidth / naturalHeight : Infinity;
-                const threshold = naturalWidth <= 500 ? 2.1 : 2.7;
-                setLogoAspect({ src: logo, compact: ratio < threshold });
-              }}
-              className={`${logoAspect?.src === logo && logoAspect.compact ? "max-h-[54px]" : "max-h-[34px]"} w-auto max-w-full self-start object-contain object-left [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.8))]`}
-            />
-          ) : (
-            <span className="line-clamp-2 text-[14.5px] font-semibold leading-tight text-ink [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">
-              {meta.name}
+          <span className={`absolute z-10 flex gap-2.5 ${pos}`}>
+            <span className="h-[54px] w-[36px] shrink-0 overflow-hidden rounded-sm shadow-[0_8px_18px_-8px_rgba(0,0,0,0.9)] ring-1 ring-white/12">
+              <img
+                src={posterSrc}
+                onError={onPosterError}
+                alt=""
+                draggable={false}
+                className="h-full w-full object-cover"
+              />
             </span>
-          )}
-          {!kids && (
-            <span className="truncate text-[11px] tabular-nums text-ink-muted [text-shadow:0_1px_6px_rgba(0,0,0,0.9)] min-h-[1em]">
-              {[meta.releaseInfo, reason].filter(Boolean).join(" · ")}
+            <span className="flex min-w-0 flex-1 flex-col justify-end gap-1">
+              {logo ? (
+                <img
+                  src={logo}
+                  alt={meta.name}
+                  draggable={false}
+                  loading="lazy"
+                  onLoad={(event) => {
+                    const { naturalWidth, naturalHeight } = event.currentTarget;
+                    const ratio = naturalHeight > 0 ? naturalWidth / naturalHeight : Infinity;
+                    const threshold = naturalWidth <= 500 ? 2.1 : 2.7;
+                    setLogoAspect({ src: logo, compact: ratio < threshold });
+                  }}
+                  className={`${logoAspect?.src === logo && logoAspect.compact ? "max-h-[54px]" : "max-h-[34px]"} w-auto max-w-full self-start object-contain object-left [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.8))]`}
+                />
+              ) : (
+                <span className="line-clamp-2 text-[14.5px] font-semibold leading-tight text-ink [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">
+                  {meta.name}
+                </span>
+              )}
+              {!kids && (
+                <span className="truncate text-[11px] tabular-nums text-ink-muted [text-shadow:0_1px_6px_rgba(0,0,0,0.9)] min-h-[1em]">
+                  {[meta.releaseInfo, reason].filter(Boolean).join(" · ")}
+                </span>
+              )}
             </span>
-          )}
-        </span>
-      </span>
+          </span>
         </>
       )}
-      {!kids && scoreBadges.length > 0 &&(
+      {!kids && scoreBadges.length > 0 && (
         <ScoreStack
           badges={scoreBadges}
           limit={scoreBadges.length}
@@ -388,18 +396,41 @@ export function TvCardArtwork({
       )}
       {showTop10 && <TopTenRibbon side={ribbonSide} />}
       {hasDub && (
-        <span className={`pointer-events-none absolute ${curatedPosition === "end" ? "end-2" : "start-2"} ${stackTop(0, overlayRibbonShift, "tv")} z-10 rounded-md bg-accent/90 px-2 py-1 text-[10px] font-extrabold text-canvas`}>
+        <span
+          className={`pointer-events-none absolute ${curatedPosition === "end" ? "end-2" : "start-2"} ${stackTop(0, overlayRibbonShift, "tv")} z-10 rounded-md bg-accent/90 px-2 py-1 text-[10px] font-extrabold text-canvas`}
+        >
           DUB
         </span>
       )}
       {card.showCardBadges && (
         <>
           {rerun && (
-            <RerunBadge year={meta.releaseInfo} dubShift={hasDub} ribbonShift={overlayRibbonShift} side={curatedPosition} layout="tv" />
+            <RerunBadge
+              year={meta.releaseInfo}
+              dubShift={hasDub}
+              ribbonShift={overlayRibbonShift}
+              side={curatedPosition}
+              layout="tv"
+            />
           )}
-          {showCinema && ( <CinemaBadge dubShift={hasDub} ribbonShift={overlayRibbonShift} side={curatedPosition} layout="tv" /> )}
+          {showCinema && (
+            <CinemaBadge
+              dubShift={hasDub}
+              ribbonShift={overlayRibbonShift}
+              side={curatedPosition}
+              layout="tv"
+            />
+          )}
           {newBadge && (
-            <StatusBadge label={t(newBadge.label)} tone={newBadge.tone} kids={kids} dubShift={hasDub} ribbonShift={overlayRibbonShift} side={curatedPosition} layout="tv" />
+            <StatusBadge
+              label={t(newBadge.label)}
+              tone={newBadge.tone}
+              kids={kids}
+              dubShift={hasDub}
+              ribbonShift={overlayRibbonShift}
+              side={curatedPosition}
+              layout="tv"
+            />
           )}
         </>
       )}
@@ -433,10 +464,7 @@ export function TvCardArtwork({
         />
       )}
       {card.cardAwardDisplay === "tabs" && classicWin && !isAnime && (
-        <ClassicAwardTab
-          win={classicWin}
-          top={awardTabTop}
-        />
+        <ClassicAwardTab win={classicWin} top={awardTabTop} />
       )}
       {card.watchlistBadge !== "off" && inWatchlist && (
         <span
@@ -446,12 +474,17 @@ export function TvCardArtwork({
         </span>
       )}
       {card.showWatchedBadge && watched && (
-        <span className={`absolute z-20 grid h-6 w-6 place-items-center rounded-full bg-emerald-500 text-white ${watchedPosition}`}>
+        <span
+          className={`absolute z-20 grid h-6 w-6 place-items-center rounded-full bg-emerald-500 text-white ${watchedPosition}`}
+        >
           <Check size={12} />
         </span>
       )}
       {card.showLocalLibraryBadge && inLocalLibrary && (
-        <LocalDot title="In your local library" className={`bottom-2 ${card.watchlistBadge === "bottomStart" ? "start-10" : "start-2"}`} />
+        <LocalDot
+          title="In your local library"
+          className={`bottom-2 ${card.watchlistBadge === "bottomStart" ? "start-10" : "start-2"}`}
+        />
       )}
     </>
   );

@@ -21,8 +21,13 @@ let save: (() => void) | undefined;
 Object.defineProperty(globalThis, "window", {
   configurable: true,
   value: {
-    setTimeout: (fn: () => void) => { save = fn; return 1; },
-    clearTimeout: () => { save = undefined; },
+    setTimeout: (fn: () => void) => {
+      save = fn;
+      return 1;
+    },
+    clearTimeout: () => {
+      save = undefined;
+    },
   },
 });
 
@@ -32,8 +37,13 @@ function seed() {
   const cache = emptyCache();
   const add = (simklId: number, type: SimklCacheItem["type"], rating: number) => {
     const item: SimklCacheItem = {
-      simklId, type, title: `Title ${simklId}`, year: 2020,
-      status: "watching", userRating: rating, watchedAt: null,
+      simklId,
+      type,
+      title: `Title ${simklId}`,
+      year: 2020,
+      status: "watching",
+      userRating: rating,
+      watchedAt: null,
     };
     cache.items[String(simklId)] = item;
     return item;
@@ -51,8 +61,16 @@ const targets: Array<[string, SimklTarget, number]> = [
   ["TMDB movie with the same numeric ID", { kind: "movie", ids: { tmdb: 7 } }, 6],
   ["MAL anime from the detail picker", { kind: "show", ids: { mal: 21 } }, 9],
   ["Kitsu anime", { kind: "anime", ids: { kitsu: 12 } }, 9],
-  ["show episode", { kind: "episode", show: { ids: { imdb: "tt1234567" } }, season: 1, number: 2 }, 8],
-  ["anime episode", { kind: "anime-episode", anime: { ids: { mal: 21 } }, season: 1, number: 2 }, 9],
+  [
+    "show episode",
+    { kind: "episode", show: { ids: { imdb: "tt1234567" } }, season: 1, number: 2 },
+    8,
+  ],
+  [
+    "anime episode",
+    { kind: "anime-episode", anime: { ids: { mal: 21 } }, season: 1, number: 2 },
+    9,
+  ],
   ["direct SIMKL identity", { kind: "show", ids: { simkl: 101 } }, 8],
 ];
 

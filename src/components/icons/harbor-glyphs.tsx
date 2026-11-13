@@ -9,7 +9,11 @@ type GlyphProps = {
   style?: CSSProperties;
 };
 
-function sized(size: number | string | undefined, style: CSSProperties | undefined, extra?: string): CSSProperties {
+function sized(
+  size: number | string | undefined,
+  style: CSSProperties | undefined,
+  extra?: string,
+): CSSProperties {
   const base: CSSProperties = { ...style, width: size ?? 18, height: size ?? 18 };
   if (extra) base.transform = style?.transform ? `${style.transform} ${extra}` : extra;
   return base;
@@ -24,7 +28,9 @@ export function ThumbsUpIcon({ size = 18, className, style }: GlyphProps) {
 }
 
 export function ThumbsDownIcon({ size = 18, className, style }: GlyphProps) {
-  return <UiIcon name="thumbs-up" className={className} style={sized(size, style, "rotate(180deg)")} />;
+  return (
+    <UiIcon name="thumbs-up" className={className} style={sized(size, style, "rotate(180deg)")} />
+  );
 }
 
 export function SkipIcon({ size = 18, className, style }: GlyphProps) {

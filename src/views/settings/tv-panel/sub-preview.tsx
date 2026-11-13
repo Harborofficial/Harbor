@@ -84,32 +84,27 @@ export function SubPreview({ doc }: { doc: TvDoc }) {
           ].join(", ")
         : "none";
 
-  const justify =
-    align === "Left" ? "flex-start" : align === "Right" ? "flex-end" : "center";
+  const justify = align === "Left" ? "flex-start" : align === "Right" ? "flex-end" : "center";
 
   return (
     <div className="flex flex-col gap-3">
-      <div
-      ref={ref}
-      className="relative aspect-video w-full overflow-hidden rounded-md bg-canvas"
-    >
-      <img
-        src={subtitleStill}
-        alt=""
-        draggable={false}
-        className="absolute inset-0 h-full w-full object-cover opacity-80"
-      />
-      <div
-        className="absolute inset-x-0 flex flex-col"
-        style={{
-          bottom: `${bottom}%`,
-          alignItems: justify,
-          gap: `${gap * fontPx * 0.02}px`,
-          paddingInline: "6%",
-        }}
-      >
-        {[t("This is how your subtitles"), t("will look on your TV.")].map(
-          (line, i) => (
+      <div ref={ref} className="relative aspect-video w-full overflow-hidden rounded-md bg-canvas">
+        <img
+          src={subtitleStill}
+          alt=""
+          draggable={false}
+          className="absolute inset-0 h-full w-full object-cover opacity-80"
+        />
+        <div
+          className="absolute inset-x-0 flex flex-col"
+          style={{
+            bottom: `${bottom}%`,
+            alignItems: justify,
+            gap: `${gap * fontPx * 0.02}px`,
+            paddingInline: "6%",
+          }}
+        >
+          {[t("This is how your subtitles"), t("will look on your TV.")].map((line, i) => (
             <span
               key={i}
               style={{
@@ -127,11 +122,12 @@ export function SubPreview({ doc }: { doc: TvDoc }) {
             >
               {line}
             </span>
-          ),
-        )}
+          ))}
+        </div>
       </div>
-      </div>
-      <p className="text-[14px] leading-5 text-ink-muted">{t("Text is enlarged in this preview so you can judge the style.")}</p>
+      <p className="text-[14px] leading-5 text-ink-muted">
+        {t("Text is enlarged in this preview so you can judge the style.")}
+      </p>
     </div>
   );
 }

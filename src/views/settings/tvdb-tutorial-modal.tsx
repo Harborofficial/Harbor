@@ -85,10 +85,10 @@ export function TvdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
       >
         <div className="flex items-start justify-between gap-4 px-6 pb-5 pt-5">
           <div className="flex min-w-0 flex-col gap-1">
-            <span className="harbor-settings-label">
-              TheTVDB
-            </span>
-            <h2 className="text-[19px] font-semibold leading-[26px] tracking-tight text-ink">{t("Get your free TheTVDB key")}</h2>
+            <span className="harbor-settings-label">TheTVDB</span>
+            <h2 className="text-[19px] font-semibold leading-[26px] tracking-tight text-ink">
+              {t("Get your free TheTVDB key")}
+            </h2>
             <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
               {t("About a minute. Free for personal use.")}
             </p>
@@ -108,7 +108,9 @@ export function TvdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
                 {i + 1}
               </span>
               <div className="flex min-w-0 flex-col gap-1.5">
-                <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">{t(step.title)}</span>
+                <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">
+                  {t(step.title)}
+                </span>
                 <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
                   {linkify(t(step.body))}
                 </p>

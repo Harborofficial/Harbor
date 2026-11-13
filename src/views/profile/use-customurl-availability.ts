@@ -3,7 +3,11 @@ import { fetchSummary, ProfileNotFound } from "./profile-api";
 
 export type UrlStatus = "idle" | "checking" | "available" | "taken" | "invalid" | "mine";
 
-export function useCustomUrlAvailability(value: string, ownHandle: string, ownCurrent: string): UrlStatus {
+export function useCustomUrlAvailability(
+  value: string,
+  ownHandle: string,
+  ownCurrent: string,
+): UrlStatus {
   const [status, setStatus] = useState<UrlStatus>("idle");
 
   useEffect(() => {

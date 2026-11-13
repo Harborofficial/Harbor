@@ -175,7 +175,7 @@ export default {
   "Show all {count}": "Alle {count} anzeigen",
   "{count} competing": "{count} am Start",
   "Starting field": "Startfeld",
-  "Leaderboard": "Rangliste",
+  Leaderboard: "Rangliste",
   "Full field": "Gesamtes Feld",
   "Loading event schedule…": "Eventplan wird geladen…",
   "Loading lineups…": "Aufstellungen werden geladen…",

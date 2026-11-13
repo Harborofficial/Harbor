@@ -7,8 +7,7 @@ const ebookSources: Record<string, string> = {
     "Tiện ích mở rộng đến từ các kho bạn thêm. Harbor không xác minh quyền đối với nội dung của chúng.",
   "Harbor does not support copyright infringement.":
     "Harbor không ủng hộ hành vi vi phạm bản quyền.",
-  "Copyright & third-party sources":
-    "Bản quyền và nguồn bên thứ ba",
+  "Copyright & third-party sources": "Bản quyền và nguồn bên thứ ba",
   "Build a source for a library you are authorized to access.":
     "Tạo nguồn cho một thư viện mà bạn được phép truy cập.",
 };

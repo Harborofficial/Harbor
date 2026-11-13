@@ -12,7 +12,8 @@ export default {
   "games.battlenet.update": "请重启更新后的 Harbor 桌面应用以连接 Battle.net。",
   "games.battlenet.error": "无法更新 Battle.net。最近导入的游戏库仍会保留。",
   "games.battlenet.disconnect": "断开 Battle.net 连接",
-  "games.battlenet.removeNote": "移除此个人资料中从账户导入的条目。已安装的文件和其他个人资料将保留。",
+  "games.battlenet.removeNote":
+    "移除此个人资料中从账户导入的条目。已安装的文件和其他个人资料将保留。",
   "games.battlenet.signing": "请在 Battle.net 窗口中完成登录。",
   "games.battlenet.cached": "账户中有 {count} 款游戏 · 上次更新 {date}",
 
@@ -25,7 +26,8 @@ export default {
   "games.steamImport.excluded": "已按导入设置忽略",
   "games.steamImport.ignoreSettings": "忽略的 Steam ID（{count}）",
   "games.steamImport.ignoreLabel": "要忽略的 Steam ID",
-  "games.steamImport.ignoreNote": "手动导入时跳过这些 ID。现有游戏库项目和文件会保留。清空此栏即可停止忽略这些 ID。",
+  "games.steamImport.ignoreNote":
+    "手动导入时跳过这些 ID。现有游戏库项目和文件会保留。清空此栏即可停止忽略这些 ID。",
   "games.steamImport.ignoreSave": "保存忽略的 ID",
   "games.steamImport.ignoreSaved": "已保存忽略的 ID。",
   "games.steamImport.title": "导入 Steam 游戏",
@@ -33,7 +35,8 @@ export default {
   "games.steamImport.input": "Steam 应用 ID 或商店网址",
   "games.steamImport.profile": "选择 Depressurizer 资料",
   "games.steamImport.count": "已选择 {selected} 项 · 共 {total} 项",
-  "games.steamImport.unavailableNote": "无法获取详情的项目默认不选中。选中后可保留其 ID，稍后再加载详情。",
+  "games.steamImport.unavailableNote":
+    "无法获取详情的项目默认不选中。选中后可保留其 ID，稍后再加载详情。",
   "games.steamImport.unknown": "Steam 应用 {id}",
   "games.steamImport.ready": "已找到 Steam 详情",
   "games.steamImport.profileName": "资料中的名称",
@@ -44,7 +47,8 @@ export default {
   "games.steamImport.duplicate": "重复项目",
   "games.steamImport.nonSteam": "非 Steam 快捷方式 · 已跳过",
   "games.steamImport.limit": "每个资料最多支持 5,000 个导入的游戏。文件必须小于 4 MB。",
-  "games.steamImport.inputError": "请输入有效的 Steam ID 或商店网址，或选择有效的 Depressurizer 资料。",
+  "games.steamImport.inputError":
+    "请输入有效的 Steam ID 或商店网址，或选择有效的 Depressurizer 资料。",
   "games.steamImport.writeError": "无法保存导入。现有项目未更改，请重试。",
   "games.steamImport.readError": "无法读取已导入的游戏。请重试后再进行更改。",
   "games.steamImport.done": "已添加到游戏库：{count}",
@@ -65,7 +69,8 @@ export default {
   "games.libraryStatus.finished": "已通关",
   "games.libraryStatus.onHold": "暂时搁置",
   "games.libraryStatus.stopped": "已弃玩",
-  "games.libraryStatus.note": "你对这个副本的选择会保存在当前 Harbor 个人资料中。游玩时间和成就不会自动更改此选择。",
+  "games.libraryStatus.note":
+    "你对这个副本的选择会保存在当前 Harbor 个人资料中。游玩时间和成就不会自动更改此选择。",
 
   "games.unified.playtime": "游玩时间",
   "games.unified.playtime.all": "所有游玩时间",
@@ -79,7 +84,8 @@ export default {
   "games.unified.playtime.zeroSteam": "Steam上无已记录的游玩时间",
   "games.unified.playtime.zeroHarbor": "Harbor中无已记录的游玩时间",
   "games.unified.playtime.unknownHint": "Steam账户的游玩时间不可用，或此来源不提供游玩时间。",
-  "games.unified.playtime.note": "使用Steam总时长和Harbor中记录的时长，包括你的修正。不可用的游玩时间会单独区分。",
+  "games.unified.playtime.note":
+    "使用Steam总时长和Harbor中记录的时长，包括你的修正。不可用的游玩时间会单独区分。",
   "games.unified.note": "在同一视图中查看你的Steam游戏库、PC游戏和已导入的ROM。",
   "games.unified.allSources": "所有来源",
   "games.unified.availability": "可用状态",
@@ -117,5 +123,5 @@ export default {
   "games.libraryNews.failed": "无法加载游戏动态。",
   "games.libraryNews.hide": "隐藏游戏动态",
   "games.libraryNews.show": "显示游戏动态",
-  "games.libraryNews.pending": "正在查看游戏动态…"
+  "games.libraryNews.pending": "正在查看游戏动态…",
 };

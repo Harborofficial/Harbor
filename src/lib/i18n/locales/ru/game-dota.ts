@@ -3,7 +3,8 @@ export default {
   "games.dota.title": "Тенденции героев",
   "games.dota.intro": "Найдите следующего героя.",
   "games.dota.refresh": "Обновить тенденции",
-  "games.dota.unavailable": "Не удалось обновить. Ранее загруженные данные могут остаться на экране.",
+  "games.dota.unavailable":
+    "Не удалось обновить. Ранее загруженные данные могут остаться на экране.",
   "games.dota.partial": "Часть данных недоступна.",
   "games.dota.checked": "Проверено: {date}",
   "games.dota.search": "Найти героя",
@@ -18,7 +19,8 @@ export default {
   "games.dota.attribute.agi": "Ловкость",
   "games.dota.attribute.int": "Интеллект",
   "games.dota.attribute.all": "Универсальный",
-  "games.dota.trendsScope": "Выборка OpenDota: семь дней UTC, включая сегодня. Ранг — средний по матчу; Turbo и профессиональные матчи учитываются отдельно.",
+  "games.dota.trendsScope":
+    "Выборка OpenDota: семь дней UTC, включая сегодня. Ранг — средний по матчу; Turbo и профессиональные матчи учитываются отдельно.",
   "games.dota.wins": "побед",
   "games.dota.picks": "{count} выборов",
   "games.dota.noSample": "Нет выборки",
@@ -26,7 +28,8 @@ export default {
   "games.dota.moreHeroes": "Больше героев",
   "games.dota.matchups": "Профессиональные встречи",
   "games.dota.refreshMatchups": "Обновить встречи",
-  "games.dota.matchupsScope": "Победы героя {hero} против каждого соперника в записанных профессиональных матчах за год. Включает старые патчи; не зависит от фильтра ранга.",
+  "games.dota.matchupsScope":
+    "Победы героя {hero} против каждого соперника в записанных профессиональных матчах за год. Включает старые патчи; не зависит от фильтра ранга.",
   "games.dota.opponent": "Найти соперника",
   "games.dota.minimum": "Минимум матчей",
   "games.dota.minGames": "{count}+ матчей",
@@ -48,5 +51,5 @@ export default {
   "games.dota.sample.5": "Легенда",
   "games.dota.sample.6": "Властелин",
   "games.dota.sample.7": "Божество",
-  "games.dota.sample.8": "Титан"
+  "games.dota.sample.8": "Титан",
 };

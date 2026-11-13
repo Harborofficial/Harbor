@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useContextMenu, useContextTarget, type ContextMenuTarget } from "@/lib/context-menu";
 import { useT } from "@/lib/i18n";
 import {
+  disposeFlipbook,
   fitLevel,
   guardPageLoaded,
   hasNativeZoom,
@@ -455,6 +456,7 @@ export function BookFlip({
       if (httpMod) window.fetch = origFetch;
       window.onpopstate = origOnPopState;
       window.removeEventListener("r3d-pagechange", onPage);
+      disposeFlipbook(inst);
       try {
         inst?.dispose?.();
         inst?.destroy?.();

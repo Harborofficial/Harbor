@@ -173,7 +173,7 @@ export default {
   "Show all {count}": "Tampilkan semua {count}",
   "{count} competing": "{count} peserta",
   "Starting field": "Daftar start",
-  "Leaderboard": "Klasemen",
+  Leaderboard: "Klasemen",
   "Full field": "Seluruh peserta",
   "Loading event schedule…": "Memuat jadwal acara…",
   "Loading lineups…": "Memuat susunan pemain…",

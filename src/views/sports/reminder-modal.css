@@ -42,9 +42,39 @@
 }
 
 /* The reminder editor is also opened outside the Sports hub. */
-.sh-reminder-modal-body .sh-button { display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:10px 14px;border-radius:6px;background:var(--color-elevated);color:var(--color-ink);font-size:13px; }
-.sh-reminder-modal-body .sh-button.primary { background:var(--color-ink);color:var(--color-canvas); }
-.sh-reminder-modal-body .sh-text-button { align-self:flex-start;color:var(--color-ink-muted);font-size:13px; }
-.sh-reminder-modal-head>.sh-icon { display:grid;place-items:center;width:36px;height:36px;border-radius:5px; }
-.sh-reminder-modal-head>.sh-icon:hover { background:var(--color-elevated); }
-.sh-reminder-modal-body button:focus-visible,.sh-reminder-modal-head button:focus-visible { outline:2px solid var(--color-accent);outline-offset:2px; }
+.sh-reminder-modal-body .sh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: var(--color-elevated);
+  color: var(--color-ink);
+  font-size: 13px;
+}
+.sh-reminder-modal-body .sh-button.primary {
+  background: var(--color-ink);
+  color: var(--color-canvas);
+}
+.sh-reminder-modal-body .sh-text-button {
+  align-self: flex-start;
+  color: var(--color-ink-muted);
+  font-size: 13px;
+}
+.sh-reminder-modal-head > .sh-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 5px;
+}
+.sh-reminder-modal-head > .sh-icon:hover {
+  background: var(--color-elevated);
+}
+.sh-reminder-modal-body button:focus-visible,
+.sh-reminder-modal-head button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

@@ -1,7 +1,8 @@
 export default {
   "games.hydra.checkOnImport": "Oyun dosyası içe aktarılırken denetlenir",
   "games.hydra.title": "Hydra’dan içe aktar",
-  "games.hydra.note": "Hydra’daki oyunları ve kaynak aboneliklerini gözden geçirin. Veritabanı klasörünü seçmeden önce Hydra’yı kapatın.",
+  "games.hydra.note":
+    "Hydra’daki oyunları ve kaynak aboneliklerini gözden geçirin. Veritabanı klasörünü seçmeden önce Hydra’yı kapatın.",
   "games.hydra.choose": "Hydra veritabanı klasörünü seç",
   "games.hydra.reading": "Hydra kitaplığınız okunuyor…",
   "games.hydra.checking": "Oyun dosyaları denetleniyor · {count} / {total}",
@@ -14,20 +15,25 @@ export default {
   "games.hydra.missing": "Bağlı oyun dosyası yok",
   "games.hydra.ready": "Oyun dosyası bulundu",
   "games.hydra.original": "Hydra’daki ayarlar",
-  "games.hydra.pendingNote": "İçe aktardıktan sonra oynamadan önce dosyayı ve başlatma ayarlarını incelemek için Oyunu yönet bölümünü açın.",
-  "games.hydra.unsupported": "Bazı Hydra ayarları aktarılamadı ({count}). Bunları Hydra’da inceleyin.",
+  "games.hydra.pendingNote":
+    "İçe aktardıktan sonra oynamadan önce dosyayı ve başlatma ayarlarını incelemek için Oyunu yönet bölümünü açın.",
+  "games.hydra.unsupported":
+    "Bazı Hydra ayarları aktarılamadı ({count}). Bunları Hydra’da inceleyin.",
   "games.hydra.skipped": "Atlanan silinmiş veya okunamayan kayıtlar: {count}",
   "games.hydra.done": "{games} oyun ve {sources} kaynak içe aktarıldı.",
   "games.hydra.kept": "{count} mevcut kayıt korundu.",
-  "games.hydra.scope": "Kitaplık bilgilerini ve seçili katalogları içe aktarır. Oyun dosyaları mevcut klasörlerinde kalır.",
+  "games.hydra.scope":
+    "Kitaplık bilgilerini ve seçili katalogları içe aktarır. Oyun dosyaları mevcut klasörlerinde kalır.",
   "games.hydra.apply": "Seçilenleri içe aktar ({count})",
   "games.hydra.stopped": "Durduruldu. İçe aktarılmış kayıtlar korundu.",
   "games.hydra.changed": "Hydra bu incelemeden sonra değişti. Yenilemek için klasörü tekrar seçin.",
-  "games.hydra.space": "Bu veritabanını incelemek için yeterli geçici alan yok. Alan açıp tekrar deneyin.",
+  "games.hydra.space":
+    "Bu veritabanını incelemek için yeterli geçici alan yok. Alan açıp tekrar deneyin.",
   "games.hydra.busy": "Başka bir Hydra incelemesi sürüyor. Bittiğinde tekrar deneyin.",
   "games.hydra.timeout": "Veritabanının okunması çok uzun sürdü. Hydra’yı kapatıp tekrar deneyin.",
   "games.hydra.limit": "Bu veritabanı desteklenen inceleme boyutunu aşıyor.",
-  "games.hydra.readError": "Hydra veritabanı okunamadı. Hydra’yı kapatıp veritabanı klasörünü tekrar seçin.",
+  "games.hydra.readError":
+    "Hydra veritabanı okunamadı. Hydra’yı kapatıp veritabanı klasörünü tekrar seçin.",
   "games.hydra.imported": "Hydra’dan içe aktarıldı",
   "games.hydra.sourceExists": "Kaynak zaten ekli",
   "games.hydra.useFile": "Kayıtlı oyun dosyasını kullan",
@@ -36,5 +42,5 @@ export default {
   "games.hydra.resetTime": "İçe aktarılan ve ölçülen süreye sıfırla",
   "games.hydra.fileLabel": "Oyun dosyası",
   "games.hydra.argumentsLabel": "Başlatma seçenekleri",
-  "games.hydra.prefixLabel": "Uyumluluk klasörü"
+  "games.hydra.prefixLabel": "Uyumluluk klasörü",
 };

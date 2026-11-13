@@ -34,20 +34,24 @@ export default {
   "games.valorant.sampleNote": "يُدرج العملاء الذين ظهروا أقل من 200 مرة في نهاية القائمة.",
   "games.valorant.empty": "لا توجد نتائج لهذه المرشحات.",
   "games.valorant.checked": "آخر تحقق: {date}",
-  "games.valorant.metaScope": "بيانات OP.GG التنافسية للتحديث المحدد. نسبة الاختيار هي حصة مرات ظهور العميل. تمثل النتائج عينة المصدر وليس جميع اللاعبين.",
-  "games.valorant.referenceScope": "صور اللعبة ومراجعها عبر Valorant-API. قد تتأخر التحديثات عن اللعبة. Harbor غير معتمد من Riot Games.",
+  "games.valorant.metaScope":
+    "بيانات OP.GG التنافسية للتحديث المحدد. نسبة الاختيار هي حصة مرات ظهور العميل. تمثل النتائج عينة المصدر وليس جميع اللاعبين.",
+  "games.valorant.referenceScope":
+    "صور اللعبة ومراجعها عبر Valorant-API. قد تتأخر التحديثات عن اللعبة. Harbor غير معتمد من Riot Games.",
   "games.valorant.samples": "{count} ظهور",
   "games.valorant.smallSample": "عينة صغيرة",
   "games.valorant.abilities": "القدرات",
   "games.valorant.watchAbility": "شاهد القدرة",
   "games.valorant.videoError": "تعذر تشغيل هذا العرض.",
   "games.valorant.mapMeta": "اختيارات العملاء لهذه الخريطة",
-  "games.valorant.mapScope": "مرجع للخرائط، بما فيها الخرائط خارج دورة التصنيف الحالية. أسماء الخرائط والمواقع باللغة الإنجليزية.",
+  "games.valorant.mapScope":
+    "مرجع للخرائط، بما فيها الخرائط خارج دورة التصنيف الحالية. أسماء الخرائط والمواقع باللغة الإنجليزية.",
   "games.valorant.callouts": "أسماء المواقع",
   "games.valorant.compareWeapon": "مقارنة مع",
   "games.valorant.weapon": "السلاح",
   "games.valorant.distance": "المسافة",
-  "games.valorant.damageScope": "القيم الأساسية للإطلاق الرئيسي قبل الدروع أو الاختراق أو القدرات. ضرر البنادق الخرطوشية محسوب لكل حبيبة.",
+  "games.valorant.damageScope":
+    "القيم الأساسية للإطلاق الرئيسي قبل الدروع أو الاختراق أو القدرات. ضرر البنادق الخرطوشية محسوب لكل حبيبة.",
   "games.valorant.weaponStats": "إحصاءات السلاح",
   "games.valorant.cost": "الرصيد",
   "games.valorant.magazine": "سعة المخزن",
@@ -55,5 +59,5 @@ export default {
   "games.valorant.reload": "إعادة التلقيم · ثوانٍ",
   "games.valorant.head": "ضرر الرأس",
   "games.valorant.body": "ضرر الجسم",
-  "games.valorant.legs": "ضرر الساقين"
+  "games.valorant.legs": "ضرر الساقين",
 };

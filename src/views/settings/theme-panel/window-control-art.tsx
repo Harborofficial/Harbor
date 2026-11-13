@@ -46,7 +46,9 @@ export function TitleBarArt() {
       className="pointer-events-none flex h-8 w-full items-center overflow-hidden rounded-t-lg border border-edge-soft bg-elevated"
     >
       {mac && <WindowCaptionPreview native />}
-      <span className={`flex min-w-0 flex-1 items-center gap-2 px-2 text-[12px] text-ink ${mac ? "justify-center pe-16" : ""}`}>
+      <span
+        className={`flex min-w-0 flex-1 items-center gap-2 px-2 text-[12px] text-ink ${mac ? "justify-center pe-16" : ""}`}
+      >
         {!mac && <HarborMark className="h-4 w-4 shrink-0" />}
         Harbor
       </span>
@@ -66,7 +68,9 @@ export function HybridBarArt() {
     >
       {mac && <WindowCaptionPreview />}
       <div className="h-full min-w-0 flex-1 overflow-hidden">
-        <div className="h-full w-max"><HybridMenuBar /></div>
+        <div className="h-full w-max">
+          <HybridMenuBar />
+        </div>
       </div>
       {!mac && <WindowCaptionPreview />}
     </div>

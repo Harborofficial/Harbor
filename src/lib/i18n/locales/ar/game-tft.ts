@@ -19,7 +19,8 @@ export default {
   "games.tft.save": "حفظ الفريق",
   "games.tft.savedTeams": "الفرق المحفوظة",
   "games.tft.delete": "حذف الفريق المحفوظ",
-  "games.tft.note": "يُحتسب كل بطل مرة واحدة. قد تغيّر الأدوات والتأثيرات الخاصة السمات أو مساحة الفريق.",
+  "games.tft.note":
+    "يُحتسب كل بطل مرة واحدة. قد تغيّر الأدوات والتأثيرات الخاصة السمات أو مساحة الفريق.",
   "games.tft.saveFailed": "تعذر الحفظ على هذا الجهاز. فريقك الحالي ما زال هنا.",
   "games.tft.missing": "بعض الأبطال المحفوظين لم يعودوا ضمن هذه المجموعة.",
   "games.tft.imported": "تم استيراد الفريق.",
@@ -54,5 +55,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "تجدد الصحة",
   "games.tft.stat.set14AmpIcon": "تعزيز الضرر",
   "games.tft.stat.TFTManaRegen": "تجدد المانا",
-  "games.tft.stat.scaleSV": "امتصاص شامل"
+  "games.tft.stat.scaleSV": "امتصاص شامل",
 };

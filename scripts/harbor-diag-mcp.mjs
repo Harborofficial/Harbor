@@ -1,18 +1,73 @@
 #!/usr/bin/env node
 import { createInterface } from "node:readline";
-import { bigimgs, counts, evalInPage, layers, listTargets, rss, snapshot, watch } from "./harbor-diag.mjs";
+import {
+  bigimgs,
+  counts,
+  evalInPage,
+  layers,
+  listTargets,
+  rss,
+  snapshot,
+  watch,
+} from "./harbor-diag.mjs";
 
 const none = { type: "object", properties: {}, required: [] };
 
 const TOOLS = [
-  { name: "harbor_pages", description: "List debuggable Harbor WebView2 page targets.", inputSchema: none },
-  { name: "harbor_eval", description: "Evaluate a JavaScript expression inside the live Harbor page and return the value.", inputSchema: { type: "object", properties: { expression: { type: "string" } }, required: ["expression"] } },
-  { name: "harbor_counts", description: "Live totals: DOM nodes, img elements, loaded images with estimated decoded MB, videos, canvases, JS heap MB.", inputSchema: none },
-  { name: "harbor_layers", description: "Per view-layer attribution: active/parked state, display/visibility/content-visibility, DOM nodes, images, estimated decoded MB, videos.", inputSchema: none },
-  { name: "harbor_bigimgs", description: "Top 25 loaded images by estimated decoded size.", inputSchema: none },
-  { name: "harbor_rss", description: "OS-level RSS for Harbor.exe and its WebView2 processes, grouped by process type (browser, renderer, gpu-process, utility).", inputSchema: none },
-  { name: "harbor_watch", description: "Sample heap, DOM, image, and RSS totals over time and report the delta. Finds slow climbs.", inputSchema: { type: "object", properties: { seconds: { type: "number" }, interval: { type: "number" } }, required: [] } },
-  { name: "harbor_snapshot", description: "Take a V8 heap snapshot to harbor/.diag and report size plus detached-node reference count.", inputSchema: none },
+  {
+    name: "harbor_pages",
+    description: "List debuggable Harbor WebView2 page targets.",
+    inputSchema: none,
+  },
+  {
+    name: "harbor_eval",
+    description:
+      "Evaluate a JavaScript expression inside the live Harbor page and return the value.",
+    inputSchema: {
+      type: "object",
+      properties: { expression: { type: "string" } },
+      required: ["expression"],
+    },
+  },
+  {
+    name: "harbor_counts",
+    description:
+      "Live totals: DOM nodes, img elements, loaded images with estimated decoded MB, videos, canvases, JS heap MB.",
+    inputSchema: none,
+  },
+  {
+    name: "harbor_layers",
+    description:
+      "Per view-layer attribution: active/parked state, display/visibility/content-visibility, DOM nodes, images, estimated decoded MB, videos.",
+    inputSchema: none,
+  },
+  {
+    name: "harbor_bigimgs",
+    description: "Top 25 loaded images by estimated decoded size.",
+    inputSchema: none,
+  },
+  {
+    name: "harbor_rss",
+    description:
+      "OS-level RSS for Harbor.exe and its WebView2 processes, grouped by process type (browser, renderer, gpu-process, utility).",
+    inputSchema: none,
+  },
+  {
+    name: "harbor_watch",
+    description:
+      "Sample heap, DOM, image, and RSS totals over time and report the delta. Finds slow climbs.",
+    inputSchema: {
+      type: "object",
+      properties: { seconds: { type: "number" }, interval: { type: "number" } },
+      required: [],
+    },
+  },
+  {
+    name: "harbor_snapshot",
+    description:
+      "Take a V8 heap snapshot to harbor/.diag and report size plus detached-node reference count.",
+    inputSchema: none,
+  },
 ];
 
 async function run(name, args) {
@@ -30,7 +85,10 @@ async function run(name, args) {
     case "harbor_rss":
       return rss();
     case "harbor_watch":
-      return watch(Math.min(120, Number(args?.seconds ?? 30)), Math.max(2, Number(args?.interval ?? 5)));
+      return watch(
+        Math.min(120, Number(args?.seconds ?? 30)),
+        Math.max(2, Number(args?.interval ?? 5)),
+      );
     case "harbor_snapshot":
       return snapshot();
     default:
@@ -68,14 +126,19 @@ rl.on("line", async (line) => {
       reply(id, { tools: TOOLS });
     } else if (method === "tools/call") {
       const data = await run(params.name, params.arguments ?? {});
-      reply(id, { content: [{ type: "text", text: typeof data === "string" ? data : JSON.stringify(data, null, 2) }] });
+      reply(id, {
+        content: [
+          { type: "text", text: typeof data === "string" ? data : JSON.stringify(data, null, 2) },
+        ],
+      });
     } else if (method === "ping") {
       reply(id, {});
     } else {
       replyError(id, -32601, `method not found: ${method}`);
     }
   } catch (e) {
-    if (method === "tools/call") reply(id, { content: [{ type: "text", text: String(e?.message ?? e) }], isError: true });
+    if (method === "tools/call")
+      reply(id, { content: [{ type: "text", text: String(e?.message ?? e) }], isError: true });
     else replyError(id, -32603, String(e?.message ?? e));
   }
 });

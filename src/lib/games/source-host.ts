@@ -6,7 +6,10 @@ const forbiddenDomain = /[\u0000-\u0020\u007f#%/:<>?@[\\\]^|]/;
  * remain the URL parser's job; do not impose a public-suffix or TLD allowlist. */
 export function validSourceHttpHost(hostname: string): boolean {
   if (!hostname) return false;
-  if (hostname.startsWith('[') && hostname.endsWith(']')) return true;
-  try { return !forbiddenDomain.test(decodeURIComponent(hostname)); }
-  catch { return false; }
+  if (hostname.startsWith("[") && hostname.endsWith("]")) return true;
+  try {
+    return !forbiddenDomain.test(decodeURIComponent(hostname));
+  } catch {
+    return false;
+  }
 }

@@ -34,6 +34,7 @@ import { createConsensusPort, type ConsensusConfig } from "./consensus";
 import { createCrowdDbPort, crowdConfigFromSettings } from "./crowd-db";
 import { normalizeLang } from "@/lib/subtitles/language";
 import { consensusLanguages } from "./language-context";
+import { announceMoonshineModelMissing, resolveMoonshineLanguage } from "./moonshine-models";
 
 type AsrTokenRaw = { text?: string; t0?: number; t1?: number; p?: number };
 type AsrWindowRaw = { startSec?: number; lenSec?: number; lang?: string; tokens?: AsrTokenRaw[] };
@@ -413,22 +414,26 @@ function flattenAsr(out: AsrWindowRaw[] | null): AsrTranscript {
   return { phrases: segs, detectedLanguage, sampledWindows };
 }
 
-async function ensureAsrModel(): Promise<string | null> {
-  try {
-    return await invoke<string | null>("asr_ensure_model");
-  } catch (e) {
-    dwarn("[autosync/asr] model unavailable", String(e));
-    return null;
-  }
-}
-
 function makeAsrTranscribePort(
   diagnostic?: (message: string) => void,
+  language = "auto",
 ): NonNullable<TierPorts["asrTranscribe"]> {
   return async (ctx, windows) => {
-    const modelPath = await ensureAsrModel();
-    if (!modelPath) {
-      diagnostic?.("asr:model-unavailable");
+    const modelLanguage = resolveMoonshineLanguage(language, ctx.audioLanguage);
+    if (!modelLanguage) {
+      diagnostic?.("moonshine:language-unsupported");
+      return { phrases: [], detectedLanguage: null };
+    }
+    const status = await invoke<{
+      installed: boolean;
+      runtimeInstalled: boolean;
+      supported: boolean;
+    }>("moonshine_model_status", { language: modelLanguage }).catch(() => null);
+    if (!status?.installed) {
+      if (status?.supported && status.runtimeInstalled) {
+        announceMoonshineModelMissing(modelLanguage);
+      }
+      diagnostic?.("moonshine:model-unavailable");
       return { phrases: [], detectedLanguage: null };
     }
     const spans: AsrWindowSpec[] = Array.isArray(windows)
@@ -437,22 +442,21 @@ function makeAsrTranscribePort(
     const probeCount = spans.length > 0 ? spans.length : 3;
     const windowSec = spans.length > 0 ? median(spans.map((w) => Math.max(5, w.lenSec))) : null;
     try {
-      const out = await invoke<AsrWindowRaw[]>("asr_transcribe_windows", {
+      const out = await invoke<AsrWindowRaw[]>("moonshine_transcribe_windows", {
         url: ctx.mediaUrl,
         headers: ctx.headers ?? null,
         durationSec: ctx.durationSec,
-        subLang: ctx.audioLanguage || null,
+        subLang: modelLanguage,
         probeCount,
         windowSec,
-        modelPath,
         mapSpec: ctx.audioMap ?? null,
         sessionId: ctx.analysisSessionId ?? null,
       });
       const transcript = flattenAsr(out);
-      diagnostic?.(transcript.phrases.length > 0 ? "asr:transcribed" : "asr:no-speech");
+      diagnostic?.(transcript.phrases.length > 0 ? "moonshine:transcribed" : "moonshine:no-speech");
       return transcript;
     } catch {
-      diagnostic?.("asr:transcription-failed");
+      diagnostic?.("moonshine:transcription-failed");
       return { phrases: [], detectedLanguage: null };
     }
   };
@@ -561,7 +565,7 @@ export function buildTierPorts(
   if (piecewise) ports.vadPiecewise = piecewise;
   if (flags.subtitleAutoSyncAsr === true) {
     if (extra.asrMatch) ports.asrMatch = extra.asrMatch;
-    const transcribe = makeAsrTranscribePort(record);
+    const transcribe = makeAsrTranscribePort(record, settings.subtitleMoonshineLanguage);
     ports.asrTranscribe = (actx, windows) =>
       bounded(
         transcribe(actx, windows),

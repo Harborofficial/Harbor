@@ -44,7 +44,9 @@ export function BpRateDialog({ target, onClose }: { target: RatingTarget; onClos
           <h2 className="font-display text-[clamp(20px,2.9vh,35px)] font-semibold leading-[1.1] tracking-[-0.02em] text-ink">
             {t("Rate this")}
           </h2>
-          <p className="line-clamp-1 text-[clamp(13px,1.8vh,20px)] text-ink-subtle">{target.title}</p>
+          <p className="line-clamp-1 text-[clamp(13px,1.8vh,20px)] text-ink-subtle">
+            {target.title}
+          </p>
         </div>
 
         <div data-bp-row style={{ paddingInline: 0, marginInline: 0 }}>

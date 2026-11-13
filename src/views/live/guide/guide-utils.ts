@@ -47,7 +47,12 @@ function startOfDay(d: Date): Date {
   return out;
 }
 
-export function clampDuration(startMs: number, endMs: number, windowStart: number, windowEnd: number): {
+export function clampDuration(
+  startMs: number,
+  endMs: number,
+  windowStart: number,
+  windowEnd: number,
+): {
   visibleStart: number;
   visibleEnd: number;
 } | null {

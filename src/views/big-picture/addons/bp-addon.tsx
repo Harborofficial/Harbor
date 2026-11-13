@@ -72,7 +72,10 @@ export function BpAddon({
       </div>
 
       {catalogs.length > 0 && (
-        <div data-bp-row className="relative flex shrink-0 items-center gap-[clamp(6px,0.6vw,12px)]">
+        <div
+          data-bp-row
+          className="relative flex shrink-0 items-center gap-[clamp(6px,0.6vw,12px)]"
+        >
           <div
             data-bp-scroll-x
             className="flex items-center gap-[clamp(6px,0.6vw,12px)] overflow-x-auto py-[26px] -my-[26px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -103,7 +106,11 @@ export function BpAddon({
             ))}
           </div>
           <span className="ms-auto shrink-0 text-[clamp(15px,1.9vh,18px)] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-            {loading ? t("Loading...") : metas.length > 0 ? t("{n} results", { n: metas.length }) : ""}
+            {loading
+              ? t("Loading...")
+              : metas.length > 0
+                ? t("{n} results", { n: metas.length })
+                : ""}
           </span>
         </div>
       )}
@@ -132,8 +139,12 @@ export function BpAddon({
           <div className="flex h-full min-h-[30vh] flex-col items-center justify-center gap-[clamp(16px,2.2vh,32px)] px-6 text-center">
             <p className="max-w-[46ch] text-[clamp(18px,2.4vh,24px)] font-medium leading-snug text-ink-subtle">
               {empty
-                ? t("This addon provides streams only. It has no catalog to browse, but it still works behind every title you open.")
-                : t("This catalog came back empty. Try another one, or check the addon in Settings.")}
+                ? t(
+                    "This addon provides streams only. It has no catalog to browse, but it still works behind every title you open.",
+                  )
+                : t(
+                    "This catalog came back empty. Try another one, or check the addon in Settings.",
+                  )}
             </p>
             {/* A stream-only addon renders no chips and no grid, and a page with
                 nothing data-bp-focusable sends the next arrow press into the top

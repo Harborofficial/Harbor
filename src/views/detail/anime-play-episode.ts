@@ -9,15 +9,17 @@ export function animePlayEpisode(
   canonicalId: string | null,
 ): PlayEpisode | undefined {
   const nativeMatch = resume
-    ? episodes.find((ep) => (ep.seasonNumber ?? 1) === resume.season && ep.number === resume.episode)
+    ? episodes.find(
+        (ep) => (ep.seasonNumber ?? 1) === resume.season && ep.number === resume.episode,
+      )
     : undefined;
   const providerMatch = resume
     ? episodes.find((ep) => ep.imdbSeason === resume.season && ep.imdbEpisode === resume.episode)
     : undefined;
   const wanted = resume
     ? nativeId
-      ? nativeMatch ?? providerMatch
-      : providerMatch ?? (nativeMatch?.imdbSeason == null ? nativeMatch : undefined)
+      ? (nativeMatch ?? providerMatch)
+      : (providerMatch ?? (nativeMatch?.imdbSeason == null ? nativeMatch : undefined))
     : episodes[0];
   const sourceMetaId = !nativeId && canonicalId ? canonicalId : undefined;
   if (wanted) {

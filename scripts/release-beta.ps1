@@ -15,7 +15,7 @@
   first; without it the signer stops and prompts interactively, which hangs a script.
 
   The Shipyard installer is staged twice: as Harbor_<version>_x64-installer.exe, the name the
-  release API parses, and as harbor-shipyard-v<version>-<channel>-windows-x64.exe for
+  release API parses, and as harbor-shipyard-v<version>-<channel>-windows.exe for
   identification.
   installer/changelog/<version>-changelog.json must exist with this channel's notes, or the
   script refuses to build the release.
@@ -122,6 +122,9 @@ Step 'Uninstaller'
 Run 'cargo' @('build', '--manifest-path', 'installer/src-tauri/Cargo.toml', '--release',
   '--no-default-features', '--features', 'tauri/custom-protocol', '--bin', 'harbor-uninstall', '--locked')
 
+Step 'Moonshine runtime'
+Run 'powershell' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'scripts/build-moonshine-worker.ps1')
+
 Step 'Payload'
 Run 'node' @('installer/scripts/make-payload.mjs')
 Run 'node' @('scripts/verify-managed-payload.mjs')
@@ -132,7 +135,7 @@ Run 'cargo' @('build', '--manifest-path', 'installer/src-tauri/Cargo.toml', '--r
 Run 'node' @('scripts/verify-managed-payload.mjs', '--embedded')
 
 Step 'Name the build'
-$namedShipyard = "installer/src-tauri/target/release/harbor-shipyard-v${version}-${nameChannel}-windows-x64.exe"
+$namedShipyard = "installer/src-tauri/target/release/harbor-shipyard-v${version}-${nameChannel}-windows.exe"
 Copy-Item -LiteralPath 'installer/src-tauri/target/release/harbor-shipyard.exe' -Destination $namedShipyard -Force
 Write-Host "  $namedShipyard"
 
@@ -159,7 +162,7 @@ $staged = @{
   "Harbor_${version}_x64-installer.exe"            = $shipyard
   # The channel-named copy marks the channel the folder was cut for and names the GitHub
   # asset. publish-release.mjs only uploads the Harbor_<version>_* name.
-  "harbor-shipyard-v${version}-${nameChannel}-windows-x64.exe" = $namedShipyard
+  "harbor-shipyard-v${version}-${nameChannel}-windows.exe" = $namedShipyard
 }
 foreach ($name in $staged.Keys) {
   Copy-Item -LiteralPath $staged[$name] -Destination (Join-Path $stage $name) -Force

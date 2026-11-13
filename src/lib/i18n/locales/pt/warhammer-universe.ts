@@ -8,7 +8,8 @@ export default {
   "games.warhammerUniverse.sections": "Explorar este universo",
   "games.warhammerUniverse.start": "Comece aqui",
   "games.warhammerUniverse.storyTitle": "Siga Titus além do jogo",
-  "games.warhammerUniverse.storyNote": "Continue de Space Marine 2 para Secret Level e explore seu universo.",
+  "games.warhammerUniverse.storyNote":
+    "Continue de Space Marine 2 para Secret Level e explore seu universo.",
   "games.warhammerUniverse.playing": "{count} jogando no Steam agora",
   "games.warhammerUniverse.openSeries": "Abrir série",
   "games.warhammerUniverse.trailer": "Assistir ao trailer",
@@ -18,22 +19,29 @@ export default {
   "games.warhammerUniverse.screenNote": "Animações originais e um longa do 41º milênio.",
   "games.warhammerUniverse.free": "Grátis no Warhammer TV",
   "games.warhammerUniverse.subscription": "Pode exigir assinatura Warhammer+",
-  "games.warhammerUniverse.movieNote": "A animação de 2010. Abra os detalhes no Harbor para elenco, trailers e fontes.",
-  "games.warhammerUniverse.screenScope": "Seleção pública do Warhammer TV. Hammer and Bolter inclui vários cenários; a disponibilidade depende do provedor.",
+  "games.warhammerUniverse.movieNote":
+    "A animação de 2010. Abra os detalhes no Harbor para elenco, trailers e fontes.",
+  "games.warhammerUniverse.screenScope":
+    "Seleção pública do Warhammer TV. Hammer and Bolter inclui vários cenários; a disponibilidade depende do provedor.",
   "games.warhammerUniverse.lore": "Por dentro da história",
-  "games.warhammerUniverse.loreNote": "Personagens, facções e eventos importantes, ilustrados pelos criadores desses mundos.",
+  "games.warhammerUniverse.loreNote":
+    "Personagens, facções e eventos importantes, ilustrados pelos criadores desses mundos.",
   "games.warhammerUniverse.setting": "Escolher cenário",
   "games.warhammerUniverse.searchLore": "Buscar personagem, facção ou evento",
   "games.warhammerUniverse.subjects": "{count} assuntos",
   "games.warhammerUniverse.watchLore": "Assistir no Warhammer TV",
-  "games.warhammerUniverse.loreScope": "Sinopses oficiais em inglês. Cada cenário tem sua biblioteca: um ponto de partida, não uma enciclopédia completa.",
+  "games.warhammerUniverse.loreScope":
+    "Sinopses oficiais em inglês. Cada cenário tem sua biblioteca: um ponto de partida, não uma enciclopédia completa.",
   "games.warhammerUniverse.fullLibrary": "Biblioteca completa",
   "games.warhammerUniverse.settingGuide": "Guia do universo 40K",
   "games.warhammerUniverse.books": "Romances e audiolivros",
   "games.warhammerUniverse.encyclopedia": "Enciclopédia da comunidade",
   "games.warhammerUniverse.videos": "Da comunidade",
-  "games.warhammerUniverse.videosNote": "Explicações, conversas aprofundadas e histórias de criadores do YouTube.",
+  "games.warhammerUniverse.videosNote":
+    "Explicações, conversas aprofundadas e histórias de criadores do YouTube.",
   "games.warhammerUniverse.searchVideos": "Buscar vídeos de Warhammer",
-  "games.warhammerUniverse.unavailable": "Não foi possível atualizar esta fonte. As outras seções continuam disponíveis.",
-  "games.warhammerUniverse.partial": "Esta seleção está incompleta. Abra a biblioteca completa para ver mais."
+  "games.warhammerUniverse.unavailable":
+    "Não foi possível atualizar esta fonte. As outras seções continuam disponíveis.",
+  "games.warhammerUniverse.partial":
+    "Esta seleção está incompleta. Abra a biblioteca completa para ver mais.",
 };

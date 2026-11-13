@@ -7,6 +7,7 @@ import {
 import type { LibraryItem } from "@/lib/stremio";
 
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
+const STREAM_ID = /^(kitsu|mal|anilist|anidb):([1-9]\d*):[1-9]\d*$/;
 
 export type CwAnimeVideoLookup = (metaId: string) => Promise<AnimeKitsuMeta | null>;
 
@@ -39,7 +40,14 @@ export async function resolveCwAnimeVideo(
   lookup: CwAnimeVideoLookup = animeKitsuMeta,
 ): Promise<AnimeKitsuVideo | null> {
   if (!native || !Number.isInteger(native.episode) || native.episode < 1) return null;
-  const metaId = ANIME_ID.test(item._id) ? item._id : getAnimeCwId(item._id);
+  // The played stream names the exact cour even when the catalog row has no
+  // recorded Kitsu mapping. Prefer it over the base entry's id.
+  const played = STREAM_ID.exec(item.state?.video_id ?? "");
+  const metaId = ANIME_ID.test(item._id)
+    ? item._id
+    : played
+      ? `${played[1]}:${played[2]}`
+      : getAnimeCwId(item._id);
   if (!metaId) return null;
   const meta = await lookup(metaId).catch(() => null);
   if (!meta) return null;

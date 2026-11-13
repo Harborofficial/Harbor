@@ -11,13 +11,7 @@ import {
 } from "@/lib/music/waveform-dsp";
 import { subscribeWaveform, type TrackWaveform } from "@/lib/music/waveform";
 import { Hardware } from "./controls";
-import {
-  createScroll,
-  holdScroll,
-  resetScroll,
-  settleScroll,
-  stepScroll,
-} from "./waveform-motion";
+import { createScroll, holdScroll, resetScroll, settleScroll, stepScroll } from "./waveform-motion";
 import { drawPlayhead } from "./waveform-paint";
 import { createSheet, createTile, drawTile, paintSheet, syncTile } from "./waveform-tiles";
 
@@ -197,9 +191,7 @@ export function DeckWaveform({
     const ink = { peaks: data.peaks, filled: data.filled, stamp: data.stamp, grid };
 
     syncTile(tile.current, ink, seconds, span, face.width, face.height, weight, (at) =>
-      data.grid
-        ? refineOrigin(data.onset, data.filled, data.grid.period, data.grid.origin, at)
-        : 0,
+      data.grid ? refineOrigin(data.onset, data.filled, data.grid.period, data.grid.origin, at) : 0,
     );
     drawTile(ctx, tile.current, seconds, face.width, face.height);
     drawPlayhead(ctx, face.width / 2, face.height, weight);

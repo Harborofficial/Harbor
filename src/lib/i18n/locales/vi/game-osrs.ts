@@ -21,7 +21,8 @@ export default {
   "games.osrs.buy": "Mua tức thì",
   "games.osrs.sell": "Bán tức thì",
   "games.osrs.unseen": "Chưa có ghi nhận",
-  "games.osrs.observed": "Các giao dịch đã ghi nhận, không phải lệnh đang mở. Thời điểm ghi nhận mua và bán có thể khác nhau.",
+  "games.osrs.observed":
+    "Các giao dịch đã ghi nhận, không phải lệnh đang mở. Thời điểm ghi nhận mua và bán có thể khác nhau.",
   "games.osrs.history": "Lịch sử giá",
   "games.osrs.period": "Khoảng thời gian",
   "games.osrs.range.6h": "6 giờ qua",
@@ -39,8 +40,9 @@ export default {
   "games.osrs.averageSell": "Giá bán trung bình",
   "games.osrs.chart": "Lịch sử giá mua và bán",
   "games.osrs.observation": "Chọn ghi nhận",
-  "games.osrs.averages": "Giao dịch thiếu để lại khoảng trống. Thuế Grand Exchange không được tính ở đây.",
+  "games.osrs.averages":
+    "Giao dịch thiếu để lại khoảng trống. Thuế Grand Exchange không được tính ở đây.",
   "games.osrs.table": "24 khoảng gần nhất",
   "games.osrs.time": "Thời gian",
-  "games.osrs.volume": "Vật phẩm giao dịch"
+  "games.osrs.volume": "Vật phẩm giao dịch",
 };

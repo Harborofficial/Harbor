@@ -104,26 +104,34 @@ const music: Record<string, string> = {
   "music.broadcast.drift": "(ずれ {ms} ミリ秒)",
   "music.broadcast.live": "{product} で配信中",
   "music.broadcast.install": "{product} を入手",
-  "music.broadcast.none": "仮想オーディオケーブルが入っていません。{product} を入れてから、ここで選んでください。",
+  "music.broadcast.none":
+    "仮想オーディオケーブルが入っていません。{product} を入れてから、ここで選んでください。",
   "music.broadcast.auto": "最初に見つかった機器",
   "music.broadcast.output": "出力",
   "music.broadcast.stop": "停止",
   "music.broadcast.start": "開始",
-  "music.broadcast.blurb": "再生中の音を仮想マイクへ送り、通話中の友達にも聞こえるようにします。自分のスピーカーでもそのまま聞けます。",
+  "music.broadcast.blurb":
+    "再生中の音を仮想マイクへ送り、通話中の友達にも聞こえるようにします。自分のスピーカーでもそのまま聞けます。",
   "music.broadcast.title": "ボイスチャットに配信",
-  "music.cable.mac.installNeeded": "Harbor は独自の仮想マイクをインストールできます。macOS が管理者パスワードを求め、その後 Core Audio が再起動します。",
-  "music.cable.mac.installMissing": "このビルドの Harbor には仮想マイクのドライバが含まれていません。",
+  "music.cable.mac.installNeeded":
+    "Harbor は独自の仮想マイクをインストールできます。macOS が管理者パスワードを求め、その後 Core Audio が再起動します。",
+  "music.cable.mac.installMissing":
+    "このビルドの Harbor には仮想マイクのドライバが含まれていません。",
   "music.cable.mac.installCancelled": "インストールをキャンセルしました。",
   "music.cable.mac.installFailed": "仮想マイクをインストールできませんでした。",
-  "music.cable.mac.restartNeeded": "仮想マイクはインストール済みですが、Core Audio がまだ認識していません。Mac を再起動して完了してください。",
-  "music.cable.mac.updateAvailable": "このバージョンの Harbor には新しい仮想マイクが含まれています。ケーブルを使い続けるにはインストールしてください。",
+  "music.cable.mac.restartNeeded":
+    "仮想マイクはインストール済みですが、Core Audio がまだ認識していません。Mac を再起動して完了してください。",
+  "music.cable.mac.updateAvailable":
+    "このバージョンの Harbor には新しい仮想マイクが含まれています。ケーブルを使い続けるにはインストールしてください。",
   "music.cable.title": "Harbor 仮想マイク",
-  "music.cable.blurb": "Harbor が仮想マイクを自分で用意します。ダウンロードもインストールも不要です。",
+  "music.cable.blurb":
+    "Harbor が仮想マイクを自分で用意します。ダウンロードもインストールも不要です。",
   "music.cable.create": "仮想マイクを作成",
   "music.cable.remove": "仮想マイクを削除",
   "music.cable.spec": "{rate}、{depth}",
   "music.cable.perfect": "リサンプリングなし",
-  "music.cable.resampledGraph": "PipeWire のグラフが {graph} で動いているため、ここでリサンプリングされています",
+  "music.cable.resampledGraph":
+    "PipeWire のグラフが {graph} で動いているため、ここでリサンプリングされています",
   "music.cable.resampledServer": "オーディオサーバーは {requested} ではなく {rate} になりました",
   "music.cable.resampledFormat": "オーディオサーバーが 32bit 浮動小数点を通していません",
   "music.cable.resampledOther": "オーディオ経路のどこかでリサンプリングされています",
@@ -145,7 +153,8 @@ const music: Record<string, string> = {
   "music.cable.installNeeded": "仮想マイクのインストールには許可が必要です",
   "music.cable.installMissing": "このビルドの Harbor には仮想マイクが含まれていません",
   "music.cable.restartNeeded": "仮想マイクが現れるにはオーディオシステムの再起動が必要です",
-  "music.cable.updateAvailable": "この Harbor には新しい仮想マイクが入っています。作り直すと更新されます。",
+  "music.cable.updateAvailable":
+    "この Harbor には新しい仮想マイクが入っています。作り直すと更新されます。",
   "dj.crossfade": "クロスフェーダー",
   "dj.b.broadcasting": "配信を送出中",
   "dj.b.eject": "取り出す",
@@ -358,7 +367,8 @@ const music: Record<string, string> = {
   "music.explore.scene": "シーンから",
   "music.artist.inPlaylists": "{name} を含むプレイリスト",
   "music.audio.preferredSource": "優先するソース",
-  "music.audio.preferredSourceHint": "Harbor はまずここから再生し、失敗したら使えるソースに切り替えます。",
+  "music.audio.preferredSourceHint":
+    "Harbor はまずここから再生し、失敗したら使えるソースに切り替えます。",
   "music.spotify.connect": "Spotify Premium",
   "music.spotify.connectDetail": "一度接続すれば、広告なしでネイティブ再生できます。",
   "music.spotify.connectAction": "接続",
@@ -491,7 +501,8 @@ const music: Record<string, string> = {
   "music.connect.title": "{name} を接続",
   "music.connect.connected": "{account} として接続中",
   "music.connect.browserHandoff": "ブラウザーで Harbor を承認し、ここで接続を完了してください。",
-  "music.connect.scanningFolder": "フォルダーを読み込み中です。大きなライブラリーは時間がかかります。",
+  "music.connect.scanningFolder":
+    "フォルダーを読み込み中です。大きなライブラリーは時間がかかります。",
   "music.connect.scanned": "{count} 件のファイルをスキャンしました",
   "music.connect.connecting": "接続中",
   "music.connect.chooseFolder": "フォルダーを選択",
@@ -519,9 +530,11 @@ const music: Record<string, string> = {
   "music.ytm.loading": "YouTube Music を読み込み中",
   "music.row.scrobble": "{tag} をよく聴いているから",
   "music.row.scrobbleWaiting": "Last.fm は接続済みですが、まだタグの棚が届いていません。",
-  "music.connect.scrobbleBody": "Last.fm を接続すると、この棚は実際に scrobble したタグから作られます。",
+  "music.connect.scrobbleBody":
+    "Last.fm を接続すると、この棚は実際に scrobble したタグから作られます。",
   "music.connect.serverName": "メディアサーバーまたはフォルダー",
-  "music.connect.serverBody": "Harbor をフォルダーや Plex、Jellyfin、Navidrome、Subsonic に向ければ、この棚はすでに持っているアルバムで埋まります。",
+  "music.connect.serverBody":
+    "Harbor をフォルダーや Plex、Jellyfin、Navidrome、Subsonic に向ければ、この棚はすでに持っているアルバムで埋まります。",
   "music.row.recents": "続きから再生",
   "music.row.fresh": "よく聴くアーティストの新着",
   "music.row.freshSubtitle": "再生履歴のアーティストによる最近のリリース",
@@ -586,7 +599,8 @@ const music: Record<string, string> = {
   "music.quickListen.loop": "プレビューをループ",
   "music.quickListen.mute": "試聴をミュート",
   "music.quickListen.unmute": "ミュート解除",
-  "music.quickListen.empty": "未再生の曲が見つかりませんでした。ほかの音楽を探してから、もう一度お試しください。",
+  "music.quickListen.empty":
+    "未再生の曲が見つかりませんでした。ほかの音楽を探してから、もう一度お試しください。",
   "music.quickListen.finding": "まだ聴いたことのない曲を探しています…",
   "music.quickListen.more": "その他のオプション",
   "music.playlist.search": "プレイリストを検索",

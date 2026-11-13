@@ -63,7 +63,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.performance": "İzlemeye değer",
   "music.explore.stage": "Sahneler ve oturumlar",
   "music.explore.liveFrom": "{artist} canlı",
-  "music.explore.performanceHint": "Büyük sahneler, samimi oturumlar ve tekrar izlenecek performanslar.",
+  "music.explore.performanceHint":
+    "Büyük sahneler, samimi oturumlar ve tekrar izlenecek performanslar.",
   "music.explore.watchPerformance": "Performansı izle",
   "music.explore.events": "Festivallerde ön sıra",
   "music.explore.eventHint": "Önce güncel setler. Bir etkinlik ve yıl seç.",
@@ -103,6 +104,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.recordings": "Kayıtlar",
   "music.artist.limited": "Bu kaynak bir seçki sunar; kataloğun tamamını içermeyebilir.",
   "music.rockHall.title": "Rock & Roll Onur Listesi",
-  "music.rockHall.subtitle": "1986'dan bu yana her sınıf, doğrudan Wikipedia'dan"
+  "music.rockHall.subtitle": "1986'dan bu yana her sınıf, doğrudan Wikipedia'dan",
 };
 export default musicTaste;

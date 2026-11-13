@@ -9,14 +9,17 @@ export function useLiveRefresh(active: boolean, interval = 16 * 60_000) {
     const refresh = () => {
       if (document.hidden || Date.now() - last.current < interval) return;
       last.current = Date.now();
-      setRevision(value => value + 1);
+      setRevision((value) => value + 1);
     };
     refresh();
     const timer = setInterval(refresh, Math.min(interval, 60_000));
     const reconnect = () => {
-      if (document.hidden) { last.current = 0; return; }
+      if (document.hidden) {
+        last.current = 0;
+        return;
+      }
       last.current = Date.now();
-      setRevision(value => value + 1);
+      setRevision((value) => value + 1);
     };
     document.addEventListener("visibilitychange", refresh);
     window.addEventListener("online", reconnect);

@@ -1,5 +1,6 @@
 export default {
-  "games.notes.discardAction": "\u062a\u062c\u0627\u0647\u0644 \u0627\u0644\u062a\u063a\u064a\u064a\u0631\u0627\u062a",
+  "games.notes.discardAction":
+    "\u062a\u062c\u0627\u0647\u0644 \u0627\u0644\u062a\u063a\u064a\u064a\u0631\u0627\u062a",
   "games.notes.title": "ملاحظاتي",
   "games.notes.new": "ملاحظة جديدة",
   "games.notes.limit": "حتى 100 ملاحظة، و100,000 حرف لكل ملاحظة، و2 ميغابايت إجمالاً.",
@@ -28,5 +29,5 @@ export default {
   "games.notes.export": "تصدير نسخة احتياطية",
   "games.notes.unsaved": "تغييرات غير محفوظة",
   "games.notes.local": "محفوظ في ملف Harbor هذا",
-  "games.notes.importGuide": "نسخ إلى ملاحظاتي"
+  "games.notes.importGuide": "نسخ إلى ملاحظاتي",
 };

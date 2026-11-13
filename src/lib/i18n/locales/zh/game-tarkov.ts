@@ -21,10 +21,11 @@ export default {
   "games.tarkov.historyFailed": "无法加载删档历史。",
   "games.tarkov.elapsed": "{days} 天",
   "games.tarkov.noHistory": "未列出以往删档。",
-  "games.tarkov.modeNote": "赛季进度与全账号删档分开计算。此历史记录不代表永久 PvP 或 PvE 角色会被重置。",
+  "games.tarkov.modeNote":
+    "赛季进度与全账号删档分开计算。此历史记录不代表永久 PvP 或 PvE 角色会被重置。",
   "games.tarkov.historySource": "删档日期 · tarkov.dev",
   "games.tarkov.history": "完整删档历史",
   "games.tarkov.patch": "补丁",
   "games.tarkov.date": "开始日期（UTC）",
-  "games.tarkov.duration": "距下次完整删档"
+  "games.tarkov.duration": "距下次完整删档",
 };

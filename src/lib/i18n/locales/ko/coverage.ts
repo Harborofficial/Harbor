@@ -1,9 +1,10 @@
-const coverage: Record<string, string> = {
+const coverage: Record<string, string> = {
   "Waiting for {name}…": "{name} 대기 중…",
   "Keeping the source you were watching.": "시청 중이던 소스를 유지합니다.",
   "Sound descriptions": "소리 설명",
   "Hide sound effects and speaker names": "효과음과 화자 이름 숨기기",
-  "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.": "재생 중인 자막에서 [문이 삐걱거린다] 같은 대괄호 설명과 JOHN: 처럼 대문자로 쓴 화자 이름을 지웁니다. SDH 자막만 들어 있는 릴리스도 일반 대사처럼 읽을 수 있습니다. 가사, 일반 괄호, 라틴 문자가 아닌 문자는 그대로 둡니다. 강제 자막과 이미지 자막에는 적용되지 않습니다.",
+  "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.":
+    "재생 중인 자막에서 [문이 삐걱거린다] 같은 대괄호 설명과 JOHN: 처럼 대문자로 쓴 화자 이름을 지웁니다. SDH 자막만 들어 있는 릴리스도 일반 대사처럼 읽을 수 있습니다. 가사, 일반 괄호, 라틴 문자가 아닌 문자는 그대로 둡니다. 강제 자막과 이미지 자막에는 적용되지 않습니다.",
   "nav.home": "홈",
   "nav.discover": "둘러보기",
   "nav.catalogs": "카탈로그",
@@ -98,9 +99,11 @@ const coverage: Record<string, string> = {
   "Reveal comments": "댓글 표시",
   "Comments are hidden": "댓글이 숨겨져 있습니다",
   "Hosted elsewhere": "외부 호스팅",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "이 요금제는 제3자가 운영합니다. Harbor는 제휴 관계가 없으며 가입으로 어떤 대가도 받지 않습니다. 현재 가격과 약관은 해당 사이트에 있습니다.",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "이 요금제는 제3자가 운영합니다. Harbor는 제휴 관계가 없으며 가입으로 어떤 대가도 받지 않습니다. 현재 가격과 약관은 해당 사이트에 있습니다.",
   "{name} can run on a hosted instance": "{name}은(는) 호스팅 인스턴스에서 실행할 수 있습니다",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "제3자가 운영합니다. Harbor는 제휴 관계가 없고 재판매하지 않으며 가입 시 어떤 대가도 받지 않습니다. 가격과 구성은 해당 사이트를 확인하세요.",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "제3자가 운영합니다. Harbor는 제휴 관계가 없고 재판매하지 않으며 가입 시 어떤 대가도 받지 않습니다. 가격과 구성은 해당 사이트를 확인하세요.",
   "Show comments": "댓글 보기",
   "Hide comments": "댓글 숨기기",
   "You haven't commented yet": "아직 작성한 댓글이 없습니다",

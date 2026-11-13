@@ -80,9 +80,7 @@ export function SearchFilterBar({
     <div className="flex min-w-0 flex-wrap items-center gap-2">
       {pill("all", "All", total)}
       {present.map((entry) => pill(entry.key, entry.label, counts[entry.key] ?? 0))}
-      {live.map((entry) =>
-        pill(`addon:${entry.id}`, entry.name, entry.count, entry.logo),
-      )}
+      {live.map((entry) => pill(`addon:${entry.id}`, entry.name, entry.count, entry.logo))}
     </div>
   );
 }

@@ -310,7 +310,19 @@ export function subStyleProperties(
     typeof context.assScale === "number" && Number.isFinite(context.assScale)
       ? context.assScale
       : null;
-  const effOverride = fontOnly ? "yes" : normScale != null ? "scale" : override;
+  // Reading a file's ASS header can fail (a remote track, a large MKV, a protected
+  // link). "Match my size" must still resize the subtitle, so fall back to mpv's
+  // plain scale with the user's size, like the old "Resize only" did.
+  const normalizeFallback =
+    normScale == null &&
+    s.subAssNormalizeSize === true &&
+    context.assNativeActive &&
+    override === "no";
+  const effOverride = fontOnly
+    ? "yes"
+    : normScale != null || normalizeFallback
+      ? "scale"
+      : override;
   const assMargins = subUsesMargins(s, context) ? "yes" : "no";
   const marginY = clamp(Number(s.subMarginY) || 0, 0, 100);
   const liftPct = clamp(Number(context.liftPct) || 0, 0, 100);
@@ -377,6 +389,9 @@ export async function applySubStyle(
         ? subPos.set(Number(value))
         : invoke("mpv_set_property", { name, value }).catch(() => {}),
     ),
-    applyFontOnlyOverrides(s.subAssOverride === "font", mpvFontFor(s.subFontFamily, customFontName(s))),
+    applyFontOnlyOverrides(
+      s.subAssOverride === "font",
+      mpvFontFor(s.subFontFamily, customFontName(s)),
+    ),
   ]);
 }

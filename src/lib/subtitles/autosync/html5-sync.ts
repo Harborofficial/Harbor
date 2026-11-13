@@ -89,20 +89,25 @@ export function evaluateEngineReadiness(input: TriggerInput): EngineReadiness {
   const base = { vadCapable, hashCapable, crowdCapable, sourceKind, hlsAdRisk, native };
 
   if (!input.autoSyncOn) return { ok: false, reason: "disabled", ...base };
-  if (input.isLive === true || input.notWebReady === true) return { ok: false, reason: "live", ...base };
+  if (input.isLive === true || input.notWebReady === true)
+    return { ok: false, reason: "live", ...base };
   if (!(input.durationSec >= MIN_DURATION_SEC)) return { ok: false, reason: "too-short", ...base };
-  if (!vadCapable && !hashCapable && !crowdCapable) return { ok: false, reason: "no-analyzable-signal", ...base };
+  if (!vadCapable && !hashCapable && !crowdCapable)
+    return { ok: false, reason: "no-analyzable-signal", ...base };
   return { ok: true, reason: vadCapable ? "ready" : "network-tiers-only", ...base };
 }
 
 export function resolveAutoSyncTrigger(
-  input: TriggerInput & { subtitleTracks: Array<{ id: string; selected: boolean; external?: boolean }> },
+  input: TriggerInput & {
+    subtitleTracks: Array<{ id: string; selected: boolean; external?: boolean }>;
+  },
 ): TriggerResolution {
   const readiness = evaluateEngineReadiness(input);
   const selected = input.subtitleTracks.find((t) => t.selected) ?? null;
   const trackId = selected?.id ?? null;
   if (!readiness.ok) return { run: false, reason: readiness.reason, readiness, trackId };
-  if (!selected || selected.external !== true) return { run: false, reason: "no-external-track", readiness, trackId };
+  if (!selected || selected.external !== true)
+    return { run: false, reason: "no-external-track", readiness, trackId };
   return { run: true, reason: "ready", readiness, trackId };
 }
 
@@ -138,7 +143,8 @@ export type VadAffine = { offsetSec: number; ratio: number; confidence: number }
 
 export async function analyzeVad(input: VadInput): Promise<VadAffine | null> {
   if (!input.readiness.vadCapable) return null;
-  if (input.readiness.sourceKind === "torrent" || input.readiness.sourceKind === "debrid") return null;
+  if (input.readiness.sourceKind === "torrent" || input.readiness.sourceKind === "debrid")
+    return null;
   if (input.cues.length < 4 || !(input.durationSec >= MIN_DURATION_SEC)) return null;
   const out = await invoke<VadAffine | null>("sync_subtitle", {
     url: input.url,
@@ -247,11 +253,16 @@ export type HlsGuardInput = {
   independentGroups: string[];
 };
 
-export function hlsSafetyDowngrade(input: HlsGuardInput): { decision: Outcome; reason: string | null } {
+export function hlsSafetyDowngrade(input: HlsGuardInput): {
+  decision: Outcome;
+  reason: string | null;
+} {
   if (input.sourceKind !== "hls" || input.decision !== "apply") {
     return { decision: input.decision, reason: null };
   }
-  const nonAcoustic = input.independentGroups.some((g) => g === "hash" || g === "crowd" || g === "asr");
+  const nonAcoustic = input.independentGroups.some(
+    (g) => g === "hash" || g === "crowd" || g === "asr",
+  );
   if (nonAcoustic) return { decision: input.decision, reason: null };
   return { decision: "offer", reason: "hls-ad-stitch-guard" };
 }

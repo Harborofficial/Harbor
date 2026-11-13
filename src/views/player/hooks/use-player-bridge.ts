@@ -10,8 +10,7 @@ import { probeMpv } from "@/lib/player/mpv";
 import { externalMpvEnabled } from "@/lib/player/external-mpv";
 import { mergeMpvOptions } from "@/lib/player/mpv-tuning";
 import { anime4kPackComplete, repairAnime4kPack } from "@/lib/anime4k";
-import { metaIsAnime } from "@/lib/player/anime-src";
-import { fullShaderChain, type Anime4kChoice } from "./use-anime4k";
+import { anime4kWantedFor, fullShaderChain, type Anime4kChoice } from "./use-anime4k";
 import { generalShaderKey, shaderCompanionOptions } from "@/lib/player/shader-chain";
 import type { PlayerSrc } from "@/lib/view";
 import type { Settings } from "@/lib/settings";
@@ -72,8 +71,7 @@ export function usePlayerBridge(params: {
 
   const hdrOpaqueWindow = isWindowsDesktop() && settings.playerHdrOpaqueWindow;
   const embedActive = settings.playerMpvEmbed && !hdrOpaqueWindow;
-  const isAnimeSrc = metaIsAnime(src.meta) || !!src.isAnime;
-  const anime4kWanted = settings.playerAnime4k && (!settings.playerAnime4kAnimeOnly || isAnimeSrc);
+  const anime4kWanted = anime4kWantedFor(settings, src);
   // mpv only compiles a shader chain whose files it can open, and it drops the
   // rest without a word. Presets that name a kernel the installed pack predates
   // would silently run short, so the gap is filled before the chain is built

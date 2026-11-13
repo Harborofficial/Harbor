@@ -53,10 +53,8 @@ const catalog: Record<string, string> = {
   "Feature this catalog in the hero carousel": "إبراز هذا الكتالوج في شريط العرض الرئيسي",
   "Stop feeding the hero carousel (back to automatic)":
     "إيقاف تغذية شريط العرض الرئيسي (العودة إلى التلقائي)",
-  "Needs artwork-rich titles to feed the hero":
-    "يحتاج إلى عناوين غنية بالصور لتغذية العرض الرئيسي",
-  "Needs at least 10 titles for the Top 10 look":
-    "يحتاج إلى 10 عناوين على الأقل لمظهر أفضل 10",
+  "Needs artwork-rich titles to feed the hero": "يحتاج إلى عناوين غنية بالصور لتغذية العرض الرئيسي",
+  "Needs at least 10 titles for the Top 10 look": "يحتاج إلى 10 عناوين على الأقل لمظهر أفضل 10",
 
   "Customize home": "تخصيص الرئيسية",
   "Customize anime": "تخصيص الأنمي",

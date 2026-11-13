@@ -21,7 +21,8 @@ export default {
   "games.osrs.buy": "즉시 구매",
   "games.osrs.sell": "즉시 판매",
   "games.osrs.unseen": "관측 기록 없음",
-  "games.osrs.observed": "체결된 거래 기록이며 현재 주문이 아닙니다. 구매와 판매의 관측 시점이 다를 수 있습니다.",
+  "games.osrs.observed":
+    "체결된 거래 기록이며 현재 주문이 아닙니다. 구매와 판매의 관측 시점이 다를 수 있습니다.",
   "games.osrs.history": "가격 기록",
   "games.osrs.period": "기간",
   "games.osrs.range.6h": "최근 6시간",
@@ -39,8 +40,9 @@ export default {
   "games.osrs.averageSell": "평균 판매가",
   "games.osrs.chart": "구매 및 판매 가격 기록",
   "games.osrs.observation": "관측 지점 선택",
-  "games.osrs.averages": "거래 기록이 없는 곳은 비워 둡니다. 거래소 세금은 여기서 계산하지 않습니다.",
+  "games.osrs.averages":
+    "거래 기록이 없는 곳은 비워 둡니다. 거래소 세금은 여기서 계산하지 않습니다.",
   "games.osrs.table": "최근 24구간",
   "games.osrs.time": "시간",
-  "games.osrs.volume": "거래된 아이템"
+  "games.osrs.volume": "거래된 아이템",
 };

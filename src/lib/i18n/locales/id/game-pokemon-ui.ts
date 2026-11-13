@@ -25,7 +25,8 @@ export default {
   "games.pokemon.videosHint": "Panduan dan kiat",
   "games.pokemon.bank": "Save & Pokémon",
   "games.pokemon.bankHint": "Edit save dan kelola kotak",
-  "games.pokemon.bankIntro": "Buka save emulator untuk mengedit tim, atau impor Pokémon satu per satu ke koleksi.",
+  "games.pokemon.bankIntro":
+    "Buka save emulator untuk mengedit tim, atau impor Pokémon satu per satu ke koleksi.",
   "games.pokemon.guideSourceNote": "Baca panduan aslinya, atau buka di sini saat sumber tersedia.",
   "games.pokemon.readGuide": "Baca di Bulbapedia",
   "games.pokemon.readInside": "Baca di Harbor",
@@ -34,19 +35,24 @@ export default {
   "games.pokemon.imageSaved": "Gambar {name} disimpan",
   "games.pokemon.imageFailed": "Gagal mengunduh. Coba lagi.",
   "games.pokemon.saveStart": "Menggunakan emulator?",
-  "games.pokemon.emulatorSave": "Emulator membuat berkas save saat kamu menyimpan lewat menu game itu sendiri.",
+  "games.pokemon.emulatorSave":
+    "Emulator membuat berkas save saat kamu menyimpan lewat menu game itu sendiri.",
   "games.pokemon.saveStep1": "Buka game dan pilih Simpan di menu game.",
-  "games.pokemon.saveStep2": "Tutup game, lalu cari atau ekspor battery save (.sav, .srm, atau .dsv).",
+  "games.pokemon.saveStep2":
+    "Tutup game, lalu cari atau ekspor battery save (.sav, .srm, atau .dsv).",
   "games.pokemon.saveStep3": "Pilih Buka save game di atas untuk mengeditnya di Harbor.",
   "games.pokemon.findSave": "Di mana save saya?",
-  "games.pokemon.saveLocations": "Cari di samping ROM atau folder save emulator. Jika hanya punya save state, muat di emulator lalu simpan melalui menu game.",
+  "games.pokemon.saveLocations":
+    "Cari di samping ROM atau folder save emulator. Jika hanya punya save state, muat di emulator lalu simpan melalui menu game.",
   "games.pokemon.noSave": "Belum punya save?",
   "games.pokemon.communitySaves": "Jelajahi save komunitas",
-  "games.pokemon.communitySavesNote": "Project Pokémon · Pilih game yang tepat dan baca catatan kontributornya.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · Pilih game yang tepat dan baca catatan kontributornya.",
   "games.pokemon.pkhexNote": "Editor save, unduhan, dan bantuan dari pengembangnya.",
-  "games.pokemon.noSaveNeeded": "Kamu bisa mengimpor berkas Pokémon tanpa save game. Save hanya diperlukan untuk mengedit tim atau kotak suatu game.",
+  "games.pokemon.noSaveNeeded":
+    "Kamu bisa mengimpor berkas Pokémon tanpa save game. Save hanya diperlukan untuk mengedit tim atau kotak suatu game.",
   "games.pokemon.videoUnavailable": "Video tidak dapat dimuat di sini.",
   "games.pokemon.youtubeSearch": "Cari di YouTube",
   "games.hub.downloadApply": "Unduh patch",
-  "games.hub.manualPatch": "Gunakan patch atau tautan yang sudah dimiliki"
+  "games.hub.manualPatch": "Gunakan patch atau tautan yang sudah dimiliki",
 };

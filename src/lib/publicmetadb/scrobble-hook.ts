@@ -93,7 +93,9 @@ export function usePublicMetaDbScrobble({ src, snap }: { src: PlayerSrc; snap: S
         await pmdbDeleteResumeForTarget(target);
         return true;
       })
-        .then((ok) => { completion.done = ok; })
+        .then((ok) => {
+          completion.done = ok;
+        })
         .finally(() => {
           completion.inFlight = false;
         });
@@ -291,7 +293,9 @@ export function usePublicMetaDbScrobble({ src, snap }: { src: PlayerSrc; snap: S
       saveOrWatched(t, best, dur, "unload");
     };
 
-    const onPageShow = () => { pageHiddenRef.current = false; };
+    const onPageShow = () => {
+      pageHiddenRef.current = false;
+    };
     window.addEventListener("pagehide", onPageHide);
     window.addEventListener("pageshow", onPageShow);
     return () => {

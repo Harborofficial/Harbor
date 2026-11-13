@@ -164,7 +164,9 @@ function CuratedAccolade({ entry }: { entry: CanonEntry }) {
       <div className="flex min-w-0 flex-col gap-5">
         <ul className="grid grid-cols-1 gap-x-10 gap-y-0">
           <li className="flex items-baseline gap-4 border-b border-edge-soft/30 py-2.5 text-[13px]">
-            <span className="w-11 shrink-0 font-semibold tabular-nums text-accent">{year ?? ""}</span>
+            <span className="w-11 shrink-0 font-semibold tabular-nums text-accent">
+              {year ?? ""}
+            </span>
             <button
               type="button"
               onClick={() => openCuratedList(listId)}

@@ -56,7 +56,9 @@ async function toWebp(src: string, size: number): Promise<Blob | null> {
     const w = img.width * scale;
     const h = img.height * scale;
     ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
-    return await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), "image/webp", 0.9));
+    return await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/webp", 0.9),
+    );
   } catch {
     return null;
   }
@@ -79,7 +81,9 @@ export async function pushAvatarToEcosystem(value: string | null): Promise<void>
     return;
   }
   try {
-    const blob = value.startsWith("data:") ? await dataUrlToBlob(value) : await toWebp(value, UPLOAD_SIZE);
+    const blob = value.startsWith("data:")
+      ? await dataUrlToBlob(value)
+      : await toWebp(value, UPLOAD_SIZE);
     if (!blob) return;
     await uploadAvatar(blob);
     writeMark(author.id, key);

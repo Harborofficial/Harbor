@@ -25,7 +25,7 @@ export type GameSummary = {
   /** Present only when displaying a disk snapshot instead of a fresh provider result. */
   cachedAt?: number;
   /** Selected release provenance, separate from catalog/artwork identity. */
-  sourceOrigin?: import('./source-origin').SourceOrigin;
+  sourceOrigin?: import("./source-origin").SourceOrigin;
   /** Published release-page metadata for games not indexed by Steam or IGDB. */
   sourceListing?: { page: string; sourceName: string; description: string; screenshots: string[] };
 };
@@ -63,8 +63,19 @@ export type GameShelf = {
   id: "top_sellers" | "new_releases" | "coming_soon" | "specials";
   games: GameSummary[];
 };
-export type GameDiscovery = { shelves: GameShelf[]; fetchedAt: number; source: "Steam"; enriched?: boolean; cachedAt?: number };
+export type GameDiscovery = {
+  shelves: GameShelf[];
+  fetchedAt: number;
+  source: "Steam";
+  enriched?: boolean;
+  cachedAt?: number;
+};
 
 export type GameArtwork = { libraryHero?: string; portrait?: string; wideCapsule?: string };
 
-export type GameCatalogPage = { games: GameSummary[]; total: number; nextOffset: number | null; cachedAt?: number };
+export type GameCatalogPage = {
+  games: GameSummary[];
+  total: number;
+  nextOffset: number | null;
+  cachedAt?: number;
+};

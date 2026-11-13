@@ -19,7 +19,8 @@ export default {
   "games.notes.up": "Notu yukarı taşı",
   "games.notes.down": "Notu aşağı taşı",
   "games.notes.image": "Görseli aç",
-  "games.notes.emptyBody": "Stratejileri, hatırlatmaları ve keşifleri saklayın. Markdown desteklenir.",
+  "games.notes.emptyBody":
+    "Stratejileri, hatırlatmaları ve keşifleri saklayın. Markdown desteklenir.",
   "games.notes.noteTitle": "Not başlığı",
   "games.notes.body": "Not metni (Markdown)",
   "games.notes.empty": "Oyun not defteriniz",
@@ -28,5 +29,5 @@ export default {
   "games.notes.export": "Yedek dışa aktar",
   "games.notes.unsaved": "Kaydedilmemiş değişiklikler",
   "games.notes.local": "Bu Harbor profilinde saklanır",
-  "games.notes.importGuide": "Notlarıma kopyala"
+  "games.notes.importGuide": "Notlarıma kopyala",
 };

@@ -50,14 +50,15 @@ function topBilled(cast: TitleCreditPerson[], personId: number): TitleCreditPers
   for (const p of cast) {
     if (p.id === personId) continue;
     const existing = best.get(p.id);
-    if (!existing || (p.order ?? Number.MAX_SAFE_INTEGER) < (existing.order ?? Number.MAX_SAFE_INTEGER)) {
+    if (
+      !existing ||
+      (p.order ?? Number.MAX_SAFE_INTEGER) < (existing.order ?? Number.MAX_SAFE_INTEGER)
+    ) {
       best.set(p.id, p);
     }
   }
   return [...best.values()]
-    .sort(
-      (a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
-    )
+    .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER))
     .slice(0, BILLING_CAP);
 }
 
@@ -67,10 +68,7 @@ function roleOf(tally: Tally): CollaboratorRole | null {
   return tally.directed >= tally.wrote ? "Director" : "Writer";
 }
 
-export function rankCollaborators(
-  titles: CollaboratorTitle[],
-  personId: number,
-): Collaborator[] {
+export function rankCollaborators(titles: CollaboratorTitle[], personId: number): Collaborator[] {
   const tallies = new Map<number, Tally>();
   const counted = new Set<string>();
 

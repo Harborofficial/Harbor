@@ -36,7 +36,7 @@ export function HomeLanguagePicker() {
 
   return (
     <div className="flex flex-col gap-3">
- <div className="flex items-center gap-2.5 rounded-md bg-canvas px-3.5 py-2.5">
+      <div className="flex items-center gap-2.5 rounded-md bg-canvas px-3.5 py-2.5">
         <Globe size={18} className={`shrink-0 ${count ? "text-accent" : "text-ink-subtle"}`} />
         <span className="text-[15.5px] leading-[22px] text-ink-muted">
           {count === 0 ? (
@@ -44,7 +44,9 @@ export function HomeLanguagePicker() {
           ) : (
             <>
               <span className="font-semibold tabular-nums text-ink">{count}</span>{" "}
-              {t(count === 1 ? "language. Home filters to it." : "languages. Home filters to these.")}
+              {t(
+                count === 1 ? "language. Home filters to it." : "languages. Home filters to these.",
+              )}
             </>
           )}
         </span>
@@ -79,7 +81,9 @@ export function HomeLanguagePicker() {
                 </span>
                 <span
                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition ${
-                    on ? "bg-accent text-canvas" : "bg-transparent text-transparent ring-1 ring-edge-soft"
+                    on
+                      ? "bg-accent text-canvas"
+                      : "bg-transparent text-transparent ring-1 ring-edge-soft"
                   }`}
                 >
                   <Check size={14} strokeWidth={3} />
@@ -87,7 +91,9 @@ export function HomeLanguagePicker() {
               </span>
               <span className="flex w-full items-center gap-1.5">
                 <LangFlags codes={flags} />
-                <span className="truncate text-[15.5px] leading-[22px] text-ink-subtle">{t(name)}</span>
+                <span className="truncate text-[15.5px] leading-[22px] text-ink-subtle">
+                  {t(name)}
+                </span>
               </span>
             </button>
           );

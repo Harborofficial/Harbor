@@ -120,7 +120,10 @@ export function useChromeEdits(
       setDraft((cur) => {
         const panels = { ...(cur.panels ?? {}) };
         const prev = panels[id];
-        panels[id] = { corner: prev?.corner ?? PANEL_META[id].defaultCorner, hidden: !prev?.hidden };
+        panels[id] = {
+          corner: prev?.corner ?? PANEL_META[id].defaultCorner,
+          hidden: !prev?.hidden,
+        };
         return { ...cur, panels };
       });
     },

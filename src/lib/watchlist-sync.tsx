@@ -10,10 +10,7 @@ import { useSimkl } from "@/lib/simkl/provider";
 import { setWatchlistAggregate } from "@/lib/watchlist";
 import { isNuvioProviderActive, resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
 import { getNuvioAccountId } from "@/lib/nuvio/nuvio-client";
-import {
-  readCachedNuvioLibrary,
-  pullNuvioLibrarySnapshot,
-} from "@/lib/nuvio/nuvio-library";
+import { readCachedNuvioLibrary, pullNuvioLibrarySnapshot } from "@/lib/nuvio/nuvio-library";
 
 const STORE: { stremio: string[]; nuvio: string[]; trakt: string[]; simkl: string[] } = {
   stremio: [],
@@ -218,7 +215,8 @@ export function WatchlistSync() {
             seq !== requestSeq ||
             getNuvioAccountId() !== accountId ||
             resolveNuvioProfileIndex() !== slot
-          ) return;
+          )
+            return;
           STORE.nuvio = fresh.map((i) => i.content_id).filter(Boolean);
           pushAggregate();
         });

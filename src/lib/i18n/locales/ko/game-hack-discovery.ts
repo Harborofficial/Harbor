@@ -16,28 +16,40 @@ export default {
   "games.patch.saveCopy": "새 복사본 저장",
   "games.patch.verified": "파일 확인 완료",
   "games.patch.ready": "패치 준비 완료",
-  "games.patch.verifiedNote": "원본 게임, 패치, 완성된 복사본이 BPS 패치에 저장된 체크섬과 일치합니다.",
-  "games.patch.ipsNote": "IPS에는 원본 게임의 체크섬이 없습니다. 저장하기 전에 프로젝트에서 요구하는 게임 버전을 확인하세요.",
+  "games.patch.verifiedNote":
+    "원본 게임, 패치, 완성된 복사본이 BPS 패치에 저장된 체크섬과 일치합니다.",
+  "games.patch.ipsNote":
+    "IPS에는 원본 게임의 체크섬이 없습니다. 저장하기 전에 프로젝트에서 요구하는 게임 버전을 확인하세요.",
   "games.patch.output": "완성된 복사본",
   "games.patch.fingerprint": "파일 지문 · SHA-256",
   "games.patch.fingerprints": "파일 지문 목록 · SHA-256",
   "games.patch.localNote": "내 기기에서 처리 · BPS · IPS · UPS · 최대 256 MB",
-  "games.patch.desktop": "Windows, macOS 또는 Linux용 Harbor 데스크톱 앱에서 패치를 적용하세요. 파일은 기기에 보관되며 원본 게임은 유지됩니다.",
+  "games.patch.desktop":
+    "Windows, macOS 또는 Linux용 Harbor 데스크톱 앱에서 패치를 적용하세요. 파일은 기기에 보관되며 원본 게임은 유지됩니다.",
   "games.patch.done": "새로운 모험을 떠날 준비 완료",
-  "games.patch.preserved": "패치가 적용된 복사본을 저장했습니다. 원본 게임과 패치는 변경되지 않았습니다.",
-  "games.patch.patch_source_mismatch": "이 패치에는 다른 게임 파일이나 버전이 필요합니다. 프로젝트 요구 사항을 확인하고 알맞은 파일을 선택하세요.",
-  "games.patch.patch_checksum_mismatch": "패치 체크섬이 일치하지 않습니다. 파일이 불완전할 수 있으니 프로젝트에서 다시 다운로드하세요.",
-  "games.patch.patch_target_mismatch": "완성된 복사본이 예상 체크섬과 일치하지 않습니다. 아무것도 저장하지 않았습니다.",
+  "games.patch.preserved":
+    "패치가 적용된 복사본을 저장했습니다. 원본 게임과 패치는 변경되지 않았습니다.",
+  "games.patch.patch_source_mismatch":
+    "이 패치에는 다른 게임 파일이나 버전이 필요합니다. 프로젝트 요구 사항을 확인하고 알맞은 파일을 선택하세요.",
+  "games.patch.patch_checksum_mismatch":
+    "패치 체크섬이 일치하지 않습니다. 파일이 불완전할 수 있으니 프로젝트에서 다시 다운로드하세요.",
+  "games.patch.patch_target_mismatch":
+    "완성된 복사본이 예상 체크섬과 일치하지 않습니다. 아무것도 저장하지 않았습니다.",
   "games.patch.patch_expired": "이 준비 작업이 만료되었습니다. 패치를 다시 확인하세요.",
-  "games.patch.patch_inputs_changed": "확인 후 선택한 파일이 변경되었습니다. 저장하기 전에 패치를 다시 확인하세요.",
-  "games.patch.patch_output_exists": "해당 위치에 파일이 이미 있습니다. 다른 이름을 선택하세요. Harbor는 기존 파일을 덮어쓰지 않습니다.",
-  "games.patch.patch_read_failed": "선택한 파일을 읽을 수 없습니다. 파일이 아직 사용 가능한지 확인하고 다시 선택하세요.",
-  "games.patch.patch_write_failed": "복사본을 저장할 수 없습니다. 폴더와 여유 공간을 확인하거나 다른 위치를 선택하세요.",
+  "games.patch.patch_inputs_changed":
+    "확인 후 선택한 파일이 변경되었습니다. 저장하기 전에 패치를 다시 확인하세요.",
+  "games.patch.patch_output_exists":
+    "해당 위치에 파일이 이미 있습니다. 다른 이름을 선택하세요. Harbor는 기존 파일을 덮어쓰지 않습니다.",
+  "games.patch.patch_read_failed":
+    "선택한 파일을 읽을 수 없습니다. 파일이 아직 사용 가능한지 확인하고 다시 선택하세요.",
+  "games.patch.patch_write_failed":
+    "복사본을 저장할 수 없습니다. 폴더와 여유 공간을 확인하거나 다른 위치를 선택하세요.",
   "games.patch.patch_too_large": "원본 게임, 패치, 완성된 복사본은 각각 256 MB 이하여야 합니다.",
   "games.patch.patch_busy": "다른 패치를 처리 중입니다. 완료되면 다시 시도하세요.",
   "games.patch.patch_game_type": "GBA, GB, NES, SFC, NDS, ROM 등 지원되는 게임 파일을 선택하세요.",
   "games.patch.patch_output_type": "복사본을 저장할 때 원본 게임의 확장자를 유지하세요.",
-  "games.patch.invalid": "이 패치를 읽을 수 없습니다. 파일과 프로젝트에서 요구하는 게임 버전을 확인하세요.",
+  "games.patch.invalid":
+    "이 패치를 읽을 수 없습니다. 파일과 프로젝트에서 요구하는 게임 버전을 확인하세요.",
   "games.hub.spotlight": "주목할 작품",
   "games.hub.watch": "플레이 영상 보기",
   "games.hub.watchTitle": "직접 플레이하는 모습",
@@ -49,7 +61,8 @@ export default {
   "games.hub.viewOriginal": "원작 게임 보기",
   "games.hub.toolkitNote": "원본 게임에 사용할 패치를 받으세요.",
   "games.hub.baseVersion": "프로젝트에서 지정한 정확한 게임 버전과 지역을 사용하세요.",
-  "games.hub.catalogNote": "ROM 해크와 콘솔 모드를 찾아보세요. 시스템으로 필터링하거나 이름으로 검색하세요.",
+  "games.hub.catalogNote":
+    "ROM 해크와 콘솔 모드를 찾아보세요. 시스템으로 필터링하거나 이름으로 검색하세요.",
   "games.hub.findVideos": "플레이 영상 찾기",
   "games.hub.resources": "ROM 핵 커뮤니티",
   "games.patch.open": "패치 적용",
@@ -60,10 +73,12 @@ export default {
   "games.atlas.sort.rated": "평점 높은 순",
   "games.atlas.sort.newest": "최신순",
   "games.atlas.sort.oldest": "오래된순",
-  "games.hub.stepPatch": "원본 게임과 BPS, IPS 또는 UPS 패치를 선택하세요. Harbor가 별도 사본을 저장합니다.",
-  "games.patch.description": "원본 게임과 BPS, IPS 또는 UPS 패치를 선택하세요. Harbor가 별도 사본을 저장합니다.",
+  "games.hub.stepPatch":
+    "원본 게임과 BPS, IPS 또는 UPS 패치를 선택하세요. Harbor가 별도 사본을 저장합니다.",
+  "games.patch.description":
+    "원본 게임과 BPS, IPS 또는 UPS 패치를 선택하세요. Harbor가 별도 사본을 저장합니다.",
   "games.patch.choosePatch": "패치 선택 (BPS, IPS, UPS)",
   "games.patch.patch_unsupported": "지원되는 BPS, IPS 또는 UPS 패치 파일이 아닙니다.",
   "games.discovery.viewGame": "게임 보기",
-  "games.atlas.basedOn": "원작 게임"
+  "games.atlas.basedOn": "원작 게임",
 };

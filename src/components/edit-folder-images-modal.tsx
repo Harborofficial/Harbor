@@ -53,7 +53,9 @@ export function EditFolderImagesModal({
       <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-3xl border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-0.5">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Edit Folder Images")}</h2>
+            <h2 className="text-[19px] font-medium tracking-tight text-ink">
+              {t("Edit Folder Images")}
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -66,7 +68,9 @@ export function EditFolderImagesModal({
 
         <div className="flex flex-col gap-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-ink-muted">{t("Cover Image URL")}</label>
+            <label className="mb-1.5 block text-sm font-medium text-ink-muted">
+              {t("Cover Image URL")}
+            </label>
             <input
               type="text"
               className="w-full rounded-lg border border-edge-soft bg-canvas/60 px-4 py-2.5 text-[14px] text-ink outline-none transition-colors focus:border-accent"
@@ -78,7 +82,9 @@ export function EditFolderImagesModal({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-ink-muted">{t("Focus GIF URL")}</label>
+            <label className="mb-1.5 block text-sm font-medium text-ink-muted">
+              {t("Focus GIF URL")}
+            </label>
             <input
               type="text"
               className="w-full rounded-lg border border-edge-soft bg-canvas/60 px-4 py-2.5 text-[14px] text-ink outline-none transition-colors focus:border-accent"
@@ -90,7 +96,9 @@ export function EditFolderImagesModal({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-ink-muted">{t("Layout Style")}</label>
+            <label className="mb-2 block text-sm font-medium text-ink-muted">
+              {t("Layout Style")}
+            </label>
             <Segmented
               value={layout}
               onChange={setLayout}

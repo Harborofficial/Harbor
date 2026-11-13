@@ -131,6 +131,9 @@ async function fixture(harborSignedIn = false, stremioSignedIn = false, kid = fa
     "@/lib/settings/defaults": {
       getSecondaryPrivileges: () => ({ canAddProfiles: true, canSignOutRoot: true }),
     },
+    "@/lib/profiles/privileges": {
+      getSecondaryPrivileges: () => ({ canAddProfiles: true, canSignOutRoot: true }),
+    },
     "@/lib/nuvio/nuvio-client": {
       loadNuvioState: () => ({ session: null, profiles: [], activeProfileIndex: 1 }),
       isNuvioSignedIn: () => false,

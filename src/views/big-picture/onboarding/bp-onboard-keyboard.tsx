@@ -8,7 +8,6 @@ import { useBpT } from "../bp-i18n";
 // margin, which would push every key row outside the panel that hosts it.
 const FLUSH = { paddingInline: 0, marginInline: 0, containIntrinsicSize: "auto 72px" } as const;
 
-
 /**
  * The shared BpKeyboard is lowercase only and its symbol page carries no A-Z
  * and no underscore, which makes a Stremio password and a Harbor username
@@ -32,7 +31,7 @@ const UPPER = [
 const SYMBOLS = [
   "!#$%^&*()+".split(""),
   "=/\\|~`°£€:".split(""),
-  ";\"?<>[]{},".split(""),
+  ';"?<>[]{},'.split(""),
   "éèáàöüñçåø".split(""),
 ];
 

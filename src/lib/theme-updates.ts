@@ -20,7 +20,12 @@ function write(m: RecMap): void {
   }
 }
 
-export function recordDownloadedTheme(savedId: string, storeId: string, version: number, name: string): void {
+export function recordDownloadedTheme(
+  savedId: string,
+  storeId: string,
+  version: number,
+  name: string,
+): void {
   if (!savedId || !storeId) return;
   const m = read();
   m[savedId] = { storeId, version: version || 0, name };

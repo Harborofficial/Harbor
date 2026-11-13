@@ -5,6 +5,7 @@ export default {
   "floatingPlayer.chapters": "Capítulos",
   "floatingPlayer.subtitleDelay": "Atraso das legendas",
   "floatingPlayer.playbackSpeed": "Velocidade de reprodução",
-  "floatingPlayer.playerError": "Não foi possível atualizar a reprodução. Tente esse controle novamente.",
+  "floatingPlayer.playerError":
+    "Não foi possível atualizar a reprodução. Tente esse controle novamente.",
   "floatingPlayer.chooseChapter": "Escolher capítulo",
 };

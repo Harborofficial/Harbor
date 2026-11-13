@@ -121,7 +121,9 @@ export function StreamsView({
             {epLabel}
           </p>
           <h2 className="mt-0.5 truncate font-display text-[18px] font-semibold leading-tight text-ink">
-            {intent === "download" ? `${t("Download")} · ${episode.name ?? t("Episode {n}", { n: episode.episode })}` : episode.name ?? t("Episode {n}", { n: episode.episode })}
+            {intent === "download"
+              ? `${t("Download")} · ${episode.name ?? t("Episode {n}", { n: episode.episode })}`
+              : (episode.name ?? t("Episode {n}", { n: episode.episode }))}
           </h2>
         </div>
         <button
@@ -133,7 +135,14 @@ export function StreamsView({
         </button>
       </header>
       <div className="flex-1 overflow-y-auto px-4 pb-6">
-        {error && <p role="alert" className="mb-3 rounded-xl bg-danger/10 px-3 py-2.5 text-[12.5px] text-danger">{error}</p>}
+        {error && (
+          <p
+            role="alert"
+            className="mb-3 rounded-xl bg-danger/10 px-3 py-2.5 text-[12.5px] text-danger"
+          >
+            {error}
+          </p>
+        )}
         {loading && totalStreams === 0 && (
           <div className="flex flex-col items-center justify-center gap-3 py-16">
             <HarborLoader size="sm" />

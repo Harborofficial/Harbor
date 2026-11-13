@@ -117,7 +117,12 @@ export function AudioMenu(props: Props) {
           }`}
         >
           {props.iconUrl ? (
-            <img src={props.iconUrl} alt="" className="h-[22px] w-[22px] shrink-0 select-none object-contain" draggable={false} />
+            <img
+              src={props.iconUrl}
+              alt=""
+              className="h-[22px] w-[22px] shrink-0 select-none object-contain"
+              draggable={false}
+            />
           ) : (
             <Languages size={19} strokeWidth={2} />
           )}
@@ -145,7 +150,12 @@ const fold = (text: string) => text.toLowerCase().normalize("NFD").replace(/\p{M
 function trackMatches(track: TrackInfo, query: string): boolean {
   const wanted = normalizeLang(query);
   if (wanted && track.lang && normalizeLang(track.lang) === wanted) return true;
-  const haystack = [track.title, track.lang && languageName(track.lang), track.codec, track.channels];
+  const haystack = [
+    track.title,
+    track.lang && languageName(track.lang),
+    track.codec,
+    track.channels,
+  ];
   return fold(haystack.filter(Boolean).join(" ")).includes(fold(query));
 }
 
@@ -319,11 +329,11 @@ function DelayRow({
       }`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[12px] font-semibold text-ink">
-          {tr("Sync Offset")}
-        </span>
+        <span className="text-[12px] font-semibold text-ink">{tr("Sync Offset")}</span>
         <div className="flex items-center gap-2">
-          <span className={`font-mono text-[13px] font-bold tabular-nums ${delay !== 0 ? "text-accent" : "text-ink-muted"}`}>
+          <span
+            className={`font-mono text-[13px] font-bold tabular-nums ${delay !== 0 ? "text-accent" : "text-ink-muted"}`}
+          >
             {delay > 0 ? "+" : ""}
             {delay.toFixed(2)}s
           </span>
@@ -338,7 +348,7 @@ function DelayRow({
           )}
         </div>
       </div>
-      
+
       <div className="flex items-stretch overflow-hidden rounded-lg bg-raised">
         <button
           disabled={disabled}
@@ -359,4 +369,3 @@ function DelayRow({
     </div>
   );
 }
-

@@ -21,7 +21,8 @@ export default {
   "games.valorant.search": "Найти агента",
   "games.valorant.referenceError": "Не удалось загрузить справочник игры.",
   "games.valorant.stale": "Не удалось обновить. Показаны последние загруженные результаты.",
-  "games.valorant.metaError": "Рейтинговая статистика недоступна. Справочник агентов по-прежнему доступен.",
+  "games.valorant.metaError":
+    "Рейтинговая статистика недоступна. Справочник агентов по-прежнему доступен.",
   "games.valorant.agents": "Рейтинг агентов",
   "games.valorant.sort": "Сортировка агентов",
   "games.valorant.winSort": "Больше побед",
@@ -34,20 +35,24 @@ export default {
   "games.valorant.sampleNote": "Агенты с менее чем 200 появлениями находятся в конце списка.",
   "games.valorant.empty": "По этим фильтрам ничего не найдено.",
   "games.valorant.checked": "Проверено: {date}",
-  "games.valorant.metaScope": "Рейтинговые данные OP.GG для выбранного патча. Частота выбора — доля появлений агента. Результаты описывают выборку источника, а не всех игроков.",
-  "games.valorant.referenceScope": "Изображения и справочные данные через Valorant-API. Обновления могут запаздывать. Harbor не одобрен Riot Games.",
+  "games.valorant.metaScope":
+    "Рейтинговые данные OP.GG для выбранного патча. Частота выбора — доля появлений агента. Результаты описывают выборку источника, а не всех игроков.",
+  "games.valorant.referenceScope":
+    "Изображения и справочные данные через Valorant-API. Обновления могут запаздывать. Harbor не одобрен Riot Games.",
   "games.valorant.samples": "Появлений: {count}",
   "games.valorant.smallSample": "Малая выборка",
   "games.valorant.abilities": "Умения",
   "games.valorant.watchAbility": "Посмотреть умение",
   "games.valorant.videoError": "Не удалось воспроизвести демонстрацию.",
   "games.valorant.mapMeta": "Мета агентов на этой карте",
-  "games.valorant.mapScope": "Справочник карт, включая карты вне текущей рейтинговой ротации. Названия карт и позиций на английском.",
+  "games.valorant.mapScope":
+    "Справочник карт, включая карты вне текущей рейтинговой ротации. Названия карт и позиций на английском.",
   "games.valorant.callouts": "Названия позиций",
   "games.valorant.compareWeapon": "Сравнить с",
   "games.valorant.weapon": "Оружие",
   "games.valorant.distance": "Дистанция",
-  "games.valorant.damageScope": "Базовые значения основного огня без брони, пробития и умений. Для дробовиков указан урон одной дробинки.",
+  "games.valorant.damageScope":
+    "Базовые значения основного огня без брони, пробития и умений. Для дробовиков указан урон одной дробинки.",
   "games.valorant.weaponStats": "Характеристики оружия",
   "games.valorant.cost": "Кредиты",
   "games.valorant.magazine": "Магазин",
@@ -55,5 +60,5 @@ export default {
   "games.valorant.reload": "Перезарядка · секунды",
   "games.valorant.head": "Урон в голову",
   "games.valorant.body": "Урон в корпус",
-  "games.valorant.legs": "Урон в ноги"
+  "games.valorant.legs": "Урон в ноги",
 };

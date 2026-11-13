@@ -176,7 +176,7 @@ export async function prefetchBestMangaPage(
   key = url,
   autoDownload = false,
 ): Promise<void> {
-  if (!url || !lastRenderedWidth) return;
+  if (!url) return;
   if (!isBestUpscalerActive()) return;
   try {
     if (await cachedBestPage(key)) return;
@@ -185,7 +185,7 @@ export async function prefetchBestMangaPage(
     const bitmap = await createImageBitmap(blob);
     let height = 0;
     try {
-      if (bitmap.width * MIN_STRETCH > lastRenderedWidth) return;
+      if (lastRenderedWidth && bitmap.width * MIN_STRETCH > lastRenderedWidth) return;
       if (bitmap.width * bitmap.height > MAX_GPU_PAGE_PIXELS) return;
       if (isColorBitmap(bitmap)) {
         // MangaJaNai is for black and white; color pages use the fast model.

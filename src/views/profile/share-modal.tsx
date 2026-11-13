@@ -4,7 +4,13 @@ import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
 import { CopyRow } from "./share-modal/copy-row";
-import { DiscordIcon, FacebookIcon, RedditIcon, WhatsappIcon, XIcon } from "./share-modal/share-icons";
+import {
+  DiscordIcon,
+  FacebookIcon,
+  RedditIcon,
+  WhatsappIcon,
+  XIcon,
+} from "./share-modal/share-icons";
 import { embedFields, socialUrls } from "./share-modal/share-targets";
 
 type Tab = "link" | "embed";
@@ -114,7 +120,15 @@ export function ShareModal({ target, onClose }: { target: ShareTarget; onClose: 
   );
 }
 
-function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -144,7 +158,9 @@ function ShareButton({
       type="button"
       onClick={onClick}
       className={`inline-flex min-h-[52px] flex-col items-center justify-center gap-1 rounded-md px-2 py-2 ring-1 transition-colors ${
-        active ? "bg-accent/15 text-accent ring-accent/40" : "bg-elevated text-ink ring-edge-soft hover:bg-raised"
+        active
+          ? "bg-accent/15 text-accent ring-accent/40"
+          : "bg-elevated text-ink ring-edge-soft hover:bg-raised"
       }`}
     >
       {children}

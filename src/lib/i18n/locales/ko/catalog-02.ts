@@ -188,11 +188,13 @@ const catalog02: Record<string, string> = {
   "Budget exhausted, resets at midnight UTC.": "한도를 모두 사용했습니다. UTC 자정에 초기화됩니다.",
   "Buffer fill": "버퍼 채움",
   "Reveal the dot on hover": "마우스를 올리면 점 표시",
-  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.": "점은 평소에는 숨어 있다가 막대에 포인터를 올리면 나타납니다. 끄면 항상 표시됩니다.",
+  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.":
+    "점은 평소에는 숨어 있다가 막대에 포인터를 올리면 나타납니다. 끄면 항상 표시됩니다.",
   "Buffer fill brightness": "버퍼 채움 밝기",
   "Buffer size": "버퍼 크기",
   Buffering: "버퍼링 중",
-  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.": "시청 중이거나 일시 정지한 동안에도 전체 파일을 백그라운드에서 버퍼링합니다. 대용량 리먹스를 미리 불러오고 캐시된 파일을 재버퍼링 없이 탐색할 수 있습니다. 디브리드 및 P2P 스트림에서 작동합니다. 디스크 공간과 대역폭을 더 사용하며, 전환하거나 닫으면 삭제됩니다.",
+  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.":
+    "시청 중이거나 일시 정지한 동안에도 전체 파일을 백그라운드에서 버퍼링합니다. 대용량 리먹스를 미리 불러오고 캐시된 파일을 재버퍼링 없이 탐색할 수 있습니다. 디브리드 및 P2P 스트림에서 작동합니다. 디스크 공간과 대역폭을 더 사용하며, 전환하거나 닫으면 삭제됩니다.",
   "Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.":
     "신고한 버그가 실제 수정으로 배포되면 릴리스 노트에 신고자가 기재됩니다. 익명으로 남으려면 비워 두세요.",
   "Bug reports": "버그 신고",
@@ -389,7 +391,8 @@ const catalog02: Record<string, string> = {
   Checking: "확인 중",
   "Checking SVP installation...": "SVP 설치 확인 중...",
   "Checking availability": "사용 가능 여부 확인 중",
-  "Checking harborcommunity.site for a newer build.": "harborcommunity.site에서 새 빌드를 확인하는 중입니다.",
+  "Checking harborcommunity.site for a newer build.":
+    "harborcommunity.site에서 새 빌드를 확인하는 중입니다.",
   "Checking plots, cast, and scenes": "줄거리, 출연진, 장면 확인 중",
   "Checking sources and audio": "소스 및 오디오 확인 중",
   "Checking the local SVP and VapourSynth installation...":
@@ -743,7 +746,8 @@ const catalog02: Record<string, string> = {
   "Connect your Trakt account": "Trakt 계정 연결",
   "Connect your Trakt account to scrobble playback, sync your watchlist, and pull personalized recommendations.":
     "Trakt 계정을 연결하여 재생 기록을 전송하고, 관심 목록을 동기화하며, 맞춤 추천을 가져옵니다.",
-  "Connect your Trakt account to leave comments and reviews.": "댓글과 리뷰를 남기려면 Trakt 계정을 연결하세요.",
+  "Connect your Trakt account to leave comments and reviews.":
+    "댓글과 리뷰를 남기려면 Trakt 계정을 연결하세요.",
   "Connect your provider.": "제공업체를 연결하세요.",
   "Connect {name} in Settings first": "먼저 설정에서 {name}에 연결하세요",
   Connected: "연결됨",
@@ -837,7 +841,8 @@ const catalog02: Record<string, string> = {
   "Copy Webhook URL": "웹후크 URL 복사",
   "Copy code": "코드 복사",
   "Copy diagnostics": "진단 정보 복사",
-  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.": "진단 정보 복사는 엔진 상태와 P2P 설정을 JSON으로 가져오므로 버그 신고에 붙여 넣기 좋습니다. 엔진 폴더에는 DHT 캐시(dht.json)와 활성 전송 데이터가 저장됩니다.",
+  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.":
+    "진단 정보 복사는 엔진 상태와 P2P 설정을 JSON으로 가져오므로 버그 신고에 붙여 넣기 좋습니다. 엔진 폴더에는 DHT 캐시(dht.json)와 활성 전송 데이터가 저장됩니다.",
   "Copy error": "오류 복사",
   "Copy example": "예제 복사",
   "Copy filename": "파일 이름 복사",

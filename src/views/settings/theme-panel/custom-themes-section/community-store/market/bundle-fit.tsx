@@ -5,7 +5,9 @@ import type { StoreBundle } from "@/lib/bundle-store";
 function IconTile({ url, className }: { url: string; className: string }) {
   const [failed, setFailed] = useState(false);
   return (
-    <span className={`grid shrink-0 place-items-center rounded-[8px] bg-surface ring-1 ring-edge-soft ${className}`}>
+    <span
+      className={`grid shrink-0 place-items-center rounded-[8px] bg-surface ring-1 ring-edge-soft ${className}`}
+    >
       {!failed && (
         <img
           src={url}
@@ -66,6 +68,12 @@ export function BundleFitBody({
   );
 }
 
-export function BundleFit({ bundle, size = "card" }: { bundle: StoreBundle; size?: "card" | "hero" }) {
+export function BundleFit({
+  bundle,
+  size = "card",
+}: {
+  bundle: StoreBundle;
+  size?: "card" | "hero";
+}) {
   return <BundleFitBody icons={bundle.icons} cover={bundle.cover} size={size} />;
 }

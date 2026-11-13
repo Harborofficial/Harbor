@@ -22,10 +22,14 @@ export default {
   "games.manage.optionsTitle": "通过 {source} 卸载",
   "games.manage.removedNote": "已移除游戏条目。游戏文件仍保留在电脑上。",
   "games.manage.sentNote": "已打开 {source}。请在那里完成操作；返回后 Harbor 会更新安装状态。",
-  "games.manage.removeNote": "从此个人资料中移除 {name} 及其 Harbor 游玩记录。这不会卸载游戏或删除游戏文件。",
-  "games.manage.steamNote": "Steam 将负责卸载 {name}。你可能需要在 Steam 中再次确认。请先备份想保留的本地存档和模组。",
-  "games.manage.launcherNote": "打开 {source}，选择 {name}，然后选择管理或卸载。卸载由启动器处理，Harbor 不会删除游戏文件夹。",
-  "games.manage.windowsNote": "在 Windows 的已安装应用中找到 {name} 并选择卸载。如果是便携式游戏，请遵循游戏自身的移除说明。Harbor 不会删除其文件夹。",
+  "games.manage.removeNote":
+    "从此个人资料中移除 {name} 及其 Harbor 游玩记录。这不会卸载游戏或删除游戏文件。",
+  "games.manage.steamNote":
+    "Steam 将负责卸载 {name}。你可能需要在 Steam 中再次确认。请先备份想保留的本地存档和模组。",
+  "games.manage.launcherNote":
+    "打开 {source}，选择 {name}，然后选择管理或卸载。卸载由启动器处理，Harbor 不会删除游戏文件夹。",
+  "games.manage.windowsNote":
+    "在 Windows 的已安装应用中找到 {name} 并选择卸载。如果是便携式游戏，请遵循游戏自身的移除说明。Harbor 不会删除其文件夹。",
   "games.manage.opening": "正在打开…",
   "games.manage.confirmUninstall": "前往 Steam",
   "games.manage.openSource": "打开 {source}",

@@ -28,7 +28,8 @@
   transition: opacity 180ms ease-out;
   pointer-events: none;
 }
-.vpip[data-awake] .vpip-chrome, .vpip-chrome:focus-within {
+.vpip[data-awake] .vpip-chrome,
+.vpip-chrome:focus-within {
   opacity: 1;
 }
 .vpip-chrome::before,
@@ -59,28 +60,164 @@
   pointer-events: auto;
 }
 
-.vpip-transport { display: grid; place-items: center; flex: none; width: 28px; height: 30px; border-radius: 7px; color: white; background: transparent; }
-.vpip-transport:hover { background: rgb(255 255 255 / .16); }
-.vpip-volume { display: flex; align-items: center; gap: 3px; }
-.vpip-volume input { width: 52px; height: 16px; accent-color: white; }
-.vpip-settings { position: absolute; inset-inline-end: 12px; bottom: 56px; z-index: 3; width: min(300px, calc(100% - 24px)); max-height: calc(100% - 108px); overflow: auto; border-radius: 10px; background: #1b1c1e; padding: 14px; pointer-events: auto; color: #f7f7f7; }
-.vpip-settings header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-size: 12px; }
-.vpip-settings header button { width: 24px; height: 24px; display: grid; place-items: center; }
-.vpip-settings label { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-block: 8px; font-size: 11px; }
-.vpip-settings select, .vpip-settings input { min-width: 0; width: 150px; padding: 7px 8px; font: inherit; border-radius: 6px; background: #2b2c2e; color: white; }
-.vpip-error { position: absolute; top: 48px; inset-inline: 16px; font-size: 12px; color: white; padding: 10px; background: #242527; border-radius: 8px; pointer-events: auto; }
-.vpip :is(button,input,select):focus-visible { outline: 2px solid white; outline-offset: 2px; }
-.vpip-resize { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
-.vpip-resize > div { position: absolute; pointer-events: auto; }
-.vpip-resize [data-edge="North"] { top: 0; inset-inline: 12px; height: 5px; cursor: ns-resize; }
-.vpip-resize [data-edge="South"] { bottom: 0; inset-inline: 12px; height: 5px; cursor: ns-resize; }
-.vpip-resize [data-edge="East"] { right: 0; inset-block: 12px; width: 5px; cursor: ew-resize; }
-.vpip-resize [data-edge="West"] { left: 0; inset-block: 12px; width: 5px; cursor: ew-resize; }
-.vpip-resize [data-edge="NorthEast"] { right: 0; top: 0; width: 12px; height: 12px; cursor: nesw-resize; }
-.vpip-resize [data-edge="NorthWest"] { left: 0; top: 0; width: 12px; height: 12px; cursor: nwse-resize; }
-.vpip-resize [data-edge="SouthEast"] { right: 0; bottom: 0; width: 12px; height: 12px; cursor: nwse-resize; }
-.vpip-resize [data-edge="SouthWest"] { left: 0; bottom: 0; width: 12px; height: 12px; cursor: nesw-resize; }
-@media (max-width: 420px) { .vpip-volume input { display: none; } .vpip-time-total { display: none; } .vpip-bottom { gap: 6px; padding-inline: 8px; } }
+.vpip-transport {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 30px;
+  border-radius: 7px;
+  color: white;
+  background: transparent;
+}
+.vpip-transport:hover {
+  background: rgb(255 255 255 / 0.16);
+}
+.vpip-volume {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.vpip-volume input {
+  width: 52px;
+  height: 16px;
+  accent-color: white;
+}
+.vpip-settings {
+  position: absolute;
+  inset-inline-end: 12px;
+  bottom: 56px;
+  z-index: 3;
+  width: min(300px, calc(100% - 24px));
+  max-height: calc(100% - 108px);
+  overflow: auto;
+  border-radius: 10px;
+  background: #1b1c1e;
+  padding: 14px;
+  pointer-events: auto;
+  color: #f7f7f7;
+}
+.vpip-settings header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+.vpip-settings header button {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+}
+.vpip-settings label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-block: 8px;
+  font-size: 11px;
+}
+.vpip-settings select,
+.vpip-settings input {
+  min-width: 0;
+  width: 150px;
+  padding: 7px 8px;
+  font: inherit;
+  border-radius: 6px;
+  background: #2b2c2e;
+  color: white;
+}
+.vpip-error {
+  position: absolute;
+  top: 48px;
+  inset-inline: 16px;
+  font-size: 12px;
+  color: white;
+  padding: 10px;
+  background: #242527;
+  border-radius: 8px;
+  pointer-events: auto;
+}
+.vpip :is(button, input, select):focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+.vpip-resize {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+.vpip-resize > div {
+  position: absolute;
+  pointer-events: auto;
+}
+.vpip-resize [data-edge="North"] {
+  top: 0;
+  inset-inline: 12px;
+  height: 5px;
+  cursor: ns-resize;
+}
+.vpip-resize [data-edge="South"] {
+  bottom: 0;
+  inset-inline: 12px;
+  height: 5px;
+  cursor: ns-resize;
+}
+.vpip-resize [data-edge="East"] {
+  right: 0;
+  inset-block: 12px;
+  width: 5px;
+  cursor: ew-resize;
+}
+.vpip-resize [data-edge="West"] {
+  left: 0;
+  inset-block: 12px;
+  width: 5px;
+  cursor: ew-resize;
+}
+.vpip-resize [data-edge="NorthEast"] {
+  right: 0;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  cursor: nesw-resize;
+}
+.vpip-resize [data-edge="NorthWest"] {
+  left: 0;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+}
+.vpip-resize [data-edge="SouthEast"] {
+  right: 0;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+}
+.vpip-resize [data-edge="SouthWest"] {
+  left: 0;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  cursor: nesw-resize;
+}
+@media (max-width: 420px) {
+  .vpip-volume input {
+    display: none;
+  }
+  .vpip-time-total {
+    display: none;
+  }
+  .vpip-bottom {
+    gap: 6px;
+    padding-inline: 8px;
+  }
+}
 .vpip-title {
   min-width: 0;
   flex: 1;

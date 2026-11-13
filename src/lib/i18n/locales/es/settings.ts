@@ -322,7 +322,8 @@ const settings: Record<string, string> = {
     "Revisa los registros en el panel de Cloudflare y vuelve a implementar",
   "Check relay": "Comprobar servidor de retransmisión",
   "Checking {n} items…": "Comprobando {n} elementos…",
-  "Checking harborcommunity.site for a newer build.": "Buscando una versión más reciente en harborcommunity.site.",
+  "Checking harborcommunity.site for a newer build.":
+    "Buscando una versión más reciente en harborcommunity.site.",
   "Checking…": "Comprobando…",
   "Choose a model": "Elige un modelo",
   "Choose an avatar": "Elige un avatar",
@@ -644,7 +645,8 @@ const settings: Record<string, string> = {
   "Fan-made avatars for personal use. Harbor claims no rights to these characters; they belong to their creators and studios, shown here under fair use. Every one is optimized down to a tiny WebP.":
     "Avatares creados por fans para uso personal. Harbor no reclama derechos sobre estos personajes; pertenecen a sus creadores y estudios, y se muestran aquí según el uso legítimo. Todos están optimizados como archivos WebP diminutos.",
   "Fanart.tv · logos and backdrops": "Fanart.tv · logotipos y fondos",
-  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.": "Más rápido y silencioso que P2P si ya pagas por Usenet. Configúralo en la página del complemento y pega la URL del manifiesto que genera.",
+  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.":
+    "Más rápido y silencioso que P2P si ya pagas por Usenet. Configúralo en la página del complemento y pega la URL del manifiesto que genera.",
   "feature broken": "función dañada",
   "Fetches DuckDuckGo results and feeds top hits into the model prompt.":
     "Obtiene resultados de DuckDuckGo e incorpora los principales en la instrucción del modelo.",
@@ -784,7 +786,8 @@ const settings: Record<string, string> = {
     "Harbor usa la tarjeta gráfica cuando es seguro y recurre a la CPU cuando no lo es. La opción adecuada para casi todos.",
   "Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.":
     "Harbor marcará en Simkl como visto lo que termines y sincronizará tu lista de títulos por ver.",
-  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.": "Harbor no iniciará el motor P2P, no contactará rastreadores ni ejecutará DHT. Usa esta opción si solo quieres debrid y enlaces directos. Desactívala para volver a habilitar la reproducción por P2P.",
+  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.":
+    "Harbor no iniciará el motor P2P, no contactará rastreadores ni ejecutará DHT. Usa esta opción si solo quieres debrid y enlaces directos. Desactívala para volver a habilitar la reproducción por P2P.",
   "Harbor will scrobble your playback to Trakt and sync your watchlist.":
     "Harbor registrará en Trakt lo que reproduzcas y sincronizará tu lista de seguimiento.",
   "Harbor's built-in frame interpolation. Smooths panning, best on anime. Needs a display refresh rate above the video's frame rate, and can stutter on weak GPUs. Lighter than SVP.":
@@ -1306,7 +1309,8 @@ const settings: Record<string, string> = {
     "PNG, JPEG, WebP o SVG (se reduce automáticamente si es muy grande). Los GIF animados de hasta 2 MB se reproducen.",
   "PNG, JPG, WebP, GIF, MP4, WebM, MOV. Up to 6 files, 100 MB each.":
     "PNG, JPG, WebP, GIF, MP4, WebM o MOV. Hasta 6 archivos de 100 MB cada uno.",
-  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.": "Conecta Harbor a un servidor de streaming en otra máquina, como el servicio de Stremio en un servidor doméstico. Las fuentes P2P se descargan y reproducen desde esa máquina en lugar de esta.",
+  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.":
+    "Conecta Harbor a un servidor de streaming en otra máquina, como el servicio de Stremio en un servidor doméstico. Las fuentes P2P se descargan y reproducen desde esa máquina en lugar de esta.",
   "Popular · AIO": "Popular · AIO",
   "Popular This Week": "Popular esta semana",
   "Poster image quality": "Calidad de imagen de los pósteres",
@@ -1524,7 +1528,8 @@ const settings: Record<string, string> = {
   "Seek to the last half second.": "Ir al último medio segundo.",
   "Self-host": "Alojamiento propio",
   "Self-test": "Autodiagnóstico",
-  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.": "El autodiagnóstico está desactivado mientras la transmisión remota estricta está activa. Descarga un pequeño archivo de prueba mediante P2P en esta computadora.",
+  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.":
+    "El autodiagnóstico está desactivado mientras la transmisión remota estricta está activa. Descarga un pequeño archivo de prueba mediante P2P en esta computadora.",
   "Send a bug report straight to the Harbor team. Screenshots and screen recordings welcome.":
     "Envía un informe de errores directamente al equipo de Harbor. Puedes incluir capturas y grabaciones de pantalla.",
   "Send test": "Enviar prueba",
@@ -1884,7 +1889,8 @@ const settings: Record<string, string> = {
   "Top titles per service. Toggle off the ones you don't pay for.":
     "Títulos destacados por servicio. Desactiva los que no pagas.",
   "TorBox API key": "Clave de API de TorBox",
-  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.": "P2P está desactivado. Las fuentes sin caché no se reproducirán, salvo que provengan de un servicio debrid o un enlace directo. Para usar P2P, desactiva esta opción.",
+  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.":
+    "P2P está desactivado. Las fuentes sin caché no se reproducirán, salvo que provengan de un servicio debrid o un enlace directo. Para usar P2P, desactiva esta opción.",
   "Tracked people": "Personas seguidas",
   "Tracked person release rule": "Regla de estrenos de personas seguidas",
   "Trailer quality": "Calidad del tráiler",
@@ -2017,7 +2023,8 @@ const settings: Record<string, string> = {
     "Cuando una versión incluye varias pistas de audio, Harbor selecciona la primera que coincida con esta lista.",
   "When an episode ends, automatically start the next one. Off lets the episode finish and stop.":
     "Cuando termina un episodio, inicia automáticamente el siguiente. Si se desactiva, el episodio termina y la reproducción se detiene.",
-  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.": "Si se desactiva, una transferencia P2P se detiene en cuanto cierras o cambias de fuente, para que nada siga descargándose en segundo plano. Actívala para que continúe después de salir; administra o pausa esas descargas desde la pestaña Descargas.",
+  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.":
+    "Si se desactiva, una transferencia P2P se detiene en cuanto cierras o cambias de fuente, para que nada siga descargándose en segundo plano. Actívala para que continúe después de salir; administra o pausa esas descargas desde la pestaña Descargas.",
   "When playback starts, Harbor automatically finds and loads a subtitle in one of these languages, so you never have to search by hand. The first available match wins, so put your main language first.":
     "Cuando comienza la reproducción, Harbor busca y carga automáticamente un subtítulo en uno de estos idiomas, para que nunca tengas que buscarlo manualmente. Se usa la primera coincidencia disponible, así que coloca primero tu idioma principal.",
   "When the audio already matches your subtitle language, pick a forced track (foreign dialogue and signs only) instead of full subtitles. If the file has no forced track, subtitles stay off.":
@@ -2096,9 +2103,12 @@ const settings: Record<string, string> = {
   "Your Trakt watchlist": "Tu lista de seguimiento de Trakt",
   "Zoom in": "Acercar",
   "Zoom out": "Alejar",
-  "Cached source resolution and direct download links.": "Resolución de fuentes en caché y enlaces de descarga directa.",
-  "Cached source resolution and cloud library access.": "Resolución de fuentes en caché y acceso a la biblioteca en la nube.",
-  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.": "Ambos muestra juntos los resultados directos, de debrid y P2P. Directo/debrid deja los resultados P2P en segundo plano salvo que no haya otra opción. P2P los pone primero.",
+  "Cached source resolution and direct download links.":
+    "Resolución de fuentes en caché y enlaces de descarga directa.",
+  "Cached source resolution and cloud library access.":
+    "Resolución de fuentes en caché y acceso a la biblioteca en la nube.",
+  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.":
+    "Ambos muestra juntos los resultados directos, de debrid y P2P. Directo/debrid deja los resultados P2P en segundo plano salvo que no haya otra opción. P2P los pone primero.",
 };
 
 export default settings;

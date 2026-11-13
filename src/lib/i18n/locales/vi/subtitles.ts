@@ -5,6 +5,8 @@ const subtitles: Record<string, string> = {
     "Phụ đề có kiểu (ASS) giữ nguyên màu sắc, kích thước và vị trí chữ trên màn hình, nhưng dùng phông chữ của bạn.",
   "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.":
     "Harbor gửi phụ đề của mình đến mpv của bạn. Hãy chọn một phụ đề trong menu phụ đề của mpv.",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "Phụ đề có kiểu (ASS) giữ nguyên màu sắc, kích thước và vị trí chữ trên màn hình, nhưng dùng phông chữ của bạn.",
 };
 
 export default subtitles;

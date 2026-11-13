@@ -15,7 +15,9 @@ export default {
   "artwork.resetLaunch": "लॉन्च लोगो रीसेट करें",
   "artwork.local": "इस डिवाइस पर सहेजा जाता है। कम गति की सेटिंग में स्थिर छवि दिखती है।",
   "artwork.error.large": "छोटी फ़ाइल चुनें: अधिकतम 8 MB और 4096 × 4096 पिक्सेल।",
-  "artwork.error.external": "यह ऐनिमेशन बाहरी मीडिया का इस्तेमाल करता है। छवियों को एम्बेड करके एक्सपोर्ट करें।",
+  "artwork.error.external":
+    "यह ऐनिमेशन बाहरी मीडिया का इस्तेमाल करता है। छवियों को एम्बेड करके एक्सपोर्ट करें।",
   "artwork.error.storage": "इस डिवाइस पर फ़ाइल नहीं सहेजी जा सकी। पिछला चयन नहीं बदला है।",
-  "artwork.error.invalid": "फ़ाइल नहीं पढ़ी जा सकी। Lottie (.json या .lottie), GIF, PNG, JPEG या WebP चुनें।"
+  "artwork.error.invalid":
+    "फ़ाइल नहीं पढ़ी जा सकी। Lottie (.json या .lottie), GIF, PNG, JPEG या WebP चुनें।",
 };

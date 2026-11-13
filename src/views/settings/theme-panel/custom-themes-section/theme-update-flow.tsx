@@ -209,7 +209,9 @@ export function ThemeUpdateFlow({
                 />
               </div>
             </div>
-            {error && <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-danger">{error}</p>}
+            {error && (
+              <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-danger">{error}</p>
+            )}
           </div>
         </div>
       )}

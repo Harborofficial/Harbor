@@ -19,7 +19,12 @@ function dirOf(path: string): string {
 
 function fileFromBytes(bytes: Uint8Array, name: string): File {
   const ext = (name.split(".").pop() || "png").toLowerCase();
-  const mime = ext === "jpg" || ext === "jfif" ? "image/jpeg" : ext === "svg" ? "image/svg+xml" : `image/${ext}`;
+  const mime =
+    ext === "jpg" || ext === "jfif"
+      ? "image/jpeg"
+      : ext === "svg"
+        ? "image/svg+xml"
+        : `image/${ext}`;
   return new File([bytes as BlobPart], name, { type: mime });
 }
 
@@ -108,7 +113,10 @@ export async function readPackFromFile(file: File): Promise<{ pack: ParsedPack; 
 
 export async function pickPackNative(): Promise<{ pack: ParsedPack; baseDir: string } | null> {
   const { open } = await import("@tauri-apps/plugin-dialog");
-  const picked = await open({ multiple: false, filters: [{ name: "Avatar pack", extensions: ["json"] }] });
+  const picked = await open({
+    multiple: false,
+    filters: [{ name: "Avatar pack", extensions: ["json"] }],
+  });
   if (typeof picked !== "string") return null;
   const { readTextFile } = await import("@tauri-apps/plugin-fs");
   const text = await readTextFile(picked);
@@ -118,7 +126,10 @@ export async function pickPackNative(): Promise<{ pack: ParsedPack; baseDir: str
 export async function savePackJson(fileName: string, json: string): Promise<boolean> {
   if (isNativePick()) {
     const { save } = await import("@tauri-apps/plugin-dialog");
-    const target = await save({ defaultPath: fileName, filters: [{ name: "Avatar pack", extensions: ["json"] }] });
+    const target = await save({
+      defaultPath: fileName,
+      filters: [{ name: "Avatar pack", extensions: ["json"] }],
+    });
     if (typeof target !== "string") return false;
     const { writeTextFile } = await import("@tauri-apps/plugin-fs");
     await writeTextFile(target, json);

@@ -14,6 +14,6 @@ const gameWowProgress: Record<string, string> = {
   "games.wow.progress.noCounts": "クリア回数を取得できません",
   "games.wow.progress.counts": "{total}回 · 時間内{timed}回",
   "games.wow.progress.best": "ベスト記録",
-  "games.wow.progress.explore": "攻略記録を見る"
+  "games.wow.progress.explore": "攻略記録を見る",
 };
 export default gameWowProgress;

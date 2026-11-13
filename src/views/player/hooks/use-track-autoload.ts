@@ -876,7 +876,9 @@ export function useTrackAutoload(params: {
     if (embeddedRestoreRef.current === src.url) return;
     const want = rememberedSession?.subtitle
       ? selectPlaybackSubtitle(snap.subtitleTracks, rememberedSession.subtitle)
-      : memory ? pickRememberedEmbedded(snap.subtitleTracks, memory) : undefined;
+      : memory
+        ? pickRememberedEmbedded(snap.subtitleTracks, memory)
+        : undefined;
     if (want) {
       embeddedRestoreRef.current = src.url;
       if (!want.selected) bridge.setSubtitleTrack(want.id, "restore");
@@ -1022,6 +1024,8 @@ export function useTrackAutoload(params: {
   const audioRestoreWarningRef = useRef<string | null>(null);
   useEffect(() => {
     if (!rememberedAudio || !snap.firstFrameReady) return;
+    // mpv can clear its track list at natural EOF; that is not a failed restore.
+    if (snap.status === "ended" || snap.audioTracks.length === 0) return;
     const current = snap.audioTracks.find((track) => track.selected);
     if (current && autoAudioIdRef.current && current.id !== autoAudioIdRef.current) return;
     if (selectPlaybackAudio(snap.audioTracks, rememberedAudio)) return;
@@ -1031,7 +1035,7 @@ export function useTrackAutoload(params: {
       t("The saved audio track could not be restored. Choose an audio track."),
       "error",
     );
-  }, [src.url, snap.firstFrameReady, snap.audioTracks, rememberedAudio]);
+  }, [src.url, snap.status, snap.firstFrameReady, snap.audioTracks, rememberedAudio]);
 
   const delaysAppliedRef = useRef<{ url: string; bridge: PlayerBridge } | null>(null);
   useEffect(() => {
@@ -1120,15 +1124,25 @@ export function useTrackAutoload(params: {
     const prefs = readPlayerPrefs(src.meta.id);
     const manualDelay = rememberedSession?.subDelaySec ?? prefs?.subDelaySec;
     const savedKind = rememberedSession?.subtitle
-      ? (rememberedSession.subtitle.external ? "external" : "embedded")
+      ? rememberedSession.subtitle.external
+        ? "external"
+        : "embedded"
       : prefs?.subDelayTrackKind;
     bridgeRef.current?.setSubDelay(
       initialDelayForSelectedTrack(currentSubtitle, manualDelay, savedKind),
     );
   }, [
-    src.url, src.meta.id, src.episode?.season, src.episode?.episode,
-    src.playbackTraceId, src.attempt, snap.firstFrameReady,
-    currentSubtitle?.id, currentSubtitle?.external, rememberedSession, bridgeRef,
+    src.url,
+    src.meta.id,
+    src.episode?.season,
+    src.episode?.episode,
+    src.playbackTraceId,
+    src.attempt,
+    snap.firstFrameReady,
+    currentSubtitle?.id,
+    currentSubtitle?.external,
+    rememberedSession,
+    bridgeRef,
   ]);
 
   useEffect(() => {

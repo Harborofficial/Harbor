@@ -6,9 +6,11 @@ export default {
   "games.recommend.filterTitle": "Excluir das sugestões",
   "games.recommend.hideLibrary": "Jogos na minha biblioteca",
   "games.recommend.hideSaved": "Jogos salvos",
-  "games.recommend.libraryNote": "As correspondências com a biblioteca usam os jogos detectados, as importações vinculadas e sua última sincronização com o Steam.",
+  "games.recommend.libraryNote":
+    "As correspondências com a biblioteca usam os jogos detectados, as importações vinculadas e sua última sincronização com o Steam.",
   "games.recommend.steamSynced": "Biblioteca Steam sincronizada em {date}",
-  "games.recommend.steamUnavailable": "As informações sobre os jogos que você possui no Steam estão indisponíveis. Os jogos da biblioteca local continuam sendo considerados.",
+  "games.recommend.steamUnavailable":
+    "As informações sobre os jogos que você possui no Steam estão indisponíveis. Os jogos da biblioteca local continuam sendo considerados.",
   "games.recommend.inLibrary": "Na sua biblioteca",
   "games.recommend.removeSaved": "Remover {name} dos jogos salvos",
   "games.recommend.forYou": "Para você",
@@ -21,21 +23,27 @@ export default {
   "games.recommend.recent": "Jogos recentes",
   "games.recommend.reset": "Mostrar jogos ocultos novamente",
   "games.recommend.empty": "Descubra do seu jeito",
-  "games.recommend.emptyNote": "Salve jogos que chamem sua atenção ou jogue pela sua biblioteca. As sugestões aparecerão aqui.",
-  "games.recommend.signalsOff": "Ative Jogos salvos ou Jogos recentes acima para personalizar suas sugestões.",
+  "games.recommend.emptyNote":
+    "Salve jogos que chamem sua atenção ou jogue pela sua biblioteca. As sugestões aparecerão aqui.",
+  "games.recommend.signalsOff":
+    "Ative Jogos salvos ou Jogos recentes acima para personalizar suas sugestões.",
   "games.recommend.save": "Salvar {name}",
   "games.recommend.hide": "Ocultar {name} das sugestões",
   "games.recommend.hideShort": "Não é para mim",
   "games.recommend.because.saved": "Porque você salvou",
   "games.recommend.because.played": "Porque você jogou",
   "games.recommend.unavailable": "As conexões ainda não estão disponíveis.",
-  "games.recommend.retryNote": "Sua biblioteca está aqui. Tente carregar os jogos relacionados novamente.",
+  "games.recommend.retryNote":
+    "Sua biblioteca está aqui. Tente carregar os jogos relacionados novamente.",
   "games.recommend.caughtUp": "Experimente outra direção.",
-  "games.recommend.caughtUpNote": "Tente desativar um filtro, restaurar uma sugestão oculta ou salvar outro favorito.",
+  "games.recommend.caughtUpNote":
+    "Tente desativar um filtro, restaurar uma sugestão oculta ou salvar outro favorito.",
   "games.recommend.finding": "Buscando conexões com seus jogos…",
-  "games.recommend.source": "Sugestões de marcadores Steam e do IGDB, com base na sua biblioteca. As escolhas ocultas valem apenas para este perfil.",
+  "games.recommend.source":
+    "Sugestões de marcadores Steam e do IGDB, com base na sua biblioteca. As escolhas ocultas valem apenas para este perfil.",
   "games.recommend.retrySome": "Tentar conexões pendentes novamente",
-  "games.recommend.saveError": "Não foi possível salvar suas preferências de descoberta neste dispositivo. Tente novamente.",
+  "games.recommend.saveError":
+    "Não foi possível salvar suas preferências de descoberta neste dispositivo. Tente novamente.",
   "games.recommend.influences": "O que influencia suas sugestões",
   "games.recommend.influencesNote": "Escolha quais jogos o Harbor usa. Sua biblioteca não muda.",
   "games.recommend.exclude": "Deixar de usar {name}",
@@ -48,8 +56,8 @@ export default {
   "games.recommend.undo": "Desfazer",
   "games.recommend.undoLabel": "Desfazer alteração de {name}",
   "games.recommend.allExcluded": "Todas as suas influências estão excluídas.",
-  "games.recommend.allExcludedNote": "Restaure um jogo em Ajustar sugestões ou salve outro favorito.",
+  "games.recommend.allExcludedNote":
+    "Restaure um jogo em Ajustar sugestões ou salve outro favorito.",
   "games.recommend.saved": "Jogos salvos",
-  "games.recommend.close": "Fechar configurações de sugestões"
+  "games.recommend.close": "Fechar configurações de sugestões",
 };
-

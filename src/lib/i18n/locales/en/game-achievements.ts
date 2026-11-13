@@ -12,12 +12,14 @@ export default {
   "games.achievementManager.review": "Review changes",
   "games.achievementManager.reviewTitle": "Review Steam changes",
   "games.achievementManager.reviewNote": "Apply these changes to {game} on Steam account {id}.",
-  "games.achievementManager.recentGamesNote": "Steam will show {game} in your recently played games after this.",
+  "games.achievementManager.recentGamesNote":
+    "Steam will show {game} in your recently played games after this.",
   "games.achievementManager.apply": "Apply to Steam",
   "games.achievementManager.applying": "Applying changes…",
   "games.achievementManager.applied": "Steam confirmed all {count} changes.",
   "games.achievementManager.unconfirmed": "Not confirmed",
-  "games.achievementManager.partial": "Steam confirmed {count} of {total} changes. Refresh to check the remaining achievements.",
+  "games.achievementManager.partial":
+    "Steam confirmed {count} of {total} changes. Refresh to check the remaining achievements.",
   "games.achievementManager.refresh": "Refresh from Steam",
   "games.achievementManager.back": "Keep editing",
   "games.achievementManager.note": "Only the listed changes will be sent to Steam.",
@@ -25,26 +27,37 @@ export default {
   "games.achievementManager.error.clientLoad": "Couldn't connect to the installed Steam client.",
   "games.achievementManager.error.clientVersion": "This Steam client version isn't supported yet.",
   "games.achievementManager.error.offline": "Open Steam and sign in, then try again.",
-  "games.achievementManager.error.accountChanged": "The active Steam account changed. Refresh before editing.",
-  "games.achievementManager.error.notOwned": "The active Steam account doesn't have access to this game.",
-  "games.achievementManager.error.timeout": "Steam didn't return achievement data in time. Try refreshing.",
+  "games.achievementManager.error.accountChanged":
+    "The active Steam account changed. Refresh before editing.",
+  "games.achievementManager.error.notOwned":
+    "The active Steam account doesn't have access to this game.",
+  "games.achievementManager.error.timeout":
+    "Steam didn't return achievement data in time. Try refreshing.",
   "games.achievementManager.error.unavailable": "Couldn't read the game's achievements from Steam.",
-  "games.achievementManager.error.rejected": "Steam declined the update. Refresh to check the current state.",
-  "games.achievementManager.error.uncertain": "Steam hasn't confirmed the result. Refresh to check before making more changes.",
-  "games.achievementManager.error.platform": "Achievement management currently supports Harbor on Windows x64.",
+  "games.achievementManager.error.rejected":
+    "Steam declined the update. Refresh to check the current state.",
+  "games.achievementManager.error.uncertain":
+    "Steam hasn't confirmed the result. Refresh to check before making more changes.",
+  "games.achievementManager.error.platform":
+    "Achievement management currently supports Harbor on Windows x64.",
   "games.achievementManager.error.invalid": "Select up to 2,000 individual changes at a time.",
-  "games.achievementManager.error.stale": "These achievements changed in Steam. Refresh before editing.",
-  "games.achievementManager.error.protected": "The game manages this achievement. Harbor can't edit it.",
+  "games.achievementManager.error.stale":
+    "These achievements changed in Steam. Refresh before editing.",
+  "games.achievementManager.error.protected":
+    "The game manages this achievement. Harbor can't edit it.",
   "games.achievementManager.error.expired": "This review expired. Refresh before applying changes.",
   "games.achievementManager.error.busy": "Another Steam achievement request is in progress.",
   "games.achievementManager.commit": "Commit changes",
   "games.achievementManager.consentTitle": "Unlock Steam achievements",
-  "games.achievementManager.consentBody": "Unlock or relock achievements on your signed-in Steam account. Your selections stay as a draft until you commit the changes.",
-  "games.achievementManager.consentRules": "Harbor uses Steam's achievement interface without injecting into games. Each game's rules and reward requirements still apply.",
+  "games.achievementManager.consentBody":
+    "Unlock or relock achievements on your signed-in Steam account. Your selections stay as a draft until you commit the changes.",
+  "games.achievementManager.consentRules":
+    "Harbor uses Steam's achievement interface without injecting into games. Each game's rules and reward requirements still apply.",
   "games.achievementManager.consentSam": "Inspired by SAM's achievement workflow",
   "games.achievementManager.consentOnce": "Shown once for this Harbor profile.",
   "games.achievementManager.consentAccept": "I understand",
-  "games.achievementManager.desktopOnly": "Use Harbor on Windows with Steam running to change achievements.",
+  "games.achievementManager.desktopOnly":
+    "Use Harbor on Windows with Steam running to change achievements.",
   "games.achievementManager.all": "All",
   "games.achievementManager.filter": "Achievement filter",
   "games.achievementManager.rewards": "Item rewards",
@@ -60,24 +73,32 @@ export default {
   "games.achievementManager.rewardVia": "via {achievement}",
   "games.achievementManager.rewardOwned": "Already unlocked",
   "games.achievementManager.rewardAction": "Unlock {item}",
-  "games.achievementManager.rewardNote": "The game grants items. An achievement unlock does not confirm delivery, and previously claimed rewards are not granted again.",
+  "games.achievementManager.rewardNote":
+    "The game grants items. An achievement unlock does not confirm delivery, and previously claimed rewards are not granted again.",
   "games.achievementManager.progressCount": "{count} of {total} earned",
   "games.achievementManager.progressLoading": "Reading your Steam progress…",
-  "games.achievementManager.progressUnavailable": "Your progress is unavailable. Open Steam or connect your Steam account, then refresh.",
-  "games.achievementManager.progressReadOnly": "Your Steam progress · Browsing does not change achievements.",
-  "games.achievementManager.progressPublic": "Global statistics only · Personal progress is unavailable.",
+  "games.achievementManager.progressUnavailable":
+    "Your progress is unavailable. Open Steam or connect your Steam account, then refresh.",
+  "games.achievementManager.progressReadOnly":
+    "Your Steam progress · Browsing does not change achievements.",
+  "games.achievementManager.progressPublic":
+    "Global statistics only · Personal progress is unavailable.",
   "games.achievementManager.pending": "Pending",
   "games.achievementManager.managed": "Managed",
   "games.achievementManager.clear": "Clear changes",
-  "games.achievementManager.discardConfirm": "Refreshing from Steam discards your {count} selected changes.",
-  "games.achievementManager.schemaMissing": "Steam has no cached achievement details for this game on this computer, so every achievement is read only here. Launch the game once in Steam, then refresh.",
+  "games.achievementManager.discardConfirm":
+    "Refreshing from Steam discards your {count} selected changes.",
+  "games.achievementManager.schemaMissing":
+    "Steam has no cached achievement details for this game on this computer, so every achievement is read only here. Launch the game once in Steam, then refresh.",
   "games.achievementManager.pickGame": "Choose another game",
   "games.achievementManager.pickTitle": "Choose a game",
   "games.achievementManager.pickSearch": "Search your games",
-  "games.achievementManager.pickNote": "Harbor can edit a game once Steam has cached its achievements on this computer.",
+  "games.achievementManager.pickNote":
+    "Harbor can edit a game once Steam has cached its achievements on this computer.",
   "games.achievementManager.pickInstalled": "Installed",
   "games.achievementManager.pickEmpty": "No games matched your search.",
-  "games.achievementManager.pickUnavailable": "No Steam games found. Install a game through Steam or connect your Steam account, then try again.",
+  "games.achievementManager.pickUnavailable":
+    "No Steam games found. Install a game through Steam or connect your Steam account, then try again.",
   "games.achievementManager.pickMore": "Show more games",
   "games.achievementManager.status.steam": "Connect to Steam",
   "games.achievementManager.status.connection": "Steam connection unavailable",
@@ -94,7 +115,8 @@ export default {
   "games.achievementManager.status.filtered": "No matches found",
   "games.achievementManager.status.noGames": "No Steam games found",
   "games.achievementManager.status.library": "Couldn’t read your Steam library",
-  "games.achievementManager.status.libraryNote": "Try scanning again. Games from a connected Steam account are still available.",
+  "games.achievementManager.status.libraryNote":
+    "Try scanning again. Games from a connected Steam account are still available.",
   "games.achievementManager.status.emptyNote": "Steam returned no achievements for {game}.",
   "games.achievementManager.status.store": "View on Steam",
   "games.achievementManager.status.getSteam": "Get Steam",

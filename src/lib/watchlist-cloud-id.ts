@@ -12,10 +12,7 @@ function tmdbKey(): string {
   }
 }
 
-export async function watchlistImdbId(
-  id: string,
-  hint?: string | null,
-): Promise<string | null> {
+export async function watchlistImdbId(id: string, hint?: string | null): Promise<string | null> {
   if (id.startsWith("tt")) return id;
   if (hint && hint.startsWith("tt")) return hint;
   if (ANIME_CLOUD_ID.test(id)) return null;

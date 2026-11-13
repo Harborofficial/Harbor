@@ -9,8 +9,10 @@ export default {
   "games.pick.heading0": "지금 어떤 게임이 당기나요?",
   "games.pick.heading1": "좋아하는 게임 몇 개면 충분해요.",
   "games.pick.heading2": "플레이할 만한 게임.",
-  "games.pick.note0": "오늘 끌리는 분위기를 골라 보세요. 정확히 일치하는 게임을 먼저, 비슷한 대안을 그다음에 보여드려요. 플레이 방식과 다른 필터는 유지됩니다.",
-  "games.pick.note1": "좋아하는 게임을 최대 5개 선택하세요. 게임의 특징과 최근 활동을 함께 살펴봅니다.",
+  "games.pick.note0":
+    "오늘 끌리는 분위기를 골라 보세요. 정확히 일치하는 게임을 먼저, 비슷한 대안을 그다음에 보여드려요. 플레이 방식과 다른 필터는 유지됩니다.",
+  "games.pick.note1":
+    "좋아하는 게임을 최대 5개 선택하세요. 게임의 특징과 최근 활동을 함께 살펴봅니다.",
   "games.pick.note2": "선택한 조건, 공통 관심사, 플레이어 평가로 고른 후보입니다.",
   "games.pick.company": "누구와 플레이하나요?",
   "games.pick.refine": "검색 세부 조정",
@@ -37,15 +39,18 @@ export default {
   "games.pick.remove": "좋아하는 게임에서 {name} 제거",
   "games.pick.addFavorite": "{name}을 좋아하는 게임으로 사용",
   "games.pick.history": "내 라이브러리 활동 사용",
-  "games.pick.historyNote": "최근 플레이, 많이 플레이한 게임, 새로 추가한 게임, 저장한 게임을 참고합니다. 좋아하는 게임에 더 큰 비중을 둡니다.",
+  "games.pick.historyNote":
+    "최근 플레이, 많이 플레이한 게임, 새로 추가한 게임, 저장한 게임을 참고합니다. 좋아하는 게임에 더 큰 비중을 둡니다.",
   "games.pick.signal.recent": "최근 플레이",
   "games.pick.signal.mostPlayed": "많이 플레이",
   "games.pick.signal.added": "최근 추가",
   "games.pick.signal.saved": "저장됨",
   "games.pick.hours": "시간",
-  "games.pick.noHistory": "아직 참고할 활동이 없어요. 게임을 고르거나 게임 설정에서 Steam을 연결하세요.",
+  "games.pick.noHistory":
+    "아직 참고할 활동이 없어요. 게임을 고르거나 게임 설정에서 Steam을 연결하세요.",
   "games.pick.manualOnly": "좋아하는 게임과 선택한 필터만으로 추천합니다.",
-  "games.pick.addedNote": "‘최근 추가’는 최초 가져오기 이후 Harbor에서 처음 확인한 시점이며 구매일이 아닙니다.",
+  "games.pick.addedNote":
+    "‘최근 추가’는 최초 가져오기 이후 Harbor에서 처음 확인한 시점이며 구매일이 아닙니다.",
   "games.pick.because": "{name}을 좋아하니까",
   "games.pick.matches": "선택한 조건에 맞아요",
   "games.pick.steamCatalog": "Steam 카탈로그",
@@ -59,11 +64,14 @@ export default {
   "games.pick.undo": "실행 취소",
   "games.pick.resetHidden": "숨긴 게임 다시 표시",
   "games.pick.more": "더 많은 추천 찾기",
-  "games.pick.rankingNote": "공통 Steam 태그, 활동, 평가 신뢰도, 다양성으로 정렬합니다. 점수는 Steam 긍정 평가 비율입니다. 가격과 판매 여부는 미국 카탈로그 기준입니다.",
+  "games.pick.rankingNote":
+    "공통 Steam 태그, 활동, 평가 신뢰도, 다양성으로 정렬합니다. 점수는 Steam 긍정 평가 비율입니다. 가격과 판매 여부는 미국 카탈로그 기준입니다.",
   "games.pick.error": "다음 게임은 잠시만 기다려 주세요.",
-  "games.pick.errorNote": "게임 카탈로그에 연결하지 못했어요. 조건은 저장되어 있으니 다시 시도해 주세요.",
+  "games.pick.errorNote":
+    "게임 카탈로그에 연결하지 못했어요. 조건은 저장되어 있으니 다시 시도해 주세요.",
   "games.pick.noMatches": "아직 이 조건에 맞는 게임을 찾지 못했어요.",
-  "games.pick.noMatchesNote": "플랫폼, 가격 또는 라이브러리 조건을 넓혀 보세요. 분위기가 비슷한 게임은 이미 포함되어 있어요.",
+  "games.pick.noMatchesNote":
+    "플랫폼, 가격 또는 라이브러리 조건을 넓혀 보세요. 분위기가 비슷한 게임은 이미 포함되어 있어요.",
   "games.pick.saveError": "이번 세션에는 적용되지만 이 기기에 저장하지 못했어요.",
   "games.pick.selected": "태그 {count}개 선택",
   "games.pick.favoriteCount": "좋아하는 게임 {count}/5개",
@@ -76,5 +84,5 @@ export default {
   "games.pick.owned": "내 라이브러리에 있음",
   "games.pick.closest": "비슷한 대안도 포함됩니다. 플레이 방식과 다른 필터는 유지됩니다.",
   "games.pick.closeMatch": "분위기 태그 {total}개 중 {count}개 일치",
-  "games.pick.missing": "없는 태그: {tags}"
+  "games.pick.missing": "없는 태그: {tags}",
 };

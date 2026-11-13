@@ -3,7 +3,12 @@ import { createPortal } from "react-dom";
 import { Info, X } from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
 import { AVATAR_CATALOG, avatarUrl } from "@/lib/avatars/catalog";
-import { deleteAvatarPack, removeFromAvatarPack, UPLOADS_ID, useAvatarPacks } from "@/lib/avatars/packs";
+import {
+  deleteAvatarPack,
+  removeFromAvatarPack,
+  UPLOADS_ID,
+  useAvatarPacks,
+} from "@/lib/avatars/packs";
 import { flattenAvatar, loadPersonBg, savePersonBg } from "@/lib/avatars/flatten";
 import { AvatarRail, type RailGroup } from "./avatar-rail";
 import { AvatarGrid, type GridItem } from "./avatar-grid";
@@ -14,7 +19,13 @@ import { useAvatarImport } from "./use-avatar-import";
 import { AvatarPackHelp } from "./avatar-pack-help";
 import { useT } from "@/lib/i18n";
 
-type ViewGroup = { id: string; label: string; transparent?: boolean; packId?: string; items: GridItem[] };
+type ViewGroup = {
+  id: string;
+  label: string;
+  transparent?: boolean;
+  packId?: string;
+  items: GridItem[];
+};
 
 export function AvatarCatalogModal({
   current,
@@ -52,7 +63,8 @@ export function AvatarCatalogModal({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !helpOpen && !document.body.hasAttribute("data-color-popover")) onClose();
+      if (e.key === "Escape" && !helpOpen && !document.body.hasAttribute("data-color-popover"))
+        onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -84,7 +96,9 @@ export function AvatarCatalogModal({
       })),
     }));
     const packGroups = [...packs]
-      .sort((a, b) => (a.id === UPLOADS_ID ? -1 : b.id === UPLOADS_ID ? 1 : a.createdAt - b.createdAt))
+      .sort((a, b) =>
+        a.id === UPLOADS_ID ? -1 : b.id === UPLOADS_ID ? 1 : a.createdAt - b.createdAt,
+      )
       .map((p) => ({
         id: p.id,
         label: p.name,
@@ -109,7 +123,10 @@ export function AvatarCatalogModal({
 
   const query = q.trim().toLowerCase();
   const searchResults = useMemo(
-    () => (query ? groups.flatMap((g) => g.items).filter((it) => it.name.toLowerCase().includes(query)) : null),
+    () =>
+      query
+        ? groups.flatMap((g) => g.items).filter((it) => it.name.toLowerCase().includes(query))
+        : null,
     [groups, query],
   );
   const currentGroup = section === "all" ? null : groups.find((g) => g.id === section);
@@ -158,14 +175,18 @@ export function AvatarCatalogModal({
       key={g.id}
       label={g.label}
       count={g.items.length}
-      action={g.transparent ? <AvatarBgControl value={personBg} onChange={setPersonBg} /> : undefined}
+      action={
+        g.transparent ? <AvatarBgControl value={personBg} onChange={setPersonBg} /> : undefined
+      }
     >
       <AvatarGrid
         items={g.items}
         current={current}
         tileBg={g.transparent ? personBg : undefined}
         onPick={handlePick}
-        onDelete={g.packId ? (item) => void removeFromAvatarPack(g.packId as string, item.key) : undefined}
+        onDelete={
+          g.packId ? (item) => void removeFromAvatarPack(g.packId as string, item.key) : undefined
+        }
       />
     </GroupSection>
   );
@@ -220,9 +241,22 @@ export function AvatarCatalogModal({
           </button>
         </div>
 
-        <input ref={fileRef} type="file" accept="image/*" multiple onChange={onInputChange} className="hidden" />
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={onInputChange}
+          className="hidden"
+        />
         <input ref={folderRef} type="file" multiple onChange={onInputChange} className="hidden" />
-        <input ref={packRef} type="file" accept="application/json,.json" onChange={onPackInputChange} className="hidden" />
+        <input
+          ref={packRef}
+          type="file"
+          accept="application/json,.json"
+          onChange={onPackInputChange}
+          className="hidden"
+        />
 
         <div className="relative flex min-h-0 flex-1">
           <AvatarRail
@@ -242,15 +276,14 @@ export function AvatarCatalogModal({
             onDeletePack={removePack}
           />
           <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
-            <div
-              key={contentKey}
-              className="animate-fade-in-soft flex flex-col gap-8"
-            >
+            <div key={contentKey} className="animate-fade-in-soft flex flex-col gap-8">
               {searchResults ? (
                 searchResults.length ? (
                   <AvatarGrid items={searchResults} current={current} onPick={handlePick} />
                 ) : (
-                  <p className="py-16 text-center text-[13.5px] text-ink-subtle">{t("No matches.")}</p>
+                  <p className="py-16 text-center text-[13.5px] text-ink-subtle">
+                    {t("No matches.")}
+                  </p>
                 )
               ) : section === "all" ? (
                 groups.map(renderGroup)
@@ -300,7 +333,9 @@ function GroupSection({
   return (
     <section className="flex flex-col gap-3.5">
       <div className="flex items-center gap-2">
-        <h3 className="text-[11.5px] font-semibold uppercase tracking-[0.09em] text-ink-muted">{label}</h3>
+        <h3 className="text-[11.5px] font-semibold uppercase tracking-[0.09em] text-ink-muted">
+          {label}
+        </h3>
         <span className="text-[11px] tabular-nums text-ink-subtle">{count}</span>
         {action && <div className="ms-auto">{action}</div>}
       </div>
@@ -325,7 +360,9 @@ function Disclaimer() {
         onBlur={() => setHover(false)}
         aria-label={t("Rights and usage")}
         className={`flex h-5 w-5 items-center justify-center rounded-md transition-colors ${
-          show ? "bg-elevated text-ink-muted" : "text-ink-subtle hover:bg-elevated hover:text-ink-muted"
+          show
+            ? "bg-elevated text-ink-muted"
+            : "text-ink-subtle hover:bg-elevated hover:text-ink-muted"
         }`}
       >
         <Info size={12.5} strokeWidth={2.2} />

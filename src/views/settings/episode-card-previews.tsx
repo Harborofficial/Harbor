@@ -25,7 +25,9 @@ export function EpisodeCardPreview({ kind }: { kind: EpisodeCardKind }) {
 }
 
 function Caption({ children }: { children: ReactNode }) {
-  return <p className="mt-3 max-w-[70ch] text-[15.5px] leading-[22px] text-ink-muted">{children}</p>;
+  return (
+    <p className="mt-3 max-w-[70ch] text-[15.5px] leading-[22px] text-ink-muted">{children}</p>
+  );
 }
 
 function Still({ src, soft }: { src?: string; soft?: boolean }) {
@@ -98,12 +100,24 @@ function HdCompare({ src }: { src?: string }) {
         <Tile label={t("Lighter (w300)")} src={src} soft />
         <Tile label={t("Original")} src={src} accent />
       </div>
-      <Caption>{t("Loads full-resolution artwork instead of the lighter, softer version.")}</Caption>
+      <Caption>
+        {t("Loads full-resolution artwork instead of the lighter, softer version.")}
+      </Caption>
     </>
   );
 }
 
-function Tile({ label, src, soft, accent }: { label: string; src?: string; soft?: boolean; accent?: boolean }) {
+function Tile({
+  label,
+  src,
+  soft,
+  accent,
+}: {
+  label: string;
+  src?: string;
+  soft?: boolean;
+  accent?: boolean;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
       <div className="overflow-hidden rounded-md ring-1 ring-edge-soft/60">

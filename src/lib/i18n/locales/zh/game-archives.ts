@@ -8,8 +8,10 @@ export default {
   "games.cleanup.binNote": "手动清空系统回收站后才会释放空间。",
   "games.cleanup.completedNote": "存放压缩包的文件夹已移至系统回收站。如有需要，请从那里还原。",
   "games.cleanup.restoredNote": "压缩分卷已返回原文件夹。",
-  "games.cleanup.uncertainNote": "Harbor 无法确认最终结果。继续操作前，请检查原文件夹和系统回收站。",
-  "games.cleanup.recoveryNote": "部分文件可能位于 Harbor 的暂存文件夹中。继续清理或还原暂存文件，不会覆盖现有文件。",
+  "games.cleanup.uncertainNote":
+    "Harbor 无法确认最终结果。继续操作前，请检查原文件夹和系统回收站。",
+  "games.cleanup.recoveryNote":
+    "部分文件可能位于 Harbor 的暂存文件夹中。继续清理或还原暂存文件，不会覆盖现有文件。",
   "games.cleanup.working": "正在检查压缩文件",
   "games.cleanup.restore": "还原暂存文件",
   "games.cleanup.resume": "继续清理",
@@ -19,10 +21,12 @@ export default {
   "games.cleanup.restored": "压缩包已还原",
   "games.cleanup.unconfirmed": "结果未确认",
   "games.cleanup.unavailable": "请更新桌面应用以管理已下载的压缩包。",
-  "games.cleanup.archive_cleanup_in_use": "另一项操作正在使用这些文件。请停止该操作，然后重新检查。",
+  "games.cleanup.archive_cleanup_in_use":
+    "另一项操作正在使用这些文件。请停止该操作，然后重新检查。",
   "games.cleanup.archive_cleanup_recovery": "已保存的清理任务需要检查。请保留文件并检查其文件夹。",
   "games.cleanup.archive_cleanup_recycle": "系统回收站无法接收这些文件。请还原或重试。",
-  "games.cleanup.archive_cleanup_receipt": "此解压任务没有完整的源文件记录，无法在这里清理其压缩包。",
+  "games.cleanup.archive_cleanup_receipt":
+    "此解压任务没有完整的源文件记录，无法在这里清理其压缩包。",
   "games.cleanup.blocker.anotherProfile": "另一个配置文件正在使用这些压缩包。",
   "games.cleanup.blocker.activeDownload": "一项下载仍需要这些文件。",
   "games.cleanup.blocker.sharing": "清理前请停止分享此种子。",
@@ -63,7 +67,8 @@ export default {
   "games.setupShortcuts.error": "无法更新快捷方式。请重试。",
 
   "games.archive.archive_decoder": "Harbor 无法在其限制内解压此存档。请尝试其他解压工具。",
-  "games.archive.archive_password_or_checksum": "密码可能不正确，或存档已损坏。请检查密码或重新下载存档。",
+  "games.archive.archive_password_or_checksum":
+    "密码可能不正确，或存档已损坏。请检查密码或重新下载存档。",
   "games.archive.password": "压缩包密码",
   "games.archive.passwordNote": "仅用于本次解压，不会保存到下载历史中。",
   "games.archive.archive_password": "此密码无法解锁压缩包，请检查后重试。",
@@ -71,7 +76,8 @@ export default {
   "games.archive.extractNamed": "解压 {name}",
   "games.archive.eyebrow": "从下载到游戏库",
   "games.archive.title": "解压游戏文件",
-  "games.archive.intro": "检查 ZIP / 7z / RAR / TAR / TAR.GZ / ISO 压缩包并选择文件的存放位置。Harbor 会创建新文件夹，并保留原始压缩包。",
+  "games.archive.intro":
+    "检查 ZIP / 7z / RAR / TAR / TAR.GZ / ISO 压缩包并选择文件的存放位置。Harbor 会创建新文件夹，并保留原始压缩包。",
   "games.archive.source": "压缩包",
   "games.archive.chooseSource": "选择归档文件",
   "games.archive.chooseParent": "选择目标文件夹",
@@ -92,7 +98,8 @@ export default {
   "games.archive.phase.complete": "文件已就绪",
   "games.archive.ready": "可以进行下一步",
   "games.archive.complete": "已解压 {count} 个文件",
-  "games.archive.completeNote": "文件已就绪。如果是免安装游戏，请在“本地游戏”中添加其可执行文件。需要安装程序的游戏仍须单独安装。",
+  "games.archive.completeNote":
+    "文件已就绪。如果是免安装游戏，请在“本地游戏”中添加其可执行文件。需要安装程序的游戏仍须单独安装。",
   "games.archive.originalKept": "已保留原始压缩包。",
   "games.archive.zipOnly": "ZIP / 7z / RAR / TAR / TAR.GZ / ISO 压缩包 · 不会自动运行文件",
   "games.archive.openFolder": "显示文件夹",
@@ -105,9 +112,11 @@ export default {
   "games.archive.archive_limit": "此压缩包超出 Harbor 当前的解压限制。",
   "games.archive.archive_changed": "压缩包在检查后发生了变化。请在解压前重新检查。",
   "games.archive.archive_path": "压缩包包含 Harbor 无法安全解压的路径。没有替换任何游戏文件。",
-  "games.archive.archive_format": "这不是受支持的 ZIP / 7z / RAR / TAR / TAR.GZ / ISO 压缩包，或其内部目录已损坏。",
+  "games.archive.archive_format":
+    "这不是受支持的 ZIP / 7z / RAR / TAR / TAR.GZ / ISO 压缩包，或其内部目录已损坏。",
   "games.archive.archive_encrypted": "请输入此压缩包的密码以继续。",
-  "games.archive.archive_compression": "此 ZIP / 7z / RAR / TAR / TAR.GZ / ISO 使用了 Harbor 尚不支持的压缩方式。",
+  "games.archive.archive_compression":
+    "此 ZIP / 7z / RAR / TAR / TAR.GZ / ISO 使用了 Harbor 尚不支持的压缩方式。",
   "games.archive.archive_collision": "压缩包中的部分项目会互相覆盖。尚未解压任何内容。",
   "games.archive.archive_destination": "请选择可用的文件夹，并输入有效的新文件夹名称。",
   "games.archive.archive_write": "无法写入文件。请检查目标位置的空间和权限，然后重新检查压缩包。",
@@ -115,7 +124,8 @@ export default {
   "games.archive.archive_platform": "此设备不支持解压压缩包。",
   "games.archive.archive_expired": "本次压缩包检查已过期。请重新检查以继续。",
   "games.archive.archive_space": "没有足够的可用空间存放解压后的文件。请选择其他位置。",
-  "games.archive.archive_checksum": "压缩包中的文件未通过完整性校验。不完整的解压结果未被设为可用。",
+  "games.archive.archive_checksum":
+    "压缩包中的文件未通过完整性校验。不完整的解压结果未被设为可用。",
   "games.archive.space.title": "目标位置空间",
   "games.archive.space.checking": "正在检查目标位置空间…",
   "games.archive.space.free": "可用空间 {size}",
@@ -139,7 +149,8 @@ export default {
   "games.archive.cancelExtract": "取消解压",
   "games.archive.retry": "检查并重试",
   "games.archive.showPartial": "显示未完成的文件",
-  "games.archive.partialNote": "Harbor 保留了未完成的文件夹。删除前请先检查；重试会从头开始新的解压任务。",
+  "games.archive.partialNote":
+    "Harbor 保留了未完成的文件夹。删除前请先检查；重试会从头开始新的解压任务。",
   "games.archive.progressFiles": "{count} / {total} 个文件",
   "games.archive.archive_store": "Harbor 无法保存解压进度。已保留你的文件以供检查。",
   "games.archive.archive_start": "无法开始解压。请重试。",
@@ -150,10 +161,12 @@ export default {
   "games.archive.unavailable": "请更新桌面应用以使用后台解压。",
   "games.archive.continueSetup": "设置游戏",
   "games.archive.dismissRecord": "移除记录 · 保留文件",
-  "games.archive.archive_multipart": "暂不支持此分卷压缩格式。请使用其他解压应用解压，然后在 Harbor 中打开解压后的文件夹。",
+  "games.archive.archive_multipart":
+    "暂不支持此分卷压缩格式。请使用其他解压应用解压，然后在 Harbor 中打开解压后的文件夹。",
   "games.archive.partsCount": "{count} 个压缩分卷",
   "games.archive.partsNote": "请将所有分卷保存在同一文件夹中。Harbor 会将它们一起解压。",
   "games.archive.partsMore": "显示更多分卷",
   "games.archive.setHash": "压缩分卷组 SHA-256",
-  "games.archive.archive_missing_part": "缺少压缩分卷。请将所有分卷下载到同一文件夹，然后重新检查。",
+  "games.archive.archive_missing_part":
+    "缺少压缩分卷。请将所有分卷下载到同一文件夹，然后重新检查。",
 };

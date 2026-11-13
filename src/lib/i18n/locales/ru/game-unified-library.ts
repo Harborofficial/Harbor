@@ -1,39 +1,50 @@
 export default {
-  "games.battlenet.changed": "Аккаунт Battle.net изменился. Войдите снова, чтобы заменить импортированные данные этого профиля.",
+  "games.battlenet.changed":
+    "Аккаунт Battle.net изменился. Войдите снова, чтобы заменить импортированные данные этого профиля.",
   "games.battlenet.connect": "Войти",
-  "games.battlenet.intro": "Войдите в Battle.net, чтобы импортировать игры. Подключение сохраняется в текущем профиле Harbor.",
+  "games.battlenet.intro":
+    "Войдите в Battle.net, чтобы импортировать игры. Подключение сохраняется в текущем профиле Harbor.",
   "games.battlenet.installed": "Показывать установленные игры",
   "games.battlenet.uninstalled": "Показывать неустановленные игры из аккаунта",
-  "games.battlenet.partial": "Не удалось обновить часть данных аккаунта. Ранее импортированные игры по-прежнему отображаются.",
+  "games.battlenet.partial":
+    "Не удалось обновить часть данных аккаунта. Ранее импортированные игры по-прежнему отображаются.",
   "games.battlenet.unresolved": "Не удалось определить точное издание некоторых игр из аккаунта.",
-  "games.battlenet.expired": "Сеанс Battle.net истёк. Войдите снова; импортированные игры сохранены.",
+  "games.battlenet.expired":
+    "Сеанс Battle.net истёк. Войдите снова; импортированные игры сохранены.",
   "games.battlenet.timeout": "Battle.net не ответил вовремя. Повторите попытку.",
   "games.battlenet.busy": "Операция с аккаунтом Battle.net уже выполняется.",
-  "games.battlenet.update": "Перезапустите обновлённое настольное приложение Harbor для подключения Battle.net.",
-  "games.battlenet.error": "Не удалось обновить Battle.net. Последняя импортированная библиотека сохранена.",
+  "games.battlenet.update":
+    "Перезапустите обновлённое настольное приложение Harbor для подключения Battle.net.",
+  "games.battlenet.error":
+    "Не удалось обновить Battle.net. Последняя импортированная библиотека сохранена.",
   "games.battlenet.disconnect": "Отключить Battle.net",
-  "games.battlenet.removeNote": "Удалить импортированные данные аккаунта из этого профиля. Установленные файлы и другие профили сохранятся.",
+  "games.battlenet.removeNote":
+    "Удалить импортированные данные аккаунта из этого профиля. Установленные файлы и другие профили сохранятся.",
   "games.battlenet.signing": "Завершите вход в окне Battle.net.",
   "games.battlenet.cached": "Игр в аккаунте: {count} · Обновлено: {date}",
 
   "games.launcherSession.waiting": "Ожидание игры",
   "games.launcherSession.unconfirmed": "Проверка состояния игры",
   "games.launcherSession.notStarted": "Игра не запустилась",
-  "games.launcherSession.error": "Не удалось записать игровую активность. Откройте Harbor заново, чтобы повторить попытку.",
+  "games.launcherSession.error":
+    "Не удалось записать игровую активность. Откройте Harbor заново, чтобы повторить попытку.",
 
   "games.steamImport.importedTitle": "Импортированные игры",
   "games.steamImport.excluded": "Пропущено по настройкам импорта",
   "games.steamImport.ignoreSettings": "Игнорируемые ID Steam ({count})",
   "games.steamImport.ignoreLabel": "ID Steam для игнорирования",
-  "games.steamImport.ignoreNote": "Пропускать эти ID при ручном импорте. Существующие записи и файлы сохраняются. Очистите поле, чтобы снова разрешить эти ID.",
+  "games.steamImport.ignoreNote":
+    "Пропускать эти ID при ручном импорте. Существующие записи и файлы сохраняются. Очистите поле, чтобы снова разрешить эти ID.",
   "games.steamImport.ignoreSave": "Сохранить игнорируемые ID",
   "games.steamImport.ignoreSaved": "Игнорируемые ID сохранены.",
   "games.steamImport.title": "Импорт игр Steam",
-  "games.steamImport.note": "Сохраняйте записи игр в этом профиле Harbor. Владение и установка проверяются отдельно.",
+  "games.steamImport.note":
+    "Сохраняйте записи игр в этом профиле Harbor. Владение и установка проверяются отдельно.",
   "games.steamImport.input": "ID приложений Steam или ссылки магазина",
   "games.steamImport.profile": "Выбрать профиль Depressurizer",
   "games.steamImport.count": "Выбрано: {selected} · Всего: {total}",
-  "games.steamImport.unavailableNote": "Недоступные записи не выбраны. Выберите запись, чтобы сохранить ID и загрузить сведения позже.",
+  "games.steamImport.unavailableNote":
+    "Недоступные записи не выбраны. Выберите запись, чтобы сохранить ID и загрузить сведения позже.",
   "games.steamImport.unknown": "Приложение Steam {id}",
   "games.steamImport.ready": "Сведения Steam найдены",
   "games.steamImport.profileName": "Название из профиля",
@@ -43,10 +54,14 @@ export default {
   "games.steamImport.invalid": "Неверный ID или ссылка",
   "games.steamImport.duplicate": "Повторяющаяся запись",
   "games.steamImport.nonSteam": "Ярлык не из Steam · пропущен",
-  "games.steamImport.limit": "Профиль поддерживает до 5000 импортированных игр. Файлы должны быть меньше 4 МБ.",
-  "games.steamImport.inputError": "Введите верные ID Steam или ссылки магазина либо выберите подходящий профиль Depressurizer.",
-  "games.steamImport.writeError": "Не удалось сохранить импорт. Существующие записи не изменены. Повторите попытку.",
-  "games.steamImport.readError": "Не удалось прочитать импортированные игры. Повторите попытку перед изменениями.",
+  "games.steamImport.limit":
+    "Профиль поддерживает до 5000 импортированных игр. Файлы должны быть меньше 4 МБ.",
+  "games.steamImport.inputError":
+    "Введите верные ID Steam или ссылки магазина либо выберите подходящий профиль Depressurizer.",
+  "games.steamImport.writeError":
+    "Не удалось сохранить импорт. Существующие записи не изменены. Повторите попытку.",
+  "games.steamImport.readError":
+    "Не удалось прочитать импортированные игры. Повторите попытку перед изменениями.",
   "games.steamImport.done": "Добавлено в библиотеку: {count}",
   "games.steamImport.stop": "Остановить проверку",
   "games.steamImport.restart": "Начать заново",
@@ -65,7 +80,8 @@ export default {
   "games.libraryStatus.finished": "Пройдено",
   "games.libraryStatus.onHold": "Отложено",
   "games.libraryStatus.stopped": "Больше не играю",
-  "games.libraryStatus.note": "Ваш выбор для этой копии сохраняется в этом профиле Harbor. Время игры и достижения не меняют его автоматически.",
+  "games.libraryStatus.note":
+    "Ваш выбор для этой копии сохраняется в этом профиле Harbor. Время игры и достижения не меняют его автоматически.",
 
   "games.unified.playtime": "Время в игре",
   "games.unified.playtime.all": "Любое время в игре",
@@ -78,9 +94,12 @@ export default {
   "games.unified.playtime.steam": "{time} в Steam",
   "games.unified.playtime.zeroSteam": "В Steam нет записанного времени игры",
   "games.unified.playtime.zeroHarbor": "В Harbor нет записанного времени игры",
-  "games.unified.playtime.unknownHint": "Время игры аккаунта Steam недоступно или этот источник его не предоставляет.",
-  "games.unified.playtime.note": "Используются общее время Steam и время, записанное в Harbor, включая ваши исправления. Недоступные данные учитываются отдельно.",
-  "games.unified.note": "Ваша библиотека Steam, игры для ПК и импортированные ROM-файлы в одном месте.",
+  "games.unified.playtime.unknownHint":
+    "Время игры аккаунта Steam недоступно или этот источник его не предоставляет.",
+  "games.unified.playtime.note":
+    "Используются общее время Steam и время, записанное в Harbor, включая ваши исправления. Недоступные данные учитываются отдельно.",
+  "games.unified.note":
+    "Ваша библиотека Steam, игры для ПК и импортированные ROM-файлы в одном месте.",
   "games.unified.allSources": "Все источники",
   "games.unified.availability": "Доступность",
   "games.unified.anyState": "Любое состояние",
@@ -94,10 +113,13 @@ export default {
   "games.unified.state.setup": "Требуется настройка",
   "games.unified.state.unknown": "Установка не проверена",
   "games.unified.refresh": "Обновить локальные библиотеки",
-  "games.unified.scanNote": "Не удалось проверить некоторые библиотеки. Их игры остаются здесь с неизвестным или недоступным состоянием.",
-  "games.unified.partial": "Не удалось проверить некоторые папки; некоторые установленные игры могли остаться нераспознанными.",
+  "games.unified.scanNote":
+    "Не удалось проверить некоторые библиотеки. Их игры остаются здесь с неизвестным или недоступным состоянием.",
+  "games.unified.partial":
+    "Не удалось проверить некоторые папки; некоторые установленные игры могли остаться нераспознанными.",
   "games.unified.empty": "Соберите свои игры вместе",
-  "games.unified.emptyNote": "Подключите Steam, добавьте игру для ПК или импортируйте папку с ROM-файлами, чтобы увидеть здесь свои игры.",
+  "games.unified.emptyNote":
+    "Подключите Steam, добавьте игру для ПК или импортируйте папку с ROM-файлами, чтобы увидеть здесь свои игры.",
   "games.unified.pcGames": "Управление играми для ПК",
   "games.unified.roms": "Управление ROM-файлами",
   "games.unified.steam": "Управление Steam",
@@ -117,5 +139,5 @@ export default {
   "games.libraryNews.failed": "Не удалось загрузить новости игр.",
   "games.libraryNews.hide": "Скрыть новости игр",
   "games.libraryNews.show": "Показать новости игр",
-  "games.libraryNews.pending": "Проверяем новости игр…"
+  "games.libraryNews.pending": "Проверяем новости игр…",
 };

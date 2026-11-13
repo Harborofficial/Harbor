@@ -3,7 +3,7 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, ToggleRow } from "./shared";
 import { ModalButton, ROW_ACTION, SettingGroup, SettingRow, SettingsModal, Nested } from "./kit";
-import { WhisperModelRow } from "./whisper-model-row";
+import { MoonshineModelRow } from "./moonshine-model-row";
 
 export function AutoSyncPanel() {
   const t = useT();
@@ -39,7 +39,8 @@ export function AutoSyncPanel() {
     if (next) {
       try {
         const url = new URL(next);
-        if (!['http:', 'https:'].includes(url.protocol) || !url.hostname) throw new Error('Invalid URL');
+        if (!["http:", "https:"].includes(url.protocol) || !url.hostname)
+          throw new Error("Invalid URL");
       } catch {
         setUrlError(true);
         return;
@@ -96,11 +97,31 @@ export function AutoSyncPanel() {
               <ToggleRow
                 label={t("Smart resync with speech recognition")}
                 sub={t(
-                  "Transcribe brief speech samples on your device to synchronize difficult subtitles. Download the optional Whisper model below before using this feature.",
+                  "Transcribe brief speech samples on your device to synchronize difficult subtitles. Harbor uses an installed model matching your audio track and asks before downloading a missing one.",
                 )}
                 value={settings.subtitleAutoSyncAsr}
                 onChange={(v) => update({ subtitleAutoSyncAsr: v })}
               />
+              <SettingRow
+                label={t("Speech engine (testing)")}
+                desc={t(
+                  "Automatic uses Silero first, then Moonshine when needed. Moonshine direct skips Silero timing matching for Sync from playback tests.",
+                )}
+              >
+                <select
+                  aria-label={t("Speech engine")}
+                  value={settings.subtitleAutoSyncEngine ?? "automatic"}
+                  onChange={(e) =>
+                    update({
+                      subtitleAutoSyncEngine: e.target.value as "automatic" | "moonshine",
+                    })
+                  }
+                  className="min-h-10 rounded-lg border border-edge-soft bg-elevated px-3 text-sm text-ink"
+                >
+                  <option value="automatic">{t("Automatic (Silero → Moonshine)")}</option>
+                  <option value="moonshine">{t("Moonshine direct (testing)")}</option>
+                </select>
+              </SettingRow>
               <ToggleRow
                 label={t("Match subtitles across languages (experimental)")}
                 sub={t(
@@ -112,7 +133,7 @@ export function AutoSyncPanel() {
             </SettingGroup>
           </Nested>
         )}
-        <WhisperModelRow />
+        <MoonshineModelRow />
       </Section>
 
       <Section
@@ -162,10 +183,14 @@ export function AutoSyncPanel() {
           sub={t(
             "Leave this blank to use Harbor's own community server, or enter the address of a server you run yourself.",
           )}
-          actions={<>
-            <ModalButton ghost onClick={() => setServerOpen(false)}>{t("Cancel")}</ModalButton>
-            <ModalButton onClick={saveServer}>{t("Save")}</ModalButton>
-          </>}
+          actions={
+            <>
+              <ModalButton ghost onClick={() => setServerOpen(false)}>
+                {t("Cancel")}
+              </ModalButton>
+              <ModalButton onClick={saveServer}>{t("Save")}</ModalButton>
+            </>
+          }
         >
           <div className="flex flex-col gap-2.5">
             <input
@@ -173,7 +198,10 @@ export function AutoSyncPanel() {
               aria-label={t("Server address")}
               aria-invalid={urlError}
               value={urlDraft}
-              onChange={(e) => { setUrlDraft(e.target.value); setUrlError(false); }}
+              onChange={(e) => {
+                setUrlDraft(e.target.value);
+                setUrlError(false);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -185,9 +213,13 @@ export function AutoSyncPanel() {
               autoComplete="off"
               className="h-11 w-full min-w-0 max-w-[520px] rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             />
-            {urlError && <p role="alert" className="text-[15px] text-danger">
-              {t("Enter a full http:// or https:// address, or leave blank to use Harbor's server.")}
-            </p>}
+            {urlError && (
+              <p role="alert" className="text-[15px] text-danger">
+                {t(
+                  "Enter a full http:// or https:// address, or leave blank to use Harbor's server.",
+                )}
+              </p>
+            )}
             <p className={`max-w-[70ch] ${ROW_DESC}`}>
               {t("Private mode stops all contact with this server in either direction.")}
             </p>

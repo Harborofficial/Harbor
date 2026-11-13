@@ -6,16 +6,20 @@ export default {
   "games.calendar.source": "Kaydedilen oyunlar",
   "games.calendar.hint": "Kaydettiğin oyunların çıkış tarihleri",
   "games.calendar.note": "Kaydettiğin oyunların çıkışlarına göre sırada ne oynayacağını planla.",
-  "games.calendar.empty": "Çıkış planlarını burada takip etmek için Oyunlar bölümünden bir oyun kaydet.",
+  "games.calendar.empty":
+    "Çıkış planlarını burada takip etmek için Oyunlar bölümünden bir oyun kaydet.",
   "games.calendar.search": "Kaydedilen oyunlarda ara",
   "games.calendar.platform": "Çıkış platformu",
   "games.calendar.allPlatforms": "Tüm platformlar",
-  "games.calendar.dates": "Yayıncıların belirttiği tarihler değişebilir. Steam tarihleri ABD mağazasından alınır; IGDB kayıtlarında platform ve bölge belirtilir.",
-  "games.calendar.noDays": "Kontrol edilen oyunların hiçbiri için {month} ayında kesin bir çıkış günü belirtilmemiş.",
+  "games.calendar.dates":
+    "Yayıncıların belirttiği tarihler değişebilir. Steam tarihleri ABD mağazasından alınır; IGDB kayıtlarında platform ve bölge belirtilir.",
+  "games.calendar.noDays":
+    "Kontrol edilen oyunların hiçbiri için {month} ayında kesin bir çıkış günü belirtilmemiş.",
   "games.calendar.windows": "Çıkış dönemleri",
   "games.calendar.windowsNote": "Bu planlar bu ayı kapsar ancak kesin bir gün belirtmez.",
   "games.calendar.undated": "Kesinleşmiş tarih yok",
-  "games.calendar.undatedNote": "Duyurulmamış, erişilemeyen veya henüz kontrol edilmemiş tarihler takvimde gösterilmez.",
+  "games.calendar.undatedNote":
+    "Duyurulmamış, erişilemeyen veya henüz kontrol edilmemiş tarihler takvimde gösterilmez.",
   "games.calendar.cancelled": "Hariç tutulan iptal edilmiş sürüm kaydı: {count}.",
   "games.calendar.unchecked": "Tarih henüz kontrol edilmedi",
   "games.watchlist.note": "Favori oyunlarının çıkışlarını takip et.",
@@ -34,7 +38,8 @@ export default {
   "games.watchlist.coverage": "{total} oyundan {count} tanesi kontrol edildi",
   "games.watchlist.refresh": "Çıkış tarihlerini yenile",
   "games.watchlist.unavailable": "Çıkış tarihi kullanılamıyor",
-  "games.watchlist.partial": "Bazı çıkış tarihleri kontrol edilemedi. Varsa kaydedilmiş bilgiler gösteriliyor.",
+  "games.watchlist.partial":
+    "Bazı çıkış tarihleri kontrol edilemedi. Varsa kaydedilmiş bilgiler gösteriliyor.",
   "games.watchlist.noMatch": "Bu filtrelerle eşleşen favori yok.",
   "games.watchlist.dateNote": "Tarihler Steam ve IGDB’den alınır. Çıkış planları değişebilir.",
   "games.watchlist.remove": "{name} oyununu Favorilerden çıkar",
@@ -54,9 +59,12 @@ export default {
   "games.owned.pickHint": "Bu sonuçlardan rastgele bir oyun aç.",
   "games.owned.clear": "Kütüphane filtrelerini temizle",
   "games.owned.scanning": "Yerel kurulumlar kontrol ediliyor…",
-  "games.owned.scanUnavailable": "Yerel kurulum durumu kullanılamıyor. Bu cihazı kontrol etmek için yenile.",
-  "games.owned.partial": "Bazı Steam klasörleri kontrol edilemedi. Bazı kurulumlar tanınmamış olabilir.",
+  "games.owned.scanUnavailable":
+    "Yerel kurulum durumu kullanılamıyor. Bu cihazı kontrol etmek için yenile.",
+  "games.owned.partial":
+    "Bazı Steam klasörleri kontrol edilemedi. Bazı kurulumlar tanınmamış olabilir.",
   "games.owned.results": "{total} oyundan {count} tanesi",
-  "games.owned.playtimeNote": "Oynama geçmişi son Steam eşitlemesinden alınır. Kayıtlı oynama süresinin olmaması, oyunun bitirilip bitirilmediğini göstermez.",
-  "games.owned.resetAvailability": "Tüm kurulum durumlarındaki oyunları göster"
+  "games.owned.playtimeNote":
+    "Oynama geçmişi son Steam eşitlemesinden alınır. Kayıtlı oynama süresinin olmaması, oyunun bitirilip bitirilmediğini göstermez.",
+  "games.owned.resetAvailability": "Tüm kurulum durumlarındaki oyunları göster",
 };

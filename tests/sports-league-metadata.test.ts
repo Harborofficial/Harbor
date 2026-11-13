@@ -59,11 +59,7 @@ test("PGA scoreboard participants retain published athlete IDs without fetching 
       ["Peter Malnati", "5692"],
     ],
   );
-  assert.equal(
-    result.athletes?.[0].image,
-    undefined,
-    "A country flag never becomes a headshot",
-  );
+  assert.equal(result.athletes?.[0].image, undefined, "A country flag never becomes a headshot");
   assert.equal(toSide(player, "golf").athleteId, "3980");
   assert.deepEqual(
     parseEspnLeagueMetadata(def, { ...feed, leagues: [{ slug: "lpga" }] }, {}, {}).athletes,
@@ -460,9 +456,7 @@ test("SportsDB only requests its explicitly published season and never guesses o
     json: async (target) => {
       calls.push(target);
       if (target.includes("lookupleague"))
-        return published
-          ? league
-          : { leagues: [{ ...league.leagues[0], strCurrentSeason: null }] };
+        return published ? league : { leagues: [{ ...league.leagues[0], strCurrentSeason: null }] };
       if (target.includes("search_all_teams")) return { teams: [arsenal] };
       return { table: [tableRow] };
     },
@@ -496,10 +490,7 @@ test("unsupported provider keys do not trigger guessed ESPN or SportsDB requests
 test("verified catalog official links survive empty and restricted provider metadata", async () => {
   const def = { ...nba, officialWebsite: "https://www.nba.com/" };
   assert.equal(leagueMetadataSeed(def).website, "https://www.nba.com/");
-  assert.equal(
-    parseEspnLeagueMetadata(def, info, teams, table).website,
-    "https://www.nba.com/",
-  );
+  assert.equal(parseEspnLeagueMetadata(def, info, teams, table).website, "https://www.nba.com/");
   const regional = {
     ...premier,
     officialWebsite: "https://www.premierleague.com/",

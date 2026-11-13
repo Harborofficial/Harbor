@@ -3,7 +3,8 @@ export default {
   "games.dota.title": "Heldentrends",
   "games.dota.intro": "Finde deinen nächsten Helden.",
   "games.dota.refresh": "Heldentrends aktualisieren",
-  "games.dota.unavailable": "Aktualisierung fehlgeschlagen. Bereits geladene Daten werden möglicherweise weiter angezeigt.",
+  "games.dota.unavailable":
+    "Aktualisierung fehlgeschlagen. Bereits geladene Daten werden möglicherweise weiter angezeigt.",
   "games.dota.partial": "Einige Daten sind nicht verfügbar.",
   "games.dota.checked": "Geprüft: {date}",
   "games.dota.search": "Helden suchen",
@@ -18,7 +19,8 @@ export default {
   "games.dota.attribute.agi": "Beweglichkeit",
   "games.dota.attribute.int": "Intelligenz",
   "games.dota.attribute.all": "Universal",
-  "games.dota.trendsScope": "OpenDota-Stichprobe: sieben UTC-Tage einschließlich heute. Der Rang ist der Durchschnitt des Spiels; Turbo und Profispiele sind getrennt.",
+  "games.dota.trendsScope":
+    "OpenDota-Stichprobe: sieben UTC-Tage einschließlich heute. Der Rang ist der Durchschnitt des Spiels; Turbo und Profispiele sind getrennt.",
   "games.dota.wins": "Siegrate",
   "games.dota.picks": "{count} Auswahlen",
   "games.dota.noSample": "Keine Daten",
@@ -26,7 +28,8 @@ export default {
   "games.dota.moreHeroes": "Weitere Helden",
   "games.dota.matchups": "Profi-Matchups",
   "games.dota.refreshMatchups": "Matchups aktualisieren",
-  "games.dota.matchupsScope": "Siege von {hero} gegen die jeweiligen Gegner in erfassten Profispielen des letzten Jahres. Enthält ältere Patches; unabhängig vom Rangfilter.",
+  "games.dota.matchupsScope":
+    "Siege von {hero} gegen die jeweiligen Gegner in erfassten Profispielen des letzten Jahres. Enthält ältere Patches; unabhängig vom Rangfilter.",
   "games.dota.opponent": "Gegner suchen",
   "games.dota.minimum": "Mindestanzahl Spiele",
   "games.dota.minGames": "{count}+ Spiele",
@@ -48,5 +51,5 @@ export default {
   "games.dota.sample.5": "Legende",
   "games.dota.sample.6": "Uralter",
   "games.dota.sample.7": "Göttlich",
-  "games.dota.sample.8": "Unsterblich"
+  "games.dota.sample.8": "Unsterblich",
 };

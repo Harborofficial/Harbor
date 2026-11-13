@@ -34,5 +34,5 @@ export default {
   "games.fortnite.genre.party-mini-games": "Fiesta y minijuegos",
   "games.fortnite.genre.music-rhythm": "Música y ritmo",
   "games.fortnite.genre.horror": "Terror",
-  "games.fortnite.genre.deathrun-platformer": "Deathrun y plataformas"
+  "games.fortnite.genre.deathrun-platformer": "Deathrun y plataformas",
 };

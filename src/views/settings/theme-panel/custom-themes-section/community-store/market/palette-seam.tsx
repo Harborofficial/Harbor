@@ -24,9 +24,7 @@ export function PaletteSeam({ swatch, labeled = false }: { swatch: string[]; lab
               className="h-11 w-full rounded-[8px] ring-1 ring-edge-soft"
               style={{ background: cell.color }}
             />
-            <span className="harbor-settings-label truncate">
-              {t(cell.name)}
-            </span>
+            <span className="harbor-settings-label truncate">{t(cell.name)}</span>
           </div>
         ))}
       </div>

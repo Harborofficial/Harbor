@@ -124,7 +124,9 @@ function harness(
       getAnimeCwId: () => null,
       animeCwIdsVersion: () => 0,
       subscribeAnimeCwIds: () => () => {},
+      notifyAnimeCwIds: empty,
     },
+    "@/lib/cw-card-coords": { rememberCardCoords: () => false },
     "@/lib/anime-detect": { isDetectedAnime: () => false },
     "@/lib/streams/anime-identity": {
       resolveAnimeIdentity: async () =>

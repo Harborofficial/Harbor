@@ -115,12 +115,7 @@ export function writeTvTheme(profileId: string, theme: TvThemeDoc | null): void 
   queue("theme", profileId);
 }
 
-export function writeTvValue(
-  profileId: string,
-  wire: TvWire,
-  key: string,
-  value: TvValue,
-): void {
+export function writeTvValue(profileId: string, wire: TvWire, key: string, value: TvValue): void {
   if (wire === "playerlayout") writeTvLayout(profileId, { [key]: value });
   else writeTvSettings(profileId, { [key]: value });
 }

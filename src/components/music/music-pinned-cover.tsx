@@ -2,7 +2,15 @@ import { Clock3, Heart } from "@/components/icons/music-icons";
 import { MusicSurpriseIcon } from "./music-surprise-icon";
 import "./music-collection-grid.css";
 
-export function MusicPinnedCover({ kind, artwork, glyphSize = 34 }: { kind: "liked" | "recent" | "surprise"; artwork: string[]; glyphSize?: number }) {
+export function MusicPinnedCover({
+  kind,
+  artwork,
+  glyphSize = 34,
+}: {
+  kind: "liked" | "recent" | "surprise";
+  artwork: string[];
+  glyphSize?: number;
+}) {
   return (
     <span className="music-collection-pinned" data-pinned={kind}>
       {artwork.length > 0 && (
@@ -12,7 +20,13 @@ export function MusicPinnedCover({ kind, artwork, glyphSize = 34 }: { kind: "lik
           ))}
         </span>
       )}
-      {kind === "surprise" ? <MusicSurpriseIcon size={glyphSize} /> : kind === "liked" ? <Heart size={glyphSize} /> : <Clock3 size={glyphSize} />}
+      {kind === "surprise" ? (
+        <MusicSurpriseIcon size={glyphSize} />
+      ) : kind === "liked" ? (
+        <Heart size={glyphSize} />
+      ) : (
+        <Clock3 size={glyphSize} />
+      )}
     </span>
   );
 }

@@ -28,7 +28,8 @@ export type MusicArtistProfile = {
   sources: MusicArtistRef[];
 };
 const uuid = /^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/i;
-const SOCIAL_HOSTS = /^(facebook\.com|instagram\.com|twitter\.com|x\.com|tiktok\.com|threads\.net)$/;
+const SOCIAL_HOSTS =
+  /^(facebook\.com|instagram\.com|twitter\.com|x\.com|tiktok\.com|threads\.net)$/;
 export const artistNameKey = (name: string) => artistIdentityKey(name);
 const object = (value: unknown): Obj =>
   value && typeof value === "object" && !Array.isArray(value) ? (value as Obj) : {};
@@ -69,7 +70,9 @@ async function json(url: string, signal?: AbortSignal): Promise<Obj> {
     try {
       const response = await safeFetch(url, {
         signal: controller.signal,
-        headers: url.startsWith("https://musicbrainz.org/") ? MUSICBRAINZ_HEADERS : { Accept: "application/json" },
+        headers: url.startsWith("https://musicbrainz.org/")
+          ? MUSICBRAINZ_HEADERS
+          : { Accept: "application/json" },
       });
       if (!response.ok) throw new Error("Artist metadata is unavailable");
       const value = object(await response.json());

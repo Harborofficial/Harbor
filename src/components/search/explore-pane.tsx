@@ -35,7 +35,7 @@ export function ExplorePane({
   const t = useT();
   const [backdrop, setBackdrop] = useState<string | null>(
     frame.kind === "title"
-      ? frame.meta.background ?? null
+      ? (frame.meta.background ?? null)
       : frame.kind === "collection"
         ? frame.image
         : null,

@@ -3,9 +3,11 @@ export default {
   "games.notes.title": "Minhas notas",
   "games.notes.new": "Nova nota",
   "games.notes.limit": "Até 100 notas, 100.000 caracteres cada e 2 MB no total.",
-  "games.notes.readError": "Não foi possível ler as notas. Exporte um backup antes de tentar novamente.",
+  "games.notes.readError":
+    "Não foi possível ler as notas. Exporte um backup antes de tentar novamente.",
   "games.notes.saveError": "Não foi possível salvar. O rascunho foi mantido.",
-  "games.notes.conflict": "As notas mudaram em outro lugar. Exporte o rascunho antes de recarregar.",
+  "games.notes.conflict":
+    "As notas mudaram em outro lugar. Exporte o rascunho antes de recarregar.",
   "games.notes.invalidTitle": "Dê um título a cada nota.",
   "games.notes.discard": "Descartar alterações?",
   "games.notes.delete": "Excluir esta nota do rascunho?",
@@ -28,5 +30,5 @@ export default {
   "games.notes.export": "Exportar backup",
   "games.notes.unsaved": "Alterações não salvas",
   "games.notes.local": "Armazenado neste perfil Harbor",
-  "games.notes.importGuide": "Copiar para minhas notas"
+  "games.notes.importGuide": "Copiar para minhas notas",
 };

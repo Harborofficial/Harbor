@@ -169,7 +169,7 @@ export default {
   "Show all {count}": "전체 {count}명 보기",
   "{count} competing": "{count}명 출전",
   "Starting field": "출발 명단",
-  "Leaderboard": "순위표",
+  Leaderboard: "순위표",
   "Full field": "전체 출전자",
   "Loading event schedule…": "이벤트 일정 로드 중…",
   "Loading lineups…": "라인업 로드 중…",

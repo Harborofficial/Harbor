@@ -169,8 +169,7 @@ export class Takeover {
   }
 
   private hold(active: boolean, position: number | null): void {
-    const run = () =>
-      invoke<void>("music_scratch_hold", { active, position }).catch(() => {});
+    const run = () => invoke<void>("music_scratch_hold", { active, position }).catch(() => {});
     this.holds = this.holds.then(run, run);
   }
 

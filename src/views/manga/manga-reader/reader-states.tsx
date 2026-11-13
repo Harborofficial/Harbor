@@ -103,7 +103,9 @@ export function EndOfChapterHint({
             {atLastChapter ? t("All caught up") : t("Chapter finished")}
           </span>
           {!atLastChapter && nextLabel && (
-            <span className="max-w-[42vw] truncate text-[12.5px] font-medium text-ink-muted">{nextLabel}</span>
+            <span className="max-w-[42vw] truncate text-[12.5px] font-medium text-ink-muted">
+              {nextLabel}
+            </span>
           )}
         </span>
         {!atLastChapter && (

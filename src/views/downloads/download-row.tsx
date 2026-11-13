@@ -14,7 +14,10 @@ import { DownloadDeleteButton } from "@/components/download-delete-button";
 import type { ActionSource } from "@/lib/context-actions";
 
 export function DownloadRow({
-  d, compact = false, selected = false, onToggleSelection,
+  d,
+  compact = false,
+  selected = false,
+  onToggleSelection,
 }: {
   d: DownloadItem;
   compact?: boolean;
@@ -53,7 +56,11 @@ export function DownloadRow({
           onToggleSelection();
           return;
         }
-        if (onToggleSelection || (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10"))) return;
+        if (
+          onToggleSelection ||
+          (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10"))
+        )
+          return;
         event.preventDefault();
         event.stopPropagation();
         const rect = event.currentTarget.getBoundingClientRect();
@@ -128,99 +135,112 @@ export function DownloadRow({
         )}
       </div>
       <div className="harbor-download-row-trailing flex shrink-0 items-center">
-        <div className={`harbor-download-row-actions ${onToggleSelection ? "is-collapsed" : ""}`} aria-hidden={!!onToggleSelection} inert={!!onToggleSelection}>
+        <div
+          className={`harbor-download-row-actions ${onToggleSelection ? "is-collapsed" : ""}`}
+          aria-hidden={!!onToggleSelection}
+          inert={!!onToggleSelection}
+        >
           <div className="flex w-max items-center gap-1">
-        {active && (
-          <>
-            {(caps?.pause || caps?.resume) && (
-              <RowBtn
-                label={d.status === "paused" ? t("Resume download") : t("Pause download")}
-                onClick={() => run(d.status === "paused" ? "resume" : "pause")}
-                disabled={pending}
-              >
-                <DownloadPauseResumeIcon paused={d.status === "paused"} size={16} />
-              </RowBtn>
-            )}
-            <RowBtn
-              label={t("Cancel download")}
-              onClick={() => run("cancel")}
-              disabled={pending || !caps?.cancel}
-              cancel
-            >
-              <DownloadCancelIcon size={16} />
-            </RowBtn>
-          </>
-        )}
-        {!active && (
-          <>
-            {d.status === "done" && (
+            {active && (
               <>
-                {!isEBook && (
+                {(caps?.pause || caps?.resume) && (
                   <RowBtn
-                    label={t("Play")}
-                    onClick={() => run("play")}
-                    disabled={pending || !caps?.play}
+                    label={d.status === "paused" ? t("Resume download") : t("Pause download")}
+                    onClick={() => run(d.status === "paused" ? "resume" : "pause")}
+                    disabled={pending}
                   >
-                    <Play size={16} strokeWidth={2.2} fill="currentColor" />
+                    <DownloadPauseResumeIcon paused={d.status === "paused"} size={16} />
                   </RowBtn>
                 )}
-                {isEBook && d.format === "pdf" ? (
-                  <span
-                    className="flex h-9 w-9 items-center justify-center text-ink-subtle"
-                    title={t("PDF print dialog opened")}
-                  >
-                    <FileText size={16} />
-                  </span>
-                ) : (
-                  <RowBtn
-                    label={t("Show in folder")}
-                    onClick={() => run("reveal")}
-                    disabled={pending || !caps?.reveal}
-                  >
-                    {isEBook ? (
-                      <BookOpen size={16} strokeWidth={2} />
-                    ) : (
-                      <FolderOpen size={16} strokeWidth={2} />
-                    )}
-                  </RowBtn>
-                )}
+                <RowBtn
+                  label={t("Cancel download")}
+                  onClick={() => run("cancel")}
+                  disabled={pending || !caps?.cancel}
+                  cancel
+                >
+                  <DownloadCancelIcon size={16} />
+                </RowBtn>
               </>
             )}
-            {caps?.retry && (
-              <RowBtn label={t("Retry download")} onClick={() => run("retry")} disabled={pending}>
-                <DownloadPauseResumeIcon paused size={16} />
-              </RowBtn>
+            {!active && (
+              <>
+                {d.status === "done" && (
+                  <>
+                    {!isEBook && (
+                      <RowBtn
+                        label={t("Play")}
+                        onClick={() => run("play")}
+                        disabled={pending || !caps?.play}
+                      >
+                        <Play size={16} strokeWidth={2.2} fill="currentColor" />
+                      </RowBtn>
+                    )}
+                    {isEBook && d.format === "pdf" ? (
+                      <span
+                        className="flex h-9 w-9 items-center justify-center text-ink-subtle"
+                        title={t("PDF print dialog opened")}
+                      >
+                        <FileText size={16} />
+                      </span>
+                    ) : (
+                      <RowBtn
+                        label={t("Show in folder")}
+                        onClick={() => run("reveal")}
+                        disabled={pending || !caps?.reveal}
+                      >
+                        {isEBook ? (
+                          <BookOpen size={16} strokeWidth={2} />
+                        ) : (
+                          <FolderOpen size={16} strokeWidth={2} />
+                        )}
+                      </RowBtn>
+                    )}
+                  </>
+                )}
+                {caps?.retry && (
+                  <RowBtn
+                    label={t("Retry download")}
+                    onClick={() => run("retry")}
+                    disabled={pending}
+                  >
+                    <DownloadPauseResumeIcon paused size={16} />
+                  </RowBtn>
+                )}
+                <DeleteButton
+                  source={source}
+                  actionId={`download:${d.id}:delete`}
+                  recordOnly={caps?.printReceipt}
+                />
+              </>
             )}
-            <DeleteButton
-              source={source}
-              actionId={`download:${d.id}:delete`}
-              recordOnly={caps?.printReceipt}
-            />
-          </>
-        )}
-        <button
-          type="button"
-          aria-label={t("More actions")}
-          title={t("More actions")}
-          aria-haspopup="menu"
-          aria-expanded={
-            contextMenu.state?.target.kind === "actions" &&
-            contextMenu.state.target.id === source.id
-          }
-          onClick={(event) => {
-            event.stopPropagation();
-            const rect = event.currentTarget.getBoundingClientRect();
-            contextMenu.openAt({ x: rect.left, y: rect.bottom }, source);
-          }}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-ink/10 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
-        >
-          <Ellipsis size={16} />
-        </button>
+            <button
+              type="button"
+              aria-label={t("More actions")}
+              title={t("More actions")}
+              aria-haspopup="menu"
+              aria-expanded={
+                contextMenu.state?.target.kind === "actions" &&
+                contextMenu.state.target.id === source.id
+              }
+              onClick={(event) => {
+                event.stopPropagation();
+                const rect = event.currentTarget.getBoundingClientRect();
+                contextMenu.openAt({ x: rect.left, y: rect.bottom }, source);
+              }}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-ink/10 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
+            >
+              <Ellipsis size={16} />
+            </button>
           </div>
         </div>
-        <div className={`harbor-download-selection-slot ${onToggleSelection ? "is-visible" : ""}`} aria-hidden={!onToggleSelection}>
+        <div
+          className={`harbor-download-selection-slot ${onToggleSelection ? "is-visible" : ""}`}
+          aria-hidden={!onToggleSelection}
+        >
           <div className="harbor-download-selection-slot-inner">
-            {onToggleSelection && <DownloadSelectionCheck checked={selected} delayMs={compact ? 70 : 25} />}
+            {onToggleSelection && (
+              <DownloadSelectionCheck checked={selected} delayMs={compact ? 70 : 25} />
+            )}
           </div>
         </div>
       </div>

@@ -19,6 +19,7 @@ export function animeTrackerTarget(
     id,
     // A matching stream ID explicitly binds this number to this entry. An
     // absoluteNumber or imdbEpisode alone carries no such ownership evidence.
-    episode: stream && id === streamEntry ? Number(stream[2]) : (fallbackEpisode ?? episode?.episode),
+    episode:
+      stream && id === streamEntry ? Number(stream[2]) : (fallbackEpisode ?? episode?.episode),
   };
 }

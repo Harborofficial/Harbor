@@ -171,8 +171,7 @@ export function useLocalScan({
       if (!fresh.length) return;
       clearSidecarCache();
       const nfoCount = await countNfoFor(fresh.map((entry) => entry.file.path));
-      const mode: ScanMode =
-        settings.localScanMode ?? (nfoCount > 0 ? "nfo" : "tmdb");
+      const mode: ScanMode = settings.localScanMode ?? (nfoCount > 0 ? "nfo" : "tmdb");
       const tmdbKey = settings.tmdbKey?.trim() || null;
       const built: LocalEntry[] = [];
       setProgress({ found: 0, total: fresh.length });
@@ -199,7 +198,15 @@ export function useLocalScan({
       setProgress(null);
       sweeping.current = false;
     }
-  }, [busy, pending, settings.localMinFileSizeMb, settings.localScanMode, settings.tmdbKey, setToast, t]);
+  }, [
+    busy,
+    pending,
+    settings.localMinFileSizeMb,
+    settings.localScanMode,
+    settings.tmdbKey,
+    setToast,
+    t,
+  ]);
 
   return {
     busy,

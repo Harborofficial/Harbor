@@ -21,12 +21,7 @@ export function SectionCards({
   return (
     <div className="hset-cards">
       {sections.map((id) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => onOpen(id)}
-          className="hset-card"
-        >
+        <button key={id} type="button" onClick={() => onOpen(id)} className="hset-card">
           <span className="hset-card-icon">
             <Glyph name={SECTION_ICONS[id]} size={21} />
           </span>

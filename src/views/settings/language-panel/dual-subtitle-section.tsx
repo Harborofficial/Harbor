@@ -43,14 +43,18 @@ export function DualSubtitleSection() {
   return (
     <Section
       title={t("Dual subtitles")}
-      subtitle={t("Show two subtitle languages at once. Useful for learning a language or watching together.")}
+      subtitle={t(
+        "Show two subtitle languages at once. Useful for learning a language or watching together.",
+      )}
     >
       <SettingRow
         wide
         icon={<Languages size={18} strokeWidth={2} />}
         label={t("Second subtitle language")}
         desc={t("Shown at the same time as your main subtitle.")}
-        tip={t("Harbor loads it automatically when a track in that language exists. You can also set or clear the second track for one video from the subtitle menu in the player.")}
+        tip={t(
+          "Harbor loads it automatically when a track in that language exists. You can also set or clear the second track for one video from the subtitle menu in the player.",
+        )}
       >
         <div className="flex w-full flex-wrap items-center gap-2.5">
           <Dropdown
@@ -111,7 +115,10 @@ export function DualSubtitleSection() {
                   }
                 }}
                 className="harbor-slider min-w-0 flex-1"
-                style={{ ...fillStyle(settings.subSecondaryScale, 0.4, 1.4, 0.05), blockSize: "44px" }}
+                style={{
+                  ...fillStyle(settings.subSecondaryScale, 0.4, 1.4, 0.05),
+                  blockSize: "44px",
+                }}
               />
               <span className="w-[64px] shrink-0 text-end text-[15.5px] tabular-nums text-ink-muted">
                 {`${Math.round(settings.subSecondaryScale * 100)}%`}

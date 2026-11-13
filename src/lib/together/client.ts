@@ -62,7 +62,13 @@ export class TogetherClient {
   private pingSentAt = 0;
   private lastInboundAt = 0;
 
-  constructor(url: string, clientId: string, name: string, avatar: string | null = null, color: string | null = null) {
+  constructor(
+    url: string,
+    clientId: string,
+    name: string,
+    avatar: string | null = null,
+    color: string | null = null,
+  ) {
     this.url = url;
     this.clientId = clientId;
     this.name = name;
@@ -242,10 +248,27 @@ export class TogetherClient {
     this.sendNow({ t: "cursor", room: this.room, clientId: this.clientId, x, y, visible, path });
   }
 
-  sendDraw(strokeId: string, phase: "start" | "point" | "end" | "clear", path: string, x?: number, y?: number, color?: string): void {
+  sendDraw(
+    strokeId: string,
+    phase: "start" | "point" | "end" | "clear",
+    path: string,
+    x?: number,
+    y?: number,
+    color?: string,
+  ): void {
     if (!this.room) return;
     if (this.ws?.readyState !== WebSocket.OPEN) return;
-    this.sendNow({ t: "draw", room: this.room, clientId: this.clientId, strokeId, phase, x, y, color, path });
+    this.sendNow({
+      t: "draw",
+      room: this.room,
+      clientId: this.clientId,
+      strokeId,
+      phase,
+      x,
+      y,
+      color,
+      path,
+    });
   }
 
   sendPresence(location?: ParticipantLocation): void {
@@ -365,13 +388,8 @@ export class TogetherClient {
         if (msg.state) {
           this.emit({ kind: "incoming-state", state: msg.state });
           const stateAuthorPresent =
-            !!msg.state.updatedBy &&
-            msg.participants.some((p) => p.id === msg.state!.updatedBy);
-          if (
-            msg.state.mediaId &&
-            msg.state.updatedBy !== this.clientId &&
-            stateAuthorPresent
-          ) {
+            !!msg.state.updatedBy && msg.participants.some((p) => p.id === msg.state!.updatedBy);
+          if (msg.state.mediaId && msg.state.updatedBy !== this.clientId && stateAuthorPresent) {
             const hostName =
               msg.participants.find((p) => p.id === msg.state!.updatedBy)?.name ?? "Host";
             this.emit({
@@ -467,7 +485,12 @@ export class TogetherClient {
         this.update({
           participants: this.snapshot.participants.map((p) =>
             p.id === msg.participant.id
-              ? { ...p, name: msg.participant.name, avatar: msg.participant.avatar, color: msg.participant.color }
+              ? {
+                  ...p,
+                  name: msg.participant.name,
+                  avatar: msg.participant.avatar,
+                  color: msg.participant.color,
+                }
               : p,
           ),
         });
@@ -485,16 +508,36 @@ export class TogetherClient {
         return;
       case "invite":
         if (msg.from === this.clientId) return;
-        this.emit({ kind: "invite", from: msg.from, name: msg.name, invite: msg.invite, at: msg.at });
+        this.emit({
+          kind: "invite",
+          from: msg.from,
+          name: msg.name,
+          invite: msg.invite,
+          at: msg.at,
+        });
         return;
       case "host-leaving":
         this.emit({ kind: "host-leaving", from: msg.from, name: msg.name, at: msg.at });
         return;
       case "summon":
-        this.emit({ kind: "summon", from: msg.from, name: msg.name, target: msg.target, at: msg.at });
+        this.emit({
+          kind: "summon",
+          from: msg.from,
+          name: msg.name,
+          target: msg.target,
+          at: msg.at,
+        });
         return;
       case "cursor":
-        this.emit({ kind: "cursor", from: msg.from, name: msg.name, x: msg.x, y: msg.y, visible: msg.visible, path: msg.path });
+        this.emit({
+          kind: "cursor",
+          from: msg.from,
+          name: msg.name,
+          x: msg.x,
+          y: msg.y,
+          visible: msg.visible,
+          path: msg.path,
+        });
         return;
       case "draw":
         this.emit({
@@ -510,7 +553,12 @@ export class TogetherClient {
         });
         return;
       case "presence":
-        this.emit({ kind: "presence", from: msg.from, activeAt: msg.activeAt, location: msg.location });
+        this.emit({
+          kind: "presence",
+          from: msg.from,
+          activeAt: msg.activeAt,
+          location: msg.location,
+        });
         return;
       case "error":
         this.update({ state: "error", lastError: msg.message });

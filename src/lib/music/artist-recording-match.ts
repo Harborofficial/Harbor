@@ -7,10 +7,17 @@ export function sharesArtistRecordings(left: MusicTrack[], right: MusicTrack[]):
   for (const track of left) {
     const title = normalizeTitle(track.title);
     if (!title || !normalizeName(track.artist)) continue;
-    if (right.some((other) => normalizeTitle(other.title) === title
-      && normalizeName(other.artist) === normalizeName(track.artist)
-      && track.durationSeconds > 0 && other.durationSeconds > 0
-      && Math.abs(track.durationSeconds - other.durationSeconds) <= 8)) matches.add(title);
+    if (
+      right.some(
+        (other) =>
+          normalizeTitle(other.title) === title &&
+          normalizeName(other.artist) === normalizeName(track.artist) &&
+          track.durationSeconds > 0 &&
+          other.durationSeconds > 0 &&
+          Math.abs(track.durationSeconds - other.durationSeconds) <= 8,
+      )
+    )
+      matches.add(title);
   }
   return matches.size >= 2;
 }

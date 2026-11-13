@@ -7,8 +7,13 @@ export function createMusicPlaybackSelection(read: () => MusicPlayerState) {
   let selected: MusicPlaybackState | undefined;
   return () => {
     const { currentTime: _time, ...next } = read();
-    if (!selected || (Object.keys(next) as (keyof MusicPlaybackState)[])
-      .some(key => !Object.is(next[key], selected![key]))) selected = next;
+    if (
+      !selected ||
+      (Object.keys(next) as (keyof MusicPlaybackState)[]).some(
+        (key) => !Object.is(next[key], selected![key]),
+      )
+    )
+      selected = next;
     return selected;
   };
 }

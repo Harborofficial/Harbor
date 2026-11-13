@@ -26,8 +26,16 @@ function episode(overrides: Partial<KitsuEpisode> = {}): KitsuEpisode {
 }
 
 const mal: MalEpisodeTitle[] = [
-  { number: 1, title: "Mobile Capital Blutgang Has Appeared!", romaji: "Kidou Outo Blutgang ga Arawareta!" },
-  { number: 2, title: "A Rampant Scorpius Appeared!", romaji: "Bousou suru Scorpius ga Arawareta!" },
+  {
+    number: 1,
+    title: "Mobile Capital Blutgang Has Appeared!",
+    romaji: "Kidou Outo Blutgang ga Arawareta!",
+  },
+  {
+    number: 2,
+    title: "A Rampant Scorpius Appeared!",
+    romaji: "Bousou suru Scorpius ga Arawareta!",
+  },
   { number: 3, romaji: "Only Romaji Here" },
 ];
 
@@ -63,7 +71,10 @@ test("MAL leaves rows it has no record for untouched", () => {
 });
 
 test("the MAL provider reads the Tenrai (Jikan-schema) endpoint", () => {
-  const src = readFileSync(new URL("../src/lib/providers/mal-episodes.ts", import.meta.url), "utf8");
+  const src = readFileSync(
+    new URL("../src/lib/providers/mal-episodes.ts", import.meta.url),
+    "utf8",
+  );
   assert.ok(src.includes("api.tenrai.org/v1"));
   assert.ok(src.includes("/anime/${malId}/episodes"));
 });

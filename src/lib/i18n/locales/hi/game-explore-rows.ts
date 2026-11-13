@@ -14,7 +14,8 @@ export default {
   "games.discovery.steamVerdict.Positive": "सकारात्मक",
   "games.discovery.steamVerdict.Very Positive": "बहुत सकारात्मक",
   "games.discovery.steamVerdict.Overwhelmingly Positive": "अत्यधिक सकारात्मक",
-  "games.discovery.ratingNote.steam": "इस गेम की अनुशंसा करने वाली Steam खिलाड़ियों की समीक्षाओं का प्रतिशत।",
+  "games.discovery.ratingNote.steam":
+    "इस गेम की अनुशंसा करने वाली Steam खिलाड़ियों की समीक्षाओं का प्रतिशत।",
   "games.launchers.explore": "लॉन्चर के अनुसार खोजें",
   "games.launchers.note": "अलग-अलग PC लॉन्चर के गेम खोजें।",
   "games.launchers.choose": "लॉन्चर चुनें",

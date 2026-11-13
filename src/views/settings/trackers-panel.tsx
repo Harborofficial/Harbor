@@ -17,7 +17,9 @@ import { consumeTracker } from "./tracker-request";
 import { useSubTabs } from "./sub-tabs";
 
 const TraktPanel = lazy(() => import("./trakt-panel").then((m) => ({ default: m.TraktPanel })));
-const AnilistPanel = lazy(() => import("./anilist-panel").then((m) => ({ default: m.AnilistPanel })));
+const AnilistPanel = lazy(() =>
+  import("./anilist-panel").then((m) => ({ default: m.AnilistPanel })),
+);
 const MalPanel = lazy(() => import("./mal-panel").then((m) => ({ default: m.MalPanel })));
 const SimklPanel = lazy(() => import("./simkl-panel").then((m) => ({ default: m.SimklPanel })));
 const LetterboxdPanel = lazy(() =>

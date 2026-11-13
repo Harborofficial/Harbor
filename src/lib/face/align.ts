@@ -59,7 +59,11 @@ export function umeyamaSimilarity(src: [number, number][], dst: [number, number]
   return [A, B, C, D, E, F];
 }
 
-export function mpKeypointsTo4pt(kps: { x: number; y: number }[], w: number, h: number): [number, number][] {
+export function mpKeypointsTo4pt(
+  kps: { x: number; y: number }[],
+  w: number,
+  h: number,
+): [number, number][] {
   const p = (k: { x: number; y: number }): [number, number] => [k.x * w, k.y * h];
   const e0 = p(kps[0]);
   const e1 = p(kps[1]);
@@ -70,7 +74,9 @@ export function mpKeypointsTo4pt(kps: { x: number; y: number }[], w: number, h: 
 export function align112(image: ImageBitmap, detected: [number, number][]): OffscreenCanvas {
   const m = umeyamaSimilarity(detected, ARCFACE_112_4PT);
   const out = new OffscreenCanvas(112, 112);
-  const ctx = out.getContext("2d", { willReadFrequently: true }) as OffscreenCanvasRenderingContext2D;
+  const ctx = out.getContext("2d", {
+    willReadFrequently: true,
+  }) as OffscreenCanvasRenderingContext2D;
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
   ctx.setTransform(m[0], m[3], m[1], m[4], m[2], m[5]);
@@ -83,7 +89,9 @@ const MEAN = 0;
 const STD = 1;
 
 export function faceToTensor(canvas: OffscreenCanvas): Float32Array {
-  const ctx = canvas.getContext("2d", { willReadFrequently: true }) as OffscreenCanvasRenderingContext2D;
+  const ctx = canvas.getContext("2d", {
+    willReadFrequently: true,
+  }) as OffscreenCanvasRenderingContext2D;
   const { data } = ctx.getImageData(0, 0, 112, 112);
   const out = new Float32Array(3 * 112 * 112);
   const plane = 112 * 112;

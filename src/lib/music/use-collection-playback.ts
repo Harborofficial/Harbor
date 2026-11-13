@@ -19,11 +19,13 @@ export function useCollectionPlayback(
     tracks.every((track, index) => identity(track) === identity(player.queue[index]));
   const selected = Boolean(
     sameQueue &&
-      player.current &&
-      tracks.some((track) => identity(track) === identity(player.current!)),
+    player.current &&
+    tracks.some((track) => identity(track) === identity(player.current!)),
   );
   const playing = selected && player.phase === "playing";
-  const busy = (selected && player.phase === "resolving") || tracks.some(track => musicSourceRequestMatches(sourceRequest, track));
+  const busy =
+    (selected && player.phase === "resolving") ||
+    tracks.some((track) => musicSourceRequestMatches(sourceRequest, track));
   const play = () => {
     if (selected && (player.phase === "playing" || player.phase === "paused")) {
       toggleMusicPlayback();

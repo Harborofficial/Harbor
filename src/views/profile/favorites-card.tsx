@@ -68,10 +68,7 @@ export function FavoritesCard({
   const Icon = cfg.Icon;
 
   return (
-    <section
-      aria-label={t(cfg.label)}
-      className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft"
-    >
+    <section aria-label={t(cfg.label)} className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
       {!hideTitle && (
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="min-w-0">

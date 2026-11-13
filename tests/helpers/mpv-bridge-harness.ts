@@ -42,10 +42,9 @@ export function playerSnapshotChanged() {
   const compiled = ts.transpileModule(comparator.getText(ast), {
     compilerOptions: { target: ts.ScriptTarget.ES2022 },
   }).outputText;
-  return new Function(`${compiled}; return snapChangedIgnoringClock;`)() as (
-    a: PlayerSnapshot,
-    b: PlayerSnapshot,
-  ) => boolean;
+  return new Function(
+    `const AUTOMATIC_SUBTITLE_BUFFER_SEC = ${autoload.AUTOMATIC_SUBTITLE_BUFFER_SEC}; ${compiled}; return snapChangedIgnoringClock;`,
+  )() as (a: PlayerSnapshot, b: PlayerSnapshot) => boolean;
 }
 
 export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options?: MpvOptions) {

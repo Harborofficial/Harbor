@@ -39,14 +39,16 @@ export default {
   "games.pokemon.saveStep2": "关闭游戏，然后查找或导出电池存档（.sav、.srm或.dsv）。",
   "games.pokemon.saveStep3": "点击上方的打开游戏存档，在Harbor中编辑。",
   "games.pokemon.findSave": "我的存档在哪里？",
-  "games.pokemon.saveLocations": "查看ROM所在位置或模拟器的存档文件夹。如果只有即时存档，先在模拟器中读取，再从游戏菜单中保存。",
+  "games.pokemon.saveLocations":
+    "查看ROM所在位置或模拟器的存档文件夹。如果只有即时存档，先在模拟器中读取，再从游戏菜单中保存。",
   "games.pokemon.noSave": "还没有存档？",
   "games.pokemon.communitySaves": "浏览社区存档",
   "games.pokemon.communitySavesNote": "Project Pokémon · 选择准确的游戏版本，并查看作者说明。",
   "games.pokemon.pkhexNote": "开发者提供的存档编辑器、下载和帮助。",
-  "games.pokemon.noSaveNeeded": "无需游戏存档也能导入宝可梦文件。只有编辑游戏中的队伍或盒子时才需要存档。",
+  "games.pokemon.noSaveNeeded":
+    "无需游戏存档也能导入宝可梦文件。只有编辑游戏中的队伍或盒子时才需要存档。",
   "games.pokemon.videoUnavailable": "无法在此加载视频。",
   "games.pokemon.youtubeSearch": "搜索YouTube",
   "games.hub.downloadApply": "下载补丁",
-  "games.hub.manualPatch": "使用已有的补丁或链接"
+  "games.hub.manualPatch": "使用已有的补丁或链接",
 };

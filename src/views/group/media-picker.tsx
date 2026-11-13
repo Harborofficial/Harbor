@@ -7,15 +7,15 @@ import { searchAll } from "@/lib/search";
 import { mediaTag } from "@/lib/social/bbcode";
 import { Poster } from "@/components/poster";
 
-
 type Hit = { id: string; title: string; poster?: string; kind: string; sub?: string };
 
-const GROUPS: Array<{ key: "movies" | "series" | "anime" | "manga"; kind: string; label: string }> = [
-  { key: "movies", kind: "movie", label: "Movies" },
-  { key: "series", kind: "series", label: "Shows" },
-  { key: "anime", kind: "anime", label: "Anime" },
-  { key: "manga", kind: "manga", label: "Manga" },
-];
+const GROUPS: Array<{ key: "movies" | "series" | "anime" | "manga"; kind: string; label: string }> =
+  [
+    { key: "movies", kind: "movie", label: "Movies" },
+    { key: "series", kind: "series", label: "Shows" },
+    { key: "anime", kind: "anime", label: "Anime" },
+    { key: "manga", kind: "manga", label: "Manga" },
+  ];
 
 export function MediaPicker({
   onInsert,
@@ -48,10 +48,38 @@ export function MediaPicker({
         .then((r) => {
           if (ctrl.signal.aborted) return;
           const out: Hit[] = [];
-          for (const m of (r.movies ?? []).slice(0, 6)) out.push({ id: m.id, title: m.name, poster: m.poster, kind: 'movie', sub: m.releaseInfo });
-          for (const m of (r.series ?? []).slice(0, 6)) out.push({ id: m.id, title: m.name, poster: m.poster, kind: 'series', sub: m.releaseInfo });
-          for (const a of (r.anime ?? []).slice(0, 6)) out.push({ id: a.kitsuId ? 'kitsu:' + a.kitsuId : 'mal:' + a.malId, title: a.name, poster: a.poster ?? undefined, kind: 'anime', sub: a.year ?? undefined });
-          for (const g of (r.manga ?? []).slice(0, 6)) out.push({ id: g.id, title: g.title, poster: g.cover, kind: 'manga', sub: g.year ? String(g.year) : undefined });
+          for (const m of (r.movies ?? []).slice(0, 6))
+            out.push({
+              id: m.id,
+              title: m.name,
+              poster: m.poster,
+              kind: "movie",
+              sub: m.releaseInfo,
+            });
+          for (const m of (r.series ?? []).slice(0, 6))
+            out.push({
+              id: m.id,
+              title: m.name,
+              poster: m.poster,
+              kind: "series",
+              sub: m.releaseInfo,
+            });
+          for (const a of (r.anime ?? []).slice(0, 6))
+            out.push({
+              id: a.kitsuId ? "kitsu:" + a.kitsuId : "mal:" + a.malId,
+              title: a.name,
+              poster: a.poster ?? undefined,
+              kind: "anime",
+              sub: a.year ?? undefined,
+            });
+          for (const g of (r.manga ?? []).slice(0, 6))
+            out.push({
+              id: g.id,
+              title: g.title,
+              poster: g.cover,
+              kind: "manga",
+              sub: g.year ? String(g.year) : undefined,
+            });
           setHits(out);
         })
         .catch(() => {})

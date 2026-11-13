@@ -109,14 +109,18 @@ const music: Record<string, string> = {
   "music.broadcast.output": "输出",
   "music.broadcast.stop": "停止",
   "music.broadcast.start": "开始",
-  "music.broadcast.blurb": "把正在播放的声音送到虚拟麦克风，让通话里的朋友也能听到。你的音箱依然照常播放。",
+  "music.broadcast.blurb":
+    "把正在播放的声音送到虚拟麦克风，让通话里的朋友也能听到。你的音箱依然照常播放。",
   "music.broadcast.title": "广播到语音聊天",
-  "music.cable.mac.installNeeded": "Harbor 可以安装自己的虚拟麦克风。macOS 会要求输入管理员密码，然后重启 Core Audio。",
+  "music.cable.mac.installNeeded":
+    "Harbor 可以安装自己的虚拟麦克风。macOS 会要求输入管理员密码，然后重启 Core Audio。",
   "music.cable.mac.installMissing": "此版本的 Harbor 未包含虚拟麦克风驱动。",
   "music.cable.mac.installCancelled": "已取消安装。",
   "music.cable.mac.installFailed": "无法安装虚拟麦克风。",
-  "music.cable.mac.restartNeeded": "虚拟麦克风已安装，但 Core Audio 还没有识别到。重启 Mac 即可完成。",
-  "music.cable.mac.updateAvailable": "此版本的 Harbor 附带了更新的虚拟麦克风。安装后线路才能继续工作。",
+  "music.cable.mac.restartNeeded":
+    "虚拟麦克风已安装，但 Core Audio 还没有识别到。重启 Mac 即可完成。",
+  "music.cable.mac.updateAvailable":
+    "此版本的 Harbor 附带了更新的虚拟麦克风。安装后线路才能继续工作。",
   "music.cable.title": "Harbor 虚拟麦克风",
   "music.cable.blurb": "Harbor 会自己搭好虚拟麦克风，无需下载，也无需安装。",
   "music.cable.create": "创建虚拟麦克风",
@@ -512,7 +516,8 @@ const music: Record<string, string> = {
   "music.row.scrobbleWaiting": "Last.fm 已连接，但还没有发来标签栏目。",
   "music.connect.scrobbleBody": "连接 Last.fm，这一栏就会根据你真正记录的标签来生成。",
   "music.connect.serverName": "媒体服务器或文件夹",
-  "music.connect.serverBody": "把 Harbor 指向一个文件夹、Plex、Jellyfin、Navidrome 或 Subsonic，这一栏就会填满你已经拥有的专辑。",
+  "music.connect.serverBody":
+    "把 Harbor 指向一个文件夹、Plex、Jellyfin、Navidrome 或 Subsonic，这一栏就会填满你已经拥有的专辑。",
   "music.row.recents": "从上次停下的地方继续",
   "music.row.fresh": "你常听歌手的新作",
   "music.row.freshSubtitle": "收听历史中艺人的近期新作",

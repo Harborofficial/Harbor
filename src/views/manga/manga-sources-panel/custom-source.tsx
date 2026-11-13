@@ -54,7 +54,9 @@ function ResourceChip({
         )}
       </span>
       <span className="flex min-w-0 flex-col leading-tight">
-        <span className="truncate text-[12.5px] font-semibold text-ink">{done ? t("Copied") : label}</span>
+        <span className="truncate text-[12.5px] font-semibold text-ink">
+          {done ? t("Copied") : label}
+        </span>
         <span className="truncate text-[11px] text-ink-subtle">{sub}</span>
       </span>
     </button>
@@ -169,7 +171,9 @@ export function CustomSource() {
                 icon={FileText}
                 label={t("Guide")}
                 sub={t("Setup .txt")}
-                onClick={() => void downloadText("harbor-manga-source-guide.txt", GUIDE_TXT, ["txt"])}
+                onClick={() =>
+                  void downloadText("harbor-manga-source-guide.txt", GUIDE_TXT, ["txt"])
+                }
               />
               <ResourceChip
                 icon={Sparkles}
@@ -199,7 +203,9 @@ export function CustomSource() {
             <textarea
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder={t("Paste your scraping config as JSON here, or grab the template above to start.")}
+              placeholder={t(
+                "Paste your scraping config as JSON here, or grab the template above to start.",
+              )}
               spellCheck={false}
               autoCapitalize="off"
               className="h-60 w-full resize-y rounded-xl border border-edge bg-canvas px-4 pb-3.5 pt-3.5 font-mono text-[12.5px] leading-[1.7] text-ink shadow-[inset_0_1px_3px_rgba(0,0,0,0.4)] outline-none transition-all duration-200 placeholder:text-ink-subtle/80 focus:border-ink-subtle focus:ring-1 focus:ring-inset focus:ring-ink-subtle"

@@ -215,7 +215,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn playback_without_a_session_asks_for_a_premium_sign_in() {
+    async fn playback_without_a_session_reports_the_real_session_failure() {
         let state = Arc::new(SpotifyState::new());
         let error = state
             .play(
@@ -238,7 +238,13 @@ mod tests {
             )
             .await
             .expect_err("no session");
-        assert_eq!(error, CONNECT_BEFORE_PLAY);
+        assert_eq!(
+            error,
+            format!(
+                "Spotify playback session could not be restored: {}",
+                super::super::NOT_INITIALIZED
+            )
+        );
         assert!(!state.pause_for_video().await.expect("pause"));
     }
 }

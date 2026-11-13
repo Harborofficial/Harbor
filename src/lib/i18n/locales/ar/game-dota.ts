@@ -18,7 +18,8 @@ export default {
   "games.dota.attribute.agi": "الرشاقة",
   "games.dota.attribute.int": "الذكاء",
   "games.dota.attribute.all": "شامل",
-  "games.dota.trendsScope": "عينة OpenDota: سبعة أيام بتوقيت UTC تشمل اليوم. الرتبة هي متوسط المباراة؛ مباريات Turbo والاحتراف منفصلة.",
+  "games.dota.trendsScope":
+    "عينة OpenDota: سبعة أيام بتوقيت UTC تشمل اليوم. الرتبة هي متوسط المباراة؛ مباريات Turbo والاحتراف منفصلة.",
   "games.dota.wins": "نسبة الفوز",
   "games.dota.picks": "{count} اختيار",
   "games.dota.noSample": "لا توجد عينة",
@@ -26,7 +27,8 @@ export default {
   "games.dota.moreHeroes": "المزيد من الأبطال",
   "games.dota.matchups": "مواجهات المحترفين",
   "games.dota.refreshMatchups": "تحديث المواجهات",
-  "games.dota.matchupsScope": "انتصارات {hero} أمام كل خصم في مباريات المحترفين المسجلة خلال العام الماضي. تشمل تحديثات قديمة ولا تتبع مرشح الرتبة.",
+  "games.dota.matchupsScope":
+    "انتصارات {hero} أمام كل خصم في مباريات المحترفين المسجلة خلال العام الماضي. تشمل تحديثات قديمة ولا تتبع مرشح الرتبة.",
   "games.dota.opponent": "ابحث عن خصم",
   "games.dota.minimum": "الحد الأدنى للمباريات",
   "games.dota.minGames": "{count}+ مباراة",
@@ -48,5 +50,5 @@ export default {
   "games.dota.sample.5": "ليجند",
   "games.dota.sample.6": "إينشنت",
   "games.dota.sample.7": "ديفاين",
-  "games.dota.sample.8": "إيمورتال"
+  "games.dota.sample.8": "إيمورتال",
 };

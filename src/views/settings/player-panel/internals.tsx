@@ -21,9 +21,7 @@ export function DesktopOnlyBlock({ children }: { children: ReactNode }) {
 }
 
 export function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="harbor-settings-label">{children}</span>
-  );
+  return <span className="harbor-settings-label">{children}</span>;
 }
 
 export function SubField({

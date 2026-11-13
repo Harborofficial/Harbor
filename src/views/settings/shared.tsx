@@ -230,14 +230,14 @@ export function RowControl({ span, children }: { span?: boolean; children: React
 
 export function Section({
   title,
-  anchorTitle,
+  id,
   subtitle,
   newId,
   bare,
   children,
 }: {
   title: string;
-  anchorTitle?: string;
+  id?: string;
   subtitle?: string;
   newId?: string;
   bare?: boolean;
@@ -287,7 +287,7 @@ export function Section({
     <SectionRegistryContext.Provider value={registry}>
       <SectionFlagsContext.Provider value={flags}>
         <section
-          id={settingsAnchor(anchorTitle ?? title)}
+          id={id ?? settingsAnchor(title)}
           className={
             bare
               ? "scroll-mt-[72px]"

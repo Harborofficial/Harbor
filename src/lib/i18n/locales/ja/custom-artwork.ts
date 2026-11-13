@@ -15,7 +15,10 @@ export default {
   "artwork.resetLaunch": "起動ロゴをリセット",
   "artwork.local": "このデバイスに保存します。視差効果を減らす設定では静止画を使用します。",
   "artwork.error.large": "小さいファイルを選んでください。最大 8 MB、4096 × 4096 ピクセルです。",
-  "artwork.error.external": "このアニメーションは外部メディアを使用しています。画像を埋め込んで書き出してください。",
-  "artwork.error.storage": "このデバイスにファイルを保存できませんでした。前の選択は変更されていません。",
-  "artwork.error.invalid": "ファイルを読み取れませんでした。Lottie（.json または .lottie）、GIF、PNG、JPEG、WebP を選んでください。"
+  "artwork.error.external":
+    "このアニメーションは外部メディアを使用しています。画像を埋め込んで書き出してください。",
+  "artwork.error.storage":
+    "このデバイスにファイルを保存できませんでした。前の選択は変更されていません。",
+  "artwork.error.invalid":
+    "ファイルを読み取れませんでした。Lottie（.json または .lottie）、GIF、PNG、JPEG、WebP を選んでください。",
 };

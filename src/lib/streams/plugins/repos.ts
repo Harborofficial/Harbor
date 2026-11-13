@@ -1,8 +1,21 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { assertSafeUrl } from "@/lib/manga/plugins/host-http";
-import { normalizeRepoUrl, parseAndroidExtensionList, parseStreamRepoManifest, pluginIdFor, repoUrlCandidates, type ParsedStreamRepo } from "./manifest";
+import {
+  normalizeRepoUrl,
+  parseAndroidExtensionList,
+  parseStreamRepoManifest,
+  pluginIdFor,
+  repoUrlCandidates,
+  type ParsedStreamRepo,
+} from "./manifest";
 import { uninstallStreamPlugin } from "./install";
-import { installedStreamPluginsSync, saveStreamPlugin, deleteStreamRepoRecord, loadStreamRepoRecords, saveStreamRepoRecord } from "./store";
+import {
+  installedStreamPluginsSync,
+  saveStreamPlugin,
+  deleteStreamRepoRecord,
+  loadStreamRepoRecords,
+  saveStreamRepoRecord,
+} from "./store";
 import { PluginError, type StreamRepoEntry, type StreamRepoRecord } from "./types";
 
 const FETCH_TIMEOUT = 20_000;
@@ -119,12 +132,14 @@ async function upsert(url: string, parsed: ParsedStreamRepo): Promise<StreamRepo
 
 export async function addStreamRepo(rawUrl: string): Promise<StreamRepoRecord> {
   const candidates = repoUrlCandidates(normalizeRepoUrl(rawUrl));
-  if (candidates.some((u) => repos.some((r) => r.url === u))) throw new PluginError("already-added");
+  if (candidates.some((u) => repos.some((r) => r.url === u)))
+    throw new PluginError("already-added");
   let lastError: unknown = null;
   for (const url of candidates) {
     try {
       const parsed = await fetchStreamRepoManifest(url);
-      if (parsed.entries.length > 0 || url === candidates[candidates.length - 1]) return await upsert(url, parsed);
+      if (parsed.entries.length > 0 || url === candidates[candidates.length - 1])
+        return await upsert(url, parsed);
     } catch (e) {
       lastError = e;
     }

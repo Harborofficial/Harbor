@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "スタジアムのヒーロー",
   "games.overwatch.searchHeroes": "ヒーローを検索",
   "games.overwatch.refresh": "ガイドを更新",
-  "games.overwatch.unavailable": "ガイドを更新できませんでした。以前読み込んだ情報が表示される場合があります。",
+  "games.overwatch.unavailable":
+    "ガイドを更新できませんでした。以前読み込んだ情報が表示される場合があります。",
   "games.overwatch.partial": "一部の情報を取得できません。",
   "games.overwatch.checked": "確認日時：{date}",
-  "games.overwatch.scope": "OverFastを通じて取得したBlizzardのヒーロー情報です。バランス調整がガイドの更新より先にゲームへ反映される場合があります。",
-  "games.overwatch.mapsScope": "OverFastのマップとモード情報です。アーケードや旧マップを含み、利用できるマップはモードによって異なります。",
+  "games.overwatch.scope":
+    "OverFastを通じて取得したBlizzardのヒーロー情報です。バランス調整がガイドの更新より先にゲームへ反映される場合があります。",
+  "games.overwatch.mapsScope":
+    "OverFastのマップとモード情報です。アーケードや旧マップを含み、利用できるマップはモードによって異なります。",
   "games.overwatch.empty": "一致する結果がありません。検索条件やフィルターを変更してください。",
   "games.overwatch.moreHeroes": "ほかのヒーロー",
   "games.overwatch.moreMaps": "ほかのマップ",
@@ -33,6 +36,5 @@ export default {
   "games.overwatch.videoFailed": "実演を再生できませんでした。ヒーロー公式ページでご覧ください。",
   "games.overwatch.mode": "ゲームモード",
   "games.overwatch.allModes": "すべてのモード",
-  "games.overwatch.searchMaps": "マップや場所を検索"
+  "games.overwatch.searchMaps": "マップや場所を検索",
 };
-

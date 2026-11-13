@@ -19,7 +19,8 @@ export default {
   "games.tft.save": "टीम सहेजें",
   "games.tft.savedTeams": "सहेजी गई टीमें",
   "games.tft.delete": "सहेजी गई टीम मिटाएँ",
-  "games.tft.note": "हर चैंपियन एक बार गिना जाता है। आइटम और विशेष प्रभाव गुणों या टीम की जगह को बदल सकते हैं।",
+  "games.tft.note":
+    "हर चैंपियन एक बार गिना जाता है। आइटम और विशेष प्रभाव गुणों या टीम की जगह को बदल सकते हैं।",
   "games.tft.saveFailed": "इस डिवाइस पर सहेजा नहीं जा सका। आपकी वर्तमान टीम यहीं है।",
   "games.tft.missing": "कुछ सहेजे गए चैंपियन अब इस सेट में नहीं हैं।",
   "games.tft.imported": "टीम आयात की गई।",
@@ -54,5 +55,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "स्वास्थ्य पुनर्जनन",
   "games.tft.stat.set14AmpIcon": "क्षति वृद्धि",
   "games.tft.stat.TFTManaRegen": "माना पुनर्जनन",
-  "games.tft.stat.scaleSV": "सर्व-जीवनचोरी"
+  "games.tft.stat.scaleSV": "सर्व-जीवनचोरी",
 };

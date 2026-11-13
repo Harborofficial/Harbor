@@ -6,9 +6,11 @@ export default {
   "games.recommend.filterTitle": "Keep out of suggestions",
   "games.recommend.hideLibrary": "Games in my library",
   "games.recommend.hideSaved": "Saved games",
-  "games.recommend.libraryNote": "Library matches use detected games, linked imports and your last Steam sync.",
+  "games.recommend.libraryNote":
+    "Library matches use detected games, linked imports and your last Steam sync.",
   "games.recommend.steamSynced": "Steam library synced {date}",
-  "games.recommend.steamUnavailable": "Steam ownership is unavailable. Local library matches still apply.",
+  "games.recommend.steamUnavailable":
+    "Steam ownership is unavailable. Local library matches still apply.",
   "games.recommend.inLibrary": "In your library",
   "games.recommend.removeSaved": "Remove {name} from Saved",
   "games.recommend.forYou": "For you",
@@ -21,7 +23,8 @@ export default {
   "games.recommend.recent": "Recent play",
   "games.recommend.reset": "Bring back hidden games",
   "games.recommend.empty": "Make discovery yours",
-  "games.recommend.emptyNote": "Save games that catch your eye, or play from your library. Suggestions will start here.",
+  "games.recommend.emptyNote":
+    "Save games that catch your eye, or play from your library. Suggestions will start here.",
   "games.recommend.signalsOff": "Turn on Saved or Recent play above to shape your suggestions.",
   "games.recommend.save": "Save {name}",
   "games.recommend.hide": "Hide {name} from suggestions",
@@ -31,11 +34,14 @@ export default {
   "games.recommend.unavailable": "The connections haven't arrived yet.",
   "games.recommend.retryNote": "Your library is here. Try loading its related games again.",
   "games.recommend.caughtUp": "Try another direction.",
-  "games.recommend.caughtUpNote": "Try turning off a filter, restoring a hidden suggestion, or saving another favorite.",
+  "games.recommend.caughtUpNote":
+    "Try turning off a filter, restoring a hidden suggestion, or saving another favorite.",
   "games.recommend.finding": "Finding connections to your games…",
-  "games.recommend.source": "Suggestions from Steam tags and IGDB, shaped by your library. Hidden choices stay on this profile.",
+  "games.recommend.source":
+    "Suggestions from Steam tags and IGDB, shaped by your library. Hidden choices stay on this profile.",
   "games.recommend.retrySome": "Retry missing connections",
-  "games.recommend.saveError": "Couldn't save your discovery preferences on this device. Try again.",
+  "games.recommend.saveError":
+    "Couldn't save your discovery preferences on this device. Try again.",
   "games.recommend.influences": "Shaping your suggestions",
   "games.recommend.influencesNote": "Choose which games Harbor uses. Your library stays unchanged.",
   "games.recommend.exclude": "Stop using {name}",
@@ -48,7 +54,8 @@ export default {
   "games.recommend.undo": "Undo",
   "games.recommend.undoLabel": "Undo change for {name}",
   "games.recommend.allExcluded": "Your influences are excluded.",
-  "games.recommend.allExcludedNote": "Restore a game in Tune your suggestions, or save another favorite.",
+  "games.recommend.allExcludedNote":
+    "Restore a game in Tune your suggestions, or save another favorite.",
   "games.recommend.saved": "Saved games",
-  "games.recommend.close": "Close suggestion settings"
+  "games.recommend.close": "Close suggestion settings",
 };

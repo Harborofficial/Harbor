@@ -420,7 +420,12 @@ test("a failed swap download offers the unverified swap instead of aborting the 
 test("a missing offset candidate still recognizes verified already-aligned subtitles", async () => {
   const ctx: PipelineContext = {
     ...languageContext("en", "en"),
-    cues: [[10, 12], [20, 22], [30, 32], [40, 42]],
+    cues: [
+      [10, 12],
+      [20, 22],
+      [30, 32],
+      [40, 42],
+    ],
     cueText: ["one", "two", "three", "four"],
   };
   const aligned = await runAutoSync(ctx, {
@@ -689,7 +694,11 @@ test("selected audio metadata supplies audioLanguage independently of subtitle l
 
 test("ASR language and ASS application paths are wired conservatively", () => {
   const context = read("src/lib/subtitles/autosync/context.ts");
-  assert.match(context, /subLang: ctx\.audioLanguage \|\| null/);
+  assert.match(
+    context,
+    /const modelLanguage = resolveMoonshineLanguage\(language, ctx\.audioLanguage\)/,
+  );
+  assert.match(context, /subLang: modelLanguage/);
   assert.doesNotMatch(context, /subLang: ctx\.languages\[0\]/);
   assert.doesNotMatch(context, /NEUTRAL_QUALITY|TORRENT_BASELINE/);
 

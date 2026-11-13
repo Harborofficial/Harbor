@@ -17,7 +17,8 @@ function ytId(u: URL): string | null {
     const id = u.pathname.slice(1).split("/")[0];
     return YT_ID.test(id) ? id : null;
   }
-  if (host !== "youtube.com" && host !== "music.youtube.com" && host !== "youtube-nocookie.com") return null;
+  if (host !== "youtube.com" && host !== "music.youtube.com" && host !== "youtube-nocookie.com")
+    return null;
   const v = u.searchParams.get("v");
   if (v && YT_ID.test(v)) return v;
   const m = u.pathname.match(/\/(?:embed|shorts|v)\/([A-Za-z0-9_-]{11})/);
@@ -37,7 +38,8 @@ export function parseClockToSec(v: string | null | undefined): number | null {
   const mmss = s.match(/^(\d+):([0-5]?\d)$/);
   if (mmss) return parseInt(mmss[1], 10) * 60 + parseInt(mmss[2], 10);
   const hms = s.match(/^(?:(\d+)m)?(?:(\d+)s)?$/i);
-  if (hms && (hms[1] || hms[2])) return parseInt(hms[1] || "0", 10) * 60 + parseInt(hms[2] || "0", 10);
+  if (hms && (hms[1] || hms[2]))
+    return parseInt(hms[1] || "0", 10) * 60 + parseInt(hms[2] || "0", 10);
   return null;
 }
 
@@ -152,7 +154,10 @@ const OEMBED: Record<AudioProvider, (url: string) => string> = {
 
 const metaCache = new Map<string, AudioMeta | null>();
 
-export async function fetchAudioMeta(a: ProfileAudio, signal?: AbortSignal): Promise<AudioMeta | null> {
+export async function fetchAudioMeta(
+  a: ProfileAudio,
+  signal?: AbortSignal,
+): Promise<AudioMeta | null> {
   const hit = metaCache.get(a.url);
   if (hit !== undefined) return hit;
   try {
@@ -161,7 +166,10 @@ export async function fetchAudioMeta(a: ProfileAudio, signal?: AbortSignal): Pro
     const d = (await r.json()) as { title?: string; thumbnail_url?: string; author_name?: string };
     const meta: AudioMeta = {
       title: String(d.title ?? "").slice(0, 160),
-      thumbnail: typeof d.thumbnail_url === "string" && d.thumbnail_url.startsWith("https:") ? d.thumbnail_url : undefined,
+      thumbnail:
+        typeof d.thumbnail_url === "string" && d.thumbnail_url.startsWith("https:")
+          ? d.thumbnail_url
+          : undefined,
       author: typeof d.author_name === "string" ? d.author_name.slice(0, 80) : undefined,
     };
     metaCache.set(a.url, meta);
@@ -191,12 +199,22 @@ export function sendAudioVolume(
 
 type Cmd = "play" | "pause" | "mute" | "unmute";
 
-export function sendAudioCommand(frame: HTMLIFrameElement | null, provider: AudioProvider, cmd: Cmd): void {
+export function sendAudioCommand(
+  frame: HTMLIFrameElement | null,
+  provider: AudioProvider,
+  cmd: Cmd,
+): void {
   const win = frame?.contentWindow;
   if (!win) return;
   if (provider === "youtube") {
     const func =
-      cmd === "play" ? "playVideo" : cmd === "pause" ? "pauseVideo" : cmd === "mute" ? "mute" : "unMute";
+      cmd === "play"
+        ? "playVideo"
+        : cmd === "pause"
+          ? "pauseVideo"
+          : cmd === "mute"
+            ? "mute"
+            : "unMute";
     win.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*");
     return;
   }

@@ -3,7 +3,8 @@ export default {
   "games.wow.runs.title": "Run dungeon",
   "games.wow.runs.all": "Semua affix",
   "games.wow.runs.current": "Affix saat ini",
-  "games.wow.runs.currentNote": "Cocok dengan kombinasi affix saat ini, termasuk minggu sebelumnya.",
+  "games.wow.runs.currentNote":
+    "Cocok dengan kombinasi affix saat ini, termasuk minggu sebelumnya.",
   "games.wow.runs.allNote": "Run terbaik yang tercatat untuk semua affix pada musim ini.",
   "games.wow.runs.page": "Halaman {page}",
   "games.wow.runs.refresh": "Segarkan run",
@@ -19,11 +20,12 @@ export default {
   "games.wow.runs.copy": "Salin talent",
   "games.wow.runs.copyFailed": "Tidak dapat menyalin. Coba lagi.",
   "games.wow.runs.party": "Komposisi grup",
-  "games.wow.runs.snapshots": "Talent dan perlengkapan yang dipublikasikan adalah rekaman penyedia. Data ini dapat berbeda dari yang digunakan dalam run ini.",
+  "games.wow.runs.snapshots":
+    "Talent dan perlengkapan yang dipublikasikan adalah rekaman penyedia. Data ini dapat berbeda dari yang digunakan dalam run ini.",
   "games.wow.runs.gear": "Perlengkapan",
   "games.wow.runs.tank": "Tank",
   "games.wow.runs.healer": "Healer",
   "games.wow.runs.dps": "Damage",
   "games.wow.runs.snapshotAt": "Rekaman perlengkapan: {date}",
-  "games.wow.runs.closeGear": "Tutup perlengkapan"
+  "games.wow.runs.closeGear": "Tutup perlengkapan",
 };

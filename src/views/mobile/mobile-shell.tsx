@@ -17,8 +17,12 @@ import { ScrollToTop } from "./scroll-to-top";
 import { MangaNowBar } from "./manga-remote/manga-now-bar";
 
 const RemoteApp = lazy(() => import("@/views/remote-app").then((m) => ({ default: m.RemoteApp })));
-const MangaRemote = lazy(() => import("./manga-remote/manga-remote").then((m) => ({ default: m.MangaRemote })));
-const MangaLocalReader = lazy(() => import("./manga-read/manga-local-reader").then((m) => ({ default: m.MangaLocalReader })));
+const MangaRemote = lazy(() =>
+  import("./manga-remote/manga-remote").then((m) => ({ default: m.MangaRemote })),
+);
+const MangaLocalReader = lazy(() =>
+  import("./manga-read/manga-local-reader").then((m) => ({ default: m.MangaLocalReader })),
+);
 const MobileOnboard = lazy(() => import("./onboard").then((m) => ({ default: m.MobileOnboard })));
 
 export function MobileShell() {
@@ -90,9 +94,7 @@ function ShellBody() {
     <div ref={rootRef} className="absolute inset-0 z-30 flex flex-col bg-canvas">
       <style>{TAB_TRANSITION_CSS}</style>
       <div className="relative flex min-h-0 flex-1 flex-col">
-        <TabLayer active={tab === "home"}>
-          {seen.has("home") && <MobileBrowse />}
-        </TabLayer>
+        <TabLayer active={tab === "home"}>{seen.has("home") && <MobileBrowse />}</TabLayer>
         <TabLayer active={tab === "search"}>
           {seen.has("search") && (
             <BrowseScroll>
@@ -255,7 +257,9 @@ function NowPlayingBar({ onExpand }: { onExpand: () => void }) {
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 74px)" }}
     >
       <style>{NOW_PLAYING_CSS}</style>
-      <div className={`w-[min(440px,100%)] ${active ? "harbor-nowplaying-in" : "harbor-nowplaying-out"}`}>
+      <div
+        className={`w-[min(440px,100%)] ${active ? "harbor-nowplaying-in" : "harbor-nowplaying-out"}`}
+      >
         <button
           type="button"
           onClick={onExpand}
@@ -267,7 +271,9 @@ function NowPlayingBar({ onExpand }: { onExpand: () => void }) {
             )}
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-[13.5px] font-semibold text-ink">{snap.mediaTitle || "Now playing"}</span>
+            <span className="truncate text-[13.5px] font-semibold text-ink">
+              {snap.mediaTitle || "Now playing"}
+            </span>
             <span className="truncate text-[11.5px] text-ink-muted">
               {ep ? `${ep} · on your computer` : "on your computer"}
             </span>

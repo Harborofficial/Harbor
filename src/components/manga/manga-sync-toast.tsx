@@ -31,7 +31,9 @@ export function MangaSyncToast({ tracker }: { tracker: "anilist" | "mal" }) {
     };
   }, [tracker]);
 
-  if (!event || !settings.syncIndicator) return null;
+  const showIndicator =
+    tracker === "anilist" ? settings.anilistSyncIndicator : settings.malSyncIndicator;
+  if (!event || !showIndicator) return null;
   const ok = event.kind === "ok";
   const syncing = event.kind === "syncing";
   const good = ok;

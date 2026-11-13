@@ -1,29 +1,35 @@
 const controllers: Record<string, string> = {
-  "Controllers": "Контроллеры",
+  Controllers: "Контроллеры",
   "Controllers / gamepad": "Контроллеры / геймпад",
   "Controller support": "Поддержка контроллеров",
-  "Use a game controller to browse Harbor and control playback. Works with Xbox, PlayStation, and most USB or Bluetooth gamepads.": "Управляйте Harbor и воспроизведением с игрового контроллера. Работает с Xbox, PlayStation и большинством USB- и Bluetooth-геймпадов.",
-  "Use a game controller to browse Harbor and control playback. Tune the sticks and see the button map.": "Управляйте Harbor и воспроизведением с игрового контроллера. Настройте стики и посмотрите раскладку кнопок.",
+  "Use a game controller to browse Harbor and control playback. Works with Xbox, PlayStation, and most USB or Bluetooth gamepads.":
+    "Управляйте Harbor и воспроизведением с игрового контроллера. Работает с Xbox, PlayStation и большинством USB- и Bluetooth-геймпадов.",
+  "Use a game controller to browse Harbor and control playback. Tune the sticks and see the button map.":
+    "Управляйте Harbor и воспроизведением с игрового контроллера. Настройте стики и посмотрите раскладку кнопок.",
   "Enable controller": "Включить контроллер",
-  "When on, a connected controller moves focus around Harbor and drives the player. Turn it off to ignore all controllers.": "Если включено, подключённый контроллер перемещает фокус в Harbor и управляет плеером. Выключите, чтобы игнорировать все контроллеры.",
+  "When on, a connected controller moves focus around Harbor and drives the player. Turn it off to ignore all controllers.":
+    "Если включено, подключённый контроллер перемещает фокус в Harbor и управляет плеером. Выключите, чтобы игнорировать все контроллеры.",
   "Connected controllers": "Подключённые контроллеры",
-  "Controllers Harbor can see right now. Connect one over USB or Bluetooth and it shows up here.": "Контроллеры, которые Harbor видит сейчас. Подключите контроллер по USB или Bluetooth, и он появится здесь.",
-  "No controllers detected. Connect one over USB or Bluetooth.": "Контроллеры не обнаружены. Подключите контроллер по USB или Bluetooth.",
-  "Connected": "Подключено",
+  "Controllers Harbor can see right now. Connect one over USB or Bluetooth and it shows up here.":
+    "Контроллеры, которые Harbor видит сейчас. Подключите контроллер по USB или Bluetooth, и он появится здесь.",
+  "No controllers detected. Connect one over USB or Bluetooth.":
+    "Контроллеры не обнаружены. Подключите контроллер по USB или Bluetooth.",
+  Connected: "Подключено",
   "Button map": "Раскладка кнопок",
-  "How the buttons map in each context. This is a reference; the layout is fixed.": "Как работают кнопки в каждом режиме. Это справка; раскладка неизменна.",
-  "Browsing": "Навигация",
+  "How the buttons map in each context. This is a reference; the layout is fixed.":
+    "Как работают кнопки в каждом режиме. Это справка; раскладка неизменна.",
+  Browsing: "Навигация",
   "In the player": "В плеере",
   "D-pad": "Крестовина",
   "Move focus": "Переместить фокус",
   "A / Cross": "A / Крестик",
-  "Select": "Выбрать",
+  Select: "Выбрать",
   "B / Circle": "B / Круг",
-  "Back": "Назад",
+  Back: "Назад",
   "Play or pause": "Воспроизведение или пауза",
   "X / Square": "X / Квадрат",
   "Y / Triangle": "Y / Треугольник",
-  "Subtitles": "Субтитры",
+  Subtitles: "Субтитры",
   "Stats overlay": "Оверлей статистики",
   "Bumpers (LB / RB)": "Бамперы (LB / RB)",
   "Previous or next episode": "Предыдущая или следующая серия",
@@ -33,13 +39,17 @@ const controllers: Record<string, string> = {
   "Volume up or down": "Громче или тише",
   "Exit player": "Выйти из плеера",
   "Stick and timing": "Стики и тайминги",
-  "Fine-tune how far you push the stick before it registers and how quickly held directions repeat.": "Точная настройка того, насколько нужно отклонить стик для срабатывания и как быстро повторяется удержанное направление.",
-  "Deadzone": "Мёртвая зона",
-  "How far you push the stick before Harbor reacts. Raise it if the focus drifts on its own.": "Насколько нужно отклонить стик, чтобы Harbor среагировал. Увеличьте, если фокус смещается сам.",
+  "Fine-tune how far you push the stick before it registers and how quickly held directions repeat.":
+    "Точная настройка того, насколько нужно отклонить стик для срабатывания и как быстро повторяется удержанное направление.",
+  Deadzone: "Мёртвая зона",
+  "How far you push the stick before Harbor reacts. Raise it if the focus drifts on its own.":
+    "Насколько нужно отклонить стик, чтобы Harbor среагировал. Увеличьте, если фокус смещается сам.",
   "Repeat speed": "Скорость повтора",
-  "How fast a held direction keeps moving the focus.": "Как быстро удержанное направление продолжает перемещать фокус.",
+  "How fast a held direction keeps moving the focus.":
+    "Как быстро удержанное направление продолжает перемещать фокус.",
   "Initial delay": "Начальная задержка",
-  "How long you hold a direction before it starts repeating.": "Как долго нужно удерживать направление до начала повтора.",
+  "How long you hold a direction before it starts repeating.":
+    "Как долго нужно удерживать направление до начала повтора.",
   "{n} ms": "{n} ms",
 };
 

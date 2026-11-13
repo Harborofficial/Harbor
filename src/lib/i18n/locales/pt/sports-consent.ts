@@ -32,10 +32,13 @@ export default {
   "Show Sports": "Mostrar Esportes",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "Mostrar Esportes na navegação. Você deve aceitar o aviso de Esportes antes que a página seja carregada.",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "Ative Esportes sem provedor ou adicione uma fonte Live TV, M3U ou Xtream.",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "Ative Esportes sem provedor ou adicione uma fonte Live TV, M3U ou Xtream.",
   "Set up Live TV": "Configurar Live TV",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "Placares, calendarios e classificacoes funcionam sem provedor. O Harbor nao fornece transmissoes, entao assistir a um jogo exige sua propria fonte Live TV, M3U ou Xtream.",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "Placares, calendarios e classificacoes vem de dados esportivos publicos e nao precisam de provedor. O Harbor nao fornece transmissoes: assistir a um jogo exige sua propria fonte Live TV, M3U ou Xtream.",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "Placares, calendarios e classificacoes funcionam sem provedor. O Harbor nao fornece transmissoes, entao assistir a um jogo exige sua propria fonte Live TV, M3U ou Xtream.",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "Placares, calendarios e classificacoes vem de dados esportivos publicos e nao precisam de provedor. O Harbor nao fornece transmissoes: assistir a um jogo exige sua propria fonte Live TV, M3U ou Xtream.",
   "Show Sports without a TV provider": "Mostrar Esportes sem provedor de TV",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "Ativar Esportes não aceita o aviso. Sua escolha é mantida neste dispositivo e não é sincronizada com sua conta.",

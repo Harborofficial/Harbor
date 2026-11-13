@@ -1245,7 +1245,8 @@ const catalogMO: Record<string, string> = {
     "Stremio को आपके ब्राउज़र में खोलता है। ईमेल, Facebook और Apple अकाउंट के साथ काम करता है।",
   "Opens Stremio in your browser. Works with email, Facebook, and Apple. Harbor never sees your password.":
     "Stremio को आपके ब्राउज़र में खोलता है। ईमेल, Facebook और Apple के साथ काम करता है। Harbor को आपका पासवर्ड कभी दिखाई नहीं देता।",
-  "Opens the folder holding the DHT cache and active transfer data.": "DHT कैश और सक्रिय ट्रांसफ़र डेटा वाला फ़ोल्डर खोलता है।",
+  "Opens the folder holding the DHT cache and active transfer data.":
+    "DHT कैश और सक्रिय ट्रांसफ़र डेटा वाला फ़ोल्डर खोलता है।",
   "Opens the free signup page": "मुफ़्त साइनअप पेज खोलता है",
   "Opens your API settings page": "आपकी API सेटिंग्स का पेज खोलता है",
   Optional: "वैकल्पिक",

@@ -17,7 +17,11 @@ import { NavRow } from "./nav-editor/nav-row";
 
 const ICON_ONLY: ReadonlySet<ThemeLayout> = new Set(["minui"]);
 
-export function NavEditor({ layout, value: cfg, onChange }: {
+export function NavEditor({
+  layout,
+  value: cfg,
+  onChange,
+}: {
   layout: ThemeLayout;
   value: NavCustomization;
   onChange: (value: NavCustomization) => void;

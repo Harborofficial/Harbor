@@ -311,12 +311,13 @@ fn actual_process_termination_recovers_both_folder_boundaries_and_committed_stat
             install(&store, "1.0.0");
         }
         fs::write(f.0.join("Mods/Farm/config.json"), b"survives process death").unwrap();
+        let module = module_path!().split_once("::").unwrap().1;
         let mut child = Command::new(std::env::current_exe().unwrap())
             .args([
-                "stardew_store::tests::crash_worker",
-                "--ignored",
-                "--exact",
-                "--nocapture",
+                format!("{module}::crash_worker"),
+                "--ignored".into(),
+                "--exact".into(),
+                "--nocapture".into(),
             ])
             .env("HARBOR_STARDEW_CRASH_ROOT", &f.0)
             .env("HARBOR_STARDEW_CRASH_AT", at)
@@ -381,8 +382,13 @@ fn interrupted_recovery_does_not_overwrite_later_edits() {
         let store = f.store();
         install(&store, "1.0.0");
     }
+    let module = module_path!().split_once("::").unwrap().1;
     let mut child = Command::new(std::env::current_exe().unwrap())
-        .args(["stardew_store::tests::crash_worker", "--ignored", "--exact"])
+        .args([
+            format!("{module}::crash_worker"),
+            "--ignored".into(),
+            "--exact".into(),
+        ])
         .env("HARBOR_STARDEW_CRASH_ROOT", &f.0)
         .env("HARBOR_STARDEW_CRASH_AT", "moved1")
         .stdout(Stdio::null())

@@ -48,7 +48,7 @@ function fixture({ quality = "fast", installed = true, cached = false, local = n
       upscaleBestPage: async (key) => calls.push(["best", key]),
     },
     "./model": { nearestBestHeight: () => 1600 },
-    "./eligibility": { MAX_GPU_PAGE_PIXELS: 8_000_000 },
+    "./eligibility": { MAX_GPU_PAGE_PIXELS: 9_000_000 },
   };
   const exports = {};
   vm.runInNewContext(

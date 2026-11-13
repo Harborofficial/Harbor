@@ -18,7 +18,7 @@ import type {
 } from "@/lib/media-server/types";
 import {
   readPlayback,
-  streamMatchesEntry,
+  findRememberedSourceMatch,
   streamMatchesSource,
   type PlaybackEntry,
 } from "@/lib/playback-history";
@@ -222,7 +222,7 @@ export function useBpStreams(params: { meta: Meta; episode?: PlayEpisode }): BpS
     if (!rememberedEntry || pool.length === 0) return null;
     const match =
       rememberedEntry.kind === "playback"
-        ? (pool.find((s) => streamMatchesEntry(s, rememberedEntry.entry)) ?? null)
+        ? findRememberedSourceMatch(pool, rememberedEntry.entry)
         : (pool.find((s) => streamMatchesSource(s, rememberedEntry.entry)) ?? null);
     if (!match || isAnimeMetaId || !episode || rememberedEntry.kind === "source") return match;
     if (match.episode != null && match.episode !== episode.episode) return null;

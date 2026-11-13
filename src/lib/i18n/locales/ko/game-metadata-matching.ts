@@ -16,11 +16,12 @@ export default {
   "games.metadata.type.pack": "팩",
   "games.metadata.type.update": "업데이트",
   "games.metadata.note": "게임 이미지와 정보를 선택하세요. 실행기와 파일은 변경되지 않습니다.",
-  "games.metadata.conflict": "다른 창에서 연결이 변경되었습니다. 닫았다가 다시 열어 최신 선택을 확인하세요.",
+  "games.metadata.conflict":
+    "다른 창에서 연결이 변경되었습니다. 닫았다가 다시 열어 최신 선택을 확인하세요.",
   "games.match.title": "이미지 및 정보 찾기",
   "games.match.use": "이 게임 사용",
   "games.match.remove": "연결 해제",
   "games.match.source": "IGDB의 이미지 및 정보",
   "games.match.note": "파일과 일치하는 에디션을 선택하세요. 원본 파일과 파일 이름은 유지됩니다.",
-  "games.match.empty": "지역이나 리비전 표시를 뺀 게임 제목으로 검색해 보세요."
+  "games.match.empty": "지역이나 리비전 표시를 뺀 게임 제목으로 검색해 보세요.",
 };

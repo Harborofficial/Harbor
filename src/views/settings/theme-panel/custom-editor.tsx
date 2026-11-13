@@ -13,18 +13,24 @@ import { ROW_DESC } from "../shared";
 import { usePageActions } from "../page-actions";
 import { ColorPopoverTrigger } from "../color-picker";
 
-const COLOR_FIELDS: Array<{ key: keyof CustomColors; label: string; hint: string; group: string }> = [
-  { key: "canvas", label: "Background", hint: "Page base.", group: "Surfaces" },
-  { key: "surface", label: "Surface", hint: "Slightly lighter than background.", group: "Surfaces" },
-  { key: "elevated", label: "Elevated", hint: "Cards, panels.", group: "Surfaces" },
-  { key: "raised", label: "Raised", hint: "Highlighted blocks.", group: "Surfaces" },
-  { key: "ink", label: "Text", hint: "Primary copy.", group: "Text" },
-  { key: "inkMuted", label: "Muted text", hint: "Secondary copy.", group: "Text" },
-  { key: "inkSubtle", label: "Subtle text", hint: "Captions, eyebrows.", group: "Text" },
-  { key: "edge", label: "Border", hint: "Used at 55% / 25% alpha.", group: "Lines" },
-  { key: "accent", label: "Accent", hint: "Highlight, progress.", group: "Accents" },
-  { key: "danger", label: "Danger", hint: "Errors, destructive.", group: "Accents" },
-];
+const COLOR_FIELDS: Array<{ key: keyof CustomColors; label: string; hint: string; group: string }> =
+  [
+    { key: "canvas", label: "Background", hint: "Page base.", group: "Surfaces" },
+    {
+      key: "surface",
+      label: "Surface",
+      hint: "Slightly lighter than background.",
+      group: "Surfaces",
+    },
+    { key: "elevated", label: "Elevated", hint: "Cards, panels.", group: "Surfaces" },
+    { key: "raised", label: "Raised", hint: "Highlighted blocks.", group: "Surfaces" },
+    { key: "ink", label: "Text", hint: "Primary copy.", group: "Text" },
+    { key: "inkMuted", label: "Muted text", hint: "Secondary copy.", group: "Text" },
+    { key: "inkSubtle", label: "Subtle text", hint: "Captions, eyebrows.", group: "Text" },
+    { key: "edge", label: "Border", hint: "Used at 55% / 25% alpha.", group: "Lines" },
+    { key: "accent", label: "Accent", hint: "Highlight, progress.", group: "Accents" },
+    { key: "danger", label: "Danger", hint: "Errors, destructive.", group: "Accents" },
+  ];
 
 export function CustomEditor({
   seed,
@@ -131,7 +137,9 @@ export function CustomEditor({
       </div>
 
       <p className={`max-w-[70ch] ${ROW_DESC}`}>
-        {t("Live preview is on. Save keeps what you've picked as your Custom theme. Reset reverts the editor to the saved palette.")}
+        {t(
+          "Live preview is on. Save keeps what you've picked as your Custom theme. Reset reverts the editor to the saved palette.",
+        )}
       </p>
     </div>
   );

@@ -14,5 +14,9 @@ function subscribe(listener: () => void): () => void {
 }
 
 export function useTrackerStatusVersion(): number {
-  return useSyncExternalStore(subscribe, () => version, () => version);
+  return useSyncExternalStore(
+    subscribe,
+    () => version,
+    () => version,
+  );
 }

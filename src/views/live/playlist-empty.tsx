@@ -1,12 +1,6 @@
 import { MediaStartPage } from "@/components/media-start-page";
 import { useEffect, useRef, useState } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarRange,
-  Globe2,
-  Tv,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarRange, Globe2, Tv } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import {
   EMPTY_FORM,
@@ -14,11 +8,7 @@ import {
   type PlaylistKind,
 } from "./source-picker/playlist-form";
 
-export function PlaylistEmpty({
-  onSave,
-}: {
-  onSave: (entry: PlaylistFormValue) => void;
-}) {
+export function PlaylistEmpty({ onSave }: { onSave: (entry: PlaylistFormValue) => void }) {
   const [stage, setStage] = useState<"intro" | "form">("intro");
   const actionRef = useRef<HTMLButtonElement>(null);
   const restoreFocus = useRef(false);
@@ -31,10 +21,13 @@ export function PlaylistEmpty({
   return stage === "intro" ? (
     <MediaStartPage kind="live" actionRef={actionRef} onSetup={() => setStage("form")} />
   ) : (
-    <Form onBack={() => {
-      restoreFocus.current = true;
-      setStage("intro");
-    }} onSave={onSave} />
+    <Form
+      onBack={() => {
+        restoreFocus.current = true;
+        setStage("intro");
+      }}
+      onSave={onSave}
+    />
   );
 }
 
@@ -139,9 +132,7 @@ function Form({
           {t("Back")}
         </button>
         <header className="flex flex-col gap-3">
-          <h2
-            className="font-display text-[32px] font-semibold leading-tight tracking-tight text-ink"
-          >
+          <h2 className="font-display text-[32px] font-semibold leading-tight tracking-tight text-ink">
             {t("Connect your provider.")}
           </h2>
           <p className="text-[14.5px] leading-relaxed text-ink-muted">

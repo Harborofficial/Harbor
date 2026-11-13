@@ -2,7 +2,13 @@ import { AtSign, Check, Copy, Pencil, Plus } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { openLinkOut } from "@/lib/social/link-out";
-import { getService, iconColor, resolveUrl, SocialIcon, type SocialKey } from "@/lib/social/socials";
+import {
+  getService,
+  iconColor,
+  resolveUrl,
+  SocialIcon,
+  type SocialKey,
+} from "@/lib/social/socials";
 import type { ProfileSummary, SocialEntry } from "./profile-types";
 import { SocialsEditor } from "./socials-editor";
 
@@ -45,7 +51,9 @@ function LinkChip({ service, value }: SocialEntry) {
     >
       <ChipShell service={service}>
         <ChipIcon service={service} />
-        <span className="relative max-w-[168px] truncate text-[13px] font-medium text-ink">{value}</span>
+        <span className="relative max-w-[168px] truncate text-[13px] font-medium text-ink">
+          {value}
+        </span>
       </ChipShell>
     </button>
   );
@@ -74,7 +82,9 @@ function CopyChip({ service, value }: SocialEntry) {
     >
       <ChipShell service={service}>
         <ChipIcon service={service} />
-        <span className="relative max-w-[168px] truncate text-[13px] font-medium text-ink">{value}</span>
+        <span className="relative max-w-[168px] truncate text-[13px] font-medium text-ink">
+          {value}
+        </span>
         <span className="relative text-ink-subtle">
           {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
         </span>

@@ -5,17 +5,22 @@ export default {
   "games.save": "Tambahkan ke favorit",
   "games.calendar.source": "Game tersimpan",
   "games.calendar.hint": "Tanggal rilis game yang kamu simpan",
-  "games.calendar.note": "Rencanakan game berikutnya yang ingin dimainkan berdasarkan jadwal rilis game tersimpan.",
+  "games.calendar.note":
+    "Rencanakan game berikutnya yang ingin dimainkan berdasarkan jadwal rilis game tersimpan.",
   "games.calendar.empty": "Simpan game di bagian Game untuk mengikuti rencana rilisnya di sini.",
   "games.calendar.search": "Cari game tersimpan",
   "games.calendar.platform": "Platform rilis",
   "games.calendar.allPlatforms": "Semua platform",
-  "games.calendar.dates": "Tanggal dari penerbit dapat berubah. Tanggal Steam berasal dari toko AS; catatan IGDB menampilkan platform dan wilayahnya.",
-  "games.calendar.noDays": "Tidak ada game yang sudah diperiksa dengan hari rilis pasti pada {month}.",
+  "games.calendar.dates":
+    "Tanggal dari penerbit dapat berubah. Tanggal Steam berasal dari toko AS; catatan IGDB menampilkan platform dan wilayahnya.",
+  "games.calendar.noDays":
+    "Tidak ada game yang sudah diperiksa dengan hari rilis pasti pada {month}.",
   "games.calendar.windows": "Perkiraan periode rilis",
-  "games.calendar.windowsNote": "Rencana ini mencakup bulan ini, tetapi belum menyebutkan hari yang pasti.",
+  "games.calendar.windowsNote":
+    "Rencana ini mencakup bulan ini, tetapi belum menyebutkan hari yang pasti.",
   "games.calendar.undated": "Tanggal belum dikonfirmasi",
-  "games.calendar.undatedNote": "Tanggal yang belum diumumkan, tidak tersedia, atau belum diperiksa tidak dimasukkan ke kalender.",
+  "games.calendar.undatedNote":
+    "Tanggal yang belum diumumkan, tidak tersedia, atau belum diperiksa tidak dimasukkan ke kalender.",
   "games.calendar.cancelled": "Catatan rilis yang dibatalkan dan dikecualikan: {count}.",
   "games.calendar.unchecked": "Tanggal belum diperiksa",
   "games.watchlist.note": "Ikuti rilis game favoritmu.",
@@ -34,7 +39,8 @@ export default {
   "games.watchlist.coverage": "{count} dari {total} game telah diperiksa",
   "games.watchlist.refresh": "Muat ulang tanggal rilis",
   "games.watchlist.unavailable": "Tanggal rilis tidak tersedia",
-  "games.watchlist.partial": "Beberapa tanggal rilis tidak dapat diperiksa. Informasi tersimpan ditampilkan jika tersedia.",
+  "games.watchlist.partial":
+    "Beberapa tanggal rilis tidak dapat diperiksa. Informasi tersimpan ditampilkan jika tersedia.",
   "games.watchlist.noMatch": "Tidak ada favorit yang cocok dengan filter ini.",
   "games.watchlist.dateNote": "Tanggal berasal dari Steam dan IGDB. Rencana rilis dapat berubah.",
   "games.watchlist.remove": "Hapus {name} dari Favorit",
@@ -54,9 +60,12 @@ export default {
   "games.owned.pickHint": "Buka game secara acak dari hasil ini.",
   "games.owned.clear": "Hapus filter pustaka",
   "games.owned.scanning": "Memeriksa instalasi lokal…",
-  "games.owned.scanUnavailable": "Status instalasi lokal tidak tersedia. Muat ulang untuk memeriksa perangkat ini.",
-  "games.owned.partial": "Beberapa folder Steam tidak dapat diperiksa. Sebagian instalasi mungkin belum dikenali.",
+  "games.owned.scanUnavailable":
+    "Status instalasi lokal tidak tersedia. Muat ulang untuk memeriksa perangkat ini.",
+  "games.owned.partial":
+    "Beberapa folder Steam tidak dapat diperiksa. Sebagian instalasi mungkin belum dikenali.",
   "games.owned.results": "{count} dari {total} game",
-  "games.owned.playtimeNote": "Riwayat bermain berasal dari sinkronisasi Steam terakhir. Tidak adanya catatan waktu bermain tidak menunjukkan apakah game sudah ditamatkan.",
-  "games.owned.resetAvailability": "Tampilkan game dengan semua status instalasi"
+  "games.owned.playtimeNote":
+    "Riwayat bermain berasal dari sinkronisasi Steam terakhir. Tidak adanya catatan waktu bermain tidak menunjukkan apakah game sudah ditamatkan.",
+  "games.owned.resetAvailability": "Tampilkan game dengan semua status instalasi",
 };

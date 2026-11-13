@@ -16,11 +16,13 @@ export default {
   "games.metadata.type.pack": "Paket",
   "games.metadata.type.update": "Pembaruan",
   "games.metadata.note": "Pilih gambar dan detail game. Peluncur dan filenya tetap sama.",
-  "games.metadata.conflict": "Pilihan game ini berubah di jendela lain. Tutup dan buka kembali untuk meninjau pilihan terbaru.",
+  "games.metadata.conflict":
+    "Pilihan game ini berubah di jendela lain. Tutup dan buka kembali untuk meninjau pilihan terbaru.",
   "games.match.title": "Cari gambar dan detail",
   "games.match.use": "Gunakan game ini",
   "games.match.remove": "Hapus kecocokan",
   "games.match.source": "Gambar dan detail dari IGDB",
-  "games.match.note": "Pilih edisi yang sesuai dengan file Anda. Harbor mempertahankan file dan nama file asli.",
-  "games.match.empty": "Coba judul game tanpa label wilayah atau revisi."
+  "games.match.note":
+    "Pilih edisi yang sesuai dengan file Anda. Harbor mempertahankan file dan nama file asli.",
+  "games.match.empty": "Coba judul game tanpa label wilayah atau revisi.",
 };

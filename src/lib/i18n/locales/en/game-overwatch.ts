@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "Stadium roster",
   "games.overwatch.searchHeroes": "Find a hero",
   "games.overwatch.refresh": "Refresh reference",
-  "games.overwatch.unavailable": "The reference could not be refreshed. Previously loaded details may still appear.",
+  "games.overwatch.unavailable":
+    "The reference could not be refreshed. Previously loaded details may still appear.",
   "games.overwatch.partial": "Some entries are unavailable.",
   "games.overwatch.checked": "Checked {date}",
-  "games.overwatch.scope": "Hero reference from Blizzard via OverFast. Balance changes can reach the game before this reference updates.",
-  "games.overwatch.mapsScope": "Map and mode reference from OverFast. Includes Arcade and legacy maps; availability varies by mode.",
+  "games.overwatch.scope":
+    "Hero reference from Blizzard via OverFast. Balance changes can reach the game before this reference updates.",
+  "games.overwatch.mapsScope":
+    "Map and mode reference from OverFast. Includes Arcade and legacy maps; availability varies by mode.",
   "games.overwatch.empty": "Nothing matches. Try a different search or filter.",
   "games.overwatch.moreHeroes": "More heroes",
   "games.overwatch.moreMaps": "More maps",
@@ -30,9 +33,9 @@ export default {
   "games.overwatch.watchDemo": "Watch demonstration",
   "games.overwatch.hideDemo": "Hide demonstration",
   "games.overwatch.closeDemo": "Close demonstration",
-  "games.overwatch.videoFailed": "This demonstration could not play. Open the official hero page to watch it there.",
+  "games.overwatch.videoFailed":
+    "This demonstration could not play. Open the official hero page to watch it there.",
   "games.overwatch.mode": "Game mode",
   "games.overwatch.allModes": "All modes",
-  "games.overwatch.searchMaps": "Search maps or locations"
+  "games.overwatch.searchMaps": "Search maps or locations",
 };
-

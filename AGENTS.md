@@ -12,6 +12,7 @@
 - Test platform-specific changes on the affected platform when possible.
 - Do not leave warnings or errors introduced by the task unresolved.
 - If a repository-wide check fails on untouched files, record the baseline and do not reformat or refactor unrelated files.
+  Current formatting baseline: only generated and vendored content (`.json`, `public/`, `src/assets/`, `android-extension-compat/spec/`, `installer/ui/assets/`, `flatpak/`, `src-tauri/vendor/`) is unformatted; the CI format gate skips those paths.
 
 ## Project Snapshot
 

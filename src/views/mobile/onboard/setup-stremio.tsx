@@ -62,7 +62,7 @@ export function SetupStremio({
         isReachFailure(e)
           ? t("Could not reach Stremio. Check your phone's connection and try again.")
           : ((e as { message?: string })?.message ??
-            t("Stremio did not accept that email and password.")),
+              t("Stremio did not accept that email and password.")),
       );
     } finally {
       setBusy(false);

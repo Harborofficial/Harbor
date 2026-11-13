@@ -34,6 +34,7 @@ export default {
   "games.ffxiv.sales": "Giao dịch gần đây",
   "games.ffxiv.sold": "Đã bán",
   "games.ffxiv.noSales": "Không có giao dịch gần đây trong bản ghi này.",
-  "games.ffxiv.community": "Dữ liệu cộng đồng có thể đã cũ. Vật phẩm có thể đã bán sau lần cập nhật cuối.",
-  "games.ffxiv.open": "Xem trên Universalis"
+  "games.ffxiv.community":
+    "Dữ liệu cộng đồng có thể đã cũ. Vật phẩm có thể đã bán sau lần cập nhật cuối.",
+  "games.ffxiv.open": "Xem trên Universalis",
 };

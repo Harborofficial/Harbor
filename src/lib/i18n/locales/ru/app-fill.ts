@@ -805,7 +805,7 @@ const appFill: Record<string, string> = {
     "Harbor закрывается. Harbor Shipyard завершит установку и откроет его снова.",
   "Harbor Shipyard did not finish updating Harbor. Nothing was changed.":
     "Harbor Shipyard не завершил обновление Harbor. Ничего не изменилось.",
-  "Dismiss": "Скрыть",
+  Dismiss: "Скрыть",
 };
 
 export default appFill;

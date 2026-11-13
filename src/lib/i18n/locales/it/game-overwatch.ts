@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "Eroi dello Stadio",
   "games.overwatch.searchHeroes": "Cerca eroe",
   "games.overwatch.refresh": "Aggiorna guida",
-  "games.overwatch.unavailable": "Impossibile aggiornare la guida. Le informazioni già caricate potrebbero restare visibili.",
+  "games.overwatch.unavailable":
+    "Impossibile aggiornare la guida. Le informazioni già caricate potrebbero restare visibili.",
   "games.overwatch.partial": "Alcune voci non sono disponibili.",
   "games.overwatch.checked": "Verificato: {date}",
-  "games.overwatch.scope": "Informazioni sugli eroi di Blizzard tramite OverFast. Le modifiche al bilanciamento possono arrivare in gioco prima dell'aggiornamento della guida.",
-  "games.overwatch.mapsScope": "Mappe e modalità da OverFast. Include mappe Arcade e precedenti; la disponibilità varia in base alla modalità.",
+  "games.overwatch.scope":
+    "Informazioni sugli eroi di Blizzard tramite OverFast. Le modifiche al bilanciamento possono arrivare in gioco prima dell'aggiornamento della guida.",
+  "games.overwatch.mapsScope":
+    "Mappe e modalità da OverFast. Include mappe Arcade e precedenti; la disponibilità varia in base alla modalità.",
   "games.overwatch.empty": "Nessun risultato. Prova un'altra ricerca o un altro filtro.",
   "games.overwatch.moreHeroes": "Altri eroi",
   "games.overwatch.moreMaps": "Altre mappe",
@@ -30,9 +33,9 @@ export default {
   "games.overwatch.watchDemo": "Guarda la dimostrazione",
   "games.overwatch.hideDemo": "Nascondi dimostrazione",
   "games.overwatch.closeDemo": "Chiudi dimostrazione",
-  "games.overwatch.videoFailed": "Impossibile riprodurre la dimostrazione. Apri la pagina ufficiale dell'eroe per guardarla.",
+  "games.overwatch.videoFailed":
+    "Impossibile riprodurre la dimostrazione. Apri la pagina ufficiale dell'eroe per guardarla.",
   "games.overwatch.mode": "Modalità di gioco",
   "games.overwatch.allModes": "Tutte le modalità",
-  "games.overwatch.searchMaps": "Cerca mappe o luoghi"
+  "games.overwatch.searchMaps": "Cerca mappe o luoghi",
 };
-

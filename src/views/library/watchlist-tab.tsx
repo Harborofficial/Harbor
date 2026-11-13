@@ -20,7 +20,11 @@ import {
   subscribeWatchlist,
   type LocalEntry,
 } from "@/lib/watchlist";
-import { setStremioAggregate, setNuvioAggregate, refreshWatchlistAggregates } from "@/lib/watchlist-sync";
+import {
+  setStremioAggregate,
+  setNuvioAggregate,
+  refreshWatchlistAggregates,
+} from "@/lib/watchlist-sync";
 import { resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
 import { getNuvioAccountId } from "@/lib/nuvio/nuvio-client";
 import {
@@ -105,7 +109,8 @@ export function WatchlistTab({
               seq !== requestSeq ||
               getNuvioAccountId() !== accountId ||
               resolveNuvioProfileIndex() !== slot
-            ) return;
+            )
+              return;
             if (guardSeq.current !== mySeq) {
               loadNuvio();
               return;
@@ -178,7 +183,9 @@ export function WatchlistTab({
 
         // Target ONLY this item and its twin local/IMDb ID
         const targetIds = new Set<string>([cleanId]);
-        const localMatch = allLocals.find((l) => l.id === cleanId || (l.imdbId && l.imdbId === cleanId));
+        const localMatch = allLocals.find(
+          (l) => l.id === cleanId || (l.imdbId && l.imdbId === cleanId),
+        );
         if (localMatch) {
           if (localMatch.id) targetIds.add(localMatch.id);
           if (localMatch.imdbId) targetIds.add(localMatch.imdbId);

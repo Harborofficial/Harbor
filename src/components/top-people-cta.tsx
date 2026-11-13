@@ -28,7 +28,11 @@ export function TopPeopleCta({ title }: { title?: string }) {
 
   return (
     <section>
-      <button type="button" onClick={() => openPeople({ focusSource: true })} className="group block w-full text-start">
+      <button
+        type="button"
+        onClick={() => openPeople({ focusSource: true })}
+        className="group block w-full text-start"
+      >
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="font-display text-[28px] font-medium leading-tight tracking-tight text-ink">
             {title ?? t("Top People")}

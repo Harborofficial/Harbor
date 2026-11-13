@@ -5,7 +5,8 @@ export default {
   "games.notes.limit": "Maximum : 100 notes, 100 000 caractères chacune, 2 Mo au total.",
   "games.notes.readError": "Lecture impossible. Exportez une sauvegarde avant de réessayer.",
   "games.notes.saveError": "Enregistrement impossible. Votre brouillon est conservé.",
-  "games.notes.conflict": "Ces notes ont changé ailleurs. Exportez le brouillon avant de recharger.",
+  "games.notes.conflict":
+    "Ces notes ont changé ailleurs. Exportez le brouillon avant de recharger.",
   "games.notes.invalidTitle": "Donnez un titre à chaque note.",
   "games.notes.discard": "Abandonner les modifications ?",
   "games.notes.delete": "Supprimer cette note du brouillon ?",
@@ -19,7 +20,8 @@ export default {
   "games.notes.up": "Monter la note",
   "games.notes.down": "Descendre la note",
   "games.notes.image": "Ouvrir l’image",
-  "games.notes.emptyBody": "Conservez stratégies, rappels et découvertes. Markdown est pris en charge.",
+  "games.notes.emptyBody":
+    "Conservez stratégies, rappels et découvertes. Markdown est pris en charge.",
   "games.notes.noteTitle": "Titre de la note",
   "games.notes.body": "Texte (Markdown)",
   "games.notes.empty": "Votre carnet de jeu",
@@ -28,5 +30,5 @@ export default {
   "games.notes.export": "Exporter une sauvegarde",
   "games.notes.unsaved": "Modifications non enregistrées",
   "games.notes.local": "Stocké dans ce profil Harbor",
-  "games.notes.importGuide": "Copier dans mes notes"
+  "games.notes.importGuide": "Copier dans mes notes",
 };

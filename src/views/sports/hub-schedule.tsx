@@ -285,15 +285,19 @@ export function HubSchedule({
                       >
                         {league?.group === "esports" && (
                           <span className="sh-fixture-esports-logos">
-                            {[game.home, game.away].filter((side) => side.name).map((side, index) => (
-                              <span key={index} title={side.name}>
-                                <EsportsImage
-                                  src={side.logo || undefined}
-                                  fallback={game.league === "DOTA2" ? dotaLogos.get(side.id) : undefined}
-                                  name={side.name}
-                                />
-                              </span>
-                            ))}
+                            {[game.home, game.away]
+                              .filter((side) => side.name)
+                              .map((side, index) => (
+                                <span key={index} title={side.name}>
+                                  <EsportsImage
+                                    src={side.logo || undefined}
+                                    fallback={
+                                      game.league === "DOTA2" ? dotaLogos.get(side.id) : undefined
+                                    }
+                                    name={side.name}
+                                  />
+                                </span>
+                              ))}
                           </span>
                         )}
                         <span className="sh-fixture-event-copy">

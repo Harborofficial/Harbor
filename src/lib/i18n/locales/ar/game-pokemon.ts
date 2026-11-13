@@ -1,16 +1,21 @@
 export default {
-  "games.pokemon.bankUnreadable": "تعذر تحميل بعض البوكيمون ({count}). لا تزال ملفاتها محفوظة على هذا الجهاز.",
-  "games.pokemon.bankTruncated": "يتم عرض أول 10,000 ملف في البنك. جميع الملفات باقية على هذا الجهاز.",
+  "games.pokemon.bankUnreadable":
+    "تعذر تحميل بعض البوكيمون ({count}). لا تزال ملفاتها محفوظة على هذا الجهاز.",
+  "games.pokemon.bankTruncated":
+    "يتم عرض أول 10,000 ملف في البنك. جميع الملفات باقية على هذا الجهاز.",
   "games.pokemon.showBankFolder": "عرض مجلد البنك",
   "games.pokemon.noChoices": "لا توجد خيارات مطابقة.",
   "games.pokemon.detectedSaves": "ملفات حفظ هذه اللعبة",
   "games.pokemon.refreshSaves": "تحديث ملفات الحفظ",
   "games.pokemon.discoverFailed": "تعذر البحث عن ملفات الحفظ. حدّث القائمة أو اختر ملفًا.",
-  "games.pokemon.noDetectedSaves": "لم يُعثر على ملف حفظ بعد. احفظ من داخل اللعبة أولًا، أو اختر ملفًا من المحاكي.",
+  "games.pokemon.noDetectedSaves":
+    "لم يُعثر على ملف حفظ بعد. احفظ من داخل اللعبة أولًا، أو اختر ملفًا من المحاكي.",
   "games.pokemon.saveOrigin.harbor": "محفوظ في Harbor",
   "games.pokemon.saveOrigin.adjacent": "بجانب ملف ROM",
-  "games.pokemon.error.pokemon_hack_export": "تصدير هذا الروم المعدّل إلى البنك غير جاهز بعد، إذ لا يمكن الحفاظ على بيانات البوكيمون الإضافية حاليًا. يمكنك متابعة عرض ملف الحفظ وتعديله.",
-  "games.pokemon.error.pokemon_save_running": "أغلق هذه اللعبة في Harbor قبل حفظ تعديلاتك. ستبقى المعاينة محفوظة هنا.",
+  "games.pokemon.error.pokemon_hack_export":
+    "تصدير هذا الروم المعدّل إلى البنك غير جاهز بعد، إذ لا يمكن الحفاظ على بيانات البوكيمون الإضافية حاليًا. يمكنك متابعة عرض ملف الحفظ وتعديله.",
+  "games.pokemon.error.pokemon_save_running":
+    "أغلق هذه اللعبة في Harbor قبل حفظ تعديلاتك. ستبقى المعاينة محفوظة هنا.",
   "games.pokemon.title": "مغامرتك مع بوكيمون",
   "games.pokemon.intro": "اكتشف طريقك التالي. كوّن فريقك. احتفظ ببوكيموناتك معك.",
   "games.pokemon.browse": "استكشف لعبة بوكيمون هذه",
@@ -29,21 +34,27 @@ export default {
   "games.pokemon.levelRange": "المستوى {min}–{max}",
   "games.pokemon.level": "المستوى {level}",
   "games.pokemon.levelLabel": "المستوى",
-  "games.pokemon.noEncounters": "لا توجد بيانات ظهور لهذه النسخة بالتحديد. قد لا تشمل البيانات الهدايا والتبادل والأحداث الخاصة.",
+  "games.pokemon.noEncounters":
+    "لا توجد بيانات ظهور لهذه النسخة بالتحديد. قد لا تشمل البيانات الهدايا والتبادل والأحداث الخاصة.",
   "games.pokemon.backDex": "العودة إلى البوكيمونات",
   "games.pokemon.pokemonDetails": "تفاصيل البوكيمون",
   "games.pokemon.moves": "الحركات",
   "games.pokemon.evolution": "التطور",
   "games.pokemon.stats": "الإحصاءات والقدرات",
-  "games.pokemon.editionMoves": "الحركات الخاصة بهذه النسخة، بما فيها التعلّم بزيادة المستوى والآلات والمدربين.",
+  "games.pokemon.editionMoves":
+    "الحركات الخاصة بهذه النسخة، بما فيها التعلّم بزيادة المستوى والآلات والمدربين.",
   "games.pokemon.noMoves": "لا تتوفر بيانات الحركات لهذه النسخة.",
-  "games.pokemon.evolutionScope": "عائلة التطور الكاملة من بيانات بوكيمون الحالية. قد لا تتوفر التطورات والطرق الأحدث في هذه اللعبة.",
-  "games.pokemon.currentStats": "إحصاءات الأنواع وقدراتها الحالية من PokeAPI. قد تختلف النسخ القديمة. الأنواع المعروضة أعلاه تتوافق مع جيل اللعبة.",
-  "games.pokemon.dexScope": "البوكيديكس الإقليمي لهذه اللعبة. الأرقام على البطاقات هي أرقام البوكيديكس الوطني.",
+  "games.pokemon.evolutionScope":
+    "عائلة التطور الكاملة من بيانات بوكيمون الحالية. قد لا تتوفر التطورات والطرق الأحدث في هذه اللعبة.",
+  "games.pokemon.currentStats":
+    "إحصاءات الأنواع وقدراتها الحالية من PokeAPI. قد تختلف النسخ القديمة. الأنواع المعروضة أعلاه تتوافق مع جيل اللعبة.",
+  "games.pokemon.dexScope":
+    "البوكيديكس الإقليمي لهذه اللعبة. الأرقام على البطاقات هي أرقام البوكيديكس الوطني.",
   "games.pokemon.searchPokemon": "ابحث عن بوكيمون أو رقم",
   "games.pokemon.loadMore": "عرض المزيد",
   "games.pokemon.noResults": "لا توجد بوكيمونات تطابق بحثك.",
-  "games.pokemon.noRetailDex": "لا يتوفر بوكيديكس موثّق لهذه اللعبة بعد. لا نفترض أن الألعاب المعدّلة والفرعية تستخدم بوكيديكس الألعاب الأصلية.",
+  "games.pokemon.noRetailDex":
+    "لا يتوفر بوكيديكس موثّق لهذه اللعبة بعد. لا نفترض أن الألعاب المعدّلة والفرعية تستخدم بوكيديكس الألعاب الأصلية.",
   "games.pokemon.unavailable": "هذا المصدر غير متاح الآن. حاول مجددًا.",
   "games.pokemon.readProgress": "اختر فصلًا. نحفظ موضع القراءة والفصول المكتملة.",
   "games.pokemon.chapters": "فصول دليل اللعب",
@@ -51,17 +62,20 @@ export default {
   "games.pokemon.completed": "مكتمل",
   "games.pokemon.markComplete": "وضع علامة الاكتمال",
   "games.pokemon.nextChapter": "الفصل التالي",
-  "games.pokemon.locationScope": "استكشف مواقع هذه المنطقة. تُصفّى بيانات الظهور حسب نسخة اللعبة بالتحديد.",
+  "games.pokemon.locationScope":
+    "استكشف مواقع هذه المنطقة. تُصفّى بيانات الظهور حسب نسخة اللعبة بالتحديد.",
   "games.pokemon.searchLocation": "ابحث عن طريق أو موقع",
   "games.pokemon.chooseLocation": "اختر موقعًا لرؤية البوكيمونات فيه.",
   "games.pokemon.noLocations": "لا تتوفر بيانات المواقع لهذه اللعبة بعد.",
-  "games.pokemon.mapScope": "خرائط اللعبة الأصلية من أرشيف Bulbagarden. يوضّح عنوان الصورة نسخة اللعبة في الأرشيفات المشتركة.",
+  "games.pokemon.mapScope":
+    "خرائط اللعبة الأصلية من أرشيف Bulbagarden. يوضّح عنوان الصورة نسخة اللعبة في الأرشيفات المشتركة.",
   "games.pokemon.searchMaps": "البحث في الخرائط المحمّلة",
   "games.pokemon.moreMaps": "تحميل خرائط إضافية",
   "games.pokemon.noMaps": "لم يُربط أرشيف خرائط موثّق لهذه اللعبة بعد.",
   "games.pokemon.searchVideos": "ابحث عن أدلة ونصائح",
   "games.pokemon.noVideos": "لا توجد فيديوهات مطابقة. جرّب اسم طريق أو زعيم أو بوكيمون.",
-  "games.pokemon.sources": "بيانات البوكيمونات: PokeAPI · الأدلة: Bulbapedia · الخرائط: Bulbagarden Archives · الفيديوهات: YouTube. تختلف التغطية حسب اللعبة.",
+  "games.pokemon.sources":
+    "بيانات البوكيمونات: PokeAPI · الأدلة: Bulbapedia · الخرائط: Bulbagarden Archives · الفيديوهات: YouTube. تختلف التغطية حسب اللعبة.",
   "games.pokemon.bankIntro": "افتح ملف حفظ، وعدّل فريقك، وراجع كل تغيير قبل الحفظ.",
   "games.pokemon.openSave": "فتح ملف حفظ اللعبة",
   "games.pokemon.importPokemon": "استيراد ملف بوكيمون",
@@ -72,7 +86,8 @@ export default {
   "games.pokemon.myBank": "بنكي",
   "games.pokemon.readOnly": "ملف الحفظ مفتوح للعرض فقط.",
   "games.pokemon.bankWelcome": "مكان واحد لبوكيموناتك",
-  "games.pokemon.bankPrivacy": "تبقى ملفات الحفظ والبنك على هذا الجهاز. افتح ملف حفظ من داخل اللعبة، وليس حالة حفظ للمحاكي. أغلق اللعبة قبل إجراء تغييرات.",
+  "games.pokemon.bankPrivacy":
+    "تبقى ملفات الحفظ والبنك على هذا الجهاز. افتح ملف حفظ من داخل اللعبة، وليس حالة حفظ للمحاكي. أغلق اللعبة قبل إجراء تغييرات.",
   "games.pokemon.box": "اختيار صندوق",
   "games.pokemon.party": "الفريق",
   "games.pokemon.slot": "الخانة {slot}",
@@ -88,11 +103,13 @@ export default {
   "games.pokemon.chooseSlot": "اختر بوكيمون لفحصه أو تعديله. اختر خانة فارغة لإنشاء بوكيمون.",
   "games.pokemon.bankCopies": "الإيداع في البنك يُبقي الأصل في ملف الحفظ. النقل يُبقي نسخة البنك أيضًا.",
   "games.pokemon.emptyBank": "بنكك فارغ. احفظ بوكيمون من لعبة مفتوحة أو استورد ملف بوكيمون.",
-  "games.pokemon.transferHint": "اختر خانة وجهة فارغة في ملف حفظ اللعبة، ثم راجع نقل هذا البوكيمون.",
+  "games.pokemon.transferHint":
+    "اختر خانة وجهة فارغة في ملف حفظ اللعبة، ثم راجع نقل هذا البوكيمون.",
   "games.pokemon.previewTransfer": "معاينة النقل إلى ملف الحفظ",
   "games.pokemon.imported": "تم استيراد بوكيمون من البنك",
   "games.pokemon.review": "مراجعة التغييرات",
-  "games.pokemon.reviewNote": "هذه التغييرات مُجهّزة فقط. أبقِ اللعبة مغلقة. ينشئ الحفظ نسخة احتياطية من الأصل أولًا.",
+  "games.pokemon.reviewNote":
+    "هذه التغييرات مُجهّزة فقط. أبقِ اللعبة مغلقة. ينشئ الحفظ نسخة احتياطية من الأصل أولًا.",
   "games.pokemon.discard": "تجاهل التغييرات",
   "games.pokemon.commit": "نسخ احتياطي وحفظ",
   "games.pokemon.savedBackup": "تم الحفظ. توجد نسخة احتياطية من الأصل.",
@@ -101,7 +118,8 @@ export default {
   "games.pokemon.localEngine": "محرك حفظ محلي · GPL-3.0-or-later",
   "games.pokemon.create": "إنشاء بوكيمون",
   "games.pokemon.showdown": "تشكيلة Pokémon Showdown",
-  "games.pokemon.createNote": "اختر بوكيمون ومستواه. يبحث المحرك عن مواجهة مناسبة لهذه اللعبة ويرفض التركيبات غير المدعومة. يمكنك أيضًا لصق تشكيلة Showdown أدناه.",
+  "games.pokemon.createNote":
+    "اختر بوكيمون ومستواه. يبحث المحرك عن مواجهة مناسبة لهذه اللعبة ويرفض التركيبات غير المدعومة. يمكنك أيضًا لصق تشكيلة Showdown أدناه.",
   "games.pokemon.previewCreate": "معاينة البوكيمون",
   "games.pokemon.nickname": "الاسم المستعار",
   "games.pokemon.nature": "الطبيعة",
@@ -155,8 +173,10 @@ export default {
   "games.pokemon.error.generic": "فشل الإجراء. لم يُستبدل ملف حفظ اللعبة المحدد.",
   "games.pokemon.error.pokemon_save_open": "ملف الحفظ هذا مفتوح بالفعل في مساحة بوكيمون أخرى.",
   "games.pokemon.error.pokemon_draft_limit": "احفظ هذه التغييرات أو تجاهلها قبل إجراء تعديلات أخرى.",
-  "games.pokemon.error.pokemon_draft_changed": "تعذّر استئناف مسودة قديمة لتغيّر ملف الحفظ أو لتعذّر قراءة المسودة. تبقى محفوظة في مساحة الاسترداد المحلية.",
-  "games.pokemon.draftKept": "تبقى التغييرات المُجهّزة على هذا الجهاز. أعد فتح ملف الحفظ نفسه لمتابعة مسودتك.",
+  "games.pokemon.error.pokemon_draft_changed":
+    "تعذّر استئناف مسودة قديمة لتغيّر ملف الحفظ أو لتعذّر قراءة المسودة. تبقى محفوظة في مساحة الاسترداد المحلية.",
+  "games.pokemon.draftKept":
+    "تبقى التغييرات المُجهّزة على هذا الجهاز. أعد فتح ملف الحفظ نفسه لمتابعة مسودتك.",
   "games.pokemon.operation.edit": "تعديل بوكيمون",
   "games.pokemon.operation.import": "نقل من البنك",
   "games.pokemon.operation.create": "إنشاء بوكيمون",
@@ -182,7 +202,8 @@ export default {
   "games.pokemon.evolution.min_beauty": "أدنى جمال",
   "games.pokemon.evolution.min_affection": "أدنى محبة",
   "games.pokemon.evolution.gender": "الجنس (1 أنثى، 2 ذكر)",
-  "games.pokemon.evolution.relative_physical_stats": "الهجوم مقارنة بالدفاع (−1 أقل، 0 مساوٍ، 1 أعلى)",
+  "games.pokemon.evolution.relative_physical_stats":
+    "الهجوم مقارنة بالدفاع (−1 أقل، 0 مساوٍ، 1 أعلى)",
   "games.pokemon.evolution.time_of_day": "وقت اليوم",
   "games.pokemon.evolution.needs_overworld_rain": "يتطلب المطر",
   "games.pokemon.evolution.turn_upside_down": "اقلب الجهاز رأسًا على عقب",
@@ -191,5 +212,5 @@ export default {
   "games.pokemon.movePokemon": "نقل داخل ملف الحفظ",
   "games.pokemon.destinationSlot": "اختر خانة الوجهة",
   "games.pokemon.swapHint": "إذا كانت الوجهة مشغولة، يتم تبديل البوكيمونين. راجع النقل قبل الحفظ.",
-  "games.pokemon.previewMove": "معاينة النقل"
+  "games.pokemon.previewMove": "معاينة النقل",
 };

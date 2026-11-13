@@ -55,22 +55,32 @@ function resumePoint(overrides: Partial<ResumePoint> = {}): ResumePoint {
   };
 }
 
-function harness(points: ResumePoint[], mappings: Record<string, string | null> = {}) {
+function harness(
+  points: ResumePoint[],
+  mappings: Record<string, string | null> = {},
+  options: { respond?: (page: number) => unknown } = {},
+) {
   const mappingCalls: Array<{ id: number; media: PmdbMediaType }> = [];
   const resumeWrites: unknown[][] = [];
+  const requestedPages: number[] = [];
   const cached = new Map<string, string | null | undefined>();
 
   const api = load<typeof import("../src/lib/publicmetadb/playback")>(
     "src/lib/publicmetadb/playback.ts",
     {
       "./client": {
-        pmdbRequest: async () => ({
-          items: points,
-          total: points.length,
-          page: 1,
-          perPage: 100,
-          totalPages: 1,
-        }),
+        pmdbRequest: async (path: string) => {
+          const page = Number(new URLSearchParams(path.split("?")[1] ?? "").get("page") ?? "1");
+          requestedPages.push(page);
+          if (options.respond) return options.respond(page);
+          return {
+            items: points,
+            total: points.length,
+            page,
+            perPage: 100,
+            totalPages: 1,
+          };
+        },
       },
       "./session": { isAuthenticated: () => true },
       "./mappings": {
@@ -94,9 +104,13 @@ function harness(points: ResumePoint[], mappings: Record<string, string | null> 
     api,
     mappingCalls,
     resumeWrites,
+    requestedPages,
     cache: cached,
     async fetch(): Promise<LibraryItem[]> {
       return api.fetchPublicMetaDbPlaybackItems();
+    },
+    async snapshot() {
+      return api.fetchPublicMetaDbPlaybackSnapshot();
     },
   };
 }
@@ -159,4 +173,102 @@ test("a cached negative mapping keeps the TMDB id without a lookup", async () =>
 
   assert.equal(items[0]._id, "tmdb:tv:1396");
   assert.deepEqual(h.mappingCalls, []);
+});
+
+test("a single-page snapshot is complete", async () => {
+  const h = harness([resumePoint()]);
+
+  const snapshot = await h.snapshot();
+
+  assert.equal(snapshot.complete, true);
+  assert.equal(snapshot.items.length, 1);
+  assert.deepEqual(h.requestedPages, [1]);
+});
+
+test("a fully walked multi-page snapshot is complete", async () => {
+  const h = harness(
+    [],
+    {},
+    {
+      respond: (page) => ({
+        items: [resumePoint({ id: `rp-${page}`, episode: page })],
+        totalPages: 2,
+      }),
+    },
+  );
+
+  const snapshot = await h.snapshot();
+
+  assert.equal(snapshot.complete, true);
+  assert.equal(snapshot.items.length, 2);
+  assert.deepEqual(h.requestedPages, [1, 2]);
+});
+
+test("a page-cap snapshot fails closed", async () => {
+  const h = harness(
+    [],
+    {},
+    {
+      respond: (page) => ({
+        items: [resumePoint({ id: `rp-${page}`, episode: page })],
+        totalPages: 11,
+      }),
+    },
+  );
+
+  const snapshot = await h.snapshot();
+
+  assert.equal(snapshot.complete, false);
+  assert.equal(h.requestedPages.length, 10, "the walk stops at the page cap");
+});
+
+test("an early empty page makes the snapshot incomplete", async () => {
+  const h = harness(
+    [],
+    {},
+    {
+      respond: (page) =>
+        page === 1 ? { items: [resumePoint()], totalPages: 2 } : { items: [], totalPages: 2 },
+    },
+  );
+
+  const snapshot = await h.snapshot();
+
+  assert.equal(snapshot.complete, false);
+  assert.equal(snapshot.items.length, 1);
+  assert.deepEqual(h.requestedPages, [1, 2]);
+});
+
+test("a snapshot list failure rejects instead of reporting absence", async () => {
+  const h = harness(
+    [],
+    {},
+    {
+      respond: () => {
+        throw new Error("HTTP 404");
+      },
+    },
+  );
+
+  await assert.rejects(() => h.snapshot());
+});
+
+test("the deletion snapshot keeps distinct resume ids for the same episode", async () => {
+  const h = harness([resumePoint({ id: "rp-1" }), resumePoint({ id: "rp-2" })]);
+
+  const snapshot = await h.snapshot();
+
+  assert.equal(snapshot.items.length, 2);
+  assert.deepEqual(snapshot.items.map((entry) => entry.providerPlaybackIds?.publicmetadb).sort(), [
+    "rp-1",
+    "rp-2",
+  ]);
+});
+
+test("an absent totalPages makes the snapshot incomplete", async () => {
+  const h = harness([], {}, { respond: () => ({ items: [resumePoint()] }) });
+
+  const snapshot = await h.snapshot();
+
+  assert.equal(snapshot.complete, false);
 });

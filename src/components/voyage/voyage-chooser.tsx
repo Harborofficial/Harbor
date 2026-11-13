@@ -14,12 +14,21 @@ export function VoyageChooser({ inline = false }: { inline?: boolean }) {
   const [error, setError] = useState<string | null>(null);
 
   const alive = useRef(true);
-  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
   const start = async (theme: VoyageTheme) => {
     setBusy(theme.id);
     setError(null);
     let ok = false;
-    try { ok = await startVoyage(theme, len, settings.tmdbKey ?? ""); } catch { /* Show the same recoverable route error. */ }
+    try {
+      ok = await startVoyage(theme, len, settings.tmdbKey ?? "");
+    } catch {
+      /* Show the same recoverable route error. */
+    }
     if (!alive.current) return;
     if (!ok) {
       setError(t("That route wouldn't chart. Try a different direction."));
@@ -29,11 +38,21 @@ export function VoyageChooser({ inline = false }: { inline?: boolean }) {
 
   return (
     <div className={inline ? "voyage-inline-chooser" : "flex flex-col gap-6"}>
-      <div className={inline ? "voyage-inline-summary" : "flex flex-wrap items-end justify-between gap-4"}>
+      <div
+        className={
+          inline ? "voyage-inline-summary" : "flex flex-wrap items-end justify-between gap-4"
+        }
+      >
         <div className="flex flex-col gap-1">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">{t("New voyage")}</span>
-          <h2 className="font-display text-[26px] font-medium tracking-tight text-ink">{t("Where to today?")}</h2>
-          <p className="text-[13.5px] text-ink-muted">{t("Pick a direction. You steer from there, one film at a time.")}</p>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+            {t("New voyage")}
+          </span>
+          <h2 className="font-display text-[26px] font-medium tracking-tight text-ink">
+            {t("Where to today?")}
+          </h2>
+          <p className="text-[13.5px] text-ink-muted">
+            {t("Pick a direction. You steer from there, one film at a time.")}
+          </p>
         </div>
         <div className={`flex flex-col gap-2 ${inline ? "items-start" : "items-end"}`}>
           <span className="text-[11px] text-ink-subtle">{t("How many films?")}</span>
@@ -43,11 +62,21 @@ export function VoyageChooser({ inline = false }: { inline?: boolean }) {
 
       <div className={inline ? "voyage-inline-themes" : "grid grid-cols-1 gap-3 sm:grid-cols-2"}>
         {VOYAGE_THEMES.map((theme) => (
-          <ThemeTile key={theme.id} theme={theme} busy={busy === theme.id} disabled={!!busy} onPick={() => start(theme)} />
+          <ThemeTile
+            key={theme.id}
+            theme={theme}
+            busy={busy === theme.id}
+            disabled={!!busy}
+            onPick={() => start(theme)}
+          />
         ))}
       </div>
 
-      {error && <p role="alert" className="text-[12.5px] text-danger">{error}</p>}
+      {error && (
+        <p role="alert" className="text-[12.5px] text-danger">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -56,12 +85,25 @@ const LENGTHS = [3, 5, 7];
 const SEG_W = 36;
 const SEG_GAP = 4;
 
-function LengthPicker({ value, onChange, disabled }: { value: number; onChange: (n: number) => void; disabled: boolean }) {
+function LengthPicker({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  disabled: boolean;
+}) {
   const t = useT();
   const [flip, setFlip] = useState(false);
   const index = Math.max(0, LENGTHS.indexOf(value));
   return (
-    <div role="group" aria-label={t("How many films?")} className="relative flex items-center rounded-md bg-canvas p-1" style={{ gap: SEG_GAP }}>
+    <div
+      role="group"
+      aria-label={t("How many films?")}
+      className="relative flex items-center rounded-md bg-canvas p-1"
+      style={{ gap: SEG_GAP }}
+    >
       <span
         aria-hidden
         className="harbor-seg-thumb absolute bottom-1 top-1 rounded-[6px] bg-ink"
@@ -141,7 +183,11 @@ function ThemeTile({
             "linear-gradient(105deg, color-mix(in oklch, var(--color-canvas), transparent 8%) 0%, color-mix(in oklch, var(--color-canvas), transparent 34%) 40%, color-mix(in oklch, var(--color-canvas), transparent 68%) 66%, transparent 88%)",
         }}
       />
-      <span aria-hidden className="absolute inset-x-0 bottom-0 h-1/2" style={{ background: "linear-gradient(to top, var(--color-canvas), transparent)" }} />
+      <span
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-1/2"
+        style={{ background: "linear-gradient(to top, var(--color-canvas), transparent)" }}
+      />
       <span
         aria-hidden
         className="harbor-tile-keel absolute inset-x-0 bottom-0 h-0.5"
@@ -154,8 +200,12 @@ function ThemeTile({
         >
           {theme.genre ?? "Wildcard"}
         </span>
-        <span className="font-display text-[16px] font-medium leading-tight text-ink [text-shadow:0_1px_8px_var(--color-canvas),0_1px_3px_var(--color-canvas)]">{theme.label}</span>
-        <span className="line-clamp-1 text-[12px] text-ink-muted [text-shadow:0_1px_6px_var(--color-canvas),0_1px_2px_var(--color-canvas)]">{theme.tagline}</span>
+        <span className="font-display text-[16px] font-medium leading-tight text-ink [text-shadow:0_1px_8px_var(--color-canvas),0_1px_3px_var(--color-canvas)]">
+          {theme.label}
+        </span>
+        <span className="line-clamp-1 text-[12px] text-ink-muted [text-shadow:0_1px_6px_var(--color-canvas),0_1px_2px_var(--color-canvas)]">
+          {theme.tagline}
+        </span>
       </span>
       {busy && (
         <span className="absolute inset-0 z-10 grid place-items-center bg-canvas/50">

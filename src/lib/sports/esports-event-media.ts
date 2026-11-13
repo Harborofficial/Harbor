@@ -63,11 +63,23 @@ const rows = (value: unknown): Json[] => (Array.isArray(value) ? value.map(obj) 
 const text = (value: unknown) => (typeof value === "string" ? value.trim() : "");
 const folded = (value: string) => value.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
 const alnum = (value: string) => folded(value).replace(/[^\p{L}\p{N}]+/gu, "");
-const words = (value: string) => folded(value).replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+const words = (value: string) =>
+  folded(value)
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
 const plain = (value: string) =>
-  value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 160);
+  value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 160);
 const table = (spec: string): Record<string, string> =>
-  Object.fromEntries(spec.split(/\s+/).filter(Boolean).map((pair) => pair.split(":")));
+  Object.fromEntries(
+    spec
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((pair) => pair.split(":")),
+  );
 
 // Hotlink policy from the media audit. Liquipedia bitmaps are fair-use or
 // rights-holder-only grants and its CDN answers a foreign Referer with a shame
@@ -75,11 +87,13 @@ const table = (spec: string): Record<string, string> =>
 // under Liquipedia filenames, so the licence question travels with the asset.
 // octane.gg no longer resolves at all.
 const APPROVED_MEDIA_HOSTS = new Set(
-  ("upload.wikimedia.org thumb.wikimedia.org commons.wikimedia.org shared.akamai.steamstatic.com " +
+  (
+    "upload.wikimedia.org thumb.wikimedia.org commons.wikimedia.org shared.akamai.steamstatic.com " +
     "cdn.cloudflare.steamstatic.com i.ytimg.com ddragon.leagueoflegends.com " +
     "raw.communitydragon.org media.valorant-api.com cmsassets.rgpub.io " +
     "files.bo3.gg image-proxy.bo3.gg " +
-    "raw.githubusercontent.com cdn.jsdelivr.net www.opendota.com").split(" "),
+    "raw.githubusercontent.com cdn.jsdelivr.net www.opendota.com"
+  ).split(" "),
 );
 const FORBIDDEN_MEDIA = [/(^|\.)liquipedia\.net$/i, /(^|\.)pandascore\.co$/i, /(^|\.)octane\.gg$/i];
 
@@ -99,8 +113,11 @@ export function approvedEventMedia(candidate: string): string {
   }
 }
 
-const STEAM_APPS: Partial<Record<EsportsGameId, number>> =
-  { cs2: 730, dota2: 570, rocketleague: 252950 };
+const STEAM_APPS: Partial<Record<EsportsGameId, number>> = {
+  cs2: 730,
+  dota2: 570,
+  rocketleague: 252950,
+};
 const GAMES = new Map(ESPORTS_GAMES.map((game) => [game.id, game]));
 
 /** The floor of every chain below: a publisher backdrop that is always present. */

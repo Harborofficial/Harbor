@@ -5,17 +5,23 @@ export default {
   "games.save": "Zu Favoriten hinzufügen",
   "games.calendar.source": "Gespeicherte Spiele",
   "games.calendar.hint": "Veröffentlichungstermine deiner gespeicherten Spiele",
-  "games.calendar.note": "Plane anhand der Veröffentlichungstermine deiner gespeicherten Spiele, was du als Nächstes spielst.",
-  "games.calendar.empty": "Speichere unter Spiele ein Spiel, um hier seine Veröffentlichungspläne zu verfolgen.",
+  "games.calendar.note":
+    "Plane anhand der Veröffentlichungstermine deiner gespeicherten Spiele, was du als Nächstes spielst.",
+  "games.calendar.empty":
+    "Speichere unter Spiele ein Spiel, um hier seine Veröffentlichungspläne zu verfolgen.",
   "games.calendar.search": "Gespeicherte Spiele durchsuchen",
   "games.calendar.platform": "Veröffentlichungsplattform",
   "games.calendar.allPlatforms": "Alle Plattformen",
-  "games.calendar.dates": "Termine der Herausgeber können sich ändern. Steam-Termine stammen aus dem US-Store; IGDB-Einträge zeigen Plattform und Region.",
-  "games.calendar.noDays": "Für keines der geprüften Spiele ist ein genauer Veröffentlichungstag im Monat {month} angegeben.",
+  "games.calendar.dates":
+    "Termine der Herausgeber können sich ändern. Steam-Termine stammen aus dem US-Store; IGDB-Einträge zeigen Plattform und Region.",
+  "games.calendar.noDays":
+    "Für keines der geprüften Spiele ist ein genauer Veröffentlichungstag im Monat {month} angegeben.",
   "games.calendar.windows": "Veröffentlichungszeiträume",
-  "games.calendar.windowsNote": "Diese geplanten Zeiträume umfassen diesen Monat, nennen aber keinen genauen Tag.",
+  "games.calendar.windowsNote":
+    "Diese geplanten Zeiträume umfassen diesen Monat, nennen aber keinen genauen Tag.",
   "games.calendar.undated": "Kein bestätigter Termin",
-  "games.calendar.undatedNote": "Nicht angekündigte, nicht verfügbare und noch nicht geprüfte Termine werden nicht im Kalender eingetragen.",
+  "games.calendar.undatedNote":
+    "Nicht angekündigte, nicht verfügbare und noch nicht geprüfte Termine werden nicht im Kalender eingetragen.",
   "games.calendar.cancelled": "Ausgeschlossene Einträge zu abgesagten Veröffentlichungen: {count}.",
   "games.calendar.unchecked": "Termin noch nicht geprüft",
   "games.watchlist.note": "Verfolge Veröffentlichungen deiner Lieblingsspiele.",
@@ -34,9 +40,11 @@ export default {
   "games.watchlist.coverage": "{count} von {total} Spielen geprüft",
   "games.watchlist.refresh": "Veröffentlichungstermine aktualisieren",
   "games.watchlist.unavailable": "Veröffentlichungstermin nicht verfügbar",
-  "games.watchlist.partial": "Einige Veröffentlichungstermine konnten nicht geprüft werden. Gespeicherte Informationen werden angezeigt, sofern verfügbar.",
+  "games.watchlist.partial":
+    "Einige Veröffentlichungstermine konnten nicht geprüft werden. Gespeicherte Informationen werden angezeigt, sofern verfügbar.",
   "games.watchlist.noMatch": "Keine Favoriten entsprechen diesen Filtern.",
-  "games.watchlist.dateNote": "Die Termine stammen von Steam und IGDB. Veröffentlichungspläne können sich ändern.",
+  "games.watchlist.dateNote":
+    "Die Termine stammen von Steam und IGDB. Veröffentlichungspläne können sich ändern.",
   "games.watchlist.remove": "{name} aus den Favoriten entfernen",
   "games.watchlist.saved": "Gespeicherte Informationen",
   "games.owned.availability": "Auf diesem Gerät",
@@ -54,9 +62,12 @@ export default {
   "games.owned.pickHint": "Ein zufälliges Spiel aus diesen Ergebnissen öffnen.",
   "games.owned.clear": "Bibliotheksfilter zurücksetzen",
   "games.owned.scanning": "Lokale Installationen werden geprüft…",
-  "games.owned.scanUnavailable": "Der lokale Installationsstatus ist nicht verfügbar. Aktualisiere die Ansicht, um dieses Gerät zu prüfen.",
-  "games.owned.partial": "Einige Steam-Ordner konnten nicht geprüft werden. Installierte Spiele werden möglicherweise nicht vollständig erkannt.",
+  "games.owned.scanUnavailable":
+    "Der lokale Installationsstatus ist nicht verfügbar. Aktualisiere die Ansicht, um dieses Gerät zu prüfen.",
+  "games.owned.partial":
+    "Einige Steam-Ordner konnten nicht geprüft werden. Installierte Spiele werden möglicherweise nicht vollständig erkannt.",
   "games.owned.results": "{count} von {total} Spielen",
-  "games.owned.playtimeNote": "Der Spielverlauf stammt aus der letzten Steam-Synchronisierung. Fehlende Spielzeit sagt nichts darüber aus, ob ein Spiel abgeschlossen wurde.",
-  "games.owned.resetAvailability": "Spiele mit jedem Installationsstatus anzeigen"
+  "games.owned.playtimeNote":
+    "Der Spielverlauf stammt aus der letzten Steam-Synchronisierung. Fehlende Spielzeit sagt nichts darüber aus, ob ein Spiel abgeschlossen wurde.",
+  "games.owned.resetAvailability": "Spiele mit jedem Installationsstatus anzeigen",
 };
