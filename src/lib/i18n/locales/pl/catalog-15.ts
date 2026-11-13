@@ -770,6 +770,10 @@ const catalog15: Record<string, string> = {
   "m:ss": "m:ss",
   "matches every page image in order.": "dopasowuje po kolei każdy obraz strony.",
   "mdblist api key": "Klucz API mdblist",
+  Tabs: "Karty",
+  "Show tabs": "Pokaż karty",
+  "Choose which tabs appear in your library":
+    "Wybierz, które karty pojawiają się w Twojej bibliotece",
 };
 
 export default catalog15;

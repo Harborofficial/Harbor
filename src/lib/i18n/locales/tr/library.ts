@@ -512,6 +512,9 @@ const library: Record<string, string> = {
   "{source} list detected": "{source} listesi algılandı",
   "← folder or .cbz / .zip": "← klasör veya .cbz / .zip",
   "← name it like the manga": "← mangayla aynı adı verin",
+  Tabs: "Sekmeler",
+  "Show tabs": "Sekmeleri göster",
+  "Choose which tabs appear in your library": "Kitaplığınızda hangi sekmelerin görüneceğini seçin",
 };
 
 export default library;

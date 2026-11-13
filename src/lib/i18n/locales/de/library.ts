@@ -100,6 +100,10 @@ const library: Record<string, string> = {
   "{n} in your Stremio library": "{n} in deiner Stremio-Mediathek",
   "{n} on Trakt": "{n} auf Trakt",
   "{n} saved on this device": "{n} auf diesem Gerät gespeichert",
+  Tabs: "Tabs",
+  "Show tabs": "Tabs anzeigen",
+  "Choose which tabs appear in your library":
+    "Wähle, welche Tabs in deiner Mediathek angezeigt werden",
 };
 
 export default library;
