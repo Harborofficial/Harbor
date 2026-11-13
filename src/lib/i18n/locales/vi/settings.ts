@@ -271,6 +271,9 @@ const settings: Record<string, string> = {
   "Rich season and order panel": "Bảng mùa và thứ tự chi tiết",
   "Rotten Tomatoes": "Rotten Tomatoes",
   Ruleset: "Bộ quy tắc",
+  "Scale TV score badges": "Điều chỉnh kích thước huy hiệu điểm trên thẻ TV",
+  "Shrink the score stack when several ratings are enabled.":
+    "Thu nhỏ nhóm huy hiệu điểm khi bật nhiều nguồn đánh giá.",
   "Score badges on cards": "Huy hiệu điểm trên thẻ phim",
   "Score position": "Vị trí điểm",
   "Search rules by name or pattern…": "Tìm quy tắc theo tên hoặc mẫu…",

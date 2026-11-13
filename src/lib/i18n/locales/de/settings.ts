@@ -1857,6 +1857,9 @@ const settings: Record<string, string> = {
     "Durchsucht deine Stremio-Mediathek und überarbeitet alle Einträge, deren Struktur nicht exakt dem Schema von Stremio entspricht.",
   "Scans your Stremio library and rewrites any item whose shape doesn't match Stremio's exact schema. Safe to run anytime; only items that need fixing get touched.":
     "Durchsucht deine Stremio-Mediathek und schreibt alle Einträge neu, deren Struktur nicht exakt dem Schema von Stremio entspricht. Kann jederzeit gefahrlos ausgeführt werden; nur Einträge, die korrigiert werden müssen, werden geändert.",
+  "Scale TV score badges": "TV-Bewertungsabzeichen skalieren",
+  "Shrink the score stack when several ratings are enabled.":
+    "Bewertungsleiste verkleinern, wenn mehrere Bewertungen aktiviert sind.",
   "Score badges on cards": "Bewertungsabzeichen auf Karten",
   "Score position": "Position der Bewertung",
   Screenshot: "Screenshot",
