@@ -1,4 +1,4 @@
-import { useState, type Dispatch, type RefObject, type SetStateAction } from "react";
+import { useCallback, useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { useClipRecorder } from "./use-clip-recorder";
 import { useFrameGrab } from "./use-frame-grab";
@@ -24,6 +24,9 @@ export function usePlayerHotkeys(params: {
   togglePip: () => void;
   fullscreen: boolean;
   cycleSubtitles: () => void;
+  cycleAudio: () => void;
+  onSubSize: (direction: 1 | -1) => void;
+  canShowShortcuts: () => boolean;
   playNext: () => void;
   playPrev: () => void;
   hasNextEpisode: boolean;
@@ -61,6 +64,9 @@ export function usePlayerHotkeys(params: {
     togglePip,
     fullscreen,
     cycleSubtitles,
+    cycleAudio,
+    onSubSize,
+    canShowShortcuts,
     playNext,
     playPrev,
     hasNextEpisode,
@@ -84,6 +90,8 @@ export function usePlayerHotkeys(params: {
   } = params;
 
   const [showStats, setShowStats] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const closeShortcuts = useCallback(() => setShowShortcuts(false), []);
   const { holdSpeedActive, subtitleOffsetSec } = useKeyboardShortcuts({
     bridgeRef,
     snap,
@@ -98,7 +106,12 @@ export function usePlayerHotkeys(params: {
     togglePip,
     fullscreen,
     cycleSubtitles,
+    cycleAudio,
+    onSubSize,
     setShowStats,
+    showShortcuts,
+    setShowShortcuts,
+    canShowShortcuts,
     metaId,
     svpActive,
     onNextEp: hasNextEpisode ? playNext : undefined,
@@ -131,5 +144,10 @@ export function usePlayerHotkeys(params: {
     onVolumeFeedback,
   });
 
-  return { holdSpeedActive, showStats, subtitleOffsetSec };
+  return {
+    holdSpeedActive,
+    showStats,
+    shortcuts: { open: showShortcuts, close: closeShortcuts },
+    subtitleOffsetSec,
+  };
 }

@@ -516,6 +516,18 @@ const player: Record<string, string> = {
     "عدم إظهار تنبيه المحتوى لهذا العنوان مرة أخرى",
   "Search audio language": "ابحث عن لغة الصوت",
   "No audio track in that language.": "لا يوجد مسار صوتي بهذه اللغة.",
+  "Show keyboard shortcuts": "عرض اختصارات لوحة المفاتيح",
+  "Show or hide the list of player shortcuts.": "إظهار أو إخفاء قائمة اختصارات المشغّل.",
+  "Press {key} to close. Change these in Settings.":
+    "اضغط {key} للإغلاق. يمكنك تغيير هذه الاختصارات من الإعدادات.",
+  "Cycle audio tracks": "التبديل بين المسارات الصوتية",
+  "Switch to the next available audio track.": "الانتقال إلى المسار الصوتي التالي المتاح.",
+  "Smaller subtitles": "تصغير الترجمة",
+  "Decrease the subtitle text size.": "تصغير حجم نص الترجمة.",
+  "Larger subtitles": "تكبير الترجمة",
+  "Increase the subtitle text size.": "تكبير حجم نص الترجمة.",
+  "Audio: {name}": "الصوت: {name}",
+  "Subtitle size: {size}": "حجم الترجمة: {size}",
 };
 
 export default player;

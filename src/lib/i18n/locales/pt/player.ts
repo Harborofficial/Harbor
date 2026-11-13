@@ -478,6 +478,18 @@ const player: Record<string, string> = {
     "Nunca mais mostrar o aviso de conteúdo deste título",
   "Search audio language": "Buscar idioma de áudio",
   "No audio track in that language.": "Nenhuma faixa de áudio nesse idioma.",
+  "Show keyboard shortcuts": "Mostrar atalhos de teclado",
+  "Show or hide the list of player shortcuts.": "Mostra ou oculta a lista de atalhos do player.",
+  "Press {key} to close. Change these in Settings.":
+    "Pressione {key} para fechar. Altere-os nas Configurações.",
+  "Cycle audio tracks": "Alternar faixas de áudio",
+  "Switch to the next available audio track.": "Muda para a próxima faixa de áudio disponível.",
+  "Smaller subtitles": "Legendas menores",
+  "Decrease the subtitle text size.": "Diminui o tamanho do texto das legendas.",
+  "Larger subtitles": "Legendas maiores",
+  "Increase the subtitle text size.": "Aumenta o tamanho do texto das legendas.",
+  "Audio: {name}": "Áudio: {name}",
+  "Subtitle size: {size}": "Tamanho da legenda: {size}",
 };
 
 export default player;

@@ -360,6 +360,19 @@ const player: Record<string, string> = {
   "Search audio language": "Rechercher une langue audio",
   "No audio track in that language.": "Aucune piste audio dans cette langue.",
   Clear: "Effacer",
+  "Show keyboard shortcuts": "Afficher les raccourcis clavier",
+  "Show or hide the list of player shortcuts.":
+    "Affiche ou masque la liste des raccourcis du lecteur.",
+  "Press {key} to close. Change these in Settings.":
+    "Appuyez sur {key} pour fermer. Modifiez-les dans les Paramètres.",
+  "Cycle audio tracks": "Parcourir les pistes audio",
+  "Switch to the next available audio track.": "Passe à la piste audio disponible suivante.",
+  "Smaller subtitles": "Sous-titres plus petits",
+  "Decrease the subtitle text size.": "Réduit la taille du texte des sous-titres.",
+  "Larger subtitles": "Sous-titres plus grands",
+  "Increase the subtitle text size.": "Augmente la taille du texte des sous-titres.",
+  "Audio: {name}": "Audio : {name}",
+  "Subtitle size: {size}": "Taille des sous-titres : {size}",
 };
 
 export default player;
