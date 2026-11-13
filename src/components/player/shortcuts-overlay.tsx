@@ -99,11 +99,7 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
             <X size={17} strokeWidth={2.2} />
           </button>
         </header>
-        <div
-          tabIndex={0}
-          aria-label={t("Keyboard shortcuts")}
-          className="overflow-y-auto px-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
-        >
+        <div className="overflow-y-auto px-6 py-5">
           <div className="columns-1 gap-x-10 sm:columns-2 lg:columns-3">
             {groups.map((group) => (
               <section key={group.name} className="mb-5 break-inside-avoid">
@@ -112,7 +108,13 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
                 </h3>
                 <dl className="flex flex-col gap-1.5">
                   {group.items.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between gap-3">
+                    // Each row is a focus stop so TV arrows and Tab walk the list and
+                    // scroll it into view; the nav engine never scrolls a focused container.
+                    <div
+                      key={item.id}
+                      tabIndex={0}
+                      className="-mx-1.5 flex items-center justify-between gap-3 rounded-md px-1.5 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    >
                       <dt dir="auto" className="min-w-0 truncate text-[13px] text-ink-muted">
                         {t(item.label)}
                       </dt>

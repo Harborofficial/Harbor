@@ -202,13 +202,18 @@ export function useKeyboardShortcuts(params: {
         return;
       }
 
+      // The panel is modal even when focus has drifted out of it: only the two
+      // bindings that dismiss it reach the player while it is open.
+      if (showShortcuts) {
+        if (match("playerClose") || match("playerShortcuts")) {
+          e.preventDefault();
+          if (!e.repeat) setShowShortcuts(() => false);
+        }
+        return;
+      }
+
       if (match("playerClose")) {
         if (getLeaveConfirm().open) return;
-        if (showShortcuts) {
-          e.preventDefault();
-          setShowShortcuts(() => false);
-          return;
-        }
         if (drawMode) {
           setDrawMode(false);
           return;
@@ -439,10 +444,10 @@ export function useKeyboardShortcuts(params: {
         return;
       }
       if (match("playerShortcuts")) {
-        if (!showShortcuts && canShowShortcuts && !canShowShortcuts()) return;
+        if (canShowShortcuts && !canShowShortcuts()) return;
         e.preventDefault();
         if (e.repeat) return;
-        setShowShortcuts((v) => !v);
+        setShowShortcuts(() => true);
         return;
       }
       if (match("playerSpeedDown")) {
