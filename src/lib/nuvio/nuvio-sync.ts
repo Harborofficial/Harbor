@@ -23,7 +23,7 @@ import {
   localCwEntry,
   saveLocalCw,
 } from "@/lib/local-cw";
-import { clearResume, clearResumeBatch, createResumeReader } from "@/lib/resume";
+import { clearResume, clearResumeBatch, createResumeReader, saveResumeMs } from "@/lib/resume";
 import { persistCritical } from "@/lib/storage-recovery";
 import {
   isNuvioProviderActive,
@@ -38,7 +38,8 @@ import {
 import { readCachedNuvioLibrary } from "./nuvio-library";
 import { meta as fetchMeta } from "@/lib/cinemeta";
 import type { Addon } from "@/lib/addons";
-import { fetchManifestAt } from "@/lib/addon-store";
+import { fetchManifestAt, parseAddonUrl } from "@/lib/addon-store";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 import { recordNuvioAddons } from "./nuvio-addon-registry";
 import { undismissCw } from "@/lib/cw-dismiss";
 import { loadStoredSettings } from "@/lib/settings/load";
@@ -229,22 +230,24 @@ export function extractCleanNumericTmdbId(rawId?: string | null): string | null 
 export function normalizeNuvioContentId(rawId: string): string {
   if (!rawId) return "";
   const trimmed = rawId.trim();
-  if (trimmed.startsWith("tt")) return trimmed;
+  const stripped = trimmed.replace(/^(series|movie|stremio):/i, "").trim();
+  if (/^tt\d+/i.test(stripped)) return stripped.toLowerCase();
 
-  const numId = extractCleanNumericTmdbId(trimmed);
+  const numId = extractCleanNumericTmdbId(stripped);
   if (numId) {
     const cachedImdb =
       tmdbImdbCached(trimmed) ||
+      tmdbImdbCached(stripped) ||
       tmdbImdbCached(`tmdb:${numId}`) ||
       tmdbImdbCached(`tmdb:tv:${numId}`) ||
       tmdbImdbCached(`tmdb:movie:${numId}`);
-    if (cachedImdb && cachedImdb.startsWith("tt")) {
-      return cachedImdb;
+    if (cachedImdb && /^tt\d+/i.test(cachedImdb)) {
+      return cachedImdb.toLowerCase();
     }
     return `tmdb:${numId}`;
   }
 
-  return trimmed;
+  return stripped;
 }
 
 /**
@@ -257,24 +260,12 @@ export function getNuvioContentIdVariants(rawId?: string | null): string[] {
   if (!trimmed) return [];
   const variants = new Set<string>([trimmed]);
 
-  const numId = extractCleanNumericTmdbId(trimmed);
-  if (numId) {
-    variants.add(numId);
-    variants.add(`tmdb:${numId}`);
-    variants.add(`tmdb:tv:${numId}`);
-    variants.add(`tmdb:movie:${numId}`);
-    variants.add(`series:${numId}`);
-    variants.add(`movie:${numId}`);
-    const cachedImdb =
-      tmdbImdbCached(trimmed) ||
-      tmdbImdbCached(`tmdb:${numId}`) ||
-      tmdbImdbCached(`tmdb:tv:${numId}`) ||
-      tmdbImdbCached(`tmdb:movie:${numId}`);
-    if (cachedImdb && cachedImdb.startsWith("tt")) {
-      variants.add(cachedImdb);
-    }
-  } else if (trimmed.startsWith("tt")) {
-    const cachedTmdb = tmdbFromImdbCached(trimmed);
+  if (/^tt\d+/i.test(trimmed)) {
+    const lower = trimmed.toLowerCase();
+    variants.add(lower);
+    variants.add(trimmed.toUpperCase());
+    variants.add(`Tt${trimmed.slice(2)}`);
+    const cachedTmdb = tmdbFromImdbCached(lower) || tmdbFromImdbCached(trimmed);
     if (cachedTmdb) {
       const match = /^tmdb:(?:tv:|movie:)?(\d+)$/.exec(cachedTmdb);
       if (match) {
@@ -283,6 +274,25 @@ export function getNuvioContentIdVariants(rawId?: string | null): string[] {
         variants.add(`tmdb:${id}`);
         variants.add(`tmdb:tv:${id}`);
         variants.add(`tmdb:movie:${id}`);
+      }
+    }
+  } else {
+    const numId = extractCleanNumericTmdbId(trimmed);
+    if (numId) {
+      variants.add(numId);
+      variants.add(`tmdb:${numId}`);
+      variants.add(`tmdb:tv:${numId}`);
+      variants.add(`tmdb:movie:${numId}`);
+      variants.add(`series:${numId}`);
+      variants.add(`movie:${numId}`);
+      const cachedImdb =
+        tmdbImdbCached(trimmed) ||
+        tmdbImdbCached(`tmdb:${numId}`) ||
+        tmdbImdbCached(`tmdb:tv:${numId}`) ||
+        tmdbImdbCached(`tmdb:movie:${numId}`);
+      if (cachedImdb && /^tt\d+/i.test(cachedImdb)) {
+        variants.add(cachedImdb.toLowerCase());
+        variants.add(cachedImdb);
       }
     }
   }
@@ -944,6 +954,18 @@ export async function pushWatchProgressToNuvio(
         t: nowEpoch,
       },
       `nuvio-${profileIndex}`,
+    );
+
+    saveResumeMs(
+      contentId,
+      progSec * 1000,
+      season ?? undefined,
+      episode ?? undefined,
+      undefined,
+      durSec > 0 ? progSec / durSec : undefined,
+      "nuvio",
+      `nuvio-${profileIndex}`,
+      nowEpoch,
     );
 
     window.dispatchEvent(
@@ -1912,14 +1934,69 @@ async function reconcileNuvioWatchedOnce(
         serverWatchedAt.set(id, Math.max(serverWatchedAt.get(id) ?? 0, watchedAt));
       }
       serverWatchedIds.add(it.content_id);
-      if (cleanId) serverWatchedIds.add(cleanId);
+      serverWatchedIds.add(it.content_id.toLowerCase());
+      if (cleanId) {
+        serverWatchedIds.add(cleanId);
+        serverWatchedIds.add(cleanId.toLowerCase());
+      }
       if (it.content_type === "movie" || !it.content_type) {
         serverMovieIds.add(it.content_id);
-        if (cleanId) serverMovieIds.add(cleanId);
+        serverMovieIds.add(it.content_id.toLowerCase());
+        if (cleanId) {
+          serverMovieIds.add(cleanId);
+          serverMovieIds.add(cleanId.toLowerCase());
+        }
       }
     } else if (typeof it.season === "number" && typeof it.episode === "number") {
       serverEpisodeKeys.add(`${it.content_id}|${it.season}|${it.episode}`);
-      if (cleanId) serverEpisodeKeys.add(`${cleanId}|${it.season}|${it.episode}`);
+      serverEpisodeKeys.add(`${it.content_id.toLowerCase()}|${it.season}|${it.episode}`);
+      if (cleanId) {
+        serverEpisodeKeys.add(`${cleanId}|${it.season}|${it.episode}`);
+        serverEpisodeKeys.add(`${cleanId.toLowerCase()}|${it.season}|${it.episode}`);
+      }
+    }
+  }
+
+  const cachedProgress = applyPending(
+    readCachedWatchProgress(profileIndex),
+    profileIndex,
+    accountId,
+    "progress",
+    false,
+    {},
+  ).items;
+
+  for (const p of cachedProgress) {
+    if (p.content_id && typeof p.season === "number" && typeof p.episode === "number") {
+      const variants = getNuvioContentIdVariants(p.content_id);
+      const pCoord = coordinate(p);
+      const pTime = pendingRowTime("progress", p);
+      const isDeletedInPending = Object.values(pending).some((c) => {
+        if (!c.deleted) return false;
+        const matchesContent = variants.some(
+          (v) => v.toLowerCase() === (c.row.content_id || "").toLowerCase(),
+        );
+        if (!matchesContent) return false;
+        const matchesEpisode =
+          (c.row.season == null && c.row.episode == null) ||
+          (c.row.season === p.season && c.row.episode === p.episode);
+        if (!matchesEpisode) return false;
+        if (c.except && c.except.includes(pCoord)) return false;
+        if (c.deletedAt != null && pTime > c.deletedAt) return false;
+        return true;
+      });
+      if (isDeletedInPending) continue;
+
+      const dur = p.duration_seconds || 1;
+      if (p.progress_seconds >= dur * getWatchedThresholdRatio()) {
+        const clean = p.content_id.replace(/^(series|movie|tmdb):/, "").trim();
+        serverEpisodeKeys.add(`${p.content_id}|${p.season}|${p.episode}`);
+        serverEpisodeKeys.add(`${p.content_id.toLowerCase()}|${p.season}|${p.episode}`);
+        if (clean) {
+          serverEpisodeKeys.add(`${clean}|${p.season}|${p.episode}`);
+          serverEpisodeKeys.add(`${clean.toLowerCase()}|${p.season}|${p.episode}`);
+        }
+      }
     }
   }
 
@@ -2040,12 +2117,18 @@ async function reconcileNuvioWatchedOnce(
     // preserving local dismissals so titles removed via (X) do not resurrect on every sync tick.
     for (const showId of newlyWatchedShows) {
       if (serverWatchedIds.has(showId) && !cwKeepsCaughtUpForTimer()) continue;
-      undismissCw(showId);
       const clean = showId.replace(/^(series|movie|tmdb):/, "").trim();
+      // If the show has a whole-show dismissal (dropped or removed), preserve it and do not un-dismiss!
+      if (isDismissedNextUp(clean, -1, -1, dismissedKeys)) {
+        continue;
+      }
+      undismissCw(showId);
       for (const k of Array.from(dismissedKeys)) {
+        // Do NOT delete whole-show dismissals (-1|-1 or bare id)!
+        if (k === clean || k === showId || k === `${clean}|-1|-1` || k === `${showId}|-1|-1`) {
+          continue;
+        }
         if (
-          k === showId ||
-          k === clean ||
           k.startsWith(`${showId}|`) ||
           k.startsWith(`${clean}|`) ||
           k.startsWith(`tmdb:${clean}|`) ||
@@ -2062,7 +2145,12 @@ async function reconcileNuvioWatchedOnce(
     for (const entry of localEntries) {
       if (entry.type !== "series" || entry.season == null || entry.episode == null) continue;
       seenShowIds.add(entry.id);
+      seenShowIds.add(entry.id.toLowerCase());
       const cleanEntryId = entry.id.replace(/^(series|movie|tmdb):/, "");
+      seenShowIds.add(cleanEntryId);
+      seenShowIds.add(cleanEntryId.toLowerCase());
+      seenShowIds.add(`tmdb:${cleanEntryId.toLowerCase()}`);
+      seenShowIds.add(`series:${cleanEntryId.toLowerCase()}`);
       // Check if dismissed in Nuvio Cloud
       if (isDismissedNextUp(entry.id, entry.season, entry.episode, dismissedKeys)) {
         localCwMutated = true;
@@ -2169,14 +2257,24 @@ async function reconcileNuvioWatchedOnce(
           `nuvio-${profileIndex}`,
         );
       } else {
-        const hasProgress = progressItems?.some(
-          (p) =>
-            p.content_id &&
-            (p.content_id === entry.id ||
-              p.content_id === cleanEntryId ||
-              p.content_id === `tmdb:${cleanEntryId}` ||
-              p.content_id === `series:${cleanEntryId}`),
-        );
+        const hasProgress = progressItems?.some((p) => {
+          if (!p.content_id) return false;
+          const pLower = p.content_id.toLowerCase();
+          const eLower = entry.id.toLowerCase();
+          const pClean = p.content_id
+            .replace(/^(series|movie|tmdb):/, "")
+            .trim()
+            .toLowerCase();
+          const entryClean = cleanEntryId.toLowerCase();
+          return (
+            pLower === eLower ||
+            pClean === entryClean ||
+            pClean === `tmdb:${entryClean}` ||
+            pClean === `series:${entryClean}` ||
+            pLower === `tmdb:${entryClean}` ||
+            pLower === `series:${entryClean}`
+          );
+        });
         if (!hasProgress) {
           localCwMutated = true;
           clearLocalCw(entry.id, `nuvio-${profileIndex}`);
@@ -2201,17 +2299,23 @@ async function reconcileNuvioWatchedOnce(
     for (const item of items) {
       if (!item.content_id || item.season == null || item.episode == null) continue;
       const cleanShowId = item.content_id.replace(/^(series|movie|tmdb):/, "");
+      const lowerShowId = item.content_id.toLowerCase();
+      const lowerClean = cleanShowId.toLowerCase();
       if (
         seenShowIds.has(item.content_id) ||
+        seenShowIds.has(lowerShowId) ||
         seenShowIds.has(cleanShowId) ||
+        seenShowIds.has(lowerClean) ||
         seenShowIds.has(`tmdb:${cleanShowId}`) ||
+        seenShowIds.has(`tmdb:${lowerClean}`) ||
         seenShowIds.has(`series:${cleanShowId}`) ||
-        processedMidwayShows.has(cleanShowId)
+        seenShowIds.has(`series:${lowerClean}`) ||
+        processedMidwayShows.has(lowerClean)
       ) {
         continue;
       }
 
-      processedMidwayShows.add(cleanShowId);
+      processedMidwayShows.add(lowerClean);
       const maxInfo = showMaxWatched.get(item.content_id) || showMaxWatched.get(cleanShowId);
       if (!maxInfo) continue;
 
@@ -2579,13 +2683,15 @@ function saveLatestNuvioLocalProgress(items: NuvioWatchProgress[], profileIndex:
   // Callers sort newest first. Local CW stores one checkpoint per content ID.
   const saved = new Set<string>();
   for (const item of items) {
-    if (!item.content_id || saved.has(item.content_id)) continue;
-    saved.add(item.content_id);
-    const local = localCwEntry(item.content_id, false, `nuvio-${profileIndex}`);
+    if (!item.content_id) continue;
+    const normalizedId = normalizeNuvioContentId(item.content_id) || item.content_id;
+    if (saved.has(normalizedId)) continue;
+    saved.add(normalizedId);
+    const local = localCwEntry(normalizedId, false, `nuvio-${profileIndex}`);
     if (local && local.t > progressTime(item)) continue;
     saveLocalCw(
       {
-        id: item.content_id,
+        id: normalizedId,
         type: item.season != null && item.episode != null ? "series" : "movie",
         name: item.name || item.title || item.content_id,
         poster: item.poster || undefined,
@@ -2794,7 +2900,12 @@ async function pullWatchProgressOnce(
     )
       continue;
     const newest = newestByContent.get(local.id) ?? 0;
-    if (local.t <= newest || (!newestByContent.has(local.id) && local.t <= startedAt)) continue;
+    if (local.t <= newest || (!newestByContent.has(local.id) && local.t <= startedAt)) {
+      if (!newestByContent.has(local.id) && local.t <= startedAt) {
+        clearLocalCw(local.id, ownerId);
+      }
+      continue;
+    }
     const localRow: NuvioWatchProgress = {
       profile_id: slot,
       content_id: local.id,
@@ -2991,26 +3102,29 @@ export function fetchNuvioAddons(harborProfileId?: string | number): Promise<Add
 
     const addons: Addon[] = await Promise.all(
       activeItems.map(async (n): Promise<Addon> => {
-        const cached = getCachedNuvioManifest(n.url);
+        const parsed = parseAddonUrl(n.url);
+        const transportUrl = parsed.kind === "ok" ? parsed.url : n.url;
+        const cached = getCachedNuvioManifest(transportUrl) || getCachedNuvioManifest(n.url);
         if (cached) {
           return {
-            transportUrl: n.url,
+            transportUrl,
             manifest: cached,
           };
         }
         let manifest: Addon["manifest"] = {
-          id: n.url,
+          id: transportUrl,
           name: n.name || "Addon",
         };
         try {
-          const fetched = await fetchManifestAt(n.url);
+          const fetched = await fetchManifestAt(transportUrl);
           if (fetched) {
             manifest = fetched;
-            setCachedNuvioManifest(n.url, fetched);
+            setCachedNuvioManifest(transportUrl, fetched);
+            if (transportUrl !== n.url) setCachedNuvioManifest(n.url, fetched);
           }
         } catch {}
         return {
-          transportUrl: n.url,
+          transportUrl,
           manifest,
         };
       }),

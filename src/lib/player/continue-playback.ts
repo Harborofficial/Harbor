@@ -73,13 +73,19 @@ export function continuationAppliesToSource(
 export function continuationFor(
   target: ActualPlayback,
   actor: PlaybackActor,
-  restart = false,
+  restart: boolean | { restart?: boolean; positionMs?: number } = false,
 ): PlaybackContinuation {
+  const isObj = typeof restart === "object" && restart !== null;
+  const isRestart = isObj ? restart.restart === true : restart === true;
+  const posOverride =
+    isObj && typeof restart.positionMs === "number" && restart.positionMs >= 0
+      ? restart.positionMs
+      : undefined;
   return {
     id: target.id,
     actor,
-    restart,
-    positionMs: restart ? 0 : target.positionMs,
+    restart: isRestart,
+    positionMs: isRestart ? 0 : (posOverride ?? target.positionMs),
     sourceKey: actualPlaybackSourceKey(target),
     target: {
       metaId: target.src.meta.id,

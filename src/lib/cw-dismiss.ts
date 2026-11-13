@@ -233,8 +233,12 @@ function isEpisodeAhead(
 // must keep the same card hidden when the source changes.
 function itemIds(item: LibraryItem): string[] {
   const ids = [item._id];
+  const seen = new Set<string>([item._id]);
   for (const id of item.altIds ?? []) {
-    if (typeof id === "string" && id && !ids.includes(id)) ids.push(id);
+    if (typeof id === "string" && id && !seen.has(id)) {
+      seen.add(id);
+      ids.push(id);
+    }
   }
   return ids;
 }
@@ -827,23 +831,77 @@ export function dismissCw(
   );
 }
 
+function extractDismissalKeyId(key: string): string {
+  if (key.startsWith("group|") || key.startsWith("group-source|")) {
+    const parts = key.split("|");
+    if (parts.length >= 3) {
+      try {
+        return decodeURIComponent(parts[2]);
+      } catch {
+        return parts[2];
+      }
+    }
+  } else if (key.includes("|")) {
+    const parts = key.split("|");
+    return parts[parts.length - 1];
+  }
+  return key;
+}
+
 export function undismissCw(id: string): void {
   loadDismissed();
   const cleanId = id.replace(/^(series|movie|tmdb):/, "").trim();
-  const variants = [
-    id,
-    cleanId,
-    `tmdb:${cleanId}`,
-    `series:${cleanId}`,
-    `nuvio|${id}`,
-    `nuvio|${cleanId}`,
-  ];
+  const targetLower = id.toLowerCase();
+  const targetCleanLower = cleanId.toLowerCase();
+
   let changed = false;
-  for (const v of variants) {
-    if (dismissed.delete(v)) changed = true;
-    if (dismissedVid.delete(v)) changed = true;
-    if (dismissedPos.delete(v)) changed = true;
+
+  const matchesId = (key: string): boolean => {
+    const rawId = extractDismissalKeyId(key);
+    const keyLower = rawId.toLowerCase();
+    const keyCleanLower = rawId
+      .replace(/^(series|movie|tmdb):/, "")
+      .trim()
+      .toLowerCase();
+    return (
+      keyLower === targetLower ||
+      keyCleanLower === targetCleanLower ||
+      keyLower === targetCleanLower ||
+      keyCleanLower === targetLower
+    );
+  };
+
+  for (const [key] of Array.from(dismissed.entries())) {
+    if (matchesId(key)) {
+      dismissed.delete(key);
+      changed = true;
+    }
   }
+  for (const [key] of Array.from(dismissedVid.entries())) {
+    if (matchesId(key)) {
+      dismissedVid.delete(key);
+      changed = true;
+    }
+  }
+  for (const [key] of Array.from(dismissedPos.entries())) {
+    if (matchesId(key)) {
+      dismissedPos.delete(key);
+      changed = true;
+    }
+  }
+
+  // Also clean SIMKL dismissal store
+  try {
+    const simkl = JSON.parse(localStorage.getItem(SIMKL_KEY) ?? "[]");
+    if (Array.isArray(simkl)) {
+      const filtered = simkl.filter((k: string) => !matchesId(k));
+      if (filtered.length !== simkl.length) {
+        localStorage.setItem(SIMKL_KEY, JSON.stringify(filtered));
+        changed = true;
+      }
+    }
+  } catch {}
+
   if (changed) {
     persistDismissed(dismissed, dismissedVid, false, dismissedPos);
     emit();

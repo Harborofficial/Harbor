@@ -1,7 +1,6 @@
 import { manualWatchedState } from "@/lib/manual-watched";
 import { readResumeEntry } from "@/lib/resume";
-
-const FINISHED_RATIO = 0.9;
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 
 export type EpisodePoint = { season: number; episode: number };
 
@@ -21,7 +20,7 @@ export function isEpisodeFinished(
   if (stremioWatched?.has(`${at.season}:${at.episode}`)) return true;
   const entry = readResumeEntry(metaId, at.season, at.episode);
   if (!entry || entry.ms <= 0) return false;
-  return typeof entry.pct === "number" && entry.pct >= FINISHED_RATIO;
+  return typeof entry.pct === "number" && entry.pct >= getWatchedThresholdRatio();
 }
 
 export function advancePastFinished(
@@ -36,7 +35,17 @@ export function advancePastFinished(
     .filter((v) => v.season >= 1 && v.episode >= 1)
     .sort((a, b) => a.season - b.season || a.episode - b.episode);
   const idx = ordered.findIndex((v) => v.season === at.season && v.episode === at.episode);
-  if (idx < 0) return at;
+  if (idx < 0) {
+    const seasonEps = ordered.filter((v) => v.season === at.season);
+    const maxEp = seasonEps.reduce((m, v) => Math.max(m, v.episode), 0);
+    if (seasonEps.length > 0 && at.episode > maxEp) {
+      const nextEp = ordered.find(
+        (v) => v.season > at.season && !isEpisodeFinished(metaId, v, stremioWatched),
+      );
+      return nextEp ?? null;
+    }
+    return at;
+  }
   for (let i = idx + 1; i < ordered.length; i += 1) {
     if (!isEpisodeFinished(metaId, ordered[i], stremioWatched)) return ordered[i];
   }

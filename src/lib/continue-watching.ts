@@ -6,6 +6,7 @@ import { listLocalCw, localCwSourceEnabled, subscribeLocalCw } from "@/lib/local
 import { animeCwIdsVersion, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
 import { dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
 import { isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 import { setExternalCwSources } from "@/lib/feed/external-cw";
 import { useExternalCw } from "@/lib/feed/external-cw";
 import {
@@ -54,7 +55,8 @@ export function localToLibraryItem(e: ReturnType<typeof listLocalCw>[number]): L
       video_id:
         e.videoId ??
         (e.season != null && e.episode != null ? `${e.id}:${e.season}:${e.episode}` : undefined),
-      flaggedWatched: e.durationMs > 0 && e.positionMs / e.durationMs >= 0.9 ? 1 : 0,
+      flaggedWatched:
+        e.durationMs > 0 && e.positionMs / e.durationMs >= getWatchedThresholdRatio() ? 1 : 0,
       lastWatched: new Date(e.t).toISOString(),
     },
     removed: false,
@@ -213,7 +215,7 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
         const offset = i.state?.timeOffset ?? 0;
         const dur = i.state?.duration ?? 0;
         if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
-        if (dur > 0 && offset / dur >= 0.9) return false;
+        if (dur > 0 && offset / dur >= getWatchedThresholdRatio()) return false;
       }
       return true;
     });

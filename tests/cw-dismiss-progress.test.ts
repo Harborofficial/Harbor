@@ -716,6 +716,13 @@ test("external backfills preserve dismissals and save true remote progress only 
       "./list-status": {
         loadSimklProgress: async () => ({ completedSeries: [] }),
       },
+      "@/lib/watched-threshold": {
+        getWatchedThresholdPct: () => 85,
+        getWatchedThresholdRatio: () => 0.85,
+        DEFAULT_WATCHED_THRESHOLD_PCT: 85,
+        MIN_WATCHED_THRESHOLD_PCT: 70,
+        MAX_WATCHED_THRESHOLD_PCT: 100,
+      },
     };
     const module = { exports: {} as Record<string, () => Promise<LibraryItem[]>> };
     const output = ts.transpileModule(source, {

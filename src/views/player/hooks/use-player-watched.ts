@@ -1,6 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { getEpisodeProgress } from "@/lib/episode-progress";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 import { manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
 import { loadSimklWatchedMap, simklWatchedForId } from "@/lib/simkl/list-status";
 import { useSimkl } from "@/lib/simkl/provider";
@@ -14,7 +15,11 @@ import { stremioIdToPmdbTarget } from "@/lib/publicmetadb/ids";
 import { usePublicMetaDb } from "@/lib/publicmetadb/provider";
 import type { PlayEpisode } from "@/lib/view";
 import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
-import { readCachedWatchProgress, resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
+import {
+  getNuvioContentIdVariants,
+  readCachedWatchProgress,
+  resolveNuvioProfileIndex,
+} from "@/lib/nuvio/nuvio-sync";
 
 export function usePlayerWatched(params: {
   meta: Meta;
@@ -92,12 +97,25 @@ export function usePlayerWatched(params: {
       const slot = resolveNuvioProfileIndex();
       const records = readCachedWatchProgress(slot);
       const set = new Set<string>();
+      const targetVariants = new Set<string>();
+      for (const v of getNuvioContentIdVariants(meta.id)) targetVariants.add(v.toLowerCase());
+      if (imdbId) {
+        for (const v of getNuvioContentIdVariants(imdbId)) targetVariants.add(v.toLowerCase());
+      }
+      const cleanMeta = meta.id.replace(/^(series|movie|tmdb):/, "").toLowerCase();
+      if (cleanMeta) targetVariants.add(cleanMeta);
+      if (imdbId) {
+        const cleanImdb = imdbId.replace(/^(series|movie|tmdb):/, "").toLowerCase();
+        if (cleanImdb) targetVariants.add(cleanImdb);
+      }
       for (const r of records) {
-        const matches = r.content_id === meta.id || (imdbId && r.content_id === imdbId);
+        const rLower = (r.content_id || "").toLowerCase();
+        const rClean = rLower.replace(/^(series|movie|tmdb):/, "");
+        const matches = targetVariants.has(rLower) || targetVariants.has(rClean);
         if (matches && r.season != null && r.episode != null) {
           const ratio =
             r.progress_seconds && r.duration_seconds ? r.progress_seconds / r.duration_seconds : 0;
-          if (ratio >= 0.85) {
+          if (ratio >= getWatchedThresholdRatio()) {
             set.add(`${r.season}:${r.episode}`);
           }
         }

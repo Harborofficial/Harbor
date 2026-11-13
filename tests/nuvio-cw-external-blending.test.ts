@@ -117,6 +117,13 @@ function fixture(initialNuvioActive = true, nuvioSignedIn = true) {
       isNuvioProviderActive: () => isNuvioActive,
       resolveNuvioProfileIndex: () => 1,
     },
+    "@/lib/watched-threshold": {
+      getWatchedThresholdPct: () => 85,
+      getWatchedThresholdRatio: () => 0.85,
+      DEFAULT_WATCHED_THRESHOLD_PCT: 85,
+      MIN_WATCHED_THRESHOLD_PCT: 70,
+      MAX_WATCHED_THRESHOLD_PCT: 100,
+    },
   };
 
   const source = readFileSync(new URL("../src/lib/feed/external-cw.ts", import.meta.url), "utf8");

@@ -12,13 +12,14 @@ import { recordAnimePlayId } from "@/lib/anime-cw-ids";
 import type { PlayerSrc } from "@/lib/view";
 import { resumeLibraryGetOne } from "@/lib/player/resume-start";
 import { playerLoadIdentity } from "@/lib/player/load-identity";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 
 const ANIME_SCHEME = /^(kitsu|mal|anilist|anidb):/;
 
 const TICK_MS = 30000;
 const BASE_REFRESH_MS = 30000;
+
 const MIN_POSITION_SEC = 6;
-const CREDITS_RATIO = 0.9;
 
 export function isFinaleEpisode(
   videos: { season?: number | null; episode?: number | null }[] | null | undefined,
@@ -432,9 +433,10 @@ async function writeLibraryItem(
   const durationShrunk =
     !src.episode && priorDuration > 0 && durationMs > 0 && durationMs < priorDuration * 0.7;
   const playedReal = snap.status !== "error" && !durationShrunk;
-  const nowFlagged = durationMs > 0 && watchedRatio > CREDITS_RATIO && playedReal;
+  const creditsRatio = getWatchedThresholdRatio();
+  const nowFlagged = durationMs > 0 && watchedRatio >= creditsRatio && playedReal;
   const meaningfulResume =
-    playedReal && durationMs > 0 && offsetMs >= 45000 && watchedRatio < CREDITS_RATIO;
+    playedReal && durationMs > 0 && offsetMs >= 45000 && watchedRatio < creditsRatio;
   const effPrevFlagged = videoChanged || meaningfulResume ? 0 : prevFlagged;
   let finaleDone = false;
   if (isTerminal && nowFlagged && isSeries && src.episode) {
@@ -448,7 +450,7 @@ async function writeLibraryItem(
   const state: StremioLibraryItemState = {
     lastWatched: now,
     timeWatched: offsetMs,
-    timeOffset: finaleDone ? 0 : offsetMs,
+    timeOffset: (!isSeries && nowFlagged) || finaleDone ? 0 : offsetMs,
     overallTimeWatched: prevOverall + (videoChanged ? prevTimeWatched : 0),
     timesWatched: nowFlagged && effPrevFlagged === 0 ? prevTimesWatched + 1 : prevTimesWatched,
     flaggedWatched: nowFlagged ? 1 : effPrevFlagged,

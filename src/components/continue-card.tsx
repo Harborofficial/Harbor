@@ -706,18 +706,25 @@ export const ContinueCard = memo(function ContinueCard({
     }
     const src = actual.src;
     if (src.homeServer) return false;
+    const resumeEntry = readResumeEntry(meta.id, episode?.season, episode?.episode);
+    const useResume = Boolean(
+      resumeEntry &&
+      (resumeEntry.t && actual.playedAt
+        ? resumeEntry.t > actual.playedAt ||
+          (resumeEntry.t === actual.playedAt && resumeEntry.ms > actual.positionMs)
+        : resumeEntry.ms > actual.positionMs),
+    );
+    const resumeMs = useResume && resumeEntry ? resumeEntry.ms : actual.positionMs;
     if (actual.requiresSourceRefresh || src.streamRef?.infoHash) {
       assertCurrent();
       openPicker(meta, episode, {
         autoPlay: true,
         resume: true,
-        continuation: continuationFor(actual, capturePlaybackActor()),
+        continuation: continuationFor(actual, capturePlaybackActor(), { positionMs: resumeMs }),
       });
       return true;
     }
     if (!canReuseRecentRemotePlayback(actual)) return false;
-    const resumeMs =
-      readResumeEntry(meta.id, episode?.season, episode?.episode)?.ms ?? actual.positionMs;
     const actor = capturePlaybackActor();
     const historyUrl = src.historyUrl ?? src.url;
     const url = await resolvePlaybackRedirect({
@@ -730,7 +737,7 @@ export const ContinueCard = memo(function ContinueCard({
       ...src,
       url,
       historyUrl,
-      continuation: continuationFor(actual, actor),
+      continuation: continuationFor(actual, actor, { positionMs: resumeMs }),
       resume: true,
       startPositionMs: resumeMs,
       startFromZero: false,
@@ -915,7 +922,7 @@ export const ContinueCard = memo(function ContinueCard({
               {isWaiting && countdown ? (
                 <>
                   {sub && <span className="shrink-0 text-ink-subtle">·</span>}
-                  <span className="shrink-0 font-medium text-amber-500">{countdown}</span>
+                  <span className="shrink-0 font-medium text-accent">{countdown}</span>
                 </>
               ) : upNext ? (
                 <>
@@ -959,12 +966,14 @@ export const ContinueCard = memo(function ContinueCard({
               </span>
             </div>
           )}
-          <div className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/40">
-            <div
-              className={`h-full ${isWaiting ? "bg-amber-500" : "bg-accent"}`}
-              style={{ width: `${isWaiting ? 100 : progress * 100}%` }}
-            />
-          </div>
+          {progress > 0 && !isWaiting && !upNext && (
+            <div className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/40">
+              <div
+                className="h-full bg-accent"
+                style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }}
+              />
+            </div>
+          )}
         </div>
       </button>
       {settings.liquidGlass ? (

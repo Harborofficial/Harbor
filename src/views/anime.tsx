@@ -15,6 +15,7 @@ import { AnimeHero, AnimeHeroSkeleton } from "@/components/anime-hero";
 import { BackToTop } from "@/components/back-to-top";
 import { ContinueCard } from "@/components/continue-card";
 import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 import { PickCard } from "@/components/pick-card";
 import { Row, ScrollRootContext } from "@/components/row";
 import { AnimeRankCard } from "@/components/top-rank-card";
@@ -443,7 +444,10 @@ export function AnimeView({ active = true }: { active?: boolean }) {
           season: e.season,
           episode: e.episode,
           video_id: e.videoId,
-          flaggedWatched: e.durationMs > 0 && e.positionMs / e.durationMs >= 0.9 ? 1 : 0,
+          flaggedWatched:
+            e.durationMs > 0 && e.positionMs / e.durationMs >= getWatchedThresholdRatio(settings)
+              ? 1
+              : 0,
           lastWatched: new Date(e.t).toISOString(),
         },
         removed: false,
@@ -452,7 +456,13 @@ export function AnimeView({ active = true }: { active?: boolean }) {
         _mtime: new Date(e.t).toISOString(),
         local: true,
       }));
-  }, [localCwVer, hideSharedCw, activeProfile?.id, settings.cwSources]);
+  }, [
+    localCwVer,
+    hideSharedCw,
+    activeProfile?.id,
+    settings.cwSources,
+    settings.watchedThresholdPct,
+  ]);
   const continueWatching = useMemo(() => {
     return dedupeAnimeCw(
       [

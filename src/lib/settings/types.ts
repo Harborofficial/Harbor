@@ -251,6 +251,7 @@ export type Settings = {
   screensaverDelayMin: number;
   resumePrompt: boolean;
   resumePlayback: boolean;
+  watchedThresholdPct: number;
   keepFullscreenOnExit: boolean;
   fullscreenRestorePosition: boolean;
   contentAdvisoryToast: boolean;

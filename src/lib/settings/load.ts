@@ -28,6 +28,7 @@ import {
   sanitizeControllerCursorImage,
   sanitizeControllerCursorSize,
 } from "@/lib/gamepad/cursor";
+import { clampWatchedThresholdPct } from "@/lib/watched-threshold";
 
 const RETIRED_GEMINI = new Set([
   "gemini-2.0-flash",
@@ -441,6 +442,7 @@ export function parseStoredSettings(raw: string | null): {
     const settings: Settings = {
       ...DEFAULT,
       ...parsed,
+      watchedThresholdPct: clampWatchedThresholdPct(parsed.watchedThresholdPct),
       anilistSyncIndicator:
         typeof parsed.anilistSyncIndicator === "boolean"
           ? parsed.anilistSyncIndicator
@@ -565,8 +567,8 @@ export function parseStoredSettings(raw: string | null): {
         ...parsed.letterboxd,
       },
       preferredSubLangs: (parsed.preferredSubLangs ?? DEFAULT.preferredSubLangs).map(languageName),
-      preferredAudioLangs: (parsed.preferredAudioLangs ?? DEFAULT.preferredAudioLangs).map((lang) =>
-        lang === ORIGINAL_AUDIO_LANG ? lang : languageName(lang),
+      preferredAudioLangs: (parsed.preferredAudioLangs ?? DEFAULT.preferredAudioLangs).map(
+        (lang) => (lang === ORIGINAL_AUDIO_LANG ? lang : languageName(lang)),
       ),
       castAlwaysTranscode: parsed.castAlwaysTranscode ?? DEFAULT.castAlwaysTranscode,
       mangaUpscaleQuality: parsed.mangaUpscaleQuality === "best" ? "best" : "fast",

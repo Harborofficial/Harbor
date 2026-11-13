@@ -48,8 +48,8 @@ import { cwAnimeIdentityKey, dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/
 import { dedupeCwItems } from "@/lib/cw-dedupe";
 import { cwNextDisplayCoords } from "@/lib/cw-next-display";
 import { seasonIndex } from "@/lib/season-index";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 
-const FINISHED_RATIO = 0.9;
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
 
 const EMPTY_TRAKT_WATCHED: Set<string> = new Set();
@@ -62,8 +62,9 @@ function isFinishedSeries(i: LibraryItem): boolean {
   if (i.type !== "series" || !i.state) return false;
   const dur = i.state.duration ?? 0;
   const off = i.state.timeOffset ?? 0;
-  if ((i.state.flaggedWatched ?? 0) > 0) return dur <= 0 || off / dur >= FINISHED_RATIO;
-  return dur > 0 && off / dur >= FINISHED_RATIO;
+  const thresholdRatio = getWatchedThresholdRatio();
+  if ((i.state.flaggedWatched ?? 0) > 0) return dur <= 0 || off / dur >= thresholdRatio;
+  return dur > 0 && off / dur >= thresholdRatio;
 }
 
 function currentEpisode(i: LibraryItem): { season: number; episode: number } | null {
@@ -195,7 +196,7 @@ export function shouldDropFinished(
   const finaleEp = list[list.length - 1];
   const dur = state?.duration ?? 0;
   const off = state?.timeOffset ?? 0;
-  const midEpisode = off > 0 && (dur <= 0 || off / dur < FINISHED_RATIO);
+  const midEpisode = off > 0 && (dur <= 0 || off / dur < getWatchedThresholdRatio());
   const freshMidResume =
     animeMode === "only" && midEpisode && finaleEp != null && effCur.episode < finaleEp.episode;
   if (freshMidResume || midEpisode) return false;
@@ -299,7 +300,23 @@ function watchedPredicate(
 
 function sameMap(a: Map<string, LibraryItem>, b: Map<string, LibraryItem>): boolean {
   if (a.size !== b.size) return false;
-  for (const [k, v] of a) if (b.get(k) !== v) return false;
+  for (const [k, v] of a) {
+    const bv = b.get(k);
+    if (!bv) return false;
+    if (bv === v) continue;
+    if (
+      bv._id !== v._id ||
+      bv.state?.season !== v.state?.season ||
+      bv.state?.episode !== v.state?.episode ||
+      bv.state?.timeOffset !== v.state?.timeOffset ||
+      bv.state?.duration !== v.state?.duration ||
+      bv.upNext !== v.upNext ||
+      (bv as any).waitingForAir !== (v as any).waitingForAir ||
+      (bv as any).nextAirDate !== (v as any).nextAirDate
+    ) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -315,6 +332,11 @@ function sameList(a: LibraryItem[], b: LibraryItem[]): boolean {
     if (a[i]._id !== b[i]._id) return false;
     if (a[i].state?.season !== b[i].state?.season) return false;
     if (a[i].state?.episode !== b[i].state?.episode) return false;
+    if (a[i].state?.timeOffset !== b[i].state?.timeOffset) return false;
+    if (a[i].state?.duration !== b[i].state?.duration) return false;
+    if (a[i].upNext !== b[i].upNext) return false;
+    if ((a[i] as any).waitingForAir !== (b[i] as any).waitingForAir) return false;
+    if ((a[i] as any).nextAirDate !== (b[i] as any).nextAirDate) return false;
   }
   return true;
 }

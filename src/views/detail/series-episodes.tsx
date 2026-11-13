@@ -744,7 +744,7 @@ export function SeriesEpisodes({
               loading={orderedLoading}
               traktKey={traktKey}
               traktWatched={traktWatched}
-              stremioWatched={stremioWatched}
+              stremioWatched={combinedWatched}
               simklWatched={simklWatched}
               pmdbWatched={pmdbWatched}
               cinemetaVideos={cinemetaVideos}

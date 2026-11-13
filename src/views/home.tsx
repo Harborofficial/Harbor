@@ -78,9 +78,9 @@ import { isCorruptAnimeEntry } from "@/lib/anime-cw-repair";
 import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
 import { animeCwIdsVersion, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
 import { cwTitleKey, dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 import {
   ANIME_CLOUD_ID,
-  CW_FINISHED_RATIO,
   cwSortKey,
   episodeFromVideoId,
   isAnimeCwItem,
@@ -137,7 +137,10 @@ import { AddSourceModal } from "@/components/add-source-modal";
 import { updateSourceFolder, type SourceRow } from "@/lib/custom-sources";
 
 function baseCwId(id: string): string {
-  return id.replace(/^(series|movie|tmdb):/, "").trim();
+  return id
+    .replace(/^(series|movie|tmdb):/, "")
+    .trim()
+    .toLowerCase();
 }
 
 /** A manual/local card belongs to the same title as an existing row when any
@@ -643,7 +646,8 @@ export function Home({
             const duration = i.state?.duration ?? 0;
             const progress = duration > 0 ? offset / duration : 0;
             const flagged = (i.state?.flaggedWatched ?? 0) > 0;
-            if (flagged || progress > 0.85) trackEvent(i._id, "watched", undefined, mt);
+            if (flagged || progress > getWatchedThresholdRatio())
+              trackEvent(i._id, "watched", undefined, mt);
             else if (progress > 0.05) trackEvent(i._id, "play", undefined, mt);
             else if (!i.temp) trackEvent(i._id, "watchlist", undefined, mt);
           }
@@ -728,7 +732,8 @@ export function Home({
             (e.season != null && e.episode != null
               ? `${e.id}:${e.season}:${e.episode}`
               : undefined),
-          flaggedWatched: e.durationMs > 0 && e.positionMs / e.durationMs >= 0.9 ? 1 : 0,
+          flaggedWatched:
+            e.durationMs > 0 && e.positionMs / e.durationMs >= getWatchedThresholdRatio() ? 1 : 0,
           lastWatched: new Date(e.t).toISOString(),
         },
         upNext: e.type === "series" && e.positionMs === 0,
@@ -756,13 +761,18 @@ export function Home({
         const offset = i.state?.timeOffset ?? 0;
         const dur = i.state?.duration ?? 0;
         if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
-        if (dur > 0 && offset / dur >= CW_FINISHED_RATIO) return false;
+        if (dur > 0 && offset / dur >= getWatchedThresholdRatio()) return false;
       }
       return true;
     });
 
     const cwBase = isNuvioProvider
-      ? externalAllowed
+      ? [
+          ...externalAllowed,
+          ...localCwItems.filter(
+            (l) => l.external === "nuvio" && !externalAllowed.some((e) => sameCwCard(e, l)),
+          ),
+        ]
       : hideSharedCw
         ? []
         : [
@@ -838,7 +848,7 @@ export function Home({
           const offset = i.state?.timeOffset ?? 0;
           const dur = i.state?.duration ?? 0;
           if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
-          if (dur > 0 && offset / dur >= CW_FINISHED_RATIO) return false;
+          if (dur > 0 && offset / dur >= getWatchedThresholdRatio()) return false;
         }
         return i.external === "nuvio" || i.external === "trakt" || i.external === "simkl";
       });

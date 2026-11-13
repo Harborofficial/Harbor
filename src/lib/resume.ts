@@ -50,6 +50,9 @@ function readKey(ownerId?: string): string {
     const acc = nuvioAccountId();
     return `${PRIVATE_PREFIX}${acc}.${eff}`;
   }
+  if (eff) {
+    return PRIVATE_PREFIX + eff;
+  }
   const profileId = privateCwProfileId();
   if (!profileId) return KEY;
   if (profileId.startsWith("nuvio-")) {

@@ -90,8 +90,19 @@ export function reconcileNuvioWatchedFlags(
   } catch {
     // Replace malformed cache with the verified cloud state.
   }
-  const next = new Set(serverIds);
-  if (previous.length === next.size && previous.every((id) => next.has(id))) return;
+  const next = new Set<string>();
+  for (const id of serverIds) {
+    next.add(id);
+    next.add(id.toLowerCase());
+  }
+  const prevMatches = (id: string) => next.has(id) || next.has(id.toLowerCase());
+  if (previous.length === 0 && next.size === 0) return;
+  if (
+    previous.length > 0 &&
+    previous.every(prevMatches) &&
+    Array.from(next).every((id) => previous.some((p) => p.toLowerCase() === id.toLowerCase()))
+  )
+    return;
   persistCritical(key, JSON.stringify([...next]));
   if (storeKey() === key) {
     currentScope = key;

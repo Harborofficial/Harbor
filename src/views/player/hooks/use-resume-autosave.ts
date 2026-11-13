@@ -1,3 +1,4 @@
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 import { useEffect, useMemo, useRef } from "react";
 import { markAnimeWatching, syncAnimeProgress } from "@/lib/anilist/sync";
 import { markMalWatching, syncMalProgress } from "@/lib/mal/sync";
@@ -20,7 +21,9 @@ import { recordWatchEvent } from "@/lib/watch-events";
 import { isLocalUrl } from "@/lib/player/local-url";
 import { isManuallyWatched, recordManualWatchedMeta, setManualWatched } from "@/lib/manual-watched";
 import { savePlayback } from "@/lib/playback-history";
-import { clearResume, saveResumeMs } from "@/lib/resume";
+import { clearResume, readResumeEntry, saveResumeMs } from "@/lib/resume";
+import { undismissCw } from "@/lib/cw-dismiss";
+import { undismissNextUpInNuvioCloud } from "@/lib/nuvio/nuvio-sync";
 import { isMovieWatchedLocal, setMovieWatchedLocal } from "@/lib/movie-watched";
 import { setViewedSeason } from "@/lib/season-view-pref";
 import { animeTrackerTarget } from "@/lib/tracker-progress";
@@ -33,11 +36,23 @@ import { ANIME_CLOUD_ID, CLOUD_OK } from "@/lib/stremio";
 import { syncSeriesWatchedToStremio } from "@/lib/stremio-episode-watched";
 import { isNaturalEnd } from "@/lib/player/playback-end";
 import { playerLoadIdentity } from "@/lib/player/load-identity";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import {
+  resolveNuvioProfileIndex,
+  pushWatchedItemToNuvio,
+  deleteEpisodeWatchProgressFromNuvio,
+  deleteWatchProgressFromNuvio,
+  getNuvioContentIdVariants,
+} from "@/lib/nuvio/nuvio-sync";
+import { setWatchedFlag } from "@/lib/watched-flag";
+import { readActiveStremioAuthKey } from "@/lib/auth";
+import { cloudWriteId } from "@/lib/stremio";
+import { markMovieWatchedStremio } from "@/lib/stremio-watched-sync";
 
 const TICK_MS = 4000;
 const MIN_POSITION_SEC = 5;
 const TASTE_MIN_SEC = 90;
-const WATCHED_RATIO = 0.85;
 const REWATCH_RESUME_SEC = 45;
 const SYNC_RATIO = 0.7;
 const STUB_MAX_SEC = 150;
@@ -110,6 +125,8 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
   const { activeProfile } = useProfiles();
   const ownerId = getNuvioOwnerId() ?? activeProfile?.id;
   const taughtRef = useRef<Set<string>>(new Set());
+  const completedRef = useRef<Set<string>>(new Set());
+  const undismissedRef = useRef<Set<string>>(new Set());
   const anilistAutoSyncRef = useRef(settings.anilistAutoSync);
   anilistAutoSyncRef.current = settings.anilistAutoSync;
   const malAutoSyncRef = useRef(settings.malAutoSync);
@@ -189,10 +206,25 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
     if (sn.durationSec > 0 && sn.durationSec < STUB_MAX_SEC) return;
     const pos = current.position;
     if (pos < MIN_POSITION_SEC) return;
+    const undismissKey = `${current.ownerId ?? ""}|${id}`;
+    if (!undismissedRef.current.has(undismissKey)) {
+      undismissedRef.current.add(undismissKey);
+      undismissCw(id);
+      if (isNuvioProviderActive() && current.ownerId) {
+        void undismissNextUpInNuvioCloud(current.ownerId, id)
+          .then((ok) => {
+            if (!ok) undismissedRef.current.delete(undismissKey);
+          })
+          .catch(() => {
+            undismissedRef.current.delete(undismissKey);
+          });
+      }
+    }
     const seasonForeign = splitSeasonForeign(s, se);
     const cs = seasonForeign ? se : canonSeason(s, se);
     const finished =
-      (sn.durationSec > 0 && pos / sn.durationSec >= WATCHED_RATIO) || isNaturalEnd(sn, pos);
+      (sn.durationSec > 0 && pos / sn.durationSec >= getWatchedThresholdRatio()) ||
+      isNaturalEnd(sn, pos);
     current.lastSaved = pos * 1000;
     const covered =
       s.episodeSpan && cs === s.episodeSpan.season
@@ -245,28 +277,172 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
         savePlayback(id, { title: s.meta.name, parsedTitle: s.meta.name }, cs, ep);
       }
     }
-    if (
-      (s.meta.type === "series" || s.meta.type === "anime" || isAnimeId(id)) &&
-      typeof cs === "number" &&
-      typeof ep === "number" &&
-      finished &&
-      !isManuallyWatched(id, cs, ep)
-    ) {
-      recordManualWatchedMeta(id, {
-        type: "series",
-        name: s.meta.name,
-        poster: s.meta.poster,
-        background: s.meta.background,
-      });
-      for (const coveredEpisode of covered.length ? covered : [ep])
-        setManualWatched(id, cs, coveredEpisode, true);
-      void syncSeriesWatchedToStremio(s.meta, rv ? rid : null);
-    }
-    if (s.meta.type === "movie" && finished) {
-      setMovieWatchedLocal(id, true);
-      clearLocalCw(id, current.ownerId);
-    }
-    if (finished) {
+    const completionKey = `${id}|${cs ?? ""}|${ep ?? ""}`;
+    if (!finished) {
+      completedRef.current.delete(completionKey);
+    } else if (!completedRef.current.has(completionKey)) {
+      completedRef.current.add(completionKey);
+
+      if (
+        (s.meta.type === "series" || s.meta.type === "anime" || isAnimeId(id)) &&
+        typeof cs === "number" &&
+        typeof ep === "number"
+      ) {
+        if (!isManuallyWatched(id, cs, ep)) {
+          recordManualWatchedMeta(id, {
+            type: "series",
+            name: s.meta.name,
+            poster: s.meta.poster,
+            background: s.meta.background,
+          });
+          for (const coveredEpisode of covered.length ? covered : [ep])
+            setManualWatched(id, cs, coveredEpisode, true);
+          void syncSeriesWatchedToStremio(s.meta, rv ? rid : null);
+        }
+        if (isNuvioSignedIn() && isNuvioProviderActive()) {
+          const slot = resolveNuvioProfileIndex(current.ownerId);
+          const idVariants = getNuvioContentIdVariants(id);
+          const targetEpisodes = covered.length ? covered : [ep];
+          void pushWatchedItemToNuvio(
+            slot,
+            targetEpisodes.flatMap((targetEp) =>
+              idVariants.map((cid) => ({
+                contentId: cid,
+                contentType: "series" as const,
+                title: s.meta.name,
+                season: cs,
+                episode: targetEp,
+                watchedAt: Date.now(),
+              })),
+            ),
+          );
+          for (const targetEp of targetEpisodes) {
+            for (const cid of idVariants) {
+              void deleteEpisodeWatchProgressFromNuvio(slot, cid, cs, targetEp);
+            }
+          }
+        }
+
+        // Compute next episode to advance Continue Watching immediately
+        const videos = s.meta.videos ?? [];
+        const orderedVideos = videos
+          .flatMap((v) => {
+            const sNum = v.season ?? 0;
+            const eNum = v.episode ?? v.number ?? 0;
+            return sNum > 0 && eNum > 0 ? [{ season: sNum, episode: eNum, videoId: v.id }] : [];
+          })
+          .sort((a, b) => a.season - b.season || a.episode - b.episode);
+        const effectiveEndEp =
+          s.episodeSpan && cs === s.episodeSpan.season
+            ? Math.max(ep ?? 0, s.episodeSpan.episodeEnd)
+            : ep;
+        const nextVid = orderedVideos.find(
+          (v) =>
+            v.season > cs ||
+            (v.season === cs && typeof effectiveEndEp === "number" && v.episode > effectiveEndEp),
+        );
+        if (nextVid) {
+          const nextResume = readResumeEntry(id, nextVid.season, nextVid.episode, current.ownerId);
+          const existingCw = localCwEntry(id, false, current.ownerId);
+          const hasNextCw =
+            existingCw &&
+            existingCw.season === nextVid.season &&
+            existingCw.episode === nextVid.episode;
+          const posMs =
+            nextResume && nextResume.ms > 0
+              ? nextResume.ms
+              : hasNextCw && existingCw.positionMs > 0
+                ? existingCw.positionMs
+                : 0;
+          const resolvedDurMs =
+            hasNextCw && existingCw?.durationMs && existingCw.durationMs > 0
+              ? existingCw.durationMs
+              : 0;
+
+          saveLocalCw(
+            {
+              id,
+              type: "series",
+              name: s.meta.name,
+              poster: s.meta.poster,
+              background: s.meta.background,
+              isAnime: ANIME_CLOUD_ID.test(id) || s.meta.type === "anime" || !!s.isAnime,
+              source: CLOUD_OK.test(id) && !isLocalUrl(s.url) ? "library" : "local",
+              season: nextVid.season,
+              episode: nextVid.episode,
+              videoId: nextVid.videoId,
+              positionMs: posMs,
+              durationMs: resolvedDurMs,
+              t: Date.now(),
+              external: isNuvioProviderActive() ? "nuvio" : undefined,
+            },
+            current.ownerId,
+            false,
+          );
+          if (!nextResume || nextResume.ms <= 0) {
+            const pct = resolvedDurMs > 0 && posMs > 0 ? Math.min(1, posMs / resolvedDurMs) : 0;
+            saveResumeMs(
+              id,
+              posMs,
+              nextVid.season,
+              nextVid.episode,
+              undefined,
+              pct,
+              isNuvioProviderActive() ? "nuvio" : undefined,
+              current.ownerId,
+            );
+          }
+        } else if (
+          orderedVideos.length > 0 &&
+          orderedVideos[orderedVideos.length - 1].season === cs &&
+          orderedVideos[orderedVideos.length - 1].episode === effectiveEndEp
+        ) {
+          if (settings.animeCwEnd !== "timer") {
+            clearLocalCw(id, current.ownerId);
+            clearResume(id, undefined, undefined, current.ownerId);
+            if (isNuvioSignedIn() && isNuvioProviderActive()) {
+              const slot = resolveNuvioProfileIndex(current.ownerId);
+              const idVariants = getNuvioContentIdVariants(id);
+              for (const cid of idVariants) {
+                void deleteWatchProgressFromNuvio(slot, cid);
+              }
+            }
+          }
+        }
+        window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+        window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+        window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
+      }
+      if (s.meta.type === "movie") {
+        setMovieWatchedLocal(id, true);
+        setWatchedFlag(id, true);
+        clearLocalCw(id, current.ownerId);
+        clearResume(id, undefined, undefined, current.ownerId);
+        const authKey = readActiveStremioAuthKey();
+        const cid = authKey ? cloudWriteId(id, rid ?? null, Boolean(rv)) : null;
+        if (authKey && cid && !isNuvioProviderActive()) {
+          void markMovieWatchedStremio(authKey, s.meta, cid, true);
+        }
+        if (isNuvioSignedIn() && isNuvioProviderActive()) {
+          const slot = resolveNuvioProfileIndex(current.ownerId);
+          const idVariants = getNuvioContentIdVariants(id);
+          void pushWatchedItemToNuvio(
+            slot,
+            idVariants.map((cid) => ({
+              contentId: cid,
+              contentType: "movie" as const,
+              title: s.meta.name,
+              watchedAt: Date.now(),
+            })),
+          );
+          for (const cid of idVariants) {
+            void deleteWatchProgressFromNuvio(slot, cid);
+          }
+        }
+        window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+        window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+        window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
+      }
       recordWatchEvent({
         id,
         type: s.meta.type === "movie" ? "movie" : "series",
@@ -291,7 +467,7 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
       s.meta.type === "movie" &&
       sn.durationSec > 0 &&
       pos >= REWATCH_RESUME_SEC &&
-      pos / sn.durationSec < WATCHED_RATIO &&
+      pos / sn.durationSec < getWatchedThresholdRatio() &&
       (movieWasWatched || localCwEntry(id, true, current.ownerId) !== null);
     if (rewatchMovie && movieWasWatched) setMovieWatchedLocal(id, false);
     if (
@@ -299,7 +475,7 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
         s.meta.type === "movie" ||
         s.meta.type === "anime" ||
         animeLocal) &&
-      !(s.meta.type === "movie" && finished)
+      !finished
     ) {
       saveLocalCw(
         {
@@ -311,6 +487,7 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
           isAnime:
             animeLocal || s.meta.type === "anime" || !!s.isAnime || !!s.episode?.kitsuStreamId,
           source: CLOUD_OK.test(id) && !isLocalUrl(s.url) ? "library" : "local",
+          external: isNuvioProviderActive() ? "nuvio" : undefined,
           season: cs,
           episode: ep,
           videoId: s.episode?.videoId ?? s.episode?.kitsuStreamId,
@@ -450,6 +627,12 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
       record(session, activeSessionRef.current === session);
     };
   }, [session]);
+
+  useEffect(() => {
+    if (snap.status === "ended") {
+      window.dispatchEvent(new CustomEvent("harbor:playback-ended"));
+    }
+  }, [snap.status]);
 
   useEffect(() => {
     const onUnload = () => persistNow(true);

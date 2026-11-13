@@ -1,13 +1,21 @@
+import { undismissCw } from "@/lib/cw-dismiss";
 import { useEffect, useRef } from "react";
 import { isNuvioSignedIn, loadNuvioState } from "./nuvio-client";
 import {
+  undismissNextUpInNuvioCloud,
   isNuvioProviderActive,
   markWatchedInNuvio,
   pushWatchProgressToNuvio,
+  deleteEpisodeWatchProgressFromNuvio,
+  deleteWatchProgressFromNuvio,
   resolveNuvioProfileIndex,
 } from "./nuvio-sync";
+import { setManualWatched } from "@/lib/manual-watched";
+import { setMovieWatchedLocal } from "@/lib/movie-watched";
+import { setWatchedFlag } from "@/lib/watched-flag";
 import { readActiveProfileIdentity } from "@/lib/profiles";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 import type { PlayerSrc } from "@/lib/view";
 
 const MIN_POSITION_SEC = 6;
@@ -36,6 +44,7 @@ export function useNuvioScrobble({
   const isPushingRef = useRef<boolean>(false);
   const pinnedProfileTargetRef = useRef<number | null>(null);
   const pendingPushRef = useRef<string | null>(null);
+  const undismissedRef = useRef<Set<string>>(new Set());
 
   const snapRef = useRef(snap);
   snapRef.current = snap;
@@ -84,15 +93,57 @@ export function useNuvioScrobble({
 
     const currentSrc = srcRef.current;
     const profileTarget = resolvePinnedProfileTarget();
+    if (metaId && !undismissedRef.current.has(metaId)) {
+      undismissedRef.current.add(metaId);
+      undismissCw(metaId);
+      void undismissNextUpInNuvioCloud(profileTarget, metaId)
+        .then((ok) => {
+          if (!ok) undismissedRef.current.delete(metaId);
+        })
+        .catch(() => {
+          undismissedRef.current.delete(metaId);
+        });
+    }
 
     isPushingRef.current = true;
     lastPushedPosRef.current = effectivePos;
     lastPushedTimeRef.current = Date.now();
 
     const progressPct = effectivePos / currentSnap.durationSec;
-    if (progressPct >= 0.9 && !watchedReportedRef.current) {
-      watchedReportedRef.current = true;
-      void markWatchedInNuvio(profileTarget, metaId, effSeason, effEpisode);
+    if (progressPct >= getWatchedThresholdRatio()) {
+      if (!watchedReportedRef.current) {
+        watchedReportedRef.current = true;
+        void markWatchedInNuvio(
+          profileTarget,
+          metaId,
+          effSeason,
+          effEpisode,
+          srcRef.current.meta.name,
+        );
+        if (effSeason != null && effEpisode != null) {
+          setManualWatched(metaId, effSeason, effEpisode, true);
+          if (currentSrc.episode?.imdbSeason != null && currentSrc.meta.id !== metaId) {
+            setManualWatched(currentSrc.meta.id, effSeason, effEpisode, true);
+          }
+          void deleteEpisodeWatchProgressFromNuvio(profileTarget, metaId, effSeason, effEpisode);
+          if (currentSrc.meta.id !== metaId) {
+            void deleteEpisodeWatchProgressFromNuvio(
+              profileTarget,
+              currentSrc.meta.id,
+              effSeason,
+              effEpisode,
+            );
+          }
+        } else {
+          setMovieWatchedLocal(metaId, true);
+          setWatchedFlag(metaId, true);
+          void deleteWatchProgressFromNuvio(profileTarget, metaId);
+        }
+        window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+        window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+        window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
+      }
+      return;
     }
 
     try {
@@ -104,8 +155,8 @@ export function useNuvioScrobble({
         effSeason,
         effEpisode,
         {
-          title: currentSrc.meta.name,
-          name: currentSrc.meta.name,
+          title: srcRef.current.meta.name,
+          name: srcRef.current.meta.name,
           poster: currentSrc.meta.poster,
           background: currentSrc.meta.background,
         },
@@ -131,6 +182,7 @@ export function useNuvioScrobble({
     watchedReportedRef.current = false;
     pinnedProfileTargetRef.current = null;
     pendingPushRef.current = null;
+    undismissedRef.current.clear();
   }, [metaId, effSeason, effEpisode]);
 
   // Active playback interval checking clock position directly (since snap.positionSec doesn't rerender every second)
@@ -147,9 +199,29 @@ export function useNuvioScrobble({
       const progressPct = clockPos / curSnap.durationSec;
       const profileTarget = resolvePinnedProfileTarget();
 
-      if (progressPct >= 0.9 && !watchedReportedRef.current) {
-        watchedReportedRef.current = true;
-        void markWatchedInNuvio(profileTarget, metaId, effSeason, effEpisode);
+      if (progressPct >= getWatchedThresholdRatio()) {
+        if (!watchedReportedRef.current) {
+          watchedReportedRef.current = true;
+          void markWatchedInNuvio(
+            profileTarget,
+            metaId,
+            effSeason,
+            effEpisode,
+            srcRef.current.meta.name,
+          );
+          if (effSeason != null && effEpisode != null) {
+            setManualWatched(metaId, effSeason, effEpisode, true);
+            void deleteEpisodeWatchProgressFromNuvio(profileTarget, metaId, effSeason, effEpisode);
+          } else {
+            setMovieWatchedLocal(metaId, true);
+            setWatchedFlag(metaId, true);
+            void deleteWatchProgressFromNuvio(profileTarget, metaId);
+          }
+          window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+          window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+          window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
+        }
+        return;
       }
 
       const now = Date.now();

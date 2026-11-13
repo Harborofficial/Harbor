@@ -37,7 +37,9 @@ try {
  */
 export function normalizeAddonUrl(url: string): string {
   try {
-    const u = new URL(url.trim());
+    let raw = url.trim();
+    if (raw.startsWith("stremio://")) raw = "https://" + raw.slice("stremio://".length);
+    const u = new URL(raw);
     return `${u.protocol}//${u.host}${u.pathname.replace(/\/manifest\.json$/i, "").replace(/\/+$/, "")}`;
   } catch {
     return url.trim().toLowerCase();

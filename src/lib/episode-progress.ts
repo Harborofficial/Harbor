@@ -1,6 +1,9 @@
 import { manualWatchedState, createManualWatchedReader } from "@/lib/manual-watched";
 import { lastPlayedEpisode, readResumeEntry, createResumeReader } from "@/lib/resume";
 import { pmdbUsesAbsoluteOrder } from "@/lib/publicmetadb/watched-order";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { readCachedWatchProgress, resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
 
 export type EpisodeProgress = {
   ratio: number;
@@ -8,10 +11,13 @@ export type EpisodeProgress = {
   startedAt: number;
 };
 
-const WATCHED_THRESHOLD = 0.85;
-
 export function createEpisodeProgressSnapshot() {
-  return { manualWatchedState: createManualWatchedReader(), readResumeEntry: createResumeReader() };
+  const nuvioActive = isNuvioProviderActive();
+  return {
+    manualWatchedState: createManualWatchedReader(),
+    readResumeEntry: createResumeReader(),
+    nuvioProgress: nuvioActive ? readCachedWatchProgress(resolveNuvioProfileIndex()) : undefined,
+  };
 }
 
 export function resumeDefaultSeason(
@@ -102,6 +108,30 @@ export function getEpisodeProgress(
     const e = readResume(id, s, eNum);
     if (e && (!entry || e.t > entry.t)) entry = e;
   }
+  if (isNuvioProviderActive()) {
+    const list = local?.nuvioProgress ?? readCachedWatchProgress(resolveNuvioProfileIndex());
+    const cleanId = resumeId.replace(/^(series|movie|tmdb):/, "").toLowerCase();
+    const nuvioItem = list.find((p) => {
+      const pId = (p.content_id || "").replace(/^(series|movie|tmdb):/, "").toLowerCase();
+      return (
+        (pId === cleanId || (imdbAlias && pId === imdbAlias.toLowerCase())) &&
+        p.season === season &&
+        p.episode === episode
+      );
+    });
+    if (nuvioItem) {
+      const nuvioT =
+        nuvioItem.last_watched || (nuvioItem.updated_at ? Date.parse(nuvioItem.updated_at) : 0);
+      if (!entry || nuvioT > entry.t) {
+        const dur = nuvioItem.duration_seconds || (runtimeMin ? runtimeMin * 60 : 0);
+        entry = {
+          ms: (nuvioItem.progress_seconds || 0) * 1000,
+          t: nuvioT,
+          pct: dur > 0 ? (nuvioItem.progress_seconds || 0) / dur : undefined,
+        };
+      }
+    }
+  }
   const startedAt = entry?.t ?? 0;
 
   const manualSelf = readManual(
@@ -158,7 +188,7 @@ export function getEpisodeProgress(
 
   return {
     ratio: done ? 1 : ratio,
-    watched: done || ratio >= WATCHED_THRESHOLD,
+    watched: done || ratio >= getWatchedThresholdRatio(),
     startedAt,
   };
 }

@@ -85,7 +85,7 @@ export function CWSection({ signedIn, isNuvio, items, watchedSet, onDismiss, loa
             ...(showQueueCard ? [<QueueContinueCard key="continue-queue" />] : []),
             ...items.map((item) => (
               <ContinueCard
-                key={item._id}
+                key={item._id.toLowerCase()}
                 item={item}
                 watched={watchedSet ? isLibraryItemWatched(item, watchedSet) : false}
                 onDismiss={onDismiss}

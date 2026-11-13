@@ -180,6 +180,22 @@ function harness() {
     "@/lib/local-cw": { listLocalCw: () => [], localCwSourceEnabled: () => true },
     "@/lib/continue-watching": { localToLibraryItem: (i: any) => i },
     "@/lib/cw-anime-episode": {},
+    "@/lib/watched-threshold": {
+      getWatchedThresholdPct: () => 85,
+      getWatchedThresholdRatio: () => 0.85,
+      DEFAULT_WATCHED_THRESHOLD_PCT: 85,
+      MIN_WATCHED_THRESHOLD_PCT: 70,
+      MAX_WATCHED_THRESHOLD_PCT: 100,
+    },
+    "@/lib/active-profile-id": {
+      isNuvioProviderActive: () => false,
+    },
+    "@/lib/nuvio/nuvio-sync": {
+      readCachedWatchProgress: () => [],
+      resolveNuvioProfileIndex: () => 1,
+      isNuvioProviderActive: () => false,
+      getNuvioContentIdVariants: (id?: string | null) => (id ? [id] : []),
+    },
   };
   const seriesSource = readFileSync("src/lib/series-episodes.ts", "utf8");
   const parsed = ts.createSourceFile("series.ts", seriesSource, ts.ScriptTarget.Latest, true);

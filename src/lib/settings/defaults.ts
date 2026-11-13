@@ -162,6 +162,7 @@ export const DEFAULT: Settings = {
   screensaverDelayMin: 5,
   resumePrompt: false,
   resumePlayback: true,
+  watchedThresholdPct: 85,
   keepFullscreenOnExit: true,
   fullscreenRestorePosition: true,
   // Advisories interrupt playback, so they require an explicit opt-in.

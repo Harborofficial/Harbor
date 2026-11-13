@@ -377,21 +377,31 @@ export function reconcileNuvioWatchedEpisodes(
       serverEpisodeKeys.add(`${clean}|${s}|${e}`);
       serverEpisodeKeys.add(`tmdb:${clean}|${s}|${e}`);
       serverEpisodeKeys.add(`series:${clean}|${s}|${e}`);
+      serverEpisodeKeys.add(`${showId.toLowerCase()}|${s}|${e}`);
+      serverEpisodeKeys.add(`${clean.toLowerCase()}|${s}|${e}`);
+      serverEpisodeKeys.add(`tmdb:${clean.toLowerCase()}|${s}|${e}`);
+      serverEpisodeKeys.add(`series:${clean.toLowerCase()}|${s}|${e}`);
     }
   }
 
   for (const sKey of serverEpisodeKeys) {
-    if (!currentLocalWatched.has(sKey)) {
+    const sLower = sKey.toLowerCase();
+    if (!currentLocalWatched.has(sKey) && !currentLocalWatched.has(sLower)) {
       currentLocalWatched.add(sKey);
       currentLocalUnwatched.delete(sKey);
+      currentLocalUnwatched.delete(sLower);
       changed = true;
       const sid = sKey.split("|")[0];
       if (sid) {
         newlyWatchedShows.add(sid);
+        newlyWatchedShows.add(sid.toLowerCase());
         const clean = sid.replace(/^(series|movie|tmdb):/, "");
         newlyWatchedShows.add(clean);
+        newlyWatchedShows.add(clean.toLowerCase());
         newlyWatchedShows.add(`tmdb:${clean}`);
         newlyWatchedShows.add(`series:${clean}`);
+        newlyWatchedShows.add(`tmdb:${clean.toLowerCase()}`);
+        newlyWatchedShows.add(`series:${clean.toLowerCase()}`);
       }
     }
   }
@@ -405,6 +415,7 @@ export function reconcileNuvioWatchedEpisodes(
       if (parts.length === 3) {
         const clean = parts[0]?.replace(/^(series|movie|tmdb):/, "");
         serverSeasonEpisodes.add(`${clean}|${parts[1]}|${parts[2]}`);
+        if (clean) serverSeasonEpisodes.add(`${clean.toLowerCase()}|${parts[1]}|${parts[2]}`);
       }
     }
     const watchedTimes = watchedAtMap();
@@ -415,12 +426,17 @@ export function reconcileNuvioWatchedEpisodes(
       const cleanShowId = showId?.replace(/^(series|movie|tmdb):/, "");
       const isTargetShow =
         showId &&
-        (targetSeriesIds.has(showId) || (cleanShowId && targetSeriesIds.has(cleanShowId)));
+        (targetSeriesIds.has(showId) ||
+          targetSeriesIds.has(showId.toLowerCase()) ||
+          (cleanShowId &&
+            (targetSeriesIds.has(cleanShowId) || targetSeriesIds.has(cleanShowId.toLowerCase()))));
       const hasOnServer =
         serverEpisodeKeys.has(lKey) ||
+        serverEpisodeKeys.has(lKey.toLowerCase()) ||
         (cleanShowId &&
           parts.length === 3 &&
-          serverSeasonEpisodes.has(`${cleanShowId}|${parts[1]}|${parts[2]}`));
+          (serverSeasonEpisodes.has(`${cleanShowId}|${parts[1]}|${parts[2]}`) ||
+            serverSeasonEpisodes.has(`${cleanShowId.toLowerCase()}|${parts[1]}|${parts[2]}`)));
       const locallyMarkedRecent = now - (watchedTimes[lKey] || 0) < 60_000;
       if (isTargetShow && !hasOnServer && !locallyMarkedRecent) {
         currentLocalWatched.delete(lKey);
@@ -437,9 +453,13 @@ export function reconcileNuvioWatchedEpisodes(
         const sid = parts[0];
         const clean = sid.replace(/^(series|movie|tmdb):/, "");
         serverShowsWithEpisodes.add(sid);
+        serverShowsWithEpisodes.add(sid.toLowerCase());
         serverShowsWithEpisodes.add(clean);
+        serverShowsWithEpisodes.add(clean.toLowerCase());
         serverShowsWithEpisodes.add(`tmdb:${clean}`);
         serverShowsWithEpisodes.add(`series:${clean}`);
+        serverShowsWithEpisodes.add(`tmdb:${clean.toLowerCase()}`);
+        serverShowsWithEpisodes.add(`series:${clean.toLowerCase()}`);
       }
     }
 
@@ -447,11 +467,23 @@ export function reconcileNuvioWatchedEpisodes(
       const parts = lKey.split("|");
       const showId = parts[0];
       const cleanShowId = showId?.replace(/^(series|movie|tmdb):/, "");
-      if (
-        (serverShowsWithEpisodes.has(showId) ||
-          (cleanShowId && serverShowsWithEpisodes.has(cleanShowId))) &&
-        !serverEpisodeKeys.has(lKey)
-      ) {
+      const lowerShowId = showId?.toLowerCase();
+      const lowerClean = cleanShowId?.toLowerCase();
+      const hasShow =
+        (showId && serverShowsWithEpisodes.has(showId)) ||
+        (cleanShowId && serverShowsWithEpisodes.has(cleanShowId)) ||
+        (lowerShowId && serverShowsWithEpisodes.has(lowerShowId)) ||
+        (lowerClean && serverShowsWithEpisodes.has(lowerClean));
+      const hasEpisode =
+        serverEpisodeKeys.has(lKey) ||
+        serverEpisodeKeys.has(lKey.toLowerCase()) ||
+        (lowerShowId &&
+          parts.length === 3 &&
+          serverEpisodeKeys.has(`${lowerShowId}|${parts[1]}|${parts[2]}`)) ||
+        (lowerClean &&
+          parts.length === 3 &&
+          serverEpisodeKeys.has(`${lowerClean}|${parts[1]}|${parts[2]}`));
+      if (hasShow && !serverEpisodeKeys.has(lKey) && !hasEpisode) {
         currentLocalWatched.delete(lKey);
         currentLocalUnwatched.add(lKey);
         changed = true;

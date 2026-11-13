@@ -1,12 +1,12 @@
 import { cwProfileScope, privateCwProfileId } from "./cw-profile";
 import { isNuvioProviderActive, getNuvioActiveSlot } from "./active-profile-id";
+import { getWatchedThresholdRatio } from "./watched-threshold";
 
 const KEY_PREFIX = "harbor.localcw.v1.";
 const PRIVATE_PREFIX = "harbor.localcw.private.v1.";
 const LEGACY_KEY = "harbor.localcw.v1";
 const PROFILES_KEY = "harbor.profiles.v1";
 const MAX = 60;
-const FINISHED_RATIO = 0.92;
 
 export type LocalCwEntry = {
   id: string;
@@ -159,11 +159,25 @@ function emit(): void {
 }
 
 function applyEntry(all: Record<string, LocalCwEntry>, entry: LocalCwEntry): boolean {
-  const finished = entry.durationMs > 0 && entry.positionMs / entry.durationMs >= FINISHED_RATIO;
+  const threshold = getWatchedThresholdRatio();
+  const finished = entry.durationMs > 0 && entry.positionMs / entry.durationMs >= threshold;
   if (finished && entry.type === "movie") {
     if (!(entry.id in all)) return false;
     delete all[entry.id];
     return true;
+  }
+  const existing = all[entry.id];
+  if (
+    existing &&
+    existing.positionMs === entry.positionMs &&
+    existing.durationMs === entry.durationMs &&
+    existing.season === entry.season &&
+    existing.episode === entry.episode &&
+    existing.videoId === entry.videoId &&
+    existing.type === entry.type &&
+    (existing as any).external === (entry as any).external
+  ) {
+    return false;
   }
   all[entry.id] = entry;
   return true;
@@ -176,11 +190,12 @@ function capEntries(all: Record<string, LocalCwEntry>): void {
   for (const id of ids.slice(0, ids.length - MAX)) delete all[id];
 }
 
-function saveEntry(key: string, entry: LocalCwEntry): void {
+function saveEntry(key: string, entry: LocalCwEntry): boolean {
   const all = { ...readAll(key) };
-  if (!applyEntry(all, entry)) return;
+  if (!applyEntry(all, entry)) return false;
   capEntries(all);
   writeAll(key, all);
+  return true;
 }
 
 // Only an actual playback session may assign ownership. Cloud absorption keeps
@@ -194,15 +209,16 @@ export function saveLocalCw(entry: LocalCwEntry, ownerId?: string, shared = true
   if (isNuvio) {
     const eff = effectiveOwner(ownerId) || `nuvio-${getNuvioActiveSlot()}`;
     const nuvioEntry = { ...entry, external: "nuvio" as const };
-    saveEntry(storeKey(false, eff), nuvioEntry);
-    emit();
+    const changed = saveEntry(storeKey(false, eff), nuvioEntry);
+    if (changed) emit();
     return;
   }
   // Stremio mode: strictly reject any Nuvio items
   if ((entry as any).external === "nuvio") return;
-  if (ownerId) saveEntry(storeKey(true, ownerId), entry);
-  if (shared) saveEntry(storeKey(false, ownerId), entry);
-  emit();
+  let changed = false;
+  if (ownerId && saveEntry(storeKey(true, ownerId), entry)) changed = true;
+  if (shared && saveEntry(storeKey(false, ownerId), entry)) changed = true;
+  if (changed) emit();
 }
 
 /** One storage write and one notification for a cloud commit or progress pull. */

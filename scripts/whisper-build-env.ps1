@@ -43,18 +43,25 @@ $clangCandidates += $cachedClang
 $clangDll = $clangCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
 
 if (-not $clangDll) {
-  if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
-    throw 'Whisper requires libclang to build. Install LLVM or Python to fetch the portable compiler bindings.'
-  }
   Write-Host 'Downloading portable libclang build dependency (one-time, Windows only)...' -ForegroundColor Cyan
   New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null
-  & python -m pip download --disable-pip-version-check --no-deps --only-binary=:all: --dest $cacheDir libclang==18.1.1
-  if ($LASTEXITCODE -ne 0) {
-    throw 'Could not fetch libclang. Install LLVM and set LIBCLANG_PATH, then rebuild.'
+  $wheel = Get-ChildItem -LiteralPath $cacheDir -Filter 'libclang-18.1.1-*.whl' -File | Select-Object -First 1
+  if (-not $wheel) {
+    $wheelUrl = 'https://files.pythonhosted.org/packages/0b/2d/3f480b1e1d31eb3d6de5e3ef641954e5c67430d5ac93b7fa7e07589576c7/libclang-18.1.1-py2.py3-none-win_amd64.whl'
+    $targetWheel = Join-Path $cacheDir 'libclang-18.1.1-py2.py3-none-win_amd64.whl'
+    try {
+      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+      Invoke-WebRequest -Uri $wheelUrl -OutFile $targetWheel -UseBasicParsing
+    } catch {
+      if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
+        & curl.exe -fsSL $wheelUrl -o $targetWheel
+      } elseif (Get-Command python -ErrorAction SilentlyContinue) {
+        & python -m pip download --disable-pip-version-check --no-deps --only-binary=:all: --dest $cacheDir libclang==18.1.1
+      }
+    }
+    $wheel = Get-ChildItem -LiteralPath $cacheDir -Filter 'libclang-18.1.1-*.whl' -File | Select-Object -First 1
   }
-  $wheel = Get-ChildItem -LiteralPath $cacheDir -Filter 'libclang-18.1.1-*.whl' -File |
-    Select-Object -First 1
-  if (-not $wheel) { throw 'Downloaded libclang wheel not found.' }
+  if (-not $wheel) { throw 'Could not fetch libclang. Install LLVM and set LIBCLANG_PATH, then rebuild.' }
   Add-Type -AssemblyName System.IO.Compression.FileSystem
   # A previous interrupted extraction may have left partial wheel contents.
   foreach ($name in @('libclang-18.1.1.data', 'libclang-18.1.1.dist-info')) {

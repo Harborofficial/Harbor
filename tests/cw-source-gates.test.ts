@@ -92,6 +92,13 @@ function harness(bigPicture: boolean, sources: any, privateProfile = false) {
       manualWatchedVersion: () => 0,
     },
     "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
+    "@/lib/watched-threshold": {
+      getWatchedThresholdPct: () => 85,
+      getWatchedThresholdRatio: () => 0.85,
+      DEFAULT_WATCHED_THRESHOLD_PCT: 85,
+      MIN_WATCHED_THRESHOLD_PCT: 70,
+      MAX_WATCHED_THRESHOLD_PCT: 100,
+    },
   };
   const h = hookHarness(
     bigPicture ? "src/views/big-picture/use-bp-anime-cw.ts" : "src/lib/continue-watching.ts",
