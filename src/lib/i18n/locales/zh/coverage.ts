@@ -862,6 +862,17 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "NYT Books API 密钥",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "选择 Harbor 优先使用直连和 debrid 来源、点对点种子，或同时显示两者。",
+  "Show keyboard shortcuts": "显示键盘快捷键",
+  "Show or hide the list of player shortcuts.": "显示或隐藏播放器快捷键列表。",
+  "Press {key} to close. Change these in Settings.": "按 {key} 关闭。可在设置中更改。",
+  "Cycle audio tracks": "切换音轨",
+  "Switch to the next available audio track.": "切换到下一个可用音轨。",
+  "Smaller subtitles": "缩小字幕",
+  "Decrease the subtitle text size.": "减小字幕文字大小。",
+  "Larger subtitles": "放大字幕",
+  "Increase the subtitle text size.": "增大字幕文字大小。",
+  "Audio: {name}": "音频：{name}",
+  "Subtitle size: {size}": "字幕大小：{size}",
 };
 
 export default coverage;

@@ -1062,6 +1062,18 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "Klucz API NYT Books",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "Wybierz, czy Harbor ma preferować źródła bezpośrednie i debrid, torrenty peer-to-peer, czy wyświetlać oba typy.",
+  "Show keyboard shortcuts": "Pokaż skróty klawiaturowe",
+  "Show or hide the list of player shortcuts.": "Pokazuje lub ukrywa listę skrótów odtwarzacza.",
+  "Press {key} to close. Change these in Settings.":
+    "Naciśnij {key}, aby zamknąć. Zmienisz je w Ustawieniach.",
+  "Cycle audio tracks": "Przełącz ścieżkę audio",
+  "Switch to the next available audio track.": "Przełącza na następną dostępną ścieżkę audio.",
+  "Smaller subtitles": "Mniejsze napisy",
+  "Decrease the subtitle text size.": "Zmniejsza rozmiar tekstu napisów.",
+  "Larger subtitles": "Większe napisy",
+  "Increase the subtitle text size.": "Zwiększa rozmiar tekstu napisów.",
+  "Audio: {name}": "Audio: {name}",
+  "Subtitle size: {size}": "Rozmiar napisów: {size}",
 };
 
 export default coverage;

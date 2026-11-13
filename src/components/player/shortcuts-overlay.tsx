@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { X } from "lucide-react";
 import { playerShortcutGroups } from "@/lib/player/shortcut-groups";
-import { effectiveBinding, formatBindingForDisplay } from "@/lib/hotkeys";
+import { createHotkeyMatcher, effectiveBinding, formatBindingForDisplay } from "@/lib/hotkeys";
 import { useT } from "@/lib/i18n";
+import { tvFocus } from "@/lib/keyboard-navigation";
 import { useSettings } from "@/lib/settings";
 
 export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
@@ -11,6 +12,44 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
   const overrides = settings.hotkeys;
   const groups = useMemo(() => playerShortcutGroups(overrides ?? {}), [overrides]);
   const closeKey = formatBindingForDisplay(effectiveBinding("playerClose", overrides ?? {}));
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const close = closeRef.current;
+    if (close) tvFocus(close);
+    return () => {
+      if (previous?.isConnected) tvFocus(previous);
+    };
+  }, []);
+
+  const onKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Tab") {
+      const controls = Array.from(
+        e.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled), [tabindex="0"]'),
+      ).filter((el) => el.getClientRects().length);
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (!first || !last) return;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+      return;
+    }
+    if (e.key.startsWith("Media")) return;
+    // The dialog is modal: player hotkeys stay inert under it, except the two
+    // bindings that dismiss it.
+    e.stopPropagation();
+    const match = createHotkeyMatcher(e.nativeEvent, overrides ?? {}, "Player");
+    if (match("playerClose") || match("playerShortcuts")) {
+      e.preventDefault();
+      if (!e.repeat) onClose();
+    }
+  };
 
   return (
     <div
@@ -19,14 +58,20 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
     >
       <div
         role="dialog"
-        aria-modal="false"
-        aria-label={t("Keyboard shortcuts")}
+        aria-modal="true"
+        aria-labelledby="player-shortcuts-title"
+        data-tv-focus-scope
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={onKeyDown}
         className="flex max-h-full w-full max-w-[920px] flex-col overflow-hidden rounded-2xl border border-edge-soft bg-canvas/92 shadow-[0_28px_72px_-20px_rgba(0,0,0,0.9)]"
       >
         <header className="flex items-center justify-between gap-4 border-b border-edge-soft px-6 py-4">
           <div className="flex flex-col gap-0.5">
-            <h2 dir="auto" className="text-[16px] font-semibold text-ink">
+            <h2
+              id="player-shortcuts-title"
+              dir="auto"
+              className="text-[16px] font-semibold text-ink"
+            >
               {t("Keyboard shortcuts")}
             </h2>
             <p dir="auto" className="text-[12.5px] text-ink-subtle">
@@ -34,9 +79,12 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
             </p>
           </div>
           <button
+            ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label={t("Close")}
+            data-tv-modal-close
+            data-tv-initial-focus
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-raised hover:text-ink"
           >
             <X size={17} strokeWidth={2.2} />

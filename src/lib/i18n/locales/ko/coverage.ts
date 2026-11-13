@@ -675,6 +675,18 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "NYT Books API 키",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "Harbor가 직접 및 debrid 소스, P2P 토렌트를 우선할지 또는 둘 다 표시할지 선택합니다.",
+  "Show keyboard shortcuts": "키보드 단축키 보기",
+  "Show or hide the list of player shortcuts.": "플레이어 단축키 목록을 표시하거나 숨깁니다.",
+  "Press {key} to close. Change these in Settings.":
+    "{key} 키를 눌러 닫습니다. 설정에서 변경할 수 있습니다.",
+  "Cycle audio tracks": "오디오 트랙 전환",
+  "Switch to the next available audio track.": "사용 가능한 다음 오디오 트랙으로 전환합니다.",
+  "Smaller subtitles": "자막 작게",
+  "Decrease the subtitle text size.": "자막 글자 크기를 줄입니다.",
+  "Larger subtitles": "자막 크게",
+  "Increase the subtitle text size.": "자막 글자 크기를 키웁니다.",
+  "Audio: {name}": "오디오: {name}",
+  "Subtitle size: {size}": "자막 크기: {size}",
 };
 
 export default coverage;
