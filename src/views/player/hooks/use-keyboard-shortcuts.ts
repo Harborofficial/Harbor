@@ -213,6 +213,8 @@ export function useKeyboardShortcuts(params: {
       }
 
       if (match("playerClose")) {
+        // A held key that just dismissed a panel must not go on to close playback.
+        if (e.repeat) return;
         if (getLeaveConfirm().open) return;
         if (drawMode) {
           setDrawMode(false);
