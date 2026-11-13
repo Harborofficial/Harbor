@@ -97,6 +97,9 @@ const library: Record<string, string> = {
     "Adicione uma chave do TMDB em Configurações para desbloquear o feed completo de descoberta.",
   "No picks loaded. TMDB might be unreachable.":
     "Nenhuma seleção carregada. O TMDB pode estar inacessível.",
+  Tabs: "Abas",
+  "Show tabs": "Mostrar abas",
+  "Choose which tabs appear in your library": "Escolha quais abas aparecem na sua biblioteca",
 };
 
 export default library;

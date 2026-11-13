@@ -88,6 +88,9 @@ const library: Record<string, string> = {
     "Thêm khóa TMDB trong Cài đặt để mở khóa toàn bộ nguồn cấp khám phá.",
   "No picks loaded. TMDB might be unreachable.":
     "Chưa tải được đề xuất. Có thể không kết nối được với TMDB.",
+  Tabs: "Thẻ",
+  "Show tabs": "Hiện thẻ",
+  "Choose which tabs appear in your library": "Chọn các thẻ hiển thị trong thư viện của bạn",
 };
 
 export default library;

@@ -812,6 +812,9 @@ const catalogVZ: Record<string, string> = {
   "you@example.com": "you@example.com",
   yourhandle: "yourhandle",
   yourname: "yourname",
+  Tabs: "टैब",
+  "Show tabs": "टैब दिखाएँ",
+  "Choose which tabs appear in your library": "चुनें कि आपकी लाइब्रेरी में कौन-से टैब दिखें",
 };
 
 export default catalogVZ;

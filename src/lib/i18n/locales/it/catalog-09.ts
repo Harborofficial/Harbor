@@ -1253,6 +1253,9 @@ const catalog09: Record<string, string> = {
     "La tua recensione contiene un linguaggio non consentito",
   "Your saved shows have no episodes scheduled for this month. Switch to All upcoming to browse the full release calendar.":
     "Le serie che hai salvato non hanno episodi in programma questo mese. Seleziona Tutte le prossime uscite per consultare il calendario completo delle uscite.",
+  Tabs: "Schede",
+  "Show tabs": "Mostra schede",
+  "Choose which tabs appear in your library": "Scegli quali schede mostrare nella tua raccolta",
 };
 
 export default catalog09;

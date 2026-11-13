@@ -96,6 +96,9 @@ const library: Record<string, string> = {
     "すべての発見フィードを利用するには、設定でTMDBキーを追加してください。",
   "No picks loaded. TMDB might be unreachable.":
     "おすすめを読み込めませんでした。TMDBに接続できない可能性があります。",
+  Tabs: "タブ",
+  "Show tabs": "表示するタブ",
+  "Choose which tabs appear in your library": "ライブラリに表示するタブを選択",
 };
 
 export default library;

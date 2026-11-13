@@ -97,6 +97,9 @@ const library: Record<string, string> = {
     "Добавьте ключ TMDB в настройках, чтобы открыть полную ленту рекомендаций.",
   "No picks loaded. TMDB might be unreachable.":
     "Подборки не загружены. Возможно, TMDB недоступен.",
+  Tabs: "Вкладки",
+  "Show tabs": "Показывать вкладки",
+  "Choose which tabs appear in your library": "Выберите, какие вкладки показывать в библиотеке",
 };
 
 export default library;

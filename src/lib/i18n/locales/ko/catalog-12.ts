@@ -901,6 +901,9 @@ const catalog12: Record<string, string> = {
   "{n} tab locked#few": "잠긴 탭 {n}개#few",
   "{n} tab locked#one": "잠긴 탭 {n}개#one",
   "{n} tab requires this profile's PIN.": "{n} 탭을 열려면 이 프로필의 PIN이 필요합니다.",
+  Tabs: "탭",
+  "Show tabs": "탭 표시",
+  "Choose which tabs appear in your library": "라이브러리에 표시할 탭 선택",
 };
 
 export default catalog12;

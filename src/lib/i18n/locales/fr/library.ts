@@ -89,6 +89,10 @@ const library: Record<string, string> = {
   "{n} in your Stremio library": "{n} dans votre bibliothèque Stremio",
   "{n} on Trakt": "{n} sur Trakt",
   "{n} saved on this device": "{n} enregistrés sur cet appareil",
+  Tabs: "Onglets",
+  "Show tabs": "Afficher les onglets",
+  "Choose which tabs appear in your library":
+    "Choisissez les onglets affichés dans votre bibliothèque",
 };
 
 export default library;

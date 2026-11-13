@@ -448,6 +448,7 @@ function Header({
           id={tabsMenuId}
           role="group"
           aria-labelledby={tabsMenuLabelId}
+          data-tv-focus-scope
           className="animate-menu-pop flex min-h-0 flex-col overflow-hidden rounded-md bg-elevated shadow-[0_18px_44px_-18px_rgba(0,0,0,0.85)]"
         >
           <div className="shrink-0 px-3 pt-2.5 pb-1.5">

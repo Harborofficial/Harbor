@@ -88,6 +88,9 @@ const library: Record<string, string> = {
   "Your saved shows have no episodes scheduled for this month. Switch to All upcoming to browse the full release calendar.":
     "Tus series guardadas no tienen episodios programados para este mes. Cambia a Todos los próximos para consultar el calendario completo de estrenos.",
   "Your watchlist is empty": "Tu lista de seguimiento está vacía",
+  Tabs: "Pestañas",
+  "Show tabs": "Mostrar pestañas",
+  "Choose which tabs appear in your library": "Elige qué pestañas aparecen en tu biblioteca",
 };
 
 export default library;
