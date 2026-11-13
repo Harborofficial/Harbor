@@ -406,6 +406,10 @@ const player: Record<string, string> = {
   "Search audio language": "Audiosprache suchen",
   "No audio track in that language.": "Keine Tonspur in dieser Sprache.",
   Clear: "Löschen",
+  "Largest first": "Größte zuerst",
+  "Smallest first": "Kleinste zuerst",
+  "Default order": "Standardreihenfolge",
+  "Sort sources: {value}": "Quellen sortieren: {value}",
 };
 
 export default player;

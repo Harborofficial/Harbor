@@ -478,6 +478,10 @@ const player: Record<string, string> = {
     "Nunca mais mostrar o aviso de conteúdo deste título",
   "Search audio language": "Buscar idioma de áudio",
   "No audio track in that language.": "Nenhuma faixa de áudio nesse idioma.",
+  "Largest first": "Maiores primeiro",
+  "Smallest first": "Menores primeiro",
+  "Default order": "Ordem padrão",
+  "Sort sources: {value}": "Ordenar fontes: {value}",
 };
 
 export default player;

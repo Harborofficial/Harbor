@@ -386,6 +386,10 @@ const player: Record<string, string> = {
   "Streaming server restarted.": "Đã khởi động lại máy chủ phát trực tuyến.",
   "Search audio language": "Tìm ngôn ngữ âm thanh",
   "No audio track in that language.": "Không có bản âm thanh ở ngôn ngữ đó.",
+  "Largest first": "Lớn nhất trước",
+  "Smallest first": "Nhỏ nhất trước",
+  "Default order": "Thứ tự mặc định",
+  "Sort sources: {value}": "Sắp xếp nguồn: {value}",
 };
 
 export default player;

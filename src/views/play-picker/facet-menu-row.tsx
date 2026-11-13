@@ -3,8 +3,12 @@ import { useState } from "react";
 import { FormatBadge, type BadgeKind } from "@/components/format-badge";
 import { useT } from "@/lib/i18n";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
+import type { SourceSort } from "@/lib/streams/source-sort";
 import { facetBadge } from "./filter-builder/badge-maps";
+import { SourceSortMenu } from "./source-sort-menu";
 import type { FacetDim, FacetOption } from "./stream-facets";
+
+const SORT_KEY = "__sort";
 
 export type FacetRowEntry = {
   dim: FacetDim;
@@ -21,6 +25,8 @@ export function FacetMenuRow({
   onSelectFilter,
   onNewFilter,
   onEditFilter,
+  sourceSort,
+  onSourceSort,
 }: {
   facets: FacetRowEntry[];
   onFacet: (key: string, value: string) => void;
@@ -29,6 +35,8 @@ export function FacetMenuRow({
   onSelectFilter: (id: string | null) => void;
   onNewFilter: () => void;
   onEditFilter: (filter: CustomStreamFilter) => void;
+  sourceSort?: SourceSort;
+  onSourceSort?: (value: SourceSort) => void;
 }) {
   const t = useT();
   const [openKey, setOpenKey] = useState<string | null>(null);
@@ -42,6 +50,18 @@ export function FacetMenuRow({
   };
   return (
     <div className="flex flex-wrap items-center gap-1.5">
+      {sourceSort !== undefined && onSourceSort && (
+        <SourceSortMenu
+          value={sourceSort}
+          open={openKey === SORT_KEY}
+          onToggle={() => setOpenKey((k) => (k === SORT_KEY ? null : SORT_KEY))}
+          onClose={() => setOpenKey(null)}
+          onPick={(v) => {
+            onSourceSort(v);
+            setOpenKey(null);
+          }}
+        />
+      )}
       {visible.map((f) => (
         <FacetMenu
           key={f.dim.key}

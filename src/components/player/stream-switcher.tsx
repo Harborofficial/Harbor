@@ -13,6 +13,7 @@ import { useSettings } from "@/lib/settings";
 import type { ScoredStream } from "@/lib/streams/types";
 import { hasCachedMarker } from "@/lib/streams/cached";
 import { filterStreamsByMode } from "@/lib/streams/mode";
+import { sortStreams } from "@/lib/streams/source-sort";
 import type { SourceDescriptor } from "@/lib/together/protocol";
 import { buildMatchScores, matchBadge } from "@/lib/together/source-match";
 import { addonInstanceKey, buildAddonOptions } from "@/views/play-picker/picker-utils";
@@ -217,6 +218,7 @@ export function StreamSwitcher({
   const [addonFilter, setAddonFilter] = useState<string>("all");
   const [qualityFilter, setQualityFilter] = useState<QualityKey>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const sourceSort = settings.sourceSort;
   const qualityOptions = useMemo(() => {
     const counts = new Map<Exclude<QualityKey, "all">, number>();
     for (const s of allStreams) {
@@ -278,8 +280,8 @@ export function StreamSwitcher({
     if (addonFilter === "all" && matchScores) {
       list = list.slice().sort((a, b) => (matchScores.get(b) ?? 0) - (matchScores.get(a) ?? 0));
     }
-    return list;
-  }, [baseList, addonFilter, qualityFilter, sourceFilter, matchScores]);
+    return sortStreams(list, sourceSort);
+  }, [baseList, addonFilter, qualityFilter, sourceFilter, matchScores, sourceSort]);
   const matchedStreams = useMemo(
     () =>
       preferredLangs.length === 0
@@ -333,12 +335,22 @@ export function StreamSwitcher({
   const [showCount, setShowCount] = useState(80);
   useEffect(() => {
     setShowCount(80);
-  }, [addonFilter, qualityFilter, sourceFilter, filterToPreferred, cachedOnly, list.length]);
+  }, [
+    addonFilter,
+    qualityFilter,
+    sourceFilter,
+    filterToPreferred,
+    cachedOnly,
+    sourceSort,
+    list.length,
+  ]);
   const hiddenCount = addonFilteredList.length - matchedStreams.length;
   const uncachedHidden = allStreams.length - cachedStreams.length;
   const filters: SwitcherFilters = {
     mode: settings.streamMode,
     setMode: (m) => update({ streamMode: m }),
+    sourceSort,
+    setSourceSort: (v) => update({ sourceSort: v }),
     quality: qualityFilter,
     setQuality: setQualityFilter,
     qualityOptions,

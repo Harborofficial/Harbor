@@ -863,6 +863,10 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "NYT Books API 密钥",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "选择 Harbor 优先使用直连和 debrid 来源、点对点种子，或同时显示两者。",
+  "Largest first": "从大到小",
+  "Smallest first": "从小到大",
+  "Default order": "默认顺序",
+  "Sort sources: {value}": "来源排序：{value}",
 };
 
 export default coverage;

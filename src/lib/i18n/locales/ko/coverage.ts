@@ -678,6 +678,10 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "NYT Books API 키",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "Harbor가 직접 및 debrid 소스, P2P 토렌트를 우선할지 또는 둘 다 표시할지 선택합니다.",
+  "Largest first": "큰 순서",
+  "Smallest first": "작은 순서",
+  "Default order": "기본 순서",
+  "Sort sources: {value}": "소스 정렬: {value}",
 };
 
 export default coverage;

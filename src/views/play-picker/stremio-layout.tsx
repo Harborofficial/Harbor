@@ -9,6 +9,7 @@ import { addonInstanceKey, buildAddonOptions, needsDownload } from "./picker-uti
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
+import { sortStreams } from "@/lib/streams/source-sort";
 import { FacetMenuRow } from "./facet-menu-row";
 import { FilterBuilder } from "./filter-builder";
 
@@ -91,8 +92,10 @@ export function StremioLayout({
   useEffect(() => {
     if (filter !== "all" && addonFiltered.length === 0 && streams.length > 0) setFilter("all");
   }, [filter, addonFiltered.length, streams.length]);
+  const sourceSort = settings.sourceSort;
   const visibleStreams = useMemo(() => {
     const filtered = addonFiltered.filter((s) => matchesFacets(s, facet));
+    if (sourceSort !== "default") return sortStreams(filtered, sourceSort);
     if (filter !== "all") return filtered;
     if (preserveOrder) return filtered;
     return filtered.slice().sort((a, b) => {
@@ -110,7 +113,7 @@ export function StremioLayout({
       if (ai !== bi) return bi - ai;
       return 0;
     });
-  }, [addonFiltered, facet, filter, addonRank, preserveOrder]);
+  }, [addonFiltered, facet, filter, addonRank, preserveOrder, sourceSort]);
   const filterLabel =
     filter === "all" ? t("All") : (addonOptions.find((o) => o.id === filter)?.name ?? t("All"));
   const filterLogo = filter === "all" ? null : (addonLogoMap.get(filter) ?? null);
@@ -189,6 +192,8 @@ export function StremioLayout({
           setEditingFilter(f);
           setBuilderOpen(true);
         }}
+        sourceSort={sourceSort}
+        onSourceSort={(v) => update({ sourceSort: v })}
       />
       <div className="flex flex-col gap-2">
         {visibleStreams.map((s, i) => (

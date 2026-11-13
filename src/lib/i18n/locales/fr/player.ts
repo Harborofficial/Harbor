@@ -360,6 +360,10 @@ const player: Record<string, string> = {
   "Search audio language": "Rechercher une langue audio",
   "No audio track in that language.": "Aucune piste audio dans cette langue.",
   Clear: "Effacer",
+  "Largest first": "Les plus grandes d'abord",
+  "Smallest first": "Les plus petites d'abord",
+  "Default order": "Ordre par défaut",
+  "Sort sources: {value}": "Trier les sources : {value}",
 };
 
 export default player;

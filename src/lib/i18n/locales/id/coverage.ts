@@ -750,6 +750,10 @@ const coverage: Record<string, string> = {
     "Pilih apakah Harbor mengutamakan sumber langsung dan debrid, torrent peer-to-peer, atau menampilkan keduanya.",
   "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.":
     "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
+  "Largest first": "Terbesar dulu",
+  "Smallest first": "Terkecil dulu",
+  "Default order": "Urutan bawaan",
+  "Sort sources: {value}": "Urutkan sumber: {value}",
 };
 
 export default coverage;
