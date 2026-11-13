@@ -121,7 +121,7 @@
   justify-content: space-between;
   gap: 15px;
   list-style: none;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding: 16px 0;
   font-size: 14px;
   font-weight: 650;

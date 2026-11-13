@@ -10,7 +10,7 @@
   align-items: center;
   gap: 14px;
   padding: 22px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
 }
 .sh-field-preview summary > span {
@@ -68,7 +68,7 @@
   padding: 8px 10px;
   border-radius: 7px;
   background: #242727;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .sh-field-tools button[aria-pressed="true"] {
   background: #f4f5f5;
@@ -228,12 +228,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   max-width: 110px;
   z-index: 2;
 }
 .sh-field-player:disabled {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
   opacity: 0.65;
 }
 .sh-field-portrait {

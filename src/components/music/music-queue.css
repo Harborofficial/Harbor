@@ -284,7 +284,7 @@
 .music-queue-history summary {
   min-height: 44px;
   align-content: center;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 13px;
   padding: 8px;
   color: var(--color-ink-muted);

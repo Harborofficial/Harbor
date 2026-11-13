@@ -52,7 +52,7 @@
   color: var(--color-ink-muted);
 }
 .sports-usage-details summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   min-height: 44px;
   align-content: center;
   color: var(--color-ink);
@@ -97,7 +97,7 @@
   border-radius: 10px;
   font-size: 14px;
   line-height: 1.55;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .sports-access-check input {
   width: 19px;

@@ -1,7 +1,8 @@
 import { fillStyle, SliderReset } from "@/components/slider";
-import { DEFAULT } from "@/lib/settings/defaults";
+import { DEFAULT, HARBOR_CURSOR_SCALE } from "@/lib/settings/defaults";
 import { Dropdown } from "@/components/dropdown";
 import { GamesIcon } from "@/components/icons/games-icon";
+import harborCursorIcon from "@/assets/harbor-cursor.svg";
 import {
   Droplet,
   Hourglass,
@@ -334,6 +335,37 @@ export function DisplaySection() {
             resetTo={1}
             onChange={(uiScale) => update({ uiScale })}
           />
+        </SettingGroup>
+      </Section>
+
+      <Section title={t("Harbor cursor")} bare>
+        <SettingGroup>
+          <ToggleRow
+            label={t("Harbor cursor")}
+            sub={t("Use Harbor's anchor as your mouse pointer.")}
+            value={settings.harborCursor}
+            onChange={(harborCursor) => update({ harborCursor })}
+            leading={
+              <img
+                src={harborCursorIcon}
+                alt=""
+                draggable={false}
+                className={`size-[18px] object-contain ${settings.harborCursor ? "" : "grayscale"}`}
+              />
+            }
+          />
+          {settings.harborCursor && (
+            <SliderRow
+              label={t("settings.harborCursor.scale")}
+              desc={t("Adjust the size of Harbor's mouse pointer.")}
+              icon={<ZoomIn size={18} strokeWidth={2} />}
+              value={settings.harborCursorScale}
+              {...HARBOR_CURSOR_SCALE}
+              readout={`${Math.round(settings.harborCursorScale * 100)}%`}
+              resetTo={DEFAULT.harborCursorScale}
+              onChange={(harborCursorScale) => update({ harborCursorScale })}
+            />
+          )}
         </SettingGroup>
       </Section>
 

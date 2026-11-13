@@ -42,7 +42,7 @@
   overflow: hidden;
   border-radius: 8px;
   background: var(--color-elevated);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .music-watch-next-art:focus-visible,
 .music-watch-next-label button:focus-visible {
@@ -74,7 +74,7 @@
   min-width: 0;
 }
 .music-watch-next-label button {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   border-radius: 4px;
 }
 .music-watch-next-label strong {
@@ -121,7 +121,7 @@
   pointer-events: none;
 }
 .music-watch-next-skeleton .music-watch-next-art {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .music-watch-next-skeleton .music-watch-next-label {
   flex: 1;
@@ -204,7 +204,7 @@
   color: var(--color-ink);
   font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition: background-color 180ms ease-out;
 }
 .music-watch-retry:hover {

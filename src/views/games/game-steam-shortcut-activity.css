@@ -43,14 +43,14 @@
   gap: 24px;
   min-height: 40px;
   font-size: 14px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-shortcut-activity-options input {
   width: 18px;
   height: 18px;
   flex: 0 0 18px;
   accent-color: var(--color-accent);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-shortcut-activity-scroll {
   min-height: 140px;

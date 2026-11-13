@@ -81,7 +81,7 @@ export function HdrOverlayApp() {
     <OverlayErrorBoundary>
       <CompanionProfilesProvider>
         <AuthProvider>
-          <SettingsProvider>
+          <SettingsProvider preserveStoredHarborCursor>
             <PlayerNavigationProvider value={navigation}>
               <HdrOverlayChrome />
             </PlayerNavigationProvider>

@@ -39,13 +39,21 @@ const RETIRED_GEMINI = new Set([
   "gemini-pro",
   "gemini-3-pro-preview",
 ]);
-import { DEFAULT, STORAGE_KEY } from "./defaults";
+import { DEFAULT, HARBOR_CURSOR_SCALE, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
 import { adoptLegacyPlaylists, readPlaylists } from "@/lib/iptv/playlists-store";
 import { sanitizeDisplaySelection } from "@/lib/monitors";
 import { migratePublicRelayUrl } from "@/lib/together/relay-version";
 
 const HEX_RE = /^#[0-9a-f]{6}$/i;
+
+export function sanitizeHarborCursorScale(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return DEFAULT.harborCursorScale;
+  const { min, max, step } = HARBOR_CURSOR_SCALE;
+  const bounded = Math.min(max, Math.max(min, value));
+  const stepsPerUnit = 1 / step;
+  return Math.round(bounded * stepsPerUnit) / stepsPerUnit;
+}
 
 function sanitizePosterDockTransition(value: unknown): number {
   if (typeof value !== "number" || !Number.isFinite(value)) {
@@ -441,6 +449,8 @@ export function parseStoredSettings(raw: string | null): {
     const settings: Settings = {
       ...DEFAULT,
       ...parsed,
+      harborCursor: parsed.harborCursor === true,
+      harborCursorScale: sanitizeHarborCursorScale(parsed.harborCursorScale),
       anilistSyncIndicator:
         typeof parsed.anilistSyncIndicator === "boolean"
           ? parsed.anilistSyncIndicator

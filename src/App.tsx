@@ -17,6 +17,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -151,6 +152,7 @@ import { CharacterFavoritesProvider } from "@/lib/character-favorites";
 import { MangaFavoritesProvider } from "@/lib/manga-favorites";
 import { LocalWatchlistProvider } from "@/lib/local-watchlist";
 import { useSettings } from "@/lib/settings";
+import { mountHarborCursor } from "@/lib/harbor-cursor";
 import {
   flushPendingTorrentRemovals,
   reconcilePendingTorrentRemovals,
@@ -491,9 +493,28 @@ function useIdleEvict(active: boolean, pin = false): boolean {
   return alive || active || pin;
 }
 
+function HarborMouseCursor() {
+  const { settings } = useSettings();
+  const cursor = useRef<ReturnType<typeof mountHarborCursor> | null>(null);
+  useLayoutEffect(() => {
+    if (!settings.harborCursor) return;
+    const session = mountHarborCursor(window);
+    cursor.current = session;
+    return () => {
+      session.dispose();
+      cursor.current = null;
+    };
+  }, [settings.harborCursor]);
+  useLayoutEffect(() => {
+    if (settings.harborCursor) cursor.current?.setScale(settings.harborCursorScale);
+  }, [settings.harborCursor, settings.harborCursorScale]);
+  return null;
+}
+
 export function App({ onReady }: { onReady?: () => void }) {
   return (
     <SettingsProvider syncTorrentEnginePolicy>
+      {!isMobileWeb() && !isRemoteRoute() && <HarborMouseCursor />}
       <ProfilesProvider>
         <ParentalProvider>
           <TraktProvider>

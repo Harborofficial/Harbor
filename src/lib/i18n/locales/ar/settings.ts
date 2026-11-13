@@ -1524,6 +1524,11 @@ const settings: Record<string, string> = {
   "Make everything bigger and easier to read: sidebar, menus, popups, every page. The whole interface scales live as you drag, so you can see the change right here. Great on 4K and ultrawide monitors, or whenever the text feels small.":
     "اجعل كل شيء أكبر وأسهل للقراءة: الشريط الجانبي، القوائم، النوافذ المنبثقة، كل صفحة. الواجهة بأكملها تتغير أثناء السحب. ممتاز للشاشات الكبيرة.",
   "Interface scale": "حجم الواجهة",
+  "Harbor cursor": "مؤشر هاربور",
+  "Harbor cursor size": "حجم مؤشر هاربور",
+  "settings.harborCursor.scale": "حجم المؤشر",
+  "Use Harbor's anchor as your mouse pointer.": "استخدم مرساة هاربور كمؤشر للماوس.",
+  "Adjust the size of Harbor's mouse pointer.": "ضبط حجم مؤشر Harbor.",
   "Trailer quality": "جودة العرض الدعائي",
   "How sharp the trailer is when you hit the preview button. Auto picks from your connection speed. 1080p and Best merge separate video and audio with the bundled ffmpeg, so they take a beat longer to start.":
     "مدى دقة المقطع الدعائي عند النقر على زر المعاينة. 'تلقائي' يختار بناءً على سرعة اتصالك. '1080p' و'الأفضل' يدمجان الفيديو والصوت المنفصلين عبر ffmpeg، لذا قد يستغرقان وقتاً أطول قليلاً للبدء.",

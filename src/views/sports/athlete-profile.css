@@ -8,7 +8,7 @@
   padding: 9px 12px;
   background: var(--color-elevated, #292d2c);
   border-radius: 8px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .sh-athlete-link:hover {
   background: var(--color-hover, #383d3b);

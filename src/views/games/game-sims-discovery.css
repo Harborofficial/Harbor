@@ -116,7 +116,7 @@
   background: var(--color-surface);
   transition: background-color 180ms ease-out;
   text-align: start;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-sims-mts-browser.is-discovery .sims-discovery-project:not(:disabled):hover {
   background: var(--color-elevated);
@@ -342,7 +342,7 @@
   margin-inline-start: auto;
 }
 .games-sims-mts-browser.is-discovery .sims-discovery-loading .sims-discovery-project {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 @container (max-width:740px) {
   .games-sims-mts-browser.is-discovery .games-sims-mts-card.sims-discovery-project {

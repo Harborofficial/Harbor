@@ -338,7 +338,7 @@
 }
 .games-library-collection-actions > button:first-child {
   margin-inline-end: 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   touch-action: auto;
 }
 .games-library-side-row {
@@ -451,7 +451,7 @@
   font-size: 13.5px;
   color: var(--color-ink-subtle);
   background: var(--color-canvas);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background 150ms ease-in-out,
     color 150ms ease-in-out;
@@ -489,7 +489,7 @@
   padding: 0 14px;
   font-size: 13px;
   color: var(--color-ink-muted);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-library-badge-choices > label:first-of-type {
   margin-top: 4px;

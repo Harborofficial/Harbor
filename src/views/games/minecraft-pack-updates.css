@@ -201,7 +201,7 @@
   margin-top: 18px;
 }
 .mc-update-extras summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   line-height: 1.6;
 }
 .mc-update-extras > span {

@@ -141,7 +141,7 @@
   width: 100%;
   min-width: 0;
   accent-color: var(--color-accent);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .retro-volume output {
   width: 38px;

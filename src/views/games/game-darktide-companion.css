@@ -130,7 +130,7 @@
 }
 .games-darktide-mission summary {
   display: block;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
 }
 .games-darktide-mission summary::-webkit-details-marker {

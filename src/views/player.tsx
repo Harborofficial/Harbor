@@ -1616,7 +1616,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
       dir="ltr"
       className={`fixed z-[100] overflow-hidden ${docked ? "sports-player-dock" : "inset-0"} ${stageBg}`}
       style={{
-        ...(screenLocked ? { cursor: "default" } : cursorStyle),
+        ...(screenLocked ? { cursor: "var(--harbor-cursor-default, default)" } : cursorStyle),
         ...dockDrag.style,
         ...(src.pipDocked ? { visibility: "hidden", pointerEvents: "none" } : {}),
       }}

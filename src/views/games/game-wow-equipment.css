@@ -20,7 +20,7 @@
   gap: 12px;
   min-height: 82px;
   padding: 12px 10px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
   border-radius: 6px;
 }

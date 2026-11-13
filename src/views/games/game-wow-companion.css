@@ -257,7 +257,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 16px;
   line-height: 1.5;
   list-style: none;

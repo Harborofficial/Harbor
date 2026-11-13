@@ -42,7 +42,8 @@ function syncStatusSlots(): void {
     const color = STATUS_COLORS[status] ?? STATUS_COLORS.offline;
     if (el.style.background !== color) el.style.background = color;
     if (el.style.pointerEvents !== "auto") el.style.pointerEvents = "auto";
-    if (el.style.cursor !== "pointer") el.style.cursor = "pointer";
+    const cursor = "var(--harbor-cursor-pointer, pointer)";
+    if (el.style.cursor !== cursor) el.style.cursor = cursor;
   }
 }
 

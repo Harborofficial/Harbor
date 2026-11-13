@@ -4,6 +4,7 @@ import type { Settings } from "./types";
 
 export const MIRROR_KEY = "harbor.settings";
 export const SHARED_KEY = "harbor.settings.shared";
+export const PROFILES_KEY = "harbor.profiles.v1";
 let lastSavedAt = 0;
 
 export function profileKey(id: string): string {
@@ -42,9 +43,9 @@ export function recoverableLegacyBlob(): string | null {
   return localStorage.getItem(SHARED_KEY) ?? localStorage.getItem(MIRROR_KEY);
 }
 
-function readActiveSourceForRecovery(): { profileId: string; linked: boolean } {
+export function readActiveSource(): { profileId: string; linked: boolean } {
   try {
-    const raw = localStorage.getItem("harbor.profiles.v1");
+    const raw = localStorage.getItem(PROFILES_KEY);
     if (!raw) return { profileId: "default", linked: true };
     const s = JSON.parse(raw) as {
       profiles?: Array<{ id: string; settingsLinked?: boolean }>;
@@ -61,7 +62,7 @@ function readActiveSourceForRecovery(): { profileId: string; linked: boolean } {
 export function applyLegacyToActive(): boolean {
   const blob = recoverableLegacyBlob();
   if (blob == null) return false;
-  const { profileId, linked } = readActiveSourceForRecovery();
+  const { profileId, linked } = readActiveSource();
   const ok = setItemWithRecovery(sourceKeyFor(profileId, linked), blob);
   setItemWithRecovery(MIRROR_KEY, blob);
   return ok;

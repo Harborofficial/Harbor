@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import type { CSSProperties } from "react";
 import type { LibraryKey } from "./settings/library-panel";
 import type { RelayMode } from "./settings/relay-section";
 import type { DebridKey } from "./settings/streaming-sources-panel";
@@ -605,7 +606,13 @@ export function Settings({ visible = true }: { visible?: boolean }) {
               className="hset-top-space shrink-0"
               style={{ blockSize: "var(--hset-chrome-h, 92px)" }}
             />
-            <div className="hset-grid" data-browse-open={compact && browseOpen ? "" : undefined}>
+            <div
+              className="hset-grid"
+              data-browse-open={compact && browseOpen ? "" : undefined}
+              style={
+                { "--hset-ui-scale": settings.uiScale > 0 ? settings.uiScale : 1 } as CSSProperties
+              }
+            >
               <SettingsTools
                 query={query}
                 setQuery={(value) => {

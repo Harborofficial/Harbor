@@ -76,7 +76,7 @@ button {
   border-radius: 5px;
   outline: none;
   background: transparent;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
   text-align: start;
 }
 .tray-row:hover {

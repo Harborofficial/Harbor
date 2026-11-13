@@ -63,7 +63,7 @@
   min-height: 42px;
   font-size: 14px;
   color: var(--color-ink);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding-block: 8px;
 }
 .games-title-toggle input {

@@ -339,7 +339,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding: 7px 0;
 }
 .games-tft-traits summary > img {

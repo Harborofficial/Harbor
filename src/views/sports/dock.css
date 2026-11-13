@@ -97,7 +97,7 @@
   min-width: 34px;
   min-height: 34px;
   border-radius: 7px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .sports-dock-chrome button:hover {
   background: #ffffff20;

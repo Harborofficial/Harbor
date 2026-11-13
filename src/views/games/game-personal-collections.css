@@ -574,7 +574,7 @@
 }
 .games-collection-local > .games-card:disabled {
   opacity: 1;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 @media (max-width: 600px) {
   .games-personal-detail-heading .games-personal-cover-name {

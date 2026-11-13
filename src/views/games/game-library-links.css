@@ -62,7 +62,7 @@
   align-items: center;
   gap: 18px;
   min-height: 52px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding: 12px 0;
   font-size: 14px;
 }

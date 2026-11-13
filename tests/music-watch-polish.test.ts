@@ -64,8 +64,9 @@ test("the up next rows expose focus and pointer affordance on the controls that 
     watchCss,
     /\.music-watch-next-art:focus-visible,\.music-watch-next-label button:focus-visible\{outline:/,
   );
-  assert.doesNotMatch(rule(watchCss, ".music-watch-video-next"), /cursor:pointer/);
-  assert.match(rule(watchCss, ".music-watch-next-art"), /cursor:pointer/);
+  const pointerCursor = /cursor:(?:pointer|var\(--harbor-cursor-pointer,pointer\))(?:;|$)/;
+  assert.doesNotMatch(rule(watchCss, ".music-watch-video-next"), pointerCursor);
+  assert.match(rule(watchCss, ".music-watch-next-art"), pointerCursor);
 });
 
 test("skeleton and retry motion stand down under reduced motion", () => {

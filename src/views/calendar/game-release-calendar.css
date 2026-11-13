@@ -51,7 +51,7 @@
 }
 .game-calendar button[aria-disabled="true"] {
   opacity: 0.55;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .game-calendar-refresh:hover {
   background: var(--color-raised);
@@ -221,7 +221,7 @@
 .game-calendar-more {
   font-size: 11px;
   color: var(--color-ink-muted);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   margin: 7px 0;
   padding: 3px;
 }
@@ -282,7 +282,7 @@
   gap: 10px;
 }
 .game-calendar-undated > summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding-block: 10px;
 }
 .game-calendar-undated > summary span {

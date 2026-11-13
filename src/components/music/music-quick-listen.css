@@ -276,7 +276,7 @@
   width: 120px;
   min-width: 0;
   accent-color: var(--color-ink);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .music-snippet-volume-panel output {
   font-size: 11px;

@@ -175,7 +175,7 @@ export function useChromeVisibility(params: {
         ? { cursor: "none" }
         : !chromeVisible && playing
           ? { cursor: "none" }
-          : { cursor: "default" },
+          : { cursor: "var(--harbor-cursor-default, default)" },
     [drawMode, chromeVisible, playing],
   );
 

@@ -77,7 +77,7 @@
   font-size: 12px;
 }
 .mc-java-current summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   min-height: 24px;
   width: fit-content;
 }

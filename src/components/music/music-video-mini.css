@@ -22,7 +22,7 @@
   padding: 0;
   text-align: start;
   background: var(--color-canvas);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .music-video-mini-stage .music-video-surface {
   width: 100%;

@@ -7212,6 +7212,20 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
+    label: "Harbor cursor",
+    section: "theme",
+    tab: "interface",
+    anchorTitle: "Harbor cursor",
+    keywords: ["cursor", "mouse", "pointer", "anchor", "مؤشر", "ماوس", "مرساة"],
+  },
+  {
+    label: "Harbor cursor size",
+    section: "theme",
+    tab: "interface",
+    anchorTitle: "Harbor cursor",
+    keywords: ["mouse cursor size", "pointer size", "anchor size", "حجم المؤشر", "حجم الماوس"],
+  },
+  {
     label: "Show format chips on stream rows",
     section: "badges",
     tab: "badges",

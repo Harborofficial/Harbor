@@ -171,7 +171,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 14px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding-block: 10px;
 }
 .games-warframe-trader ul {
@@ -247,7 +247,7 @@
   margin-top: 8px;
 }
 .games-warframe-operation summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   display: flex;
   align-items: center;
   gap: 8px;

@@ -6,7 +6,7 @@
   overflow: hidden;
   background: transparent;
   color: #fff;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
   user-select: none;
 }
 .vpip-drag {
@@ -283,7 +283,7 @@
   margin: 0;
   background: transparent;
   appearance: none;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .vpip-scrub input[type="range"]::-webkit-slider-thumb {
   appearance: none;

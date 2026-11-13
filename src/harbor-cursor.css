@@ -1,0 +1,31 @@
+@media (any-pointer: fine) {
+  :root[data-harbor-cursor]:not([data-big-picture="true"], [data-middle-click-scroll]) {
+    --harbor-cursor-default: var(--harbor-cursor-image), default;
+    --harbor-cursor-pointer: var(--harbor-cursor-image), pointer;
+  }
+
+  @layer base {
+    :where(:root[data-harbor-cursor]:not([data-big-picture="true"], [data-middle-click-scroll])) {
+      :where(body) {
+        cursor: var(--harbor-cursor-default, default);
+      }
+
+      :where(
+        a[href],
+        button:enabled,
+        input:is([type="button"], [type="submit"], [type="reset"]):enabled,
+        summary,
+        [role="button"],
+        [role="link"],
+        [role="menuitem"],
+        [role="tab"]
+      ) {
+        cursor: var(--harbor-cursor-pointer, pointer);
+      }
+
+      :where(:read-write, .select-text) {
+        cursor: text;
+      }
+    }
+  }
+}

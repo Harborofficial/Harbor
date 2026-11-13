@@ -36,7 +36,7 @@
 }
 .music-xxl-year-step:disabled {
   opacity: 0.35;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .music-xxl :is(.music-xxl-year-step, .music-xxl-artists button):focus-visible {
   outline: 2px solid var(--color-accent);

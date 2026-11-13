@@ -272,7 +272,7 @@
   transform: scale(1.15);
 }
 .music-dock-volume .harbor-slider:disabled {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 @media (prefers-reduced-motion: reduce) {
   .music-dock-seek-track,
@@ -548,7 +548,7 @@
 .music-dock-reveal-zone {
   position: fixed;
   z-index: 121;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .music-dock-reveal-zone::after {
   content: "";

@@ -104,7 +104,7 @@
   border-radius: 0;
   background: transparent;
   color: var(--color-ink);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background 0.18s ease,
     color 0.18s ease,
@@ -148,7 +148,7 @@
   color: inherit;
   border: 0;
   border-radius: 4px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-detail-installed button:hover {
   background: rgb(255 255 255 / 0.1);
@@ -224,7 +224,7 @@
   border-radius: 4px;
   padding: 10px 12px;
   font-size: 12px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-speedrun-record {
   display: flex;
@@ -301,7 +301,7 @@
 .games-speedrun-status button {
   color: var(--color-ink);
   padding-inline-start: 6px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-detail-player-count {
   display: flex;
@@ -342,7 +342,7 @@
   border: 0;
   color: var(--color-ink-muted);
   font-size: 11px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-detail-deck strong {
   display: flex;
@@ -577,7 +577,7 @@
   background: #101313a8;
   color: var(--color-ink);
   opacity: 0.35;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition: opacity 0.2s ease;
 }
 .games-publisher-about:hover .games-publisher-motion,
@@ -597,7 +597,7 @@
   color: var(--color-ink);
   background: #ffffff09;
   font-size: 12px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background 0.18s ease,
     color 0.18s ease;
@@ -674,7 +674,7 @@
   border: 0;
   background: none;
   padding: 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   color: var(--color-ink-muted);
 }
 .games-detail-achievement-strip img {
@@ -734,7 +734,7 @@
   color: var(--color-ink-muted);
   font-size: 11px;
   padding: 10px 0 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-detail-text-button:hover {
   color: white;
@@ -784,7 +784,7 @@
   padding: 10px 15px;
   border: 0;
   border-radius: 4px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 12px;
   transition:
     background 0.18s ease,
@@ -845,7 +845,7 @@
   align-items: center;
   gap: 12px;
   padding: 17px 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
 }
 .games-detail-languages > summary > span {
@@ -905,7 +905,7 @@
   background: none;
   color: var(--color-ink-muted);
   padding: 6px 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-live-broadcast {
   margin: 10px 0 24px;
@@ -921,7 +921,7 @@
   border-radius: 6px;
   color: var(--color-ink-muted);
   text-align: start;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition: background 0.2s ease;
 }
 .games-live-broadcast-heading:hover {
@@ -1013,7 +1013,7 @@
   background: var(--color-elevated);
   color: var(--color-ink-muted);
   padding: 8px 12px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-achievements-backdrop {
   background: transparent;
@@ -1057,7 +1057,7 @@
   color: var(--color-ink-muted);
   background: none;
   border-radius: 4px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-public-achievements header > button:hover {
   color: white;
@@ -1147,7 +1147,7 @@
   padding: 0;
   color: var(--color-ink);
   background: none;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-achievement-message {
   padding: 30px 0;
@@ -1401,7 +1401,7 @@
   border: 0;
   border-radius: 4px;
   font-size: 13px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-news-pagination button[aria-current="page"] {
   color: var(--color-ink);
@@ -2006,7 +2006,7 @@
   gap: 10px;
   list-style: none;
   padding: 14px 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 15px;
   font-weight: 600;
   line-height: 1.4;
@@ -2118,7 +2118,7 @@
   border: 0;
   color: var(--color-ink-muted);
   font: inherit;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   text-decoration: underline;
   text-underline-offset: 3px;
 }

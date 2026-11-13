@@ -80,7 +80,7 @@
   font: inherit;
 }
 .game-picker button {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background 150ms ease-out,
     color 150ms ease-out,
@@ -88,7 +88,7 @@
 }
 .game-picker button:disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .game-picker button:focus-visible,
 .game-picker input:focus-visible,
@@ -310,7 +310,7 @@
   min-height: 44px;
   font-size: 14px;
   color: var(--color-ink);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .game-picker-checkbox input {
   accent-color: var(--color-ink);

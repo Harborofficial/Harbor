@@ -35,6 +35,7 @@ export function useMiddleClickScroll() {
       cancelAnimationFrame(raf);
       marker?.remove();
       marker = null;
+      document.documentElement.removeAttribute("data-middle-click-scroll");
       document.body.style.cursor = "";
       window.removeEventListener("mousemove", onMove, true);
       window.removeEventListener("wheel", stop, true);
@@ -67,6 +68,7 @@ export function useMiddleClickScroll() {
         "width:5px;height:5px;border-radius:9999px;background:rgba(255,255,255,0.85);";
       marker.appendChild(dot);
       document.body.appendChild(marker);
+      document.documentElement.setAttribute("data-middle-click-scroll", "");
       document.body.style.cursor = "ns-resize";
       window.addEventListener("mousemove", onMove, true);
       window.addEventListener("wheel", stop, true);

@@ -108,7 +108,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 20px 24px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
 }
 .sh-full-score > summary::-webkit-details-marker {

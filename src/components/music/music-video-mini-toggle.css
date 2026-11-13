@@ -4,7 +4,7 @@
   align-items: center;
   gap: 10px;
   padding: 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   text-align: start;
   color: var(--color-ink-muted);
 }

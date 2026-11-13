@@ -8,7 +8,8 @@ export function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-const MENTION_STYLE = "color:var(--color-accent);font-weight:600;cursor:pointer";
+const MENTION_STYLE =
+  "color:var(--color-accent);font-weight:600;cursor:var(--harbor-cursor-pointer, pointer)";
 
 export function escapeWithMentions(s: string, allowed?: ReadonlySet<string>): string {
   if (!allowed?.size) return escapeHtml(s);

@@ -181,7 +181,7 @@
 }
 .games-library-personal-dialog button:disabled {
   opacity: 0.4;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .games-library-personal-dialog button:focus-visible {
   outline: 2px solid var(--color-accent);

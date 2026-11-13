@@ -145,7 +145,7 @@
   color: var(--color-ink-muted);
 }
 .games-hydra-row summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding: 6px 0;
 }
 .games-hydra-row dl {
@@ -239,7 +239,7 @@
   color: var(--color-ink-muted);
 }
 .games-hydra-original summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding-block: 8px;
 }
 .games-hydra-original dl {

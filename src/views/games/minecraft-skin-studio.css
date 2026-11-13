@@ -312,7 +312,7 @@
   padding: 0;
   border: 0;
   border-radius: 5px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   background: transparent;
 }
 .mc-skin-palette > div {
@@ -429,7 +429,7 @@
 }
 .mc-skin-studio button:disabled {
   opacity: 0.35;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .mc-skin-studio :is(button, input, select):focus-visible {
   outline: 2px solid var(--color-ink);

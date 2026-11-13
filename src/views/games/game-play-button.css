@@ -3,7 +3,7 @@
   min-inline-size: 9rem;
 }
 .games-play-feedback[aria-disabled="true"] {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .games-play-feedback-mark {
   display: grid;

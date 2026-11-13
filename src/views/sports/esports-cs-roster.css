@@ -26,7 +26,7 @@
   transform: rotate(180deg);
 }
 .ea-cs-roster button {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .ea-cs-roster button:focus-visible {
   outline: 2px solid var(--color-accent);

@@ -402,7 +402,7 @@
 .music-now-tabs [role="tab"]:disabled,
 .music-now-options button:disabled {
   opacity: 0.38;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .music-now-tabs [aria-selected="true"] {
   color: var(--color-ink);
@@ -1141,7 +1141,7 @@
   color: var(--color-danger, #ff6b5e);
 }
 .music-now-lyric-translate:disabled {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
   opacity: 0.6;
 }
 .music-now-lyric-translate:focus-visible,

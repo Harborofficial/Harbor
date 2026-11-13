@@ -62,7 +62,7 @@
   transform: scale(1.06);
 }
 .music-sticky-play:disabled {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .music-sticky-title[data-on] .music-sticky-play:disabled {
   opacity: 0.4;

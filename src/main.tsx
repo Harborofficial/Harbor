@@ -21,6 +21,7 @@ import "flag-icons/css/flag-icons.min.css";
 import { startTaskbarProgress } from "@/lib/download/taskbar-progress";
 import { completeBetaReturnPreferences } from "@/lib/updater/beta-return";
 import { proactiveStorageCleanup } from "@/lib/storage-recovery";
+import { observeStoredHarborCursor } from "@/lib/harbor-cursor";
 
 // Loaded only when a DJ window is actually opened; not part of the core entry graph.
 const DjDeckApp = lazy(() =>
@@ -226,6 +227,11 @@ function MainRoot() {
  *  is in the middle of using. */
 const isAuxWindow = isPip || isVideoPip || isModal || isHdrOverlay || isCaptions || isDjDeck;
 
+function CompanionCursor() {
+  useEffect(() => observeStoredHarborCursor(window), []);
+  return null;
+}
+
 async function mount() {
   // Must run before anything writes: on a full localStorage every setItem throws, and the
   // first unguarded one during the initial render kills the tree before onReady fires, so
@@ -258,6 +264,7 @@ async function mount() {
     startTaskbarProgress();
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
+      {isAuxWindow && <CompanionCursor />}
       {isHdrOverlay ? (
         <HdrOverlayApp />
       ) : isDjDeck ? (

@@ -27,7 +27,7 @@
 }
 .music-artist-menu button:disabled {
   opacity: 0.4;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .music-artist-menu svg {
   flex-shrink: 0;

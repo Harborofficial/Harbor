@@ -195,7 +195,7 @@ function spotifyIframe(src: string): string {
 const MEDIA_CARD_STYLE =
   "display:flex;align-items:center;gap:10px;margin:8px 0;padding:8px;border-radius:12px;" +
   "background:var(--color-elevated);box-shadow:inset 0 0 0 1px var(--color-edge-soft);" +
-  "max-width:340px;cursor:pointer;text-decoration:none";
+  "max-width:340px;cursor:var(--harbor-cursor-pointer, pointer);text-decoration:none";
 
 const MEDIA_KIND: Record<string, string> = {
   movie: "Movie",

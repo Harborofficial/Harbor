@@ -151,7 +151,7 @@
   align-items: center;
   gap: 14px;
   padding: 16px 8px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
   border-radius: 7px;
 }
@@ -249,7 +249,7 @@
 .games-stardew-history summary,
 .games-stardew-issues summary {
   list-style: none;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   display: flex;
   gap: 8px;
   align-items: center;
@@ -360,7 +360,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
   font-size: 13px;
   padding-block: 10px;

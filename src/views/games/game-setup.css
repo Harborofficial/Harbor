@@ -182,7 +182,7 @@
   border-top: 1px solid var(--color-edge-soft);
 }
 .games-setup-disclosure > summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   color: var(--color-ink-muted);
   font-size: 13px;
   line-height: 24px;

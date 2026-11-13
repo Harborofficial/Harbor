@@ -984,7 +984,7 @@
 .games-download-form summary {
   font-size: 12px;
   color: var(--color-ink-muted);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-download-form details p {
   font-size: 11px;
@@ -1090,7 +1090,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
   font-size: 12px;
   color: var(--color-ink-muted);
@@ -1192,7 +1192,7 @@
   border: 0;
   background: transparent;
   padding: 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-download-bundle-expand > .games-download-art {
   flex: none;
@@ -1265,7 +1265,7 @@
   border: 0;
   color: inherit;
   background: transparent;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-download-bundle-progress-action .games-download-bundle-progress-label {
   display: flex;
@@ -1363,10 +1363,10 @@
 }
 
 .games-download-bundle {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-download-bundle-files {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 
 /* Restore the full-width hero art and logo from the former featured download

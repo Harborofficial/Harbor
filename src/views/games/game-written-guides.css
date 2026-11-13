@@ -108,7 +108,7 @@
   min-height: 37px;
   font-size: 13px;
   line-height: 1.4;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   color: var(--color-ink-muted);
 }
 .games-written-categories label:hover,
