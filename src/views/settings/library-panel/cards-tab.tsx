@@ -1,5 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { Award, Captions, Check, Eye, HardDrive, Sparkles, Tag, Trophy, Type, Scaling } from "../icons";
+import {
+  Award,
+  Captions,
+  Check,
+  Eye,
+  HardDrive,
+  Sparkles,
+  Tag,
+  Trophy,
+  Type,
+  Scaling,
+} from "../icons";
 import { useSettings } from "@/lib/settings";
 import type { Settings, TvCardOptions } from "@/lib/settings/types";
 import { useT } from "@/lib/i18n";
