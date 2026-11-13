@@ -62,6 +62,7 @@ export function EpisodeGridCard({
   const minsLeft =
     partial && g.runtime ? Math.max(1, Math.round(g.runtime * (1 - progress.ratio))) : 0;
   const spoilered = !!spoiler && (spoiler.thumb || spoiler.title || spoiler.desc);
+  const episodeNumber = g.displayNumber ?? g.number; // Default to .number if no display number exists
 
   const enter = () => {
     window.clearTimeout(timer.current);
@@ -140,7 +141,7 @@ export function EpisodeGridCard({
             {g.filler && <FillerBadge />}
           </span>
           <span className="text-[11.5px] text-ink-subtle">
-            {bidiIsolate(g.seasonLabel ? `${g.seasonLabel} · E${g.number}` : `E${g.number}`)}
+            {bidiIsolate(g.seasonLabel ? `${g.seasonLabel} · E${episodeNumber}` : `E${episodeNumber}`)}
             {g.runtime ? ` · ${bidiIsolate(t("{n} min", { n: g.runtime }))}` : ""}
             {airDate ? ` · ${bidiIsolate(airDate)}` : ""}
           </span>
@@ -261,6 +262,9 @@ export function EpisodePreview({
 }) {
   const { openEpisodeDetail } = useView();
   const { settings } = useSettings();
+  const episodeNumber = g.displayNumber ?? g.number; // Default to .number if no display number exists
+  const seasonLabel = g.seasonLabel ?? `S${g.displaySeason ?? g.season}`;
+
   return (
     <div className="group animate-popover-in absolute -inset-x-2 -top-2 z-30 overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)]">
       <button
@@ -303,7 +307,7 @@ export function EpisodePreview({
         </div>
         <span className="flex items-center gap-1.5 text-[11.5px] text-ink-subtle">
           <span className="font-semibold text-ink-muted">
-            {bidiIsolate(g.seasonLabel ? `${g.seasonLabel} · E${g.number}` : `E${g.number}`)}
+            {bidiIsolate(`${seasonLabel} · E${episodeNumber}`)}
           </span>
           {g.airDate && (
             <>
@@ -311,6 +315,11 @@ export function EpisodePreview({
               <CalendarDays size={11} />
               <bdi>{formatAirDate(g.airDate)}</bdi>
             </>
+          )}
+          {g.filler && (
+            <span className="ms-auto">
+            <FillerBadge />
+            </span>
           )}
         </span>
         <EpisodeReleaseCountdown date={g.airDate} className="text-[11.5px]" />

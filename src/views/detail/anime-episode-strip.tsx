@@ -63,13 +63,17 @@ export function AnimeEpisodeStrip({
   const presentEpisode = useCallback(
     (ep: KitsuEpisode): GridEpisode => {
       const epMeta = metaForEp ? metaForEp(ep) : meta;
+      const episodeNumber = ep.displayNumber ?? ep.number;
+      const seasonNumber = ep.displaySeason ?? ep.seasonNumber ?? ep.imdbSeason ?? 1;
       return {
         key: String(ep.id),
         number: ep.number,
+        displayNumber: episodeNumber,
         season: animeSeasonKey(ep),
         absoluteNumber: ep.absoluteNumber,
-        seasonLabel: showSeason ? `S${ep.imdbSeason ?? ep.seasonNumber ?? 1}` : undefined,
-        title: ep.title || t("Episode {n}", { n: ep.number }),
+        displaySeason: seasonNumber,
+        seasonLabel: showSeason ? `S${seasonNumber}` : undefined,
+        title: ep.title || t("Episode {n}", { n: episodeNumber }),
         stills: [ep.thumbnail, ep.thumbnailFallback, meta.background].filter(
           (u): u is string => !!u,
         ),
@@ -185,6 +189,8 @@ function AnimeEpisodeStripCard({
   const { openPicker, openEpisodeDetail } = useView();
   const { settings } = useSettings();
   const upcoming = isUpcomingDate(ep.airdate) || !!forceUpcoming;
+  const episodeNumber = ep.displayNumber ?? ep.number;
+  const seasonNumber = ep.displaySeason ?? ep.seasonNumber ?? ep.imdbSeason ?? 1;
 
   const handlePlayClick = () => {
     openPicker(meta, animePlayEpisode(ep), {
@@ -272,14 +278,12 @@ function AnimeEpisodeStripCard({
             <span
               className={`truncate text-[13.5px] font-semibold text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}
             >
-              {ep.title || t("Episode {n}", { n: ep.number })}
+              {ep.title || t("Episode {n}", { n: episodeNumber })}
             </span>
             {ep.filler && <FillerBadge />}
           </span>
           <span className="text-[11.5px] text-ink-subtle">
-            {showSeason
-              ? `S${ep.imdbSeason ?? ep.seasonNumber ?? 1} · E${ep.number}`
-              : `E${ep.number}`}
+            {showSeason ? `S${seasonNumber} · E${episodeNumber}` : `E${episodeNumber}`}
             {ep.length ? ` · ${t("{n} min", { n: ep.length })}` : ""}
             {upcoming && ep.airdate ? ` · ${formatAirDate(ep.airdate)}` : ""}
           </span>

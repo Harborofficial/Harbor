@@ -56,6 +56,8 @@ export type Episode = {
   id: number;
   episodeNumber: number;
   seasonNumber: number;
+  orderNumber?: number;
+  orderSeason?: number;
   name: string;
   overview: string;
   nameLanguage?: string;

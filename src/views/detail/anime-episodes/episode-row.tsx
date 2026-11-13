@@ -54,6 +54,8 @@ export function AnimeEpisodeRow({
   const { settings } = useSettings();
   const epMeta = metaForEp ? metaForEp(ep) : meta;
   const watchedAgo = progress.startedAt > 0 ? formatRelativeWatched(progress.startedAt) : "";
+  const episodeNumber = ep.displayNumber ?? ep.number;
+  const seasonNumber = ep.displaySeason ?? ep.seasonNumber ?? ep.imdbSeason ?? 1;
   const playEpisode = {
     season: animeSeasonKey(ep),
     episode: ep.number,
@@ -140,7 +142,7 @@ export function AnimeEpisodeRow({
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <h4 className="flex items-center gap-2 truncate text-[16px] font-semibold text-ink">
             <span className={`truncate ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}>
-              {ep.title || t("Episode {n}", { n: ep.number })}
+              {ep.title || t("Episode {n}", { n: episodeNumber })}
             </span>
             {ep.filler && <FillerBadge />}
             {isUpcomingDate(ep.airdate) || forceUpcoming ? <UpcomingBadge /> : null}
@@ -149,9 +151,9 @@ export function AnimeEpisodeRow({
             <span>
               {[
                 showSeason
-                  ? `S${partDisplaySeason(meta.id, ep.sourceMetaId) ?? ep.imdbSeason ?? ep.seasonNumber ?? 1} · E${ep.number}`
-                  : `E${ep.number}`,
-                ep.absoluteNumber && ep.absoluteNumber !== ep.number
+                  ? `S${partDisplaySeason(meta.id, ep.sourceMetaId) ?? seasonNumber} · E${episodeNumber}`
+                  : `E${episodeNumber}`,
+                ep.absoluteNumber && ep.absoluteNumber !== episodeNumber
                   ? `Abs E${ep.absoluteNumber}`
                   : null,
                 ep.length ? t("{n} min", { n: ep.length }) : null,

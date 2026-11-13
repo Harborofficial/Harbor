@@ -507,7 +507,7 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
   const handleOpenTrakt = useCallback(() => {
     if (!target) return;
     const ids = target.kind === "episode" ? target.show.ids : target.ids;
-    const slug = ids.tmdb ? `tmdb:${ids.tmdb}` : ids.imdb;
+    const slug = ids.imdb;
     if (!slug) return;
     if (target.kind === "episode") {
       openUrl(

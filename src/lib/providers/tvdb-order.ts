@@ -17,6 +17,11 @@ export type OrderedEpisode = Episode & {
   overviewEn?: string;
   nameEnLanguage?: string;
   overviewEnLanguage?: string;
+
+  /** Episode number within the selected ordering (e.g. DVD, alternate). Absent for arc episodes. */
+  orderNumber?: number;
+  /** Season number within the selected ordering. Absent for arc episodes. */
+  orderSeason?: number;
 };
 
 export type TvdbOrder = {
@@ -257,6 +262,8 @@ async function build(
         overviewEn === trEn?.overview
           ? (trEn?.overviewLanguage ?? episodeTextLanguage(overviewEn, "en"))
           : (e.overviewLanguage ?? "und"),
+      orderSeason: e.seasonNumber,
+      orderNumber: e.number,
       stillPath: null,
       stillUrl: e.image ?? undefined,
       airDate: e.aired ?? null,
@@ -275,6 +282,8 @@ async function build(
     bucket.forEach((ep, i) => {
       ep.seasonNumber = alt[i].season;
       ep.episodeNumber = alt[i].episode;
+      ep.orderSeason = alt[i].season;
+      ep.orderNumber = alt[i].episode;
     });
   }
   if (bySeason.size === 0) return null;

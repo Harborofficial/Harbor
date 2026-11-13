@@ -176,6 +176,8 @@ export type KitsuEpisode = {
   rating?: number;
   ratingIsImdb?: boolean;
   sourceMetaId?: string;
+  displayNumber?: number;
+  displaySeason?: number;
 };
 
 export type KitsuCharacter = {
