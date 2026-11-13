@@ -26,6 +26,7 @@ export function usePlayerHotkeys(params: {
   cycleSubtitles: () => void;
   cycleAudio: () => void;
   onSubSize: (direction: 1 | -1) => void;
+  canShowShortcuts: () => boolean;
   playNext: () => void;
   playPrev: () => void;
   hasNextEpisode: boolean;
@@ -65,6 +66,7 @@ export function usePlayerHotkeys(params: {
     cycleSubtitles,
     cycleAudio,
     onSubSize,
+    canShowShortcuts,
     playNext,
     playPrev,
     hasNextEpisode,
@@ -109,6 +111,7 @@ export function usePlayerHotkeys(params: {
     setShowStats,
     showShortcuts,
     setShowShortcuts,
+    canShowShortcuts,
     metaId,
     svpActive,
     onNextEp: hasNextEpisode ? playNext : undefined,

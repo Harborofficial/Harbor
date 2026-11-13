@@ -13,6 +13,9 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
   const groups = useMemo(() => playerShortcutGroups(overrides ?? {}), [overrides]);
   const closeKey = formatBindingForDisplay(effectiveBinding("playerClose", overrides ?? {}));
   const closeRef = useRef<HTMLButtonElement>(null);
+  // A drag that starts inside the panel (e.g. selecting text) and ends on the
+  // backdrop must not dismiss it, so both ends of the click have to be the backdrop.
+  const pressedBackdrop = useRef(false);
 
   useEffect(() => {
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -54,7 +57,13 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
   return (
     <div
       className="pointer-events-auto absolute inset-0 z-[60] flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm animate-fade-in"
-      onClick={onClose}
+      onMouseDown={(e) => {
+        pressedBackdrop.current = e.target === e.currentTarget;
+      }}
+      onClick={(e) => {
+        if (pressedBackdrop.current && e.target === e.currentTarget) onClose();
+        pressedBackdrop.current = false;
+      }}
     >
       <div
         role="dialog"
@@ -90,7 +99,11 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
             <X size={17} strokeWidth={2.2} />
           </button>
         </header>
-        <div className="overflow-y-auto px-6 py-5">
+        <div
+          tabIndex={0}
+          aria-label={t("Keyboard shortcuts")}
+          className="overflow-y-auto px-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+        >
           <div className="columns-1 gap-x-10 sm:columns-2 lg:columns-3">
             {groups.map((group) => (
               <section key={group.name} className="mb-5 break-inside-avoid">

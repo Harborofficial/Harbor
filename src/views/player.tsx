@@ -1053,6 +1053,9 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     [settings.subFontSize, showSyncToast, t, update],
   );
 
+  // Set below once the HDR stage is known; the panel only mounts on the plain full player.
+  const shortcutsAvailableRef = useRef(false);
+  const canShowShortcuts = useCallback(() => shortcutsAvailableRef.current, []);
   const { holdSpeedActive, showStats, shortcuts, subtitleOffsetSec } = usePlayerHotkeys({
     bridgeRef,
     snap,
@@ -1071,6 +1074,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     cycleSubtitles,
     cycleAudio,
     onSubSize: stepSubtitleSize,
+    canShowShortcuts,
     playNext,
     playPrev,
     hasNextEpisode: hasNextEpisodeNow,
@@ -1337,6 +1341,13 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
       );
     },
   });
+  // Mirrors where StageOverlays renders the panel, so it never sits open while hidden.
+  const shortcutsAvailable = !docked && !pipMode && !hdrStageActive;
+  shortcutsAvailableRef.current = shortcutsAvailable;
+  const closeShortcuts = shortcuts.close;
+  useEffect(() => {
+    if (!shortcutsAvailable) closeShortcuts();
+  }, [closeShortcuts, shortcutsAvailable]);
 
   const { mpvEmbedWindowsActive, stageBg } = embedFlags(
     engine,

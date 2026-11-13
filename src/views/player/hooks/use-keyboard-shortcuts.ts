@@ -37,6 +37,7 @@ export function useKeyboardShortcuts(params: {
   setShowStats: (updater: (prev: boolean) => boolean) => void;
   showShortcuts: boolean;
   setShowShortcuts: (updater: (prev: boolean) => boolean) => void;
+  canShowShortcuts?: () => boolean;
   metaId: string;
   svpActive: boolean;
   onNextEp?: () => void;
@@ -81,6 +82,7 @@ export function useKeyboardShortcuts(params: {
     setShowStats,
     showShortcuts,
     setShowShortcuts,
+    canShowShortcuts,
     metaId,
     svpActive,
     onNextEp,
@@ -437,6 +439,7 @@ export function useKeyboardShortcuts(params: {
         return;
       }
       if (match("playerShortcuts")) {
+        if (!showShortcuts && canShowShortcuts && !canShowShortcuts()) return;
         e.preventDefault();
         if (e.repeat) return;
         setShowShortcuts((v) => !v);
@@ -589,6 +592,7 @@ export function useKeyboardShortcuts(params: {
     drawMode,
     showShortcuts,
     setShowShortcuts,
+    canShowShortcuts,
     cycleAudio,
     onSubSize,
     snap.muted,
