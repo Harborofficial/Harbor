@@ -274,6 +274,9 @@ const settings: Record<string, string> = {
   "Rich season and order panel": "Расширенная панель сезонов и порядка",
   "Rotten Tomatoes": "Rotten Tomatoes",
   Ruleset: "Набор правил",
+  "Scale TV score badges": "Масштабировать значки оценок на ТВ-карточках",
+  "Shrink the score stack when several ratings are enabled.":
+    "Уменьшать значки оценок при включении нескольких источников рейтинга.",
   "Score badges on cards": "Значки оценок на карточках",
   "Score position": "Положение оценки",
   "Search rules by name or pattern…": "Поиск правил по названию или шаблону…",

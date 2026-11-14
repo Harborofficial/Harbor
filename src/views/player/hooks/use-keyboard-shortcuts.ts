@@ -32,7 +32,12 @@ export function useKeyboardShortcuts(params: {
   togglePip?: () => void;
   fullscreen: boolean;
   cycleSubtitles: () => void;
+  cycleAudio?: () => void;
+  onSubSize?: (direction: 1 | -1) => void;
   setShowStats: (updater: (prev: boolean) => boolean) => void;
+  showShortcuts: boolean;
+  setShowShortcuts: (updater: (prev: boolean) => boolean) => void;
+  canShowShortcuts?: () => boolean;
   metaId: string;
   svpActive: boolean;
   onNextEp?: () => void;
@@ -72,7 +77,12 @@ export function useKeyboardShortcuts(params: {
     toggleFullscreen,
     togglePip,
     cycleSubtitles,
+    cycleAudio,
+    onSubSize,
     setShowStats,
+    showShortcuts,
+    setShowShortcuts,
+    canShowShortcuts,
     metaId,
     svpActive,
     onNextEp,
@@ -192,7 +202,19 @@ export function useKeyboardShortcuts(params: {
         return;
       }
 
+      // The panel is modal even when focus has drifted out of it: only the two
+      // bindings that dismiss it reach the player while it is open.
+      if (showShortcuts) {
+        if (match("playerClose") || match("playerShortcuts")) {
+          e.preventDefault();
+          if (!e.repeat) setShowShortcuts(() => false);
+        }
+        return;
+      }
+
       if (match("playerClose")) {
+        // A held key that just dismissed a panel must not go on to close playback.
+        if (e.repeat) return;
         if (getLeaveConfirm().open) return;
         if (drawMode) {
           setDrawMode(false);
@@ -407,6 +429,29 @@ export function useKeyboardShortcuts(params: {
         setShowStats((v) => !v);
         return;
       }
+      if (match("playerAudioCycle") && cycleAudio) {
+        e.preventDefault();
+        if (e.repeat) return;
+        cycleAudio();
+        return;
+      }
+      if (match("playerSubSizeDown") && onSubSize) {
+        e.preventDefault();
+        onSubSize(-1);
+        return;
+      }
+      if (match("playerSubSizeUp") && onSubSize) {
+        e.preventDefault();
+        onSubSize(1);
+        return;
+      }
+      if (match("playerShortcuts")) {
+        if (canShowShortcuts && !canShowShortcuts()) return;
+        e.preventDefault();
+        if (e.repeat) return;
+        setShowShortcuts(() => true);
+        return;
+      }
       if (match("playerSpeedDown")) {
         e.preventDefault();
         const r = Math.max(0.25, +(snap.rate - 0.25).toFixed(2));
@@ -552,6 +597,11 @@ export function useKeyboardShortcuts(params: {
     returnToPreview,
     togglePip,
     drawMode,
+    showShortcuts,
+    setShowShortcuts,
+    canShowShortcuts,
+    cycleAudio,
+    onSubSize,
     snap.muted,
     snap.volume,
     snap.rate,

@@ -780,6 +780,9 @@ const catalog08: Record<string, string> = {
   "Sci-fi, fantasy & horror": "SF, 판타지 및 호러",
   Score: "점수",
   "Score /10": "점수 /10",
+  "Scale TV score badges": "TV 카드 평점 배지 크기 조절",
+  "Shrink the score stack when several ratings are enabled.":
+    "여러 평점을 활성화하면 평점 배지 묶음을 축소합니다.",
   "Score badges on cards": "카드에 평점 배지 표시",
   "Score position": "평점 위치",
   Scores: "평점",

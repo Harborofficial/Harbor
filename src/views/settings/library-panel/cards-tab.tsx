@@ -1,6 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { Award, Captions, Check, Eye, HardDrive, Sparkles, Tag, Trophy, Type } from "../icons";
+import {
+  Award,
+  Captions,
+  Check,
+  Eye,
+  HardDrive,
+  Sparkles,
+  Tag,
+  Trophy,
+  Type,
+  Scaling,
+} from "../icons";
 import { useSettings } from "@/lib/settings";
+import type { Settings, TvCardOptions } from "@/lib/settings/types";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, Segmented, ToggleRow, settingsAnchor } from "../shared";
 import { SettingGroup, SettingRow, Nested, SettingsWorkbench } from "../kit";
@@ -22,7 +34,7 @@ export function CardsTab() {
   const settings =
     layout === "tv" ? { ...baseSettings, ...baseSettings.tvCardOptions } : baseSettings;
   const tvPreviewCardWidth = Math.max(72, Math.round(TV_CARD_MIN * settings.posterScale));
-  const updateCard = (patch: Partial<typeof settings>) => {
+  const updateCard = (patch: Partial<Settings & TvCardOptions>) => {
     if (layout === "poster") {
       update(patch);
       return;
@@ -234,6 +246,15 @@ export function CardsTab() {
             enabledBadgeCount={enabledBadgeCount}
             layout={layout}
           />
+          {layout === "tv" && (
+            <ToggleRow
+              label={t("Scale TV score badges")}
+              leading={<Scaling size={18} strokeWidth={2} />}
+              sub={t("Shrink the score stack when several ratings are enabled.")}
+              value={settings.tvCardOptions.scaleScoreStack}
+              onChange={(v) => updateCard({ scaleScoreStack: v })}
+            />
+          )}
           {settings.showMalBadge && (
             <SettingRow
               label={t("Anime card rating source")}

@@ -475,6 +475,20 @@ const player: Record<string, string> = {
   "Smallest first": "Сначала маленькие",
   "Default order": "Порядок по умолчанию",
   "Sort sources: {value}": "Сортировка источников: {value}",
+  "Show keyboard shortcuts": "Показать сочетания клавиш",
+  "Show or hide the list of player shortcuts.":
+    "Показать или скрыть список сочетаний клавиш плеера.",
+  "Press {key} to close. Change these in Settings.":
+    "Нажмите {key}, чтобы закрыть. Изменить их можно в настройках.",
+  "Cycle audio tracks": "Переключить звуковую дорожку",
+  "Switch to the next available audio track.":
+    "Переключиться на следующую доступную звуковую дорожку.",
+  "Smaller subtitles": "Уменьшить субтитры",
+  "Decrease the subtitle text size.": "Уменьшить размер текста субтитров.",
+  "Larger subtitles": "Увеличить субтитры",
+  "Increase the subtitle text size.": "Увеличить размер текста субтитров.",
+  "Audio: {name}": "Аудио: {name}",
+  "Subtitle size: {size}": "Размер субтитров: {size}",
 };
 
 export default player;

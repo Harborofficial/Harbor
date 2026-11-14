@@ -208,3 +208,4 @@ export const Wrench = setIconComponent("Wrench");
 export const X = setIconComponent("X");
 export const Zap = setIconComponent("Zap");
 export const ZoomIn = setIconComponent("ZoomIn");
+export const Scaling = setIconComponent("Scaling");

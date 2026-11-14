@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Anime4kIndicator } from "@/components/player/anime4k-indicator";
 import { SvpIndicator } from "@/components/player/svp-indicator";
 import { StatsOverlay } from "@/components/player/stats-overlay";
+import { ShortcutsOverlay } from "@/components/player/shortcuts-overlay";
 import { SubtitleOffsetIndicator } from "@/components/player/subtitle-offset-indicator";
 import { SubStyleBar } from "@/components/player/sub-style-bar";
 import { PictureBar } from "@/components/player/picture-bar";
@@ -29,6 +30,8 @@ export const StageOverlays = memo(function StageOverlays({
   subShowInPip,
   subAssNative,
   showStats,
+  showShortcuts,
+  onCloseShortcuts,
   subtitleOffsetSec,
   holdSpeedActive,
   volumeIndicator,
@@ -47,6 +50,8 @@ export const StageOverlays = memo(function StageOverlays({
   subShowInPip: boolean;
   subAssNative: boolean;
   showStats: boolean;
+  showShortcuts: boolean;
+  onCloseShortcuts: () => void;
   subtitleOffsetSec: number | null;
   holdSpeedActive: boolean;
   volumeIndicator: VolumeIndicatorState;
@@ -83,6 +88,7 @@ export const StageOverlays = memo(function StageOverlays({
           />
         )}
       {showStats && !pipMode && <StatsOverlay snap={snap} engine={engine} />}
+      {showShortcuts && !pipMode && <ShortcutsOverlay onClose={onCloseShortcuts} />}
       {!pipMode && <SubtitleOffsetIndicator delaySec={subtitleOffsetSec} />}
       {!pipMode && (
         <Anime4kIndicator

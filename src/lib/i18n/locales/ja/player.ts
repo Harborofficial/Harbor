@@ -470,6 +470,18 @@ const player: Record<string, string> = {
   "Smallest first": "小さい順",
   "Default order": "デフォルトの順序",
   "Sort sources: {value}": "ソースの並べ替え：{value}",
+  "Show keyboard shortcuts": "キーボードショートカットを表示",
+  "Show or hide the list of player shortcuts.":
+    "プレーヤーのショートカット一覧を表示または非表示にします。",
+  "Press {key} to close. Change these in Settings.": "{key} で閉じます。設定で変更できます。",
+  "Cycle audio tracks": "音声トラックを切り替え",
+  "Switch to the next available audio track.": "次に利用できる音声トラックに切り替えます。",
+  "Smaller subtitles": "字幕を小さく",
+  "Decrease the subtitle text size.": "字幕の文字サイズを小さくします。",
+  "Larger subtitles": "字幕を大きく",
+  "Increase the subtitle text size.": "字幕の文字サイズを大きくします。",
+  "Audio: {name}": "音声: {name}",
+  "Subtitle size: {size}": "字幕サイズ: {size}",
 };
 
 export default player;

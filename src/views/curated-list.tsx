@@ -13,7 +13,7 @@ import { RegistryEntries } from "./curated-list/registry-entries";
 export function CuratedListView({ listId }: { listId: string }) {
   const t = useT();
   const list = curatedList(listId);
-  const sizing = usePosterRow(180);
+  const sizing = usePosterRow();
   const scrollRef = useRef<HTMLElement>(null);
   const [items, setItems] = useState<readonly CuratedListItem[]>(list?.head ?? []);
   const [settled, setSettled] = useState(false);

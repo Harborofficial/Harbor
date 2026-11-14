@@ -376,6 +376,19 @@ const player: Record<string, string> = {
   "Smallest first": "Más pequeñas primero",
   "Default order": "Orden predeterminado",
   "Sort sources: {value}": "Ordenar fuentes: {value}",
+  "Show keyboard shortcuts": "Mostrar atajos de teclado",
+  "Show or hide the list of player shortcuts.":
+    "Muestra u oculta la lista de atajos del reproductor.",
+  "Press {key} to close. Change these in Settings.":
+    "Pulsa {key} para cerrar. Puedes cambiarlos en Ajustes.",
+  "Cycle audio tracks": "Cambiar pista de audio",
+  "Switch to the next available audio track.": "Cambia a la siguiente pista de audio disponible.",
+  "Smaller subtitles": "Subtítulos más pequeños",
+  "Decrease the subtitle text size.": "Reduce el tamaño del texto de los subtítulos.",
+  "Larger subtitles": "Subtítulos más grandes",
+  "Increase the subtitle text size.": "Aumenta el tamaño del texto de los subtítulos.",
+  "Audio: {name}": "Audio: {name}",
+  "Subtitle size: {size}": "Tamaño de subtítulos: {size}",
 };
 
 export default player;

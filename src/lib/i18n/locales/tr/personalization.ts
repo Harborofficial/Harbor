@@ -648,6 +648,9 @@ const personalization: Record<string, string> = {
   "Scans your Stremio library and rewrites any item whose shape doesn't match Stremio's exact schema. Safe to run anytime; only items that need fixing get touched.":
     "Stremio kitaplığınızı tarar ve yapısı Stremio'nun tam şemasıyla eşleşmeyen öğeleri yeniden yazar. İstediğiniz zaman güvenle çalıştırabilirsiniz; yalnızca düzeltilmesi gereken öğelere dokunulur.",
   "Schedule & options": "Program ve seçenekler",
+  "Scale TV score badges": "TV kartı puan rozetlerini ölçeklendir",
+  "Shrink the score stack when several ratings are enabled.":
+    "Birden fazla puan etkinleştirildiğinde rozet grubunu küçült.",
   "Score badges on cards": "Kartlardaki puan rozetleri",
   "Score position": "Puan konumu",
   Screen: "Ekran",

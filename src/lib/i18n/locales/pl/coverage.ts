@@ -1068,6 +1068,18 @@ const coverage: Record<string, string> = {
   "Smallest first": "Najmniejsze najpierw",
   "Default order": "Domyślna kolejność",
   "Sort sources: {value}": "Sortuj źródła: {value}",
+  "Show keyboard shortcuts": "Pokaż skróty klawiaturowe",
+  "Show or hide the list of player shortcuts.": "Pokazuje lub ukrywa listę skrótów odtwarzacza.",
+  "Press {key} to close. Change these in Settings.":
+    "Naciśnij {key}, aby zamknąć. Zmienisz je w Ustawieniach.",
+  "Cycle audio tracks": "Przełącz ścieżkę audio",
+  "Switch to the next available audio track.": "Przełącza na następną dostępną ścieżkę audio.",
+  "Smaller subtitles": "Mniejsze napisy",
+  "Decrease the subtitle text size.": "Zmniejsza rozmiar tekstu napisów.",
+  "Larger subtitles": "Większe napisy",
+  "Increase the subtitle text size.": "Zwiększa rozmiar tekstu napisów.",
+  "Audio: {name}": "Audio: {name}",
+  "Subtitle size: {size}": "Rozmiar napisów: {size}",
 };
 
 export default coverage;

@@ -296,6 +296,9 @@ const catalog11: Record<string, string> = {
   "Sci-fi, fantasy & horror": "Science fiction, fantasy i horror",
   Score: "Muzyka",
   "Score /10": "Wynik /10",
+  "Scale TV score badges": "Skaluj odznaki ocen na kartach TV",
+  "Shrink the score stack when several ratings are enabled.":
+    "Zmniejsz odznaki ocen, gdy włączono kilka źródeł ocen.",
   "Score badges on cards": "Odznaki ocen na kartach",
   "Score position": "Położenie oceny",
   Scores: "Oceny",

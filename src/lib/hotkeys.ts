@@ -18,6 +18,9 @@ export type HotkeyId =
   | "playerPip"
   | "playerSubtitleCycle"
   | "playerSubtitleCycleAlt"
+  | "playerAudioCycle"
+  | "playerSubSizeDown"
+  | "playerSubSizeUp"
   | "playerNextEpisode"
   | "playerPrevEpisode"
   | "playerPrevChannel"
@@ -44,6 +47,7 @@ export type HotkeyId =
   | "playerTvGuide"
   | "playerDvr"
   | "playerSleep"
+  | "playerShortcuts"
   | "playerScreenLock"
   | "playerReloadSource"
   | "playerRestartServer"
@@ -369,6 +373,30 @@ export const HOTKEYS: HotkeyDef[] = [
     defaultBinding: "c",
   },
   {
+    id: "playerAudioCycle",
+    scope: "Player",
+    group: "Tracks",
+    label: "Cycle audio tracks",
+    description: "Switch to the next available audio track.",
+    defaultBinding: "d",
+  },
+  {
+    id: "playerSubSizeDown",
+    scope: "Player",
+    group: "Tracks",
+    label: "Smaller subtitles",
+    description: "Decrease the subtitle text size.",
+    defaultBinding: "shift+{",
+  },
+  {
+    id: "playerSubSizeUp",
+    scope: "Player",
+    group: "Tracks",
+    label: "Larger subtitles",
+    description: "Increase the subtitle text size.",
+    defaultBinding: "shift+}",
+  },
+  {
     id: "playerSubDelayDown",
     scope: "Player",
     group: "Tracks",
@@ -458,6 +486,14 @@ export const HOTKEYS: HotkeyDef[] = [
     label: "DVR / record",
     description: "Open or close the live TV recorder (live channels only).",
     defaultBinding: "r",
+  },
+  {
+    id: "playerShortcuts",
+    scope: "Player",
+    group: "Panels",
+    label: "Show keyboard shortcuts",
+    description: "Show or hide the list of player shortcuts.",
+    defaultBinding: "shift+?",
   },
   {
     id: "playerSleep",

@@ -893,6 +893,9 @@ const library: Record<string, string> = {
   "Show your Letterboxd card": "显示你的 Letterboxd 卡片",
   "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
     "默认关闭。启用后，任何访问者都能在你的个人资料中看到 Letterboxd 名称、列表和电影数量。连接本身可在“设置”的“Letterboxd”中管理。",
+  Tabs: "标签页",
+  "Show tabs": "显示标签页",
+  "Choose which tabs appear in your library": "选择媒体库中显示的标签页",
 };
 
 export default library;

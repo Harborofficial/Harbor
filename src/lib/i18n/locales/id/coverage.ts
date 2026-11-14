@@ -754,6 +754,19 @@ const coverage: Record<string, string> = {
   "Smallest first": "Terkecil dulu",
   "Default order": "Urutan bawaan",
   "Sort sources: {value}": "Urutkan sumber: {value}",
+  "Show keyboard shortcuts": "Tampilkan pintasan keyboard",
+  "Show or hide the list of player shortcuts.":
+    "Tampilkan atau sembunyikan daftar pintasan pemutar.",
+  "Press {key} to close. Change these in Settings.":
+    "Tekan {key} untuk menutup. Ubah di Pengaturan.",
+  "Cycle audio tracks": "Ganti trek audio",
+  "Switch to the next available audio track.": "Beralih ke trek audio berikutnya yang tersedia.",
+  "Smaller subtitles": "Subtitle lebih kecil",
+  "Decrease the subtitle text size.": "Perkecil ukuran teks subtitle.",
+  "Larger subtitles": "Subtitle lebih besar",
+  "Increase the subtitle text size.": "Perbesar ukuran teks subtitle.",
+  "Audio: {name}": "Audio: {name}",
+  "Subtitle size: {size}": "Ukuran subtitle: {size}",
 };
 
 export default coverage;

@@ -917,6 +917,9 @@ const catalog: Record<string, string> = {
   "{n} characters": "{n} karakter",
   "{n} chars": "{n} karakter",
   "{n} connected": "{n} terhubung",
+  Tabs: "Tab",
+  "Show tabs": "Tampilkan tab",
+  "Choose which tabs appear in your library": "Pilih tab yang muncul di perpustakaan Anda",
 };
 
 export default catalog;

@@ -390,6 +390,17 @@ const player: Record<string, string> = {
   "Smallest first": "Nhỏ nhất trước",
   "Default order": "Thứ tự mặc định",
   "Sort sources: {value}": "Sắp xếp nguồn: {value}",
+  "Show keyboard shortcuts": "Hiện phím tắt",
+  "Show or hide the list of player shortcuts.": "Hiện hoặc ẩn danh sách phím tắt của trình phát.",
+  "Press {key} to close. Change these in Settings.": "Nhấn {key} để đóng. Thay đổi trong Cài đặt.",
+  "Cycle audio tracks": "Chuyển rãnh âm thanh",
+  "Switch to the next available audio track.": "Chuyển sang rãnh âm thanh khả dụng tiếp theo.",
+  "Smaller subtitles": "Phụ đề nhỏ hơn",
+  "Decrease the subtitle text size.": "Giảm cỡ chữ phụ đề.",
+  "Larger subtitles": "Phụ đề lớn hơn",
+  "Increase the subtitle text size.": "Tăng cỡ chữ phụ đề.",
+  "Audio: {name}": "Âm thanh: {name}",
+  "Subtitle size: {size}": "Cỡ phụ đề: {size}",
 };
 
 export default player;

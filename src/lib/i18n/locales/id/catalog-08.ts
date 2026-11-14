@@ -665,6 +665,9 @@ const catalog: Record<string, string> = {
   "Sci-fi, fantasy & horror": "Fiksi ilmiah, fantasi & horor",
   Score: "Skor",
   "Score /10": "Skor /10",
+  "Scale TV score badges": "Sesuaikan ukuran lencana skor kartu TV",
+  "Shrink the score stack when several ratings are enabled.":
+    "Perkecil kelompok lencana skor saat beberapa penilaian diaktifkan.",
   "Score badges on cards": "Lencana skor pada kartu",
   "Score position": "Posisi skor",
   Scores: "Skor",

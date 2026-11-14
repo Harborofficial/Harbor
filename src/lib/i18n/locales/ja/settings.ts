@@ -268,6 +268,9 @@ const settings: Record<string, string> = {
   "Rich season and order panel": "詳細なシーズン／視聴順パネル",
   "Rotten Tomatoes": "Rotten Tomatoes",
   Ruleset: "ルールセット",
+  "Scale TV score badges": "TVカードの評価バッジを縮小",
+  "Shrink the score stack when several ratings are enabled.":
+    "複数の評価を有効にしたときに、評価バッジを小さくします。",
   "Score badges on cards": "カードに評価バッジを表示",
   "Score position": "評価の位置",
   "Search rules by name or pattern…": "名前またはパターンでルールを検索…",

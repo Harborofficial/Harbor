@@ -1484,6 +1484,17 @@ const coverage: Record<string, string> = {
   "Smallest first": "सबसे छोटे पहले",
   "Default order": "डिफ़ॉल्ट क्रम",
   "Sort sources: {value}": "स्रोत क्रमबद्ध करें: {value}",
+  "Show keyboard shortcuts": "कीबोर्ड शॉर्टकट दिखाएं",
+  "Show or hide the list of player shortcuts.": "प्लेयर शॉर्टकट की सूची दिखाएं या छिपाएं।",
+  "Press {key} to close. Change these in Settings.": "बंद करने के लिए {key} दबाएं। इन्हें सेटिंग्स में बदलें।",
+  "Cycle audio tracks": "ऑडियो ट्रैक बदलें",
+  "Switch to the next available audio track.": "अगले उपलब्ध ऑडियो ट्रैक पर जाएं।",
+  "Smaller subtitles": "छोटे सबटाइटल",
+  "Decrease the subtitle text size.": "सबटाइटल टेक्स्ट का आकार घटाएं।",
+  "Larger subtitles": "बड़े सबटाइटल",
+  "Increase the subtitle text size.": "सबटाइटल टेक्स्ट का आकार बढ़ाएं।",
+  "Audio: {name}": "ऑडियो: {name}",
+  "Subtitle size: {size}": "सबटाइटल आकार: {size}",
 };
 
 export default coverage;

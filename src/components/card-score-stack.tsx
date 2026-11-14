@@ -111,6 +111,7 @@ export function ScoreStack({
   raised = false,
   shiftedFromEnd = false,
   topClass,
+  scaleBadges = true,
 }: {
   badges: readonly CardBadge[];
   limit?: number;
@@ -119,10 +120,18 @@ export function ScoreStack({
   shiftedFromEnd?: boolean;
   /** Optional top offset when TV-card overlays already occupy the top-right corner. */
   topClass?: string;
+  scaleBadges?: boolean;
 }) {
   const shown = badges.slice(0, Math.max(1, limit));
   if (shown.length === 0) return null;
-  const scale = shown.length <= 3 ? 1 : shown.length === 4 ? 0.88 : shown.length === 5 ? 0.78 : 0.7;
+  const scale =
+    !scaleBadges || shown.length <= 3
+      ? 1
+      : shown.length === 4
+        ? 0.88
+        : shown.length === 5
+          ? 0.78
+          : 0.7;
   return (
     <div
       style={scale < 1 ? { transform: `scale(${scale})`, transformOrigin: "right" } : undefined}

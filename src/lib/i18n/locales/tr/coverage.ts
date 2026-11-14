@@ -914,6 +914,19 @@ const coverage: Record<string, string> = {
   "Smallest first": "Önce en küçük",
   "Default order": "Varsayılan sıra",
   "Sort sources: {value}": "Kaynakları sırala: {value}",
+  "Show keyboard shortcuts": "Klavye kısayollarını göster",
+  "Show or hide the list of player shortcuts.":
+    "Oynatıcı kısayolları listesini gösterir veya gizler.",
+  "Press {key} to close. Change these in Settings.":
+    "Kapatmak için {key} tuşuna basın. Bunları Ayarlar'dan değiştirebilirsiniz.",
+  "Cycle audio tracks": "Ses parçaları arasında geçiş yap",
+  "Switch to the next available audio track.": "Bir sonraki kullanılabilir ses parçasına geçer.",
+  "Smaller subtitles": "Daha küçük altyazı",
+  "Decrease the subtitle text size.": "Altyazı metin boyutunu küçültür.",
+  "Larger subtitles": "Daha büyük altyazı",
+  "Increase the subtitle text size.": "Altyazı metin boyutunu büyütür.",
+  "Audio: {name}": "Ses: {name}",
+  "Subtitle size: {size}": "Altyazı boyutu: {size}",
 };
 
 export default coverage;

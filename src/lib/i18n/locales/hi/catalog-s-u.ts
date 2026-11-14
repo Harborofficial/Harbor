@@ -212,6 +212,8 @@ const catalogSU: Record<string, string> = {
   "Sci-fi, fantasy & horror": "साइंस फ़िक्शन, फ़ैंटेसी और हॉरर",
   Score: "स्कोर",
   "Score /10": "स्कोर /10",
+  "Scale TV score badges": "टीवी कार्ड के रेटिंग बैज का आकार बदलें",
+  "Shrink the score stack when several ratings are enabled.": "कई रेटिंग चालू होने पर रेटिंग बैज छोटे करें।",
   "Score badges on cards": "कार्ड पर स्कोर बैज",
   "Score position": "स्कोर की जगह",
   Scores: "स्कोर",
