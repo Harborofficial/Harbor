@@ -3,8 +3,12 @@ import { useState } from "react";
 import { FormatBadge, type BadgeKind } from "@/components/format-badge";
 import { useT } from "@/lib/i18n";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
+import type { SourceSort } from "@/lib/streams/source-sort";
 import { facetBadge } from "./filter-builder/badge-maps";
+import { SourceSortMenu } from "./source-sort-menu";
 import type { FacetDim, FacetOption } from "./stream-facets";
+
+const SORT_KEY = "__sort";
 
 export type FacetRowEntry = {
   dim: FacetDim;
@@ -21,6 +25,8 @@ export function FacetMenuRow({
   onSelectFilter,
   onNewFilter,
   onEditFilter,
+  sourceSort,
+  onSourceSort,
 }: {
   facets: FacetRowEntry[];
   onFacet: (key: string, value: string) => void;
@@ -29,6 +35,8 @@ export function FacetMenuRow({
   onSelectFilter: (id: string | null) => void;
   onNewFilter: () => void;
   onEditFilter: (filter: CustomStreamFilter) => void;
+  sourceSort?: SourceSort;
+  onSourceSort?: (value: SourceSort) => void;
 }) {
   const t = useT();
   const [openKey, setOpenKey] = useState<string | null>(null);
@@ -42,6 +50,18 @@ export function FacetMenuRow({
   };
   return (
     <div className="flex flex-wrap items-center gap-1.5">
+      {sourceSort !== undefined && onSourceSort && (
+        <SourceSortMenu
+          value={sourceSort}
+          open={openKey === SORT_KEY}
+          onToggle={() => setOpenKey((k) => (k === SORT_KEY ? null : SORT_KEY))}
+          onClose={() => setOpenKey(null)}
+          onPick={(v) => {
+            onSourceSort(v);
+            setOpenKey(null);
+          }}
+        />
+      )}
       {visible.map((f) => (
         <FacetMenu
           key={f.dim.key}
@@ -170,7 +190,11 @@ function FacetMenu({
             onClick={onClose}
             className="fixed inset-0 z-10 cursor-default"
           />
-          <div className="absolute start-0 top-full z-20 mt-1 min-w-[176px] rounded-xl bg-elevated p-1 ring-1 ring-edge shadow-[0_18px_44px_-14px_rgba(0,0,0,0.7)]">
+          <div
+            className={`absolute start-0 top-full z-20 mt-1 grid w-max min-w-[176px] gap-x-2.5 rounded-xl bg-elevated p-1 ring-1 ring-edge shadow-[0_18px_44px_-14px_rgba(0,0,0,0.7)] ${
+              badgeSlot ? "grid-cols-[auto_1fr_auto_auto]" : "grid-cols-[1fr_auto_auto]"
+            }`}
+          >
             <MenuItem
               label={t("All")}
               count={entry.total}
@@ -212,21 +236,23 @@ function MenuItem({
   badgeSlot: boolean;
   onClick: () => void;
 }) {
+  // Rows share the menu's grid columns, so the badge column grows to the widest
+  // badge in this menu instead of clipping it, and the labels stay aligned.
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-[13px] transition-colors hover:bg-raised ${
+      className={`col-span-full grid grid-cols-subgrid items-center rounded-lg px-2.5 py-2 text-start text-[13px] transition-colors hover:bg-raised ${
         selected ? "font-semibold text-ink" : "text-ink-muted"
       }`}
     >
       {badgeSlot && (
-        <span className="flex h-4 w-9 shrink-0 items-center overflow-hidden [&_img]:!h-4 [&_img]:!max-h-4 [&_img]:!w-auto">
+        <span className="flex h-4 items-center [&_img]:!h-4 [&_img]:!max-h-4 [&_img]:!w-auto">
           {badge && <FormatBadge kind={badge} size="sm" />}
         </span>
       )}
-      <span className="flex-1 truncate">{label}</span>
-      <span className="text-[11.5px] text-ink-subtle">{count}</span>
+      <span className="truncate">{label}</span>
+      <span className="text-end text-[11.5px] tabular-nums text-ink-subtle">{count}</span>
       <Check size={13} strokeWidth={2.6} className={selected ? "text-ink" : "invisible"} />
     </button>
   );

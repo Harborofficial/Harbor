@@ -4,6 +4,8 @@ import { AddonLogo } from "@/components/addon-logo";
 import { FormatBadge, type BadgeKind } from "@/components/format-badge";
 import { useT } from "@/lib/i18n";
 import type { StreamMode } from "@/components/stream-mode-toggle";
+import { SOURCE_SORTS, type SourceSort } from "@/lib/streams/source-sort";
+import { useSourceSortLabel } from "@/views/play-picker/source-sort-menu";
 import { abbreviateLanguages } from "./lang-utils";
 import { QUALITY_LABEL, type QualityKey } from "./quality";
 
@@ -22,6 +24,8 @@ type QualOpt = { id: Exclude<QualityKey, "all">; name: string; count: number; ba
 export type SwitcherFilters = {
   mode: StreamMode;
   setMode: (m: StreamMode) => void;
+  sourceSort: SourceSort;
+  setSourceSort: (v: SourceSort) => void;
   quality: QualityKey;
   setQuality: (q: QualityKey) => void;
   qualityOptions: QualOpt[];
@@ -60,6 +64,7 @@ function activeCountOf(f: SwitcherFilters): number {
 
 export function FiltersMenu({ filters }: { filters: SwitcherFilters }) {
   const t = useT();
+  const sourceSortLabel = useSourceSortLabel();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const active = activeCountOf(filters);
@@ -126,6 +131,21 @@ export function FiltersMenu({ filters }: { filters: SwitcherFilters }) {
               ).map(([v, label]) => (
                 <Chip key={v} active={filters.mode === v} onClick={() => filters.setMode(v)} grow>
                   {label}
+                </Chip>
+              ))}
+            </div>
+          </Section>
+
+          <Section label={t("Sort")}>
+            <div className="grid grid-cols-2 gap-1.5">
+              {SOURCE_SORTS.map((v) => (
+                <Chip
+                  key={v}
+                  active={filters.sourceSort === v}
+                  onClick={() => filters.setSourceSort(v)}
+                  grow
+                >
+                  {sourceSortLabel(v)}
                 </Chip>
               ))}
             </div>

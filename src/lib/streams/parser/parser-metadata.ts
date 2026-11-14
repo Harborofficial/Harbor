@@ -2,7 +2,11 @@ import type { DefaultParserResult } from "parse-torrent-title";
 import type { Container, Resolution, Source } from "../types";
 
 const CONTAINER_RX = /\.(mkv|mp4|m4v|avi|webm|mov|ts|wmv)\b/i;
-const SIZE_RX = /(\d+(?:\.\d+)?)\s*(GB|MB|TB|GiB|MiB|TiB)\b/i;
+// Accepts thousands separators ("1,024 MB") and comma decimals ("2,91Gb"), which
+// otherwise match only the digits after the comma and inflate the size.
+const SIZE_RX = /(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+|,\d{1,2})?)\s*(GB|MB|TB|GiB|MiB|TiB)\b/i;
+// The addon's own size field ("💾 1.07 GB") beats a rounded size inside the release name.
+const MARKED_SIZE_RX = new RegExp(`💾\\s*${SIZE_RX.source}`, "iu");
 const SEEDERS_RX = /(?:👥|👤|S:|seeds?:?|\bS\s*=\s*)\s*(\d+)/i;
 const ANIME_HASH_RX = /\[([0-9A-F]{8})\]/i;
 const REPACK_RX = /\bREPACK(\d+)?\b/i;
@@ -52,9 +56,10 @@ export function parseContainer(
 
 export function parseSize(text: string, hint?: number): number | null {
   if (hint && hint > 0) return hint;
-  const m = text.match(SIZE_RX);
+  const m = text.match(MARKED_SIZE_RX) ?? text.match(SIZE_RX);
   if (!m) return null;
-  const n = Number(m[1]);
+  const digits = /,\d{3}/.test(m[1]) ? m[1].replace(/,/g, "") : m[1].replace(",", ".");
+  const n = Number(digits);
   const unit = m[2].toLowerCase();
   if (unit.startsWith("t")) return Math.round(n * 1024 ** 4);
   if (unit.startsWith("g")) return Math.round(n * 1024 ** 3);

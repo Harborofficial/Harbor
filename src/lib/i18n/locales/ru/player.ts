@@ -471,6 +471,10 @@ const player: Record<string, string> = {
   "Saving...": "Сохранение...",
   "Search audio language": "Поиск языка аудио",
   "No audio track in that language.": "Нет аудиодорожки на этом языке.",
+  "Largest first": "Сначала крупные",
+  "Smallest first": "Сначала маленькие",
+  "Default order": "Порядок по умолчанию",
+  "Sort sources: {value}": "Сортировка источников: {value}",
   "Show keyboard shortcuts": "Показать сочетания клавиш",
   "Show or hide the list of player shortcuts.":
     "Показать или скрыть список сочетаний клавиш плеера.",

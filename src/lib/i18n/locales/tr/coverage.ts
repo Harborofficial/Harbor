@@ -910,6 +910,10 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "NYT Books API anahtarı",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "Harbor'ın doğrudan ve debrid kaynaklarını mı, eşler arası torrentleri mi tercih edeceğini veya ikisini birden mi göstereceğini seçin.",
+  "Largest first": "Önce en büyük",
+  "Smallest first": "Önce en küçük",
+  "Default order": "Varsayılan sıra",
+  "Sort sources: {value}": "Kaynakları sırala: {value}",
   "Show keyboard shortcuts": "Klavye kısayollarını göster",
   "Show or hide the list of player shortcuts.":
     "Oynatıcı kısayolları listesini gösterir veya gizler.",

@@ -1480,6 +1480,10 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "NYT Books API कुंजी",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "चुनें कि Harbor सीधे और debrid स्रोतों, peer-to-peer टोरेंट को प्राथमिकता दे या दोनों दिखाए।",
+  "Largest first": "सबसे बड़े पहले",
+  "Smallest first": "सबसे छोटे पहले",
+  "Default order": "डिफ़ॉल्ट क्रम",
+  "Sort sources: {value}": "स्रोत क्रमबद्ध करें: {value}",
   "Show keyboard shortcuts": "कीबोर्ड शॉर्टकट दिखाएं",
   "Show or hide the list of player shortcuts.": "प्लेयर शॉर्टकट की सूची दिखाएं या छिपाएं।",
   "Press {key} to close. Change these in Settings.": "बंद करने के लिए {key} दबाएं। इन्हें सेटिंग्स में बदलें।",

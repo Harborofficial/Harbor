@@ -516,6 +516,10 @@ const player: Record<string, string> = {
     "عدم إظهار تنبيه المحتوى لهذا العنوان مرة أخرى",
   "Search audio language": "ابحث عن لغة الصوت",
   "No audio track in that language.": "لا يوجد مسار صوتي بهذه اللغة.",
+  "Largest first": "الأكبر أولاً",
+  "Smallest first": "الأصغر أولاً",
+  "Default order": "الترتيب الافتراضي",
+  "Sort sources: {value}": "ترتيب المصادر: {value}",
   "Show keyboard shortcuts": "عرض اختصارات لوحة المفاتيح",
   "Show or hide the list of player shortcuts.": "إظهار أو إخفاء قائمة اختصارات المشغّل.",
   "Press {key} to close. Change these in Settings.":
