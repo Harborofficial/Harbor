@@ -9,6 +9,7 @@ import {
   activeScopedProfileId,
 } from "@/lib/active-profile-id";
 import { refractEnabled, refractPlaybackReached } from "@/lib/refract/client";
+import { parseRefractHistoryId, refractMappedEpisodes } from "@/lib/refract/identity";
 import { animeIdentityEligible, resolveAnimeIdentity } from "@/lib/streams/anime-identity";
 import { resolveTrackerAnimeEntry } from "@/lib/anime-tracker-entry";
 import {
@@ -284,8 +285,14 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
       });
     }
     // Refract's optional early threshold must not alter Harbor's activity or watched state.
+    const refractKind = s.meta.type === "movie" ? "movie" : "episode";
+    const externalId = rv && rid && parseRefractHistoryId(rid, refractKind) ? rid : undefined;
+    const nativeNumbering = ANIME_CLOUD_ID.test(id) || !!s.episode?.kitsuStreamId;
+    const mapped = refractMappedEpisodes(s.episode ? [s.episode] : []);
     if (
       !current.refractCompleted &&
+      !!parseRefractHistoryId(externalId ?? id, refractKind) &&
+      (refractKind === "movie" || !nativeNumbering || (!!externalId && !!mapped)) &&
       activeScopedProfileId() === (current.ownerId ?? "default") &&
       activeProfileIsPrimary() &&
       refractEnabled() &&
@@ -303,7 +310,7 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
           at: Date.now(),
         },
         {
-          externalId: rv && rid ? rid : undefined,
+          externalId,
           episodes:
             s.meta.type === "movie"
               ? undefined

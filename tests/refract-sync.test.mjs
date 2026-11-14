@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
+import { parseRefractHistoryId } from "../src/lib/refract/identity.ts";
 
 function harness() {
   const db = new Map();
@@ -45,6 +46,7 @@ function harness() {
     (id) => {
       if (id === "@/lib/active-profile-id") return { activeProfileIsPrimary: () => primary };
       if (id === "./client") return client;
+      if (id === "./identity") return { parseRefractHistoryId };
       throw new Error(`Unexpected import: ${id}`);
     },
     module,
@@ -62,6 +64,9 @@ function harness() {
     },
     setKey: (v) => {
       key = v;
+    },
+    setLookup: (v) => {
+      client.lookupRefract = v;
     },
     setOffline: (v) => {
       offline = v;
@@ -162,6 +167,28 @@ test("offline queue persists and retries without losing the viewing time", async
     await tick();
     assert.equal(h.sync.refractStatus().pending, 0);
     assert.equal(h.calls.length, 1);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("disabling sync during a lookup preserves the queued watch without sending it", async () => {
+  const h = harness();
+  try {
+    let finish;
+    h.setLookup(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    h.sync.enqueueRefractWatch(movieEvent());
+    h.setEnabled(false);
+    finish([{ ids: { refract: "movie-ref" } }]);
+    await tick();
+    assert.equal(h.calls.length, 0);
+    assert.equal(h.sync.refractStatus().pending, 1);
+    assert.equal(h.sync.refractStatus().failed, 0);
   } finally {
     h.cleanup();
   }

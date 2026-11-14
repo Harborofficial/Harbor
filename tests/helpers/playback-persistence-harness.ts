@@ -4,6 +4,7 @@ import { emptySnapshot } from "../../src/lib/player/bridge.ts";
 import { isNaturalEnd } from "../../src/lib/player/playback-end.ts";
 import { playerLoadIdentity } from "../../src/lib/player/load-identity.ts";
 import { animeTrackerTarget } from "../../src/lib/tracker-progress.ts";
+import { parseRefractHistoryId, refractMappedEpisodes } from "../../src/lib/refract/identity.ts";
 
 export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
   const effects: Array<{ deps: unknown[] | undefined; cleanup?: () => void }> = [];
@@ -60,6 +61,8 @@ export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
     activeProfileId: () => profileId,
     activeScopedProfileId: () => profileId,
     activeProfileIsPrimary: () => true,
+    parseRefractHistoryId,
+    refractMappedEpisodes,
     refractEnabled: () => refractThreshold !== null,
     refractPlaybackReached: (position: number) =>
       refractThreshold !== null && position >= refractThreshold,

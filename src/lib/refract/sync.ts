@@ -1,4 +1,5 @@
 import type { WatchEvent } from "@/lib/watch-events";
+import { parseRefractHistoryId } from "./identity";
 import { activeProfileIsPrimary } from "@/lib/active-profile-id";
 import {
   getRefractKey,
@@ -105,21 +106,13 @@ function append(s: Store, job: Job): void {
   if (s.pending.length < 2500) s.pending.push(job);
   else s.message = "Refract queue full; unable to save another watch";
 }
-/** Never send title-only matches; Refract resolves externally verified IDs. */
-function parseId(raw: string, kind: Job["type"]) {
-  if (/^tt\d+$/i.test(raw)) return { type: "imdb" as const, id: raw };
-  let m = /^imdb:(tt\d+)$/i.exec(raw);
-  if (m) return { type: "imdb" as const, id: m[1] };
-  m = /^tmdb:(movie|tv):(\d+)$/i.exec(raw);
-  if (m && m[1] === (kind === "movie" ? "movie" : "tv")) return { type: "tmdb" as const, id: m[2] };
-  m = /^tvdb:(\d+)$/i.exec(raw);
-  if (m && kind === "episode") return { type: "tvdb" as const, id: m[1] };
-  return null;
-}
 export function enqueueRefractWatch(event: WatchEvent, hint: RefractHint = {}): void {
   // A single personal key must never accidentally receive another Harbor profile's watches.
   if (!refractEnabled() || !activeProfileIsPrimary()) return;
-  const sourceId = parseId(hint.externalId || "", event.type === "movie" ? "movie" : "episode")
+  const sourceId = parseRefractHistoryId(
+    hint.externalId || "",
+    event.type === "movie" ? "movie" : "episode",
+  )
     ? hint.externalId!
     : event.id;
   const at = event.at || Date.now();
@@ -156,8 +149,9 @@ export function enqueueRefractWatch(event: WatchEvent, hint: RefractHint = {}): 
   if (save(s)) void flushRefractSync();
 }
 class Unmatched extends Error {}
+class Superseded extends Error {}
 async function push(key: string, job: Job): Promise<void> {
-  const parsed = parseId(job.sourceId, job.type);
+  const parsed = parseRefractHistoryId(job.sourceId, job.type);
   if (!parsed) throw new Unmatched("No verified IMDb/TMDB/TVDB identity");
   const found = await lookupRefract(
     key,
@@ -168,6 +162,8 @@ async function push(key: string, job: Job): Promise<void> {
     job.episode,
     job.numbering,
   );
+  if (getRefractKey() !== key || !refractEnabled() || !activeProfileIsPrimary())
+    throw new Superseded("Refract sync stopped before write");
   if (job.type === "movie") {
     const movie = found.find((x) => x.ids?.refract != null)?.ids?.refract;
     if (movie == null) throw new Unmatched("Movie not found in Refract");
@@ -212,7 +208,7 @@ export async function flushRefractSync(): Promise<void> {
         current.message = "Last watched item sent successfully";
         save(current);
       } catch (error) {
-        if (getRefractKey() !== key) break;
+        if (error instanceof Superseded || getRefractKey() !== key) break;
         const current = read();
         const pending = current.pending.find((x) => x.id === job.id);
         if (!pending) continue;

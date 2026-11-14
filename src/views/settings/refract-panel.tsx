@@ -1,4 +1,5 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { createRefractAttemptGuard } from "@/lib/refract/identity";
 import { useT } from "@/lib/i18n";
 import {
   getRefractKey,
@@ -34,6 +35,12 @@ export function RefractPanel() {
   const [showKey, setShowKey] = useState(false);
   const [status, setStatus] = useState(refractStatus);
   const [watchlist, setWatchlist] = useState(refractWatchlistStatus);
+  const attemptGuard = useRef(createRefractAttemptGuard());
+
+  useEffect(() => {
+    const guard = attemptGuard.current;
+    return () => guard.invalidate();
+  }, []);
 
   useEffect(
     () => subscribeRefractWatchlistStatus(() => setWatchlist(refractWatchlistStatus())),
@@ -52,10 +59,12 @@ export function RefractPanel() {
     event.preventDefault();
     const key = input.trim();
     if (!key) return;
+    const isCurrent = attemptGuard.current.begin();
     setBusy(true);
     setMessage("");
     try {
       const identity = await verifyRefractKey(key);
+      if (!isCurrent()) return;
       // Never replay watches from another Refract account after replacing a key.
       resetRefractSync();
       clearRefractWatchlistStatus();
@@ -67,15 +76,17 @@ export function RefractPanel() {
       setMessage(`Connected to Refract (${identity}). Watched history sync is enabled.`);
       startRefractSync();
     } catch {
+      if (!isCurrent()) return;
       setMessage(
         "Could not verify the key via Refract /v1/me. Check permissions and connectivity.",
       );
     } finally {
-      setBusy(false);
+      if (isCurrent()) setBusy(false);
     }
   };
 
   const disconnect = () => {
+    attemptGuard.current.invalidate();
     setRefractEnabled(false);
     saveRefractKey(null);
     resetRefractSync();

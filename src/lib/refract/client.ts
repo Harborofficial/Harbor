@@ -238,7 +238,7 @@ export function clearRefractWatchlistStatus(): void {
 }
 
 /** Account/profile guards are rechecked after lookup, before writing membership. */
-export async function syncRefractWatchlist(
+async function runRefractWatchlistSync(
   key: string,
   input: RefractWatchlistInput,
   on: boolean,
@@ -283,4 +283,27 @@ export async function syncRefractWatchlist(
     reportWatchlist(reason);
     return reason;
   }
+}
+
+const watchlistQueues = new Map<string, Promise<unknown>>();
+
+/** Preserve the order of rapid add/remove requests for each verified title. */
+export function syncRefractWatchlist(
+  key: string,
+  input: RefractWatchlistInput,
+  on: boolean,
+  assertCurrent: () => void,
+): Promise<string | undefined> {
+  const identity = refractWatchlistIdentity(input);
+  if (!identity) return runRefractWatchlistSync(key, input, on, assertCurrent);
+  const queueKey = `${identity.type}:${identity.idType}:${identity.id}`;
+  const next = (watchlistQueues.get(queueKey) ?? Promise.resolve()).then(() =>
+    runRefractWatchlistSync(key, input, on, assertCurrent),
+  );
+  const settled = next.catch(() => {});
+  watchlistQueues.set(queueKey, settled);
+  void settled.then(() => {
+    if (watchlistQueues.get(queueKey) === settled) watchlistQueues.delete(queueKey);
+  });
+  return next;
 }

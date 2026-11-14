@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import type { Meta } from "../src/lib/cinemeta.ts";
+import { refractMappedEpisodes } from "../src/lib/refract/identity.ts";
 
 type Actions = typeof import("../src/lib/media-context-actions.ts");
 const movie = { id: "tt123", type: "movie", name: "Fixture" } as Meta;
@@ -11,6 +12,7 @@ const series = { ...movie, type: "series" } as Meta;
 function harness() {
   const calls: Array<{ provider: string; value: unknown }> = [];
   const fetches: string[] = [];
+  const watchEvents: unknown[][] = [];
   let profile = { activeId: "fixture", settingsLinked: false };
   let full: Meta = {
     ...series,
@@ -79,7 +81,8 @@ function harness() {
       recordManualWatchedMeta: () => {},
     },
     "./playback-history": { savePlayback: () => {} },
-    "./watch-events": { recordWatchEvent: () => {} },
+    "./watch-events": { recordWatchEvent: (...args: unknown[]) => watchEvents.push(args) },
+    "./refract/identity": { refractMappedEpisodes },
     "./media-provider-actions": {
       dropProviderWrites: () => [
         { provider: "Trakt", run: () => step("trakt-drop")(true) },
@@ -134,6 +137,7 @@ function harness() {
     actions: module.exports as Actions,
     calls,
     fetches,
+    watchEvents,
     failures,
     setFull: (next: Meta) => {
       full = next;
@@ -431,4 +435,33 @@ test("verified anime unwatch clears only the mapped IMDb episode alias", async (
       ["tt123", [{ season: 2, episode: 1 }], false],
     ],
   );
+});
+
+test("unverified native anime coordinates stay local and are not forwarded to Refract", async () => {
+  const h = harness();
+  await h.actions.setContextWatched({ ...series, id: "kitsu:10" }, true, {
+    imdbId: "tt123",
+    episode: { season: 1, episode: 13 },
+  });
+  assert.equal(h.watchEvents.length, 1);
+  assert.equal(h.watchEvents[0][1], undefined);
+  assert.deepEqual(h.calls.find((c) => c.provider === "local-episodes")?.value, [
+    "kitsu:10",
+    [{ season: 1, episode: 13 }],
+    true,
+  ]);
+});
+
+test("verified native anime coordinates reach Refract without guessing episode numbers", async () => {
+  const h = harness();
+  await h.actions.setContextWatched({ ...series, id: "kitsu:10" }, true, {
+    imdbId: "tt123",
+    episode: { season: 1, episode: 13 },
+    providerEpisode: { season: 2, episode: 1 },
+  });
+  assert.equal(h.watchEvents.length, 1);
+  assert.deepEqual(h.watchEvents[0][1], {
+    externalId: "tt123",
+    episodes: [{ season: 2, episode: 1 }],
+  });
 });
