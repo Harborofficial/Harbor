@@ -1,6 +1,6 @@
 .games-wow-dungeons > button {
   text-align: start;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   border: 0;
 }
 .games-wow-run-dialog {
@@ -133,7 +133,7 @@
   align-items: center;
   padding: 16px 10px;
   min-height: 78px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
   border-radius: 5px;
 }

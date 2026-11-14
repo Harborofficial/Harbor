@@ -4,12 +4,12 @@ import { useT } from "@/lib/i18n";
 import type { ReaderMode } from "@/views/manga/manga-reader/reader-types";
 
 const SCRUB_CSS = `
-.reader-scrub{-webkit-appearance:none;appearance:none;height:6px;border-radius:9999px;outline:none;cursor:pointer;}
+.reader-scrub{-webkit-appearance:none;appearance:none;height:6px;border-radius:9999px;outline:none;cursor:var(--harbor-cursor-pointer, pointer);}
 .reader-scrub::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:9999px;background:var(--color-accent);border:none;box-shadow:0 1px 5px rgba(0,0,0,0.4),0 0 0 4px rgba(255,255,255,0.06);transition:transform 130ms cubic-bezier(0.22,1,0.36,1);}
 .reader-scrub:hover::-webkit-slider-thumb{transform:scale(1.15);}
 .reader-scrub:active::-webkit-slider-thumb{transform:scale(1.28);}
 .reader-scrub:focus-visible{outline:2px solid var(--color-accent);outline-offset:3px;}
-.reader-scrub:disabled{opacity:0.4;cursor:default;}
+.reader-scrub:disabled{opacity:0.4;cursor:var(--harbor-cursor-default, default);}
 `;
 
 const BTN =

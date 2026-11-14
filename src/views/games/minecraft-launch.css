@@ -105,7 +105,7 @@
   display: flex;
   gap: 9px;
   align-items: center;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 13px;
   min-height: 36px;
   color: var(--color-ink-muted);

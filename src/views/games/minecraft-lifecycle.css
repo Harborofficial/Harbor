@@ -76,7 +76,7 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   min-height: 44px;
   font-size: 13px;
 }

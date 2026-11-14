@@ -40,7 +40,7 @@
 }
 .music-speakers button:disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .music-speakers button:focus-visible {
   outline: 2px solid var(--color-accent);

@@ -212,7 +212,7 @@
   font-weight: 600;
 }
 .games-helldivers-map-pin {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   outline: none;
 }
 .games-helldivers-map-hit {
@@ -475,7 +475,7 @@
   gap: 16px;
   font-size: 15px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
 }
 .games-helldivers-orders summary::-webkit-details-marker {

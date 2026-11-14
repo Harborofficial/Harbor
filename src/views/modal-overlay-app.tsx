@@ -25,7 +25,7 @@ export function ModalOverlayApp() {
 
   return (
     <AuthProvider>
-      <SettingsProvider>
+      <SettingsProvider preserveStoredHarborCursor>
         <ModalRouter />
       </SettingsProvider>
     </AuthProvider>

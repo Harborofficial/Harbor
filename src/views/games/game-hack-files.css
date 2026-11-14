@@ -104,7 +104,7 @@
   margin-top: 20px;
 }
 .games-patch-manual > summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding-block: 12px;
   color: var(--color-ink-muted);
   font-size: 13px;

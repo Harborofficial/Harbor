@@ -94,7 +94,7 @@ html[data-theme-layout="custom"] .myc-nav button {
   font-family: var(--font-sans, sans-serif);
   font-size: 15px;
   font-weight: 500;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition: background 0.15s ease, color 0.15s ease;
 }
 html[data-theme-layout="custom"] .myc-nav button:hover { background: var(--color-raised); color: var(--color-ink); }
@@ -112,7 +112,7 @@ html[data-theme-layout="custom"] .myc-iconbtn {
   border-radius: 999px;
   background: transparent;
   color: var(--color-ink-muted);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition: background 0.15s ease, color 0.15s ease;
 }
 html[data-theme-layout="custom"] .myc-iconbtn:hover { background: var(--color-raised); color: var(--color-ink); }
@@ -171,7 +171,7 @@ html[data-theme-layout="custom"] .myc-bar button {
   font-weight: 600;
   padding: 8px 12px;
   border-radius: 10px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition: background 0.15s ease, color 0.15s ease;
 }
 html[data-theme-layout="custom"] .myc-bar button:hover { background: var(--color-raised); color: var(--color-ink); }

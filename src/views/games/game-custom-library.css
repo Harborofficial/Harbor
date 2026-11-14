@@ -305,7 +305,7 @@
   padding: 16px 0;
   font-size: 12px;
   color: var(--color-ink-muted);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-custom-advanced[open] > summary {
   margin-bottom: 4px;

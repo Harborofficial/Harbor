@@ -915,7 +915,7 @@ button.mc-project-card:hover {
 }
 :is(.mc-catalog, .mc-project-dialog) button:disabled {
   opacity: 0.3;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 [dir="rtl"] :is(.mc-catalog-pages, .mc-project-gallery) button > svg {
   transform: scaleX(-1);

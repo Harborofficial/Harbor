@@ -33,7 +33,7 @@
 .sh-video-preview-sound {
   pointer-events: auto;
   z-index: 3;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   min-height: 36px;
   border: 0;
   position: absolute;

@@ -64,7 +64,7 @@
   padding: 8px 16px;
   border-radius: 6px;
   background: var(--color-elevated);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .music-video-placeholder button:hover {
   background: var(--color-raised);

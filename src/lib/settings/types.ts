@@ -218,6 +218,8 @@ export type Settings = {
   playerTitleSeriesFirst: boolean;
   playerTitleLogo: boolean;
   uiScale: number;
+  harborCursor: boolean;
+  harborCursorScale: number;
   serveWebUi: boolean;
   remoteControlEnabled: boolean;
   controllerSupportEnabled: boolean;

@@ -387,7 +387,7 @@
 }
 .music-library-lastfm > summary {
   width: fit-content;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   min-height: 44px;
   font-size: 13px;
   color: var(--color-ink-muted);
@@ -399,7 +399,7 @@
   width: fit-content;
   max-inline-size: 420px;
   padding: 10px 16px 10px 10px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   border-radius: 12px;
   background: var(--color-elevated);
   transition:

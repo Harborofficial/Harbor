@@ -1,5 +1,7 @@
 import type { PlayerSnapshot } from "../bridge";
 import { t } from "@/lib/i18n";
+import { observeStoredHarborCursor } from "@/lib/harbor-cursor";
+import cursorCss from "@/harbor-cursor.css?inline";
 
 export function mountCustomPip(
   pipWin: Window,
@@ -12,8 +14,9 @@ export function mountCustomPip(
   doc.head.innerHTML = "";
   doc.body.innerHTML = "";
   const style = doc.createElement("style");
-  style.textContent = PIP_CSS;
+  style.textContent = cursorCss + PIP_CSS;
   doc.head.appendChild(style);
+  const stopCursor = observeStoredHarborCursor(pipWin);
 
   const root = doc.createElement("div");
   root.className = "pip-root";
@@ -142,6 +145,7 @@ export function mountCustomPip(
   pipWin.addEventListener(
     "pagehide",
     () => {
+      stopCursor();
       video.removeEventListener("play", sync);
       video.removeEventListener("pause", sync);
       video.removeEventListener("timeupdate", sync);
@@ -189,7 +193,7 @@ const PIP_CSS = `
     border: 1px solid rgba(255,255,255,0.16);
     background: rgba(0,0,0,0.55); backdrop-filter: blur(10px);
     color: #fafafa; font-size: 12px; font-weight: 600;
-    letter-spacing: 0.04em; cursor: pointer;
+    letter-spacing: 0.04em; cursor: var(--harbor-cursor-pointer, pointer);
     transition: background-color 150ms ease, border-color 150ms ease;
   }
   .pip-exit:hover { background: rgba(0,0,0,0.8); border-color: rgba(255,255,255,0.28); }
@@ -205,7 +209,7 @@ const PIP_CSS = `
     position: relative;
     display: inline-flex; align-items: center; justify-content: center;
     height: 38px; width: 38px;
-    border: none; background: transparent; color: #fafafa; cursor: pointer;
+    border: none; background: transparent; color: #fafafa; cursor: var(--harbor-cursor-pointer, pointer);
     border-radius: 999px;
     transition: background-color 150ms ease;
   }
@@ -219,7 +223,7 @@ const PIP_CSS = `
   .pip-play {
     display: inline-flex; align-items: center; justify-content: center;
     height: 50px; width: 50px;
-    border: none; background: rgba(255,255,255,0.14); color: #fafafa; cursor: pointer;
+    border: none; background: rgba(255,255,255,0.14); color: #fafafa; cursor: var(--harbor-cursor-pointer, pointer);
     border-radius: 999px; backdrop-filter: blur(10px);
     transition: background-color 150ms ease, transform 100ms ease;
   }
@@ -232,7 +236,7 @@ const PIP_CSS = `
   }
   .pip-volume::-webkit-slider-thumb {
     appearance: none; height: 11px; width: 11px; border-radius: 999px;
-    background: #fafafa; cursor: pointer;
+    background: #fafafa; cursor: var(--harbor-cursor-pointer, pointer);
   }
   .pip-progress {
     position: absolute; left: 0; right: 0; bottom: 0;

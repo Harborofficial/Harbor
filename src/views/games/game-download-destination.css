@@ -46,7 +46,7 @@
   color: var(--color-ink-muted);
   background: var(--color-elevated);
   min-width: 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background-color 160ms ease-out,
     color 160ms ease-out;
@@ -118,7 +118,7 @@
 }
 .games-destination-dialog button:disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 @media (max-width: 480px) {
   .games-destination-dialog header {
@@ -195,7 +195,7 @@
   background: var(--color-elevated);
   color: var(--color-ink);
   text-align: start;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-destination-subfolders > button:hover {
   background: var(--color-raised);

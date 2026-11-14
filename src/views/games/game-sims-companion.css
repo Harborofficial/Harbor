@@ -13,7 +13,7 @@
   justify-content: space-between;
   gap: 16px;
   list-style: none;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 15px;
   font-weight: 600;
   padding: 8px 0;
@@ -138,7 +138,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
   font-size: 14px;
   font-weight: 600;
@@ -277,7 +277,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 14px;
   font-weight: 600;
   list-style: none;
@@ -545,7 +545,7 @@
 }
 .games-sims-dialog details > summary {
   font-size: 13px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-sims-success {
   display: flex;
@@ -725,7 +725,7 @@
 }
 .games-sims-sets button:disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .games-sims-set-members {
   display: grid;
@@ -946,7 +946,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 13px;
   list-style: none;
 }
@@ -962,7 +962,7 @@
 }
 .games-sims-test button:disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 @media (max-width: 650px) {
   .games-sims-test > header,
@@ -1063,7 +1063,7 @@
 }
 .games-sims-dialog button:disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .games-sims-info-button {
   margin: 0 0 12px;
@@ -1577,11 +1577,11 @@
   background: none;
   color: var(--color-ink);
   text-align: start;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   overflow-wrap: anywhere;
 }
 .games-sims-mts-card:disabled {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
   opacity: 0.55;
 }
 .games-sims-mts-card .games-sims-mts-art {
@@ -1644,7 +1644,7 @@
   margin-block: 20px;
 }
 .games-sims-mts-paste > summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 13px;
   color: var(--color-ink-muted);
 }
@@ -1710,7 +1710,7 @@
   display: inline-flex;
   gap: 8px;
   align-items: center;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 13px;
 }
 .games-sims-mts-managed > div {
@@ -1933,7 +1933,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-sims-dependency-results details[open] summary svg {
   transform: rotate(180deg);
@@ -2047,7 +2047,7 @@
 }
 .games-sims-installations > button:disabled {
   opacity: 0.5;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .games-sims-installation-label {
   min-width: 0;
@@ -2081,7 +2081,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
   font-size: 13px;
   min-height: 36px;

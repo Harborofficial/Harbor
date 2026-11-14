@@ -25,7 +25,7 @@
 .music-miku-license summary {
   width: fit-content;
   padding: 8px 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   color: var(--color-ink-muted);
   font-size: 12px;
 }

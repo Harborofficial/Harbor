@@ -1,5 +1,10 @@
 // Newly introduced UI copy remains usable until each locale provides an override.
 const uiFallback: Record<string, string> = {
+  "Harbor cursor": "Harbor cursor",
+  "Harbor cursor size": "Harbor cursor size",
+  "settings.harborCursor.scale": "Cursor size",
+  "Use Harbor's anchor as your mouse pointer.": "Use Harbor's anchor as your mouse pointer.",
+  "Adjust the size of Harbor's mouse pointer.": "Adjust the size of Harbor's mouse pointer.",
   "Episode information is unavailable": "Episode information is unavailable",
   "This PDF is shown as page images. Text search, translation, and narration are not available.":
     "This PDF is shown as page images. Text search, translation, and narration are not available.",

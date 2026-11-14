@@ -102,7 +102,7 @@
 }
 .games-custom-editor > footer .games-button:disabled {
   opacity: 0.4;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 @media (max-width: 600px) {
   .games-custom-playtime-fields {

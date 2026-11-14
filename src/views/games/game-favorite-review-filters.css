@@ -51,7 +51,7 @@
   font-weight: 600;
 }
 .games-favorite-review-menu .games-filter-reset:disabled {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
   opacity: 0.4;
   background: none;
 }

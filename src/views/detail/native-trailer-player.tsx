@@ -220,7 +220,9 @@ export function NativeTrailerPlayer({
       className="absolute inset-0"
       onMouseMove={wake}
       onMouseEnter={wake}
-      style={{ cursor: chromeVisible || !playing ? "default" : "none" }}
+      style={{
+        cursor: chromeVisible || !playing ? "var(--harbor-cursor-default, default)" : "none",
+      }}
     >
       <video
         ref={ref}

@@ -66,7 +66,7 @@ html[data-theme-mode="light"] .media-start-page {
   font: inherit;
   font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     opacity 150ms var(--ease-out),
     transform 150ms var(--ease-out);

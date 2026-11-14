@@ -15,7 +15,7 @@
   background: var(--color-raised);
   color: var(--color-ink);
   box-shadow: 0 10px 30px rgb(0 0 0 / 24%);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background-color 160ms ease,
     border-color 160ms ease;

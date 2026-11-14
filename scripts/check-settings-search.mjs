@@ -66,6 +66,7 @@ const TOP_RESULT = [
   ["theme", "Theme"],
   ["download", "Downloads"],
   ["language", "Languages"],
+  ["mouse cursor size", "Harbor cursor size"],
   ["player", "Player"],
   ["spoilers", "Spoilers (blur)"],
   ["backup", "Backup & restore"],

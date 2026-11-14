@@ -19,7 +19,7 @@
 }
 .league button:disabled {
   opacity: 0.55;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .league h2,
 .league h3,
@@ -376,7 +376,7 @@
   flex-basis: 100%;
 }
 .league summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   width: fit-content;
 }
 .league-source details p {

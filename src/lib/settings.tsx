@@ -29,6 +29,7 @@ import {
   forkToProfile,
   loadEffective,
   persistEffective,
+  readActiveSource,
   recoverSettingsFile,
   seedSharedFromLegacy,
   sourceKeyFor,
@@ -59,34 +60,18 @@ type SettingsValue = {
   setSettingsLinked: (linked: boolean) => void;
 };
 
-type SettingsSource = { profileId: string; linked: boolean };
-
-function readActiveSource(): SettingsSource {
-  try {
-    const raw = localStorage.getItem("harbor.profiles.v1");
-    if (!raw) return { profileId: "default", linked: true };
-    const s = JSON.parse(raw) as {
-      profiles?: Array<{ id: string; settingsLinked?: boolean }>;
-      activeId?: string | null;
-    };
-    const id = s.activeId || "default";
-    const p = s.profiles?.find((x) => x.id === id);
-    return { profileId: id, linked: p?.settingsLinked !== false };
-  } catch {
-    return { profileId: "default", linked: true };
-  }
-}
-
 const Ctx = createContext<SettingsValue | null>(null);
 
 export function SettingsProvider({
   children,
   syncTorrentEnginePolicy = false,
+  preserveStoredHarborCursor = false,
 }: {
   children: ReactNode;
   syncTorrentEnginePolicy?: boolean;
+  preserveStoredHarborCursor?: boolean;
 }) {
-  const sourceRef = useRef<SettingsSource>({ profileId: "default", linked: true });
+  const sourceRef = useRef({ profileId: "default", linked: true });
   const [settings, setSettings] = useState<Settings>(() => {
     seedSharedFromLegacy();
     const src = readActiveSource();
@@ -200,11 +185,14 @@ export function SettingsProvider({
   useEffect(() => {
     if (!settingsReady) return;
     try {
-      const json = persistEffective(
-        settings,
-        sourceRef.current.profileId,
-        sourceRef.current.linked,
-      );
+      const { profileId, linked } = sourceRef.current;
+      // Playback companions can save their own settings after the main window changes its cursor.
+      let snapshot = settings;
+      if (preserveStoredHarborCursor) {
+        const { harborCursor, harborCursorScale } = loadEffective(profileId, linked);
+        snapshot = { ...settings, harborCursor, harborCursorScale };
+      }
+      const json = persistEffective(snapshot, profileId, linked);
       void writeSettingsFile(json);
     } catch (e) {
       if (e instanceof DOMException && (e.name === "QuotaExceededError" || e.code === 22)) {
@@ -214,7 +202,7 @@ export function SettingsProvider({
         }
       }
     }
-  }, [settings, settingsReady]);
+  }, [preserveStoredHarborCursor, settings, settingsReady]);
 
   // Apply the saved frame rate once per launch on Linux, so a vpy written by an
   // older choice matches the setting. Never launches SVP; failures stay silent.

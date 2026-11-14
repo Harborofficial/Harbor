@@ -21,7 +21,7 @@
   padding: 0;
   color: white;
   text-align: start;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 
 .queue-continue-card__posters {
@@ -108,7 +108,7 @@
   border-radius: 7px;
   background: rgb(0 0 0 / 75%);
   color: #fca5a5;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 
 .queue-continue-card__clear > svg {

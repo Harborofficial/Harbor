@@ -1444,7 +1444,7 @@
   position: relative;
   display: block;
   border-radius: 6px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .dj-wave-seek:focus-visible {
   outline: 2px solid var(--dj-cyan);

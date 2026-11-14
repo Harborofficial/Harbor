@@ -11,7 +11,7 @@
   height: 100vh;
 }
 .games-media-player > video {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-player-controls {
   position: absolute;
@@ -122,7 +122,7 @@
   margin: 0;
   border: 0;
   background: transparent;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   position: relative;
 }
 .games-player-seek input::-webkit-slider-runnable-track {
@@ -159,7 +159,7 @@
   background: #fff;
 }
 .games-player-seek input:disabled {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
   opacity: 0.4;
 }
 .games-player-volume {
@@ -368,7 +368,7 @@
 }
 .games-gallery-strip > .games-gallery-page:disabled {
   opacity: 0.18;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
   background: transparent;
 }
 .games-gallery-window {

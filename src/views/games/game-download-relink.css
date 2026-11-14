@@ -28,7 +28,7 @@
   color: var(--color-ink-muted);
 }
 .games-relink-manual summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding: 8px 0;
 }
 .games-relink-manual form {

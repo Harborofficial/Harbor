@@ -117,7 +117,7 @@
   margin-bottom: 27px;
 }
 .games-archive-contents summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 12px;
   color: var(--color-ink-muted);
 }
@@ -452,7 +452,7 @@
 }
 .games-archive-dialog button:disabled {
   opacity: 0.4;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .games-archive-dialog > footer > div {
   margin-inline-start: auto;
@@ -529,7 +529,7 @@
 }
 .games-archive-dialog .games-archive-source:disabled {
   opacity: 1;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .games-archive-source > .games-file-mark {
   width: 36px;

@@ -53,7 +53,7 @@
   cursor: grabbing;
 }
 .sports-embed-player[data-docked="true"] > header button {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .sports-embed-player header > span {
   flex: 1;

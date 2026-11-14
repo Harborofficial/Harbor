@@ -6,7 +6,7 @@
   color: var(--color-ink);
 }
 .eev-page button {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .eev-page button:focus-visible {
   outline: 2px solid var(--color-accent);

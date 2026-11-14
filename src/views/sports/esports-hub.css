@@ -6,7 +6,7 @@
 .esports-arena button,
 .ea-dialog-head button,
 .ea-match-detail button {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .esports-arena button:focus-visible,
 .ea-match-detail button:focus-visible,

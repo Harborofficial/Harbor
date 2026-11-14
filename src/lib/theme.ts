@@ -896,7 +896,7 @@ textarea {
   color: var(--color-ink);
   opacity: 0.82;
   transition: opacity 125ms ease, background-color 125ms ease;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 #ef-topleft button:hover {
   opacity: 1;
@@ -918,7 +918,7 @@ textarea {
   border-radius: 999px;
   background: transparent;
   color: var(--color-ink-muted);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition: background-color 125ms ease, color 125ms ease;
 }
 #ef-search:hover {
@@ -938,7 +938,7 @@ textarea {
   overflow: hidden;
   border: var(--ef-border-w) solid color-mix(in srgb, #ffffff 22%, transparent);
   background-color: color-mix(in srgb, var(--color-raised) 40%, transparent);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition: border-color 125ms ease;
 }
 #ef-profile:hover {
@@ -1368,7 +1368,7 @@ html[data-theme-layout="custom"] .fsh-search {
   background: #141414;
   color: #969696;
   font-size: 13px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition: background 0.15s ease;
 }
 html[data-theme-layout="custom"] .fsh-search:hover { background: #1c1c1c; }
@@ -1385,7 +1385,7 @@ html[data-theme-layout="custom"] .fsh-iconbtn {
   border-radius: 3px;
   background: #141414;
   color: #E1E1E1;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition: background 0.15s ease;
 }
 html[data-theme-layout="custom"] .fsh-iconbtn:hover { background: #1f1f1f; }
@@ -1435,7 +1435,7 @@ html[data-theme-layout="custom"] .fsh-nav button {
   font-size: 14px;
   font-weight: 500;
   text-align: left;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
   transition: color 0.2s ease-in-out, background 0.15s ease;
   white-space: nowrap;
   overflow: hidden;

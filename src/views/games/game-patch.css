@@ -22,11 +22,11 @@
 }
 .games-patch button {
   -webkit-app-region: no-drag;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-patch button:disabled {
   opacity: 0.4;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .games-patch :is(button, summary):focus-visible {
   outline: 2px solid var(--color-accent);
@@ -170,7 +170,7 @@
   color: var(--color-ink-muted);
 }
 .games-patch summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding-block: 7px;
 }
 .games-patch details > div {

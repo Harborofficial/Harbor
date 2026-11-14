@@ -1,5 +1,14 @@
 @import "tailwindcss";
+@import "./harbor-cursor.css";
 @source not "../tests";
+
+@utility cursor-default {
+  cursor: var(--harbor-cursor-default, default);
+}
+
+@utility cursor-pointer {
+  cursor: var(--harbor-cursor-pointer, pointer);
+}
 
 @font-face {
   font-family: "WonderfulFontyCure";
@@ -183,7 +192,7 @@ html[data-os="linux"] .harbor-detail-enter *::after {
 
 body {
   user-select: none;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 
 :root[data-player-black="on"] {
@@ -551,7 +560,7 @@ main[data-kids="on"]::-webkit-scrollbar-thumb:hover {
     background: none;
     border: 0;
     padding: 0;
-    cursor: pointer;
+    cursor: var(--harbor-cursor-pointer, pointer);
     transition: scale 90ms var(--ease-out);
   }
 
@@ -1147,7 +1156,7 @@ main[data-kids="on"]::-webkit-scrollbar-thumb:hover {
   width: 100%;
   height: 36px;
   background: transparent;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   outline: none;
   --slider-notch: color-mix(in srgb, var(--color-ink) 26%, transparent);
   --slider-well: color-mix(in srgb, var(--color-ink) 9%, var(--color-canvas));
@@ -3606,7 +3615,7 @@ html[data-theme-layout="minui"] .harbor-together-pill {
   appearance: none;
   height: 20px;
   background: transparent;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .reader-slider::-webkit-slider-runnable-track {
   height: 8px;
@@ -4901,7 +4910,7 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
   background: transparent;
   color: var(--color-ink-muted);
   text-align: start;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background-color 120ms var(--ease-out),
     color 120ms var(--ease-out);
@@ -5151,7 +5160,7 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
 }
 
 .hset-row[data-interactive] {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 
 .hset-row[data-interactive]:hover {
@@ -5429,7 +5438,7 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background-color 120ms var(--ease-out),
     color 120ms var(--ease-out),
@@ -5450,7 +5459,7 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
 
 .hset-btn:disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 
 .hset-btn-primary {
@@ -6236,7 +6245,7 @@ html:not([data-input-modality="pointer"]) [data-settings-search-field]:has(input
   color: var(--color-ink-muted);
   font-size: 13.5px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background-color 150ms var(--ease-out),
     color 150ms var(--ease-out);
@@ -6282,7 +6291,7 @@ html:not([data-input-modality="pointer"]) [data-settings-search-field]:has(input
   color: var(--color-ink-muted);
   font-size: 12.5px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background-color 150ms var(--ease-out),
     color 150ms var(--ease-out),
@@ -6681,7 +6690,7 @@ html:not([data-input-modality="pointer"]) [data-settings-search-field]:has(input
   background: transparent;
   color: var(--color-ink-muted);
   text-align: start;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background 150ms var(--ease-out),
     color 150ms var(--ease-out);
@@ -6816,7 +6825,7 @@ html:not([data-input-modality="pointer"]) [data-settings-search-field]:has(input
 
 button.hset-rail-me,
 .hset-rail-me[data-interactive] {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 
 button.hset-rail-me:hover,
@@ -6889,7 +6898,7 @@ button.hset-rail-me:hover,
   background: var(--color-elevated);
   color: var(--color-ink);
   text-align: start;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   transition:
     background 150ms var(--ease-out),
     color 150ms var(--ease-out);
@@ -7022,6 +7031,37 @@ button.hset-rail-me:hover,
   scrollbar-color: var(--color-edge) transparent;
 }
 
+@supports selector(::-webkit-scrollbar) {
+  @media (any-pointer: fine) and (forced-colors: none) {
+    /* WebView2 ignores inherited cursors on native scrollbars. Use its CSS scrollbar
+       while the anchor is active, keeping the thin gutter independent of page zoom. */
+    :root[data-os="windows"][data-harbor-cursor]:not(
+        [data-big-picture="true"],
+        [data-middle-click-scroll]
+      )
+      .hset-rail-nav {
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+
+      &::-webkit-scrollbar {
+        width: calc(10.5px / var(--hset-ui-scale, 1));
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        border: calc(2px / var(--hset-ui-scale, 1)) solid transparent;
+        border-radius: 999px;
+        background: transparent;
+        background-clip: padding-box;
+      }
+
+      &:is(:hover, :focus-within)::-webkit-scrollbar-thumb {
+        background-color: var(--color-edge);
+      }
+    }
+  }
+}
+
 .hset-source-options {
   display: flex;
   flex-direction: column;
@@ -7035,7 +7075,7 @@ button.hset-rail-me:hover,
   align-items: flex-start;
   gap: 14px;
   padding: 18px 20px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 
 .hset-source-option + .hset-source-option {
@@ -7095,7 +7135,7 @@ button.hset-rail-me:hover,
   border: 0;
   background: transparent;
   padding: 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   border-radius: 999px;
 }
 

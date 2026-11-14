@@ -5,9 +5,12 @@ import { createRoot } from "react-dom/client";
 import { TrayMenu } from "./tray/tray-menu";
 import { fadeTrayMenu, presentTrayMenu, prefersReducedMotion } from "./tray/tray-motion";
 import { newerSnapshot, type TrayAction, type TraySnapshot } from "./tray/types";
+import { observeStoredHarborCursor } from "@/lib/harbor-cursor";
+import "./harbor-cursor.css";
 import "./tray/tray-menu.css";
 
 function TrayRoot() {
+  useEffect(() => observeStoredHarborCursor(window), []);
   const [snapshot, setSnapshot] = useState<TraySnapshot | null>(null);
   const presented = useRef(0);
   const motion = useRef<HTMLDivElement>(null);

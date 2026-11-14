@@ -9,7 +9,7 @@
   color: inherit;
   font: inherit;
   text-align: inherit;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   min-width: 0;
   position: relative;
   z-index: 2;

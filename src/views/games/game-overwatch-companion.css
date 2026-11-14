@@ -380,7 +380,7 @@
   gap: 18px;
   font-size: 16px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   min-height: 36px;
 }
 .games-overwatch-disclosure summary::-webkit-details-marker {

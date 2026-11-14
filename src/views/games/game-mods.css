@@ -87,7 +87,7 @@
   font-size: 12px;
   max-width: 100%;
   text-overflow: ellipsis;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-mods-folder {
   margin-left: auto;
@@ -424,7 +424,7 @@
 }
 .games-mods-installed :is(button):disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .games-mods-installed button:focus-visible {
   outline: 2px solid var(--color-ink);
@@ -832,7 +832,7 @@
 }
 .games-mod-dialog button:disabled {
   opacity: 0.35;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .games-mod-dialog :is(button, select, a):focus-visible,
 .games-mods select:focus-visible {

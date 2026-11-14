@@ -31,10 +31,10 @@
   margin: 9px 0 0;
 }
 .games-cloud-dialog button {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-cloud-dialog button:disabled {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
   opacity: 0.4;
 }
 .games-cloud-dialog :is(button, input):focus-visible {
@@ -419,7 +419,7 @@
   border-radius: 5px;
   background: var(--color-elevated);
   color: var(--color-ink-muted);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-web-scope button[aria-pressed="true"] {
   background: var(--color-raised);

@@ -16,11 +16,11 @@
   color: inherit;
 }
 .pokemon button {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .pokemon button:disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .pokemon button:focus-visible,
 .pokemon a:focus-visible,
@@ -826,7 +826,7 @@
   accent-color: var(--color-accent);
 }
 .pokemon-bank summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   min-height: 44px;
   align-content: center;
   font-size: 13px;
@@ -1206,7 +1206,7 @@
 }
 .pokemon-review-items summary {
   padding: 10px 0;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-weight: 650;
 }
 .pokemon-transfer-report {
@@ -1239,7 +1239,7 @@
 }
 .pokemon-move-slot > summary {
   padding-block: 12px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .pokemon-move-slot[open] {
   display: grid;
@@ -1583,7 +1583,7 @@
 }
 .pokemon-choice-menu button {
   font: inherit;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -397,7 +397,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   width: fit-content;
   min-height: 34px;
   color: var(--color-ink-muted);

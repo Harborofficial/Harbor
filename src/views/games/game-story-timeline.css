@@ -226,7 +226,7 @@
   color: var(--color-ink-muted);
 }
 .games-order-editions summary {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   padding-block: 6px;
 }
 .games-order-editions button {

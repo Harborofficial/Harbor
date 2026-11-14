@@ -11,7 +11,7 @@
   align-items: center;
   gap: 16px;
   padding: 20px 24px;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
 }
 .sh-diamond summary::-webkit-details-marker {

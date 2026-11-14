@@ -19,7 +19,7 @@
   min-height: 56px;
   padding: 14px 18px;
   background: var(--color-elevated);
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   list-style: none;
 }
 .sh-match-disclosure > summary::-webkit-details-marker {

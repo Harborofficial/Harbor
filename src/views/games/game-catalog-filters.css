@@ -26,7 +26,7 @@
   --filter-offset: 6px;
 }
 .games-filter-popout button {
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
 }
 .games-filter-popout button:focus-visible {
   outline: 2px solid var(--color-accent);
@@ -126,7 +126,7 @@
   color: inherit;
 }
 .games-filter-row:disabled {
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
   color: var(--color-ink-muted);
   background: none;
 }

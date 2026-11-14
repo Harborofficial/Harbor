@@ -49,7 +49,7 @@
 }
 .music-collection-controls button:disabled {
   opacity: 0.4;
-  cursor: default;
+  cursor: var(--harbor-cursor-default, default);
 }
 .music-collection-controls button:focus-visible {
   outline: 2px solid var(--color-accent);

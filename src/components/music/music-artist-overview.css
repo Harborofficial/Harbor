@@ -136,7 +136,7 @@
   align-items: center;
   min-height: 44px;
   width: fit-content;
-  cursor: pointer;
+  cursor: var(--harbor-cursor-pointer, pointer);
   font-size: 13px;
   color: var(--color-ink-muted);
 }
