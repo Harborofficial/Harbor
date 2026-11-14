@@ -248,8 +248,9 @@ test("Refract early logging is opt-in, once per playback, and independent of Har
   h.enableRefract(180);
   const p = playbackParams();
   h.render(p);
-  h.render({ ...p, snap: { ...p.snap, status: "playing", positionSec: 179, durationSec: 3600 } });
-  h.clock(179);
+  // Autosave skips writes less than 1.5 seconds apart; cross the threshold on a real tick.
+  h.render({ ...p, snap: { ...p.snap, status: "playing", positionSec: 178, durationSec: 3600 } });
+  h.clock(178);
   h.tick();
   assert.equal(h.refractWatches.length, 0);
   h.clock(180);

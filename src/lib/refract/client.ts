@@ -17,13 +17,16 @@ export type RefractLookup = {
 };
 
 export class RefractApiError extends Error {
-  constructor(
-    public readonly status: number,
-    public readonly retryAfterMs = 0,
-    public readonly code?: string,
-  ) {
+  readonly status: number;
+  readonly retryAfterMs: number;
+  readonly code?: string;
+
+  constructor(status: number, retryAfterMs = 0, code?: string) {
     super(`Refract HTTP ${status}`);
     this.name = "RefractApiError";
+    this.status = status;
+    this.retryAfterMs = retryAfterMs;
+    this.code = code;
   }
 }
 
