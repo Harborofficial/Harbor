@@ -345,20 +345,18 @@ export function PlayerLayoutPanel() {
             update({ contentAdvisoryToast: v });
           }}
         />
-        {settings.contentAdvisoryToast && (
-          <Segmented
-            label={t("Content advisory theme")}
-            sub={t(
-              "Choose whether the content advisory appears in full color or a restrained monochrome tone.",
-            )}
-            value={settings.contentAdvisoryTheme}
-            options={[
-              { value: "colored", label: t("Colored") },
-              { value: "monochrome", label: t("Monochrome") },
-            ]}
-            onChange={(v) => update({ contentAdvisoryTheme: v })}
-          />
-        )}
+        <Segmented
+          label={t("Content advisory theme")}
+          sub={t(
+            "Choose whether the content advisory appears in full color or a restrained monochrome tone. Also affects the Content Advisory section on detail pages.",
+          )}
+          value={settings.contentAdvisoryTheme}
+          options={[
+            { value: "colored", label: t("Colored") },
+            { value: "monochrome", label: t("Monochrome") },
+          ]}
+          onChange={(v) => update({ contentAdvisoryTheme: v })}
+        />
         {settings.contentAdvisoryToast && (
           <ToggleRow
             label={t("Show ignore title button")}
