@@ -62,7 +62,9 @@ export function refractPlaybackReached(positionSec: number, durationSec: number)
     return false;
   const threshold = getRefractAutoThreshold();
   const target =
-    typeof threshold === "string" ? Number.parseInt(threshold, 10) * 60 : (durationSec * threshold) / 100;
+    typeof threshold === "string"
+      ? Number.parseInt(threshold, 10) * 60
+      : (durationSec * threshold) / 100;
   return positionSec >= target;
 }
 async function request<T>(
@@ -184,15 +186,17 @@ export function refractWatchlistIdentity(input: RefractWatchlistInput): Watchlis
       : ["series", "tv", "show", "anime"].includes(input.type ?? "")
         ? "show"
         : !input.type && tmdb
-          ? tmdb[1] === "movie" ? "movie" : "show"
+          ? tmdb[1] === "movie"
+            ? "movie"
+            : "show"
           : !input.type && tvdb
             ? "show"
             : null;
   if (!type) return null;
   if (tmdb && tmdb[1] !== (type === "movie" ? "movie" : "tv")) return null;
   if (tvdb && type !== "show") return null;
-  const imdb = /^(?:imdb:)?(tt\d+)$/.exec(input.imdbId ?? "") ??
-    /^(?:imdb:)?(tt\d+)$/.exec(input.id);
+  const imdb =
+    /^(?:imdb:)?(tt\d+)$/.exec(input.imdbId ?? "") ?? /^(?:imdb:)?(tt\d+)$/.exec(input.id);
   if (imdb) return { idType: "imdb", id: imdb[1], type };
   if (tmdb) return { idType: "tmdb", id: tmdb[2], type };
   if (tvdb) return { idType: "tvdb", id: tvdb[1], type };
@@ -247,9 +251,13 @@ export async function syncRefractWatchlist(
     }
     const matches = await lookupRefract(key, identity.idType, identity.id, identity.type);
     assertCurrent();
-    const ids = [...new Set(matches
-      .filter((match) => match.type === identity.type && match.ids?.refract != null)
-      .map((match) => String(match.ids!.refract)))];
+    const ids = [
+      ...new Set(
+        matches
+          .filter((match) => match.type === identity.type && match.ids?.refract != null)
+          .map((match) => String(match.ids!.refract)),
+      ),
+    ];
     if (ids.length !== 1 || !ids[0]) {
       const reason = "Refract could not uniquely identify this title.";
       reportWatchlist(reason);

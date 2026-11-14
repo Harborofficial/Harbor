@@ -102,8 +102,14 @@ test("Refract 429 uses server-supplied Retry-After delay", async () => {
 });
 
 test("Refract is registered in the visible settings sidebar and tracker panel", () => {
-  const registry = readFileSync(new URL("../src/views/settings/tab-registry.ts", import.meta.url), "utf8");
-  const panel = readFileSync(new URL("../src/views/settings/trackers-panel.tsx", import.meta.url), "utf8");
+  const registry = readFileSync(
+    new URL("../src/views/settings/tab-registry.ts", import.meta.url),
+    "utf8",
+  );
+  const panel = readFileSync(
+    new URL("../src/views/settings/trackers-panel.tsx", import.meta.url),
+    "utf8",
+  );
   assert.match(registry, /trackers:\s*\[[\s\S]*?id: "refract"/);
   assert.match(panel, /active === "refract" && <RefractPanel/);
 });
@@ -144,7 +150,11 @@ test("time-based Refract logging supports 3, 5 and 10 minutes", () => {
   };
   try {
     const { client } = harness();
-    for (const [mode, seconds] of [["3m", 180], ["5m", 300], ["10m", 600]]) {
+    for (const [mode, seconds] of [
+      ["3m", 180],
+      ["5m", 300],
+      ["10m", 600],
+    ]) {
       client.setRefractAutoThreshold(mode);
       assert.equal(client.getRefractAutoThreshold(), mode);
       assert.equal(client.refractPlaybackReached(seconds - 1, 2700), false);
@@ -163,12 +173,20 @@ test("time-based Refract logging supports 3, 5 and 10 minutes", () => {
 
 test("Refract watchlist resolves explicit title identities without guessing media type", () => {
   const { client } = harness();
-  assert.deepEqual(client.refractWatchlistIdentity({ id: "tmdb:tv:95396", type: "series" }),
-    { idType: "tmdb", id: "95396", type: "show" });
-  assert.deepEqual(client.refractWatchlistIdentity({ id: "tt123", type: "movie" }),
-    { idType: "imdb", id: "tt123", type: "movie" });
-  assert.deepEqual(client.refractWatchlistIdentity({ id: "kitsu:12", type: "anime", imdbId: "tt456" }),
-    { idType: "imdb", id: "tt456", type: "show" });
+  assert.deepEqual(client.refractWatchlistIdentity({ id: "tmdb:tv:95396", type: "series" }), {
+    idType: "tmdb",
+    id: "95396",
+    type: "show",
+  });
+  assert.deepEqual(client.refractWatchlistIdentity({ id: "tt123", type: "movie" }), {
+    idType: "imdb",
+    id: "tt123",
+    type: "movie",
+  });
+  assert.deepEqual(
+    client.refractWatchlistIdentity({ id: "kitsu:12", type: "anime", imdbId: "tt456" }),
+    { idType: "imdb", id: "tt456", type: "show" },
+  );
   assert.equal(client.refractWatchlistIdentity({ id: "tt123" }), null);
   assert.equal(client.refractWatchlistIdentity({ id: "kitsu:12", type: "anime" }), null);
   assert.equal(client.refractWatchlistIdentity({ id: "tmdb:tv:95396", type: "movie" }), null);
@@ -176,24 +194,45 @@ test("Refract watchlist resolves explicit title identities without guessing medi
 
 test("watchlist additions and removals use membership-only endpoints", async () => {
   const h = harness((url, init) =>
-    init.method === "DELETE" ? new Response(null, { status: 204 }) : new Response("{}", { status: 201 }));
-  assert.equal(await h.client.writeRefractWatchlist("rfk_private", "fixture-show", true), "updated");
-  assert.equal(await h.client.writeRefractWatchlist("rfk_private", "fixture-show", false), "updated");
-  assert.deepEqual(h.calls.map(({url, init}) => [url, init.method]), [
-    ["https://getrefract.app/v1/watchlist/fixture-show", "PUT"],
-    ["https://getrefract.app/v1/watchlist/fixture-show", "DELETE"],
-  ]);
+    init.method === "DELETE"
+      ? new Response(null, { status: 204 })
+      : new Response("{}", { status: 201 }),
+  );
+  assert.equal(
+    await h.client.writeRefractWatchlist("rfk_private", "fixture-show", true),
+    "updated",
+  );
+  assert.equal(
+    await h.client.writeRefractWatchlist("rfk_private", "fixture-show", false),
+    "updated",
+  );
+  assert.deepEqual(
+    h.calls.map(({ url, init }) => [url, init.method]),
+    [
+      ["https://getrefract.app/v1/watchlist/fixture-show", "PUT"],
+      ["https://getrefract.app/v1/watchlist/fixture-show", "DELETE"],
+    ],
+  );
 });
 
 test("watchlist does not reset a title when Refract protects its library state", async () => {
-  const h = harness(() => new Response(JSON.stringify({ code: "IN_LIBRARY" }), {status: 409}));
-  assert.equal(await h.client.writeRefractWatchlist("rfk_private", "fixture-show", true), "protected");
-  assert.equal(await h.client.writeRefractWatchlist("rfk_private", "fixture-show", false), "protected");
+  const h = harness(() => new Response(JSON.stringify({ code: "IN_LIBRARY" }), { status: 409 }));
+  assert.equal(
+    await h.client.writeRefractWatchlist("rfk_private", "fixture-show", true),
+    "protected",
+  );
+  assert.equal(
+    await h.client.writeRefractWatchlist("rfk_private", "fixture-show", false),
+    "protected",
+  );
   assert.equal(h.calls.length, 2);
 });
 
 test("watchlist action hooks both acknowledged and legacy paths", () => {
-  const provider = readFileSync(new URL("../src/lib/media-provider-actions.ts", import.meta.url), "utf8");
+  const provider = readFileSync(
+    new URL("../src/lib/media-provider-actions.ts", import.meta.url),
+    "utf8",
+  );
   const legacy = readFileSync(new URL("../src/lib/watchlist.ts", import.meta.url), "utf8");
   assert.match(provider, /function watchlistProviderWrites[\s\S]*?provider: "Refract"/);
   assert.match(legacy, /function toggleWatchlist[\s\S]*?syncRefractWatchlist/);

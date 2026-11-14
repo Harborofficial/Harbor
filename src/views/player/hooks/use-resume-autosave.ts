@@ -3,7 +3,11 @@ import { markAnimeWatching, syncAnimeProgress } from "@/lib/anilist/sync";
 import { markMalWatching, syncMalProgress } from "@/lib/mal/sync";
 import { getSession as getAnilistSession } from "@/lib/anilist/session";
 import { getSession as getMalSession } from "@/lib/mal/session";
-import { activeProfileId, activeProfileIsPrimary, activeScopedProfileId } from "@/lib/active-profile-id";
+import {
+  activeProfileId,
+  activeProfileIsPrimary,
+  activeScopedProfileId,
+} from "@/lib/active-profile-id";
 import { refractEnabled, refractPlaybackReached } from "@/lib/refract/client";
 import { animeIdentityEligible, resolveAnimeIdentity } from "@/lib/streams/anime-identity";
 import { resolveTrackerAnimeEntry } from "@/lib/anime-tracker-entry";
@@ -304,7 +308,10 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
             s.meta.type === "movie"
               ? undefined
               : (covered.length ? covered : [ep])
-                  .filter((value): value is number => typeof value === "number" && Number.isInteger(value))
+                  .filter(
+                    (value): value is number =>
+                      typeof value === "number" && Number.isInteger(value),
+                  )
                   .map((value) => ({
                     season: rv && s.episode?.imdbSeason != null ? s.episode.imdbSeason : (cs ?? -1),
                     episode:

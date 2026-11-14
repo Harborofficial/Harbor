@@ -177,7 +177,10 @@ export async function markMetaWatched(
     setManualWatchedMany(meta.id, eps, true);
     recordRefractWatch(
       { id: meta.id, type: "series", name: meta.name, poster: meta.poster, at: Date.now() },
-      { externalId: resolvedImdb ?? (tmdbId != null ? `tmdb:tv:${tmdbId}` : undefined), episodes: eps },
+      {
+        externalId: resolvedImdb ?? (tmdbId != null ? `tmdb:tv:${tmdbId}` : undefined),
+        episodes: eps,
+      },
     );
   }
   if (!isNuvioProviderActive()) void syncSeriesWatchedToStremio(meta, resolvedImdb);

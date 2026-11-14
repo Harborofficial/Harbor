@@ -61,7 +61,8 @@ export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
     activeScopedProfileId: () => profileId,
     activeProfileIsPrimary: () => true,
     refractEnabled: () => refractThreshold !== null,
-    refractPlaybackReached: (position: number) => refractThreshold !== null && position >= refractThreshold,
+    refractPlaybackReached: (position: number) =>
+      refractThreshold !== null && position >= refractThreshold,
     recordRefractWatch: (...args: any[]) => refractWatches.push(args),
     getSession: () => trackerSession,
     animeIdentityEligible: () => false,

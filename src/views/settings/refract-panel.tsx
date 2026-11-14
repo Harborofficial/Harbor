@@ -35,7 +35,10 @@ export function RefractPanel() {
   const [status, setStatus] = useState(refractStatus);
   const [watchlist, setWatchlist] = useState(refractWatchlistStatus);
 
-  useEffect(() => subscribeRefractWatchlistStatus(() => setWatchlist(refractWatchlistStatus())), []);
+  useEffect(
+    () => subscribeRefractWatchlistStatus(() => setWatchlist(refractWatchlistStatus())),
+    [],
+  );
 
   useEffect(
     () =>
@@ -121,9 +124,7 @@ export function RefractPanel() {
         </form>
       ) : (
         <div className="flex flex-col gap-5">
-          <p className="text-[14px] text-ink">
-            {t("Refract key saved in Harbor's secret store")}
-          </p>
+          <p className="text-[14px] text-ink">{t("Refract key saved in Harbor's secret store")}</p>
           <ToggleRow
             label={t("Sync watched history and watchlist")}
             sub={t(
@@ -165,9 +166,9 @@ export function RefractPanel() {
               ))}
             </select>
             <p className={ROW_DESC}>
-              Log a movie or episode in Refract when playback reaches the selected time or percentage.
-              Seeking past it also qualifies. Early logging counts as watched in Refract, not partially
-              watched. Harbor's own completion threshold is unchanged.
+              Log a movie or episode in Refract when playback reaches the selected time or
+              percentage. Seeking past it also qualifies. Early logging counts as watched in
+              Refract, not partially watched. Harbor's own completion threshold is unchanged.
             </p>
           </div>
           <div className="flex flex-col gap-1">
@@ -177,7 +178,11 @@ export function RefractPanel() {
               Requires library:write; reconnect with an updated key if needed. Existing Refract
               history and other library statuses are preserved.
             </p>
-            {watchlist && <p role="status" className={ROW_DESC}>{watchlist}</p>}
+            {watchlist && (
+              <p role="status" className={ROW_DESC}>
+                {watchlist}
+              </p>
+            )}
           </div>
           <p className={ROW_DESC}>
             {status.synced} sent · {status.pending} pending · {status.failed} unmatched

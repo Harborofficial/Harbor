@@ -439,15 +439,28 @@ export async function setContextWatched(
       }
       if (watched)
         recordWatchEvent(
-          { id: meta.id, type: isMovie ? "movie" : "series", name: meta.name, poster: meta.poster, at: Date.now() },
+          {
+            id: meta.id,
+            type: isMovie ? "movie" : "series",
+            name: meta.name,
+            poster: meta.poster,
+            at: Date.now(),
+          },
           {
             externalId: options.imdbId,
-            episodes: isMovie ? undefined : options.providerEpisode
-              ? [{ season: options.providerEpisode.season, episode: options.providerEpisode.episode }]
-              : episodes.map((item) => ({
-                  season: item.imdbSeason ?? item.season,
-                  episode: item.imdbEpisode ?? item.episode,
-                })),
+            episodes: isMovie
+              ? undefined
+              : options.providerEpisode
+                ? [
+                    {
+                      season: options.providerEpisode.season,
+                      episode: options.providerEpisode.episode,
+                    },
+                  ]
+                : episodes.map((item) => ({
+                    season: item.imdbSeason ?? item.season,
+                    episode: item.imdbEpisode ?? item.episode,
+                  })),
           },
         );
     },
