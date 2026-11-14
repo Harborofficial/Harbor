@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { activeScopedProfileId as currentHarborProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
+import { getRefractKey, refractEnabled, syncRefractWatchlist } from "@/lib/refract/client";
 import {
   addToWatchlist as traktAdd,
   removeFromWatchlist as traktRemove,
@@ -493,6 +495,16 @@ export function toggleWatchlist(input: string | WatchlistInput): boolean {
     void syncWithNuvio(input, !has);
   } else {
     void syncWithStremio(input, !has);
+  }
+  const refractKey = getRefractKey();
+  if (refractKey && refractEnabled() && activeProfileIsPrimary()) {
+    const profile = currentHarborProfileId();
+    const target = typeof input === "string" ? { id } : input;
+    void syncRefractWatchlist(refractKey, target, !has, () => {
+      if (getRefractKey() !== refractKey || !refractEnabled() ||
+          !activeProfileIsPrimary() || currentHarborProfileId() !== profile)
+        throw new Error("The Refract account or profile changed.");
+    }).catch(() => {});
   }
   return !has;
 }

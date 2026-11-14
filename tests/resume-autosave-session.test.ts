@@ -242,3 +242,26 @@ test("outgoing anime tracker sync uses its own resolved ID and reaches both trac
     ],
   );
 });
+
+test("Refract early logging is opt-in, once per playback, and independent of Harbor completion", () => {
+  const h = resumeAutosaveHarness();
+  h.enableRefract(180);
+  const p = playbackParams();
+  h.render(p);
+  h.render({ ...p, snap: { ...p.snap, status: "playing", positionSec: 179, durationSec: 3600 } });
+  h.clock(179);
+  h.tick();
+  assert.equal(h.refractWatches.length, 0);
+  h.clock(180);
+  h.tick();
+  assert.equal(h.refractWatches.length, 1);
+  assert.equal(h.refractWatches[0][0].id, "tt100");
+  assert.deepEqual(h.refractWatches[0][1].episodes, [{ season: 1, episode: 1 }]);
+  assert.equal(h.watched.length, 0);
+  assert.equal(h.watchEvents.length, 0);
+  h.clock(3500);
+  h.tick();
+  assert.equal(h.refractWatches.length, 1);
+  assert.equal(h.watchEvents.length, 1);
+  assert.deepEqual(h.watched[0], ["tt100", 1, 1, true]);
+});

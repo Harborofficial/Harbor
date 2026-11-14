@@ -42,6 +42,8 @@ function harness() {
   const id = (id: string) =>
     /^tt\d+$/.test(id) ? { ok: true, target: { kind: "movie", ids: { imdb: id } } } : { ok: false };
   const mocks: Record<string, unknown> = {
+    "./active-profile-id": { activeProfileIsPrimary: () => true },
+    "./refract/client": { getRefractKey: () => null, refractEnabled: () => false },
     "./cinemeta": { meta: async () => null },
     "./auth": { readActiveStremioAuthKey: () => null },
     "./stremio": { ANIME_CLOUD_ID: /^(kitsu|mal|anilist|anidb):/ },

@@ -1,5 +1,7 @@
 import { meta as fetchMeta, type Meta } from "./cinemeta";
 import type { WatchlistInput } from "./watchlist";
+import { activeProfileIsPrimary } from "./active-profile-id";
+import { getRefractKey, refractEnabled, syncRefractWatchlist } from "./refract/client";
 import type { WatchedEpisode } from "./media-context-actions";
 import { readActiveStremioAuthKey } from "./auth";
 import {
@@ -331,6 +333,18 @@ export function episodeSeasons(episodes: WatchedEpisode[]) {
 
 export function watchlistProviderWrites(input: WatchlistInput, on: boolean): ProviderWrite[] {
   const writes: ProviderWrite[] = [];
+  const refractKey = getRefractKey();
+  if (refractKey && refractEnabled() && activeProfileIsPrimary()) {
+    writes.push({
+      provider: "Refract",
+      run: (assertCurrent) =>
+        syncRefractWatchlist(refractKey, input, on, () => {
+          assertCurrent();
+          if (getRefractKey() !== refractKey || !refractEnabled() || !activeProfileIsPrimary())
+            throw new Error("The Refract account or profile changed.");
+        }),
+    });
+  }
   const movie = input.type === "movie";
   const bucket = movie ? "movies" : "shows";
   const assertTrakt = captureTraktGuard();

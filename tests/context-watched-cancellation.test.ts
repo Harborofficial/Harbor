@@ -63,6 +63,8 @@ function harness() {
     "./publicmetadb/lists": {},
   };
   const providers = loadModule<Providers>("../src/lib/media-provider-actions.ts", {
+    "./active-profile-id": { activeProfileIsPrimary: () => true },
+    "./refract/client": { getRefractKey: () => null, refractEnabled: () => false },
     ...shared,
     "./anilist/session": disconnected,
     "./anilist/sync": {},

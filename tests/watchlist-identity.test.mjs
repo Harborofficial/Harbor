@@ -8,6 +8,8 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf
 // Execute production functions with isolated storage and no network or React rendering.
 function load(path, mocks = {}, storage = undefined) {
   const defaultMocks = {
+    "@/lib/active-profile-id": { activeProfileIsPrimary: () => true, activeScopedProfileId: () => "fixture" },
+    "@/lib/refract/client": { getRefractKey: () => null, refractEnabled: () => false },
     "@/lib/nuvio/nuvio-sync": {
       isNuvioProviderActive: () => false,
       resolveNuvioProfileIndex: () => 1,
