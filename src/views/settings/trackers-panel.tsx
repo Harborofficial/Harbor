@@ -1,10 +1,12 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import anilistLogo from "@/assets/anilist.png";
 import malLogo from "@/assets/mal.png";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.png";
 import letterboxdLogo from "@/assets/addon-logos/letterboxd.png";
 import publicmetadbLogo from "@/assets/publicmetadb.svg";
+import refractLogo from "@/assets/refract.svg";
+import { getRefractKey } from "@/lib/refract/client";
 import { useAnilist } from "@/lib/anilist/provider";
 import { useMal } from "@/lib/mal/provider";
 import { useSimkl } from "@/lib/simkl/provider";
@@ -29,7 +31,11 @@ const PublicMetaDbPanel = lazy(() =>
   import("./publicmetadb-panel").then((m) => ({ default: m.PublicMetaDbPanel })),
 );
 
-type TrackerId = "trakt" | "simkl" | "anilist" | "mal" | "letterboxd" | "publicmetadb";
+const RefractPanel = lazy(() =>
+  import("./refract-panel").then((m) => ({ default: m.RefractPanel })),
+);
+
+type TrackerId = "trakt" | "simkl" | "anilist" | "mal" | "letterboxd" | "publicmetadb" | "refract";
 
 const TRACKERS: Array<{ id: TrackerId; name: string; logo: string; blurb: string }> = [
   {
@@ -68,6 +74,12 @@ const TRACKERS: Array<{ id: TrackerId; name: string; logo: string; blurb: string
     logo: publicmetadbLogo,
     blurb: "Scrobbles playback progress, resume points, and syncs watch history.",
   },
+  {
+    id: "refract",
+    name: "Refract",
+    logo: refractLogo,
+    blurb: "Sends watched movies, episodes and watchlist changes to Refract.",
+  },
 ];
 
 export function TrackersPanel() {
@@ -82,6 +94,12 @@ export function TrackersPanel() {
   const anilist = useAnilist();
   const mal = useMal();
   const publicmetadb = usePublicMetaDb();
+  const [refractConnected, setRefractConnected] = useState(() => getRefractKey() !== null);
+  useEffect(() => {
+    const update = () => setRefractConnected(getRefractKey() !== null);
+    window.addEventListener("harbor:refract-auth-changed", update);
+    return () => window.removeEventListener("harbor:refract-auth-changed", update);
+  }, []);
   const connected: Record<TrackerId, boolean> = {
     trakt: trakt.isConnected,
     simkl: simkl.isConnected,
@@ -89,6 +107,7 @@ export function TrackersPanel() {
     mal: mal.isConnected,
     letterboxd: !!settings.letterboxd?.enabled && !!settings.letterboxd?.username,
     publicmetadb: publicmetadb.isConnected,
+    refract: refractConnected,
   };
   const total = TRACKERS.filter((s) => connected[s.id]).length;
 
@@ -119,6 +138,7 @@ export function TrackersPanel() {
           {active === "mal" && <MalPanel />}
           {active === "letterboxd" && <LetterboxdPanel />}
           {active === "publicmetadb" && <PublicMetaDbPanel />}
+          {active === "refract" && <RefractPanel />}
         </Suspense>
       </div>
     </>

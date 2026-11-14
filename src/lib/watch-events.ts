@@ -1,3 +1,7 @@
+import { activeProfileIsPrimary, activeScopedProfileId } from "./active-profile-id";
+import { getRefractKey, refractEnabled } from "./refract/client";
+import type { RefractHint } from "./refract/sync";
+
 const KEY_PREFIX = "harbor.watchevents.v1.";
 const LEGACY_KEY = "harbor.watchevents.v1";
 const PROFILES_KEY = "harbor.profiles.v1";
@@ -84,7 +88,26 @@ export function listWatchEvents(): WatchEvent[] {
   return load();
 }
 
-export function recordWatchEvent(e: WatchEvent): void {
+/** Send an explicit Refract watch without changing Harbor's own watched state. */
+export function recordRefractWatch(e: WatchEvent, hint: RefractHint = {}): void {
+  if (!e.id || !e.name || !refractEnabled() || !activeProfileIsPrimary()) return;
+  const key = getRefractKey();
+  const owner = activeScopedProfileId();
+  if (!key) return;
+  void import("./refract/sync")
+    .then(({ enqueueRefractWatch }) => {
+      if (
+        getRefractKey() === key &&
+        activeScopedProfileId() === owner &&
+        refractEnabled() &&
+        activeProfileIsPrimary()
+      )
+        enqueueRefractWatch(e, hint);
+    })
+    .catch(() => {});
+}
+
+export function recordWatchEvent(e: WatchEvent, refract?: RefractHint): void {
   if (!e.id || !e.name) return;
   const key = `${e.id}|${e.season ?? ""}|${e.episode ?? ""}`;
   const next = [e, ...load().filter((p) => `${p.id}|${p.season ?? ""}|${p.episode ?? ""}` !== key)];
@@ -94,6 +117,7 @@ export function recordWatchEvent(e: WatchEvent): void {
     return;
   }
   subs.forEach((fn) => fn());
+  if (refract) recordRefractWatch(e, refract);
 }
 
 export function subscribeWatchEvents(fn: () => void): () => void {

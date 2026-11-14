@@ -20,6 +20,7 @@ import { setWatchedFlagAcknowledged } from "./watched-flag";
 import { setManualWatchedManyAcknowledged, recordManualWatchedMeta } from "./manual-watched";
 import { savePlayback } from "./playback-history";
 import { recordWatchEvent } from "./watch-events";
+import { refractMappedEpisodes } from "./refract/identity";
 import {
   dropProviderWrites,
   watchlistProviderWrites,
@@ -437,14 +438,41 @@ export async function setContextWatched(
           }
         }
       }
-      if (watched)
-        recordWatchEvent({
-          id: meta.id,
-          type: isMovie ? "movie" : "series",
-          name: meta.name,
-          poster: meta.poster,
-          at: Date.now(),
-        });
+      if (watched) {
+        const mapped =
+          nativeAnime && !isMovie && options.imdbId && !options.providerEpisode
+            ? refractMappedEpisodes(episodes)
+            : undefined;
+        const unsafeAnime = nativeAnime && !isMovie && !options.providerEpisode && !mapped;
+        recordWatchEvent(
+          {
+            id: meta.id,
+            type: isMovie ? "movie" : "series",
+            name: meta.name,
+            poster: meta.poster,
+            at: Date.now(),
+          },
+          unsafeAnime
+            ? undefined
+            : {
+                externalId: options.imdbId,
+                episodes: isMovie
+                  ? undefined
+                  : options.providerEpisode
+                    ? [
+                        {
+                          season: options.providerEpisode.season,
+                          episode: options.providerEpisode.episode,
+                        },
+                      ]
+                    : (mapped ??
+                      episodes.map((item) => ({
+                        season: item.imdbSeason ?? item.season,
+                        episode: item.imdbEpisode ?? item.episode,
+                      }))),
+              },
+        );
+      }
     },
     watchedProviderWrites(
       options.syncMetaId ? { ...meta, id: options.syncMetaId } : meta,

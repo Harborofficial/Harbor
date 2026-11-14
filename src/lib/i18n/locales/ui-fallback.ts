@@ -3060,6 +3060,18 @@ const uiFallback: Record<string, string> = {
   "Sync badge position": "Sync badge position",
   "Subtitle font size": "Subtitle font size",
   "Poster size": "Poster size",
+  "Refract sync": "Refract sync",
+  "Sync watched history and Harbor watchlist changes with Refract.":
+    "Sync watched history and Harbor watchlist changes with Refract.",
+  "Refract personal API key": "Refract personal API key",
+  "Verifying...": "Verifying...",
+  "Connect Refract": "Connect Refract",
+  "Refract key saved in Harbor's secret store": "Refract key saved in Harbor's secret store",
+  "Sync watched history and watchlist": "Sync watched history and watchlist",
+  "Send watched history and watchlist changes from Harbor to Refract. Only the primary Harbor profile is synced.":
+    "Send watched history and watchlist changes from Harbor to Refract. Only the primary Harbor profile is synced.",
+  "Retry pending watches": "Retry pending watches",
+  "Disconnect Refract": "Disconnect Refract",
 };
 
 export default uiFallback;

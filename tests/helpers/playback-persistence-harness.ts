@@ -4,6 +4,7 @@ import { emptySnapshot } from "../../src/lib/player/bridge.ts";
 import { isNaturalEnd } from "../../src/lib/player/playback-end.ts";
 import { playerLoadIdentity } from "../../src/lib/player/load-identity.ts";
 import { animeTrackerTarget } from "../../src/lib/tracker-progress.ts";
+import { parseRefractHistoryId, refractMappedEpisodes } from "../../src/lib/refract/identity.ts";
 
 export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
   const effects: Array<{ deps: unknown[] | undefined; cleanup?: () => void }> = [];
@@ -26,6 +27,8 @@ export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
     cleared: any[][] = [],
     watchEvents: any[] = [];
   const localOwners: any[] = [];
+  const refractWatches: any[][] = [];
+  let refractThreshold: number | null = null;
   let profileId = "fixture";
   let trackerSession = {};
   const cloudWrites: any[][] = [];
@@ -56,6 +59,14 @@ export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
     syncMalProgress: noop,
     animeTrackerTarget,
     activeProfileId: () => profileId,
+    activeScopedProfileId: () => profileId,
+    activeProfileIsPrimary: () => true,
+    parseRefractHistoryId,
+    refractMappedEpisodes,
+    refractEnabled: () => refractThreshold !== null,
+    refractPlaybackReached: (position: number) =>
+      refractThreshold !== null && position >= refractThreshold,
+    recordRefractWatch: (...args: any[]) => refractWatches.push(args),
     getSession: () => trackerSession,
     animeIdentityEligible: () => false,
     resolveAnimeIdentity: async () => null,
@@ -162,6 +173,10 @@ export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
     cleared,
     localCw,
     watchEvents,
+    refractWatches,
+    enableRefract(thresholdSeconds: number) {
+      refractThreshold = thresholdSeconds;
+    },
     cloudWrites,
     localOwners,
     setProfile: (id: string) => {

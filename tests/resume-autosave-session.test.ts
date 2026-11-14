@@ -242,3 +242,57 @@ test("outgoing anime tracker sync uses its own resolved ID and reaches both trac
     ],
   );
 });
+
+test("Refract early logging is opt-in, once per playback, and independent of Harbor completion", () => {
+  const h = resumeAutosaveHarness();
+  h.enableRefract(180);
+  const p = playbackParams();
+  h.render(p);
+  // Autosave skips writes less than 1.5 seconds apart; cross the threshold on a real tick.
+  h.render({ ...p, snap: { ...p.snap, status: "playing", positionSec: 178, durationSec: 3600 } });
+  h.clock(178);
+  h.tick();
+  assert.equal(h.refractWatches.length, 0);
+  h.clock(180);
+  h.tick();
+  assert.equal(h.refractWatches.length, 1);
+  assert.equal(h.refractWatches[0][0].id, "tt100");
+  assert.deepEqual(h.refractWatches[0][1].episodes, [{ season: 1, episode: 1 }]);
+  assert.equal(h.watched.length, 0);
+  assert.equal(h.watchEvents.length, 0);
+  h.clock(3500);
+  h.tick();
+  assert.equal(h.refractWatches.length, 1);
+  assert.equal(h.watchEvents.length, 1);
+  assert.deepEqual(h.watched[0], ["tt100", 1, 1, true]);
+});
+
+test("Refract waits for verified anime identity and episode mapping", () => {
+  const h = resumeAutosaveHarness();
+  h.enableRefract(180);
+  const p = playbackParams(1, 1, { resolvedImdbId: null, resolvedImdbVerified: false });
+  p.src.meta.id = "kitsu:12";
+  h.render(p);
+  const playing = {
+    ...p,
+    snap: { ...p.snap, status: "playing", positionSec: 180, durationSec: 3600 },
+  };
+  h.render(playing);
+  h.clock(180);
+  h.tick();
+  assert.equal(h.refractWatches.length, 0);
+  h.render({
+    ...playing,
+    resolvedImdbId: "tt200",
+    resolvedImdbVerified: true,
+    src: { ...p.src, episode: { ...p.src.episode, imdbSeason: 2, imdbEpisode: 4 } },
+  });
+  h.clock(184);
+  h.tick();
+  assert.equal(h.refractWatches.length, 1);
+  assert.equal(h.refractWatches[0][1].externalId, "tt200");
+  assert.deepEqual(h.refractWatches[0][1].episodes, [{ season: 2, episode: 4 }]);
+  h.clock(188);
+  h.tick();
+  assert.equal(h.refractWatches.length, 1);
+});

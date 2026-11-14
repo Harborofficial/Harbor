@@ -57,6 +57,8 @@ function harness() {
   const providers = load<typeof import("../src/lib/media-provider-actions")>(
     "src/lib/media-provider-actions.ts",
     {
+      "./active-profile-id": { activeProfileIsPrimary: () => true },
+      "./refract/client": { getRefractKey: () => null, refractEnabled: () => false },
       "./cinemeta": {},
       "./auth": { readActiveStremioAuthKey: () => null },
       "./stremio": { ANIME_CLOUD_ID: /^(kitsu|mal|anilist|anidb):/ },
