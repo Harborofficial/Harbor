@@ -276,6 +276,9 @@ const settings: Record<string, string> = {
   "Rich season and order panel": "Painel detalhado de temporada e ordem",
   "Rotten Tomatoes": "Rotten Tomatoes",
   Ruleset: "Conjunto de regras",
+  "Scale TV score badges": "Redimensionar emblemas de avaliação nos cartões de TV",
+  "Shrink the score stack when several ratings are enabled.":
+    "Reduzir os emblemas quando várias avaliações estiverem ativadas.",
   "Score badges on cards": "Selos de nota nos cards",
   "Score position": "Posição da nota",
   "Search rules by name or pattern…": "Buscar regras por nome ou padrão…",

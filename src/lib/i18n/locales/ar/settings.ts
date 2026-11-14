@@ -621,6 +621,9 @@ const settings: Record<string, string> = {
   "Scan for corruption": "الفحص بحثًا عن التلف",
   "Scanning your library…": "جارٍ فحص مكتبتك…",
   "Scanning…": "جارٍ الفحص…",
+  "Scale TV score badges": "تحجيم شارات التقييم في بطاقات المسلسلات",
+  "Shrink the score stack when several ratings are enabled.":
+    "تصغير مجموعة شارات التقييم عند تفعيل عدة تقييمات.",
   "Score badges on cards": "شارات التقييم على البطاقات",
   "Score position": "موضع التقييم",
   "Scrobble to SIMKL": "تسجيل المشاهدات في SIMKL",

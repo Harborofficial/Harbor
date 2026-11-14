@@ -618,6 +618,8 @@ const sweepE: Record<string, string> = {
   Score: "配乐",
   SCORE: "得分",
   "Score /10": "得分 /10",
+  "Scale TV score badges": "缩放电视卡片评分徽章",
+  "Shrink the score stack when several ratings are enabled.": "启用多个评分来源时缩小评分徽章组。",
   "Score badges on cards": "卡片上的评分徽章",
   "Score position": "评分位置",
   Scores: "评分",

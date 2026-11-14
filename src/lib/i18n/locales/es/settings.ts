@@ -1505,6 +1505,9 @@ const settings: Record<string, string> = {
     "Escanea tu biblioteca de Stremio y reescribe cualquier elemento cuya estructura no coincida con el esquema exacto de Stremio.",
   "Scans your Stremio library and rewrites any item whose shape doesn't match Stremio's exact schema. Safe to run anytime; only items that need fixing get touched.":
     "Escanea tu biblioteca de Stremio y reescribe cualquier elemento cuya estructura no coincida con el esquema exacto de Stremio. Puedes ejecutarlo en cualquier momento de forma segura; solo se modifican los elementos que necesitan corrección.",
+  "Scale TV score badges": "Escalar insignias de puntuación en tarjetas de TV",
+  "Shrink the score stack when several ratings are enabled.":
+    "Reducir el grupo de insignias cuando hay varias valoraciones activadas.",
   "Score badges on cards": "Insignias de puntuación en las tarjetas",
   "Score position": "Posición de la puntuación",
   "Screenshots and recordings": "Capturas de pantalla y grabaciones",

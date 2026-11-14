@@ -476,6 +476,9 @@ const catalog07: Record<string, string> = {
   "Sci-fi, fantasy & horror": "Fantascienza, fantasy e horror",
   Score: "Punteggio",
   "Score /10": "Punteggio /10",
+  "Scale TV score badges": "Ridimensiona i badge dei voti sulle schede TV",
+  "Shrink the score stack when several ratings are enabled.":
+    "Riduci i badge dei voti quando sono attive più valutazioni.",
   "Score badges on cards": "Badge del punteggio sulle schede",
   "Score position": "Posizione del punteggio",
   Scores: "Punteggi",
