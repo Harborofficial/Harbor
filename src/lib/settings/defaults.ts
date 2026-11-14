@@ -63,6 +63,7 @@ export const DEFAULT: Settings = {
   region: "US",
   preferredLanguages: ["English"],
   requirePreferredLanguage: false,
+  localSubtitleFolder: "",
   showImdbBadge: true,
   showSubtitleIndicator: true,
   showTmdbBadge: false,

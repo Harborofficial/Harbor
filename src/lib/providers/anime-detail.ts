@@ -802,11 +802,12 @@ async function loadAnimeDetails(
   const networks = Array.from(new Set(streamers.map((s) => s.service)));
 
   const detail: TmdbDetail = {
-    ...emptyDetail(kind),
-    id: anime.id,
-    imdbId: seriesImdb ?? addonMeta?.imdb_id ?? null,
-    title: anime.title,
-    originalTitle: anime.title,
+  ...emptyDetail(kind),
+  id: anime.id,
+  imdbId: seriesImdb ?? addonMeta?.imdb_id ?? null,
+  title: anime.title,
+  originalTitle: anime.title,
+  altTitles: anime.altTitles,
     overview: anime.synopsis,
     poster: anime.poster,
     backdrop: anime.backdrop,

@@ -1830,11 +1830,12 @@ export function DetailView({
       alternateTitles: [
         ...new Set(
           [
-            meta.name,
-            cinemetaFull?.name,
-            detail?.originalTitle,
-            ...(meta.alternateTitles ?? []),
-          ].filter(
+  meta.name,
+  cinemetaFull?.name,
+  detail?.originalTitle,
+  ...(detail?.altTitles ?? []),
+  ...(meta.alternateTitles ?? []),
+].filter(
             (candidate): candidate is string =>
               typeof candidate === "string" && candidate.trim().length > 0,
           ),
@@ -1862,8 +1863,9 @@ export function DetailView({
       backdrop,
       detail?.releaseDate,
       detail?.year,
-      detail?.originalTitle,
-      detail?.originalLanguage,
+detail?.originalTitle,
+detail?.altTitles,
+detail?.originalLanguage,
       cinemetaFull?.name,
       cinemetaFull?.releaseInfo,
       cinemetaFull?.behaviorHints,

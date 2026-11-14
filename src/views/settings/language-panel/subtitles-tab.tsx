@@ -3,6 +3,7 @@ import { useT } from "@/lib/i18n";
 import { Section, ToggleRow } from "../shared";
 import { LanguagesPicker } from "../streaming-panel";
 import { DualSubtitleSection } from "./dual-subtitle-section";
+import { open } from "@tauri-apps/plugin-dialog";
 
 export function SubtitlesLanguageTab() {
   const { settings, update } = useSettings();
@@ -20,6 +21,50 @@ export function SubtitlesLanguageTab() {
       </Section>
 
       <DualSubtitleSection />
+      <Section
+        title="Local subtitles"
+        subtitle="Choose a folder containing subtitle files. Automatic episode matching will be added next."
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-sm break-all">
+            {settings.localSubtitleFolder || "No folder selected"}
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="rounded-lg border px-4 py-2"
+              onClick={async () => {
+                try {
+                  const folder = await open({
+                    directory: true,
+                    multiple: false,
+                    title: "Select subtitles folder",
+                  });
+
+                  if (typeof folder === "string") {
+                    update({ localSubtitleFolder: folder });
+                  }
+                } catch (error) {
+                  console.error("Failed to select subtitle folder:", error);
+                }
+              }}
+            >
+              Browse Folder
+            </button>
+
+            {settings.localSubtitleFolder && (
+              <button
+                type="button"
+                className="rounded-lg border px-4 py-2"
+                onClick={() => update({ localSubtitleFolder: "" })}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      </Section>
 
       <Section
         title={t("Choosing a track")}

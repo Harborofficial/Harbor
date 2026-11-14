@@ -164,6 +164,7 @@ export type Settings = {
   region: string;
   preferredLanguages: string[];
   requirePreferredLanguage: boolean;
+  localSubtitleFolder: string;
   showImdbBadge: boolean;
   showSubtitleIndicator: boolean;
   showTmdbBadge: boolean;

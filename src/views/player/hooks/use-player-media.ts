@@ -431,11 +431,18 @@ export function usePlayerMedia(params: {
     castActiveRef,
   });
   usePowerInhibit(snap);
-  const subDropToast = useSubDrop(
-    bridgeRef,
-    src.meta.id,
-    `${src.meta.id}|${src.episode?.season ?? ""}|${src.episode?.episode ?? ""}`,
-  );
+const subDropToast = useSubDrop(
+  bridgeRef,
+  src.meta.id,
+  `${src.meta.id}|${src.episode?.season ?? ""}|${src.episode?.episode ?? ""}`,
+  {
+    title: src.meta.name ?? "",
+    alternateTitles: src.meta.alternateTitles ?? [],
+    season: src.episode?.season,
+    episode: src.episode?.episode,
+  },
+  snap.firstFrameReady,
+);
 
   useEffect(() => {
     const name = src.meta.name ?? "";

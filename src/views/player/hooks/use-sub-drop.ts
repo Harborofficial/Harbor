@@ -4,19 +4,98 @@ import { t } from "@/lib/i18n";
 import { writePlayerPrefs } from "@/lib/player-prefs";
 import { markImportedSub } from "@/lib/player/imported-subs";
 import { writeRememberedSub } from "@/lib/subtitles/subtitle-memory";
+import { useSettings } from "@/lib/settings";
+import {
+  scanLocalSubtitles,
+  findMatchingSubtitle,
+} from "@/lib/subtitles/local-subtitle-scanner";
 
 const SUB_EXT = /\.(srt|ass|ssa|vtt|sub)$/i;
+
+type EpisodeInfo = {
+  title: string;
+  alternateTitles?: string[];
+  season?: number;
+  episode?: number;
+};
 
 export function useSubDrop(
   bridgeRef: RefObject<PlayerBridge | null>,
   metaId: string,
   mediaKey: string,
+  episodeInfo: EpisodeInfo,
+  firstFrameReady: boolean,
 ) {
+  const { settings } = useSettings();
+  const localSubtitleFolder = settings.localSubtitleFolder;
+  const alternateTitlesKey = JSON.stringify(
+    episodeInfo.alternateTitles ?? [],
+  );
+
   const [toast, setToast] = useState<string | null>(null);
   const timer = useRef<number | null>(null);
 
+    useEffect(() => {
+    if (!localSubtitleFolder || !firstFrameReady) return;
+
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const files = await scanLocalSubtitles(localSubtitleFolder);
+
+        if (cancelled) return;
+
+        const match = findMatchingSubtitle(files, episodeInfo);
+        if (!match) return;
+
+        const bridge = bridgeRef.current;
+        if (!bridge) return;
+
+        const fileName = match.split(/[\\/]/).pop() ?? "Local Subtitle";
+        const subtitleTitle = fileName.replace(
+          /\.(ass|srt|ssa|vtt|sub)$/i,
+          "",
+        );
+
+        const loaded = await bridge.addSubtitle(
+          match,
+          undefined,
+          subtitleTitle,
+          true,
+          undefined,
+          "automatic",
+        );
+
+        if (cancelled) return;
+
+        if (!loaded) {
+          console.warn("[Local Subtitles] Failed to load:", match);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("[Local Subtitles] Scan failed:", error);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    bridgeRef,
+    localSubtitleFolder,
+    alternateTitlesKey,
+    episodeInfo.title,
+    episodeInfo.season,
+    episodeInfo.episode,
+    mediaKey,
+    firstFrameReady,
+  ]);
+
   useEffect(() => {
     if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return;
+
     let cancelled = false;
     let un: (() => void) | null = null;
     void (async () => {
